@@ -46,12 +46,14 @@ export function emit(rc: Resolution, event: EngineEvent, origin: Origin): void {
   if (checkOutcome(rc)) return;
 
   let capped = false;
-  for (const { key, holder, trigger, domain } of matchingTriggers(rc.state, rc.registry, event)) {
+  for (const { key, holder, trigger, domain } of matchingTriggers(rc.state, rc.registry, event, origin)) {
     if (origin.chain.includes(key)) continue; // no self re-fire within a chain
+    if (trigger.once === 'turn' && rc.state.usedThisTurn.includes(key)) continue;
     if (origin.depth >= MAX_CHAIN_DEPTH) {
       capped = true;
       continue;
     }
+    if (trigger.once === 'turn') rc.state.usedThisTurn.push(key);
     const ctx: OpContext = { source: holder, event };
     if (!domain && rc.state.members.some((m) => m.id === holder)) ctx.owner = holder;
     enqueue(rc, trigger.do, ctx, { depth: origin.depth + 1, chain: [...origin.chain, key] });
@@ -103,7 +105,7 @@ interface HeldTrigger {
  * Fixed trigger order: the event's source, then party slot order, then relic acquisition
  * order, then enemy slot order, then Domain hooks (so Tentacles attack after scheduled effects).
  */
-function matchingTriggers(state: CombatState, registry: Registry, event: EngineEvent): HeldTrigger[] {
+function matchingTriggers(state: CombatState, registry: Registry, event: EngineEvent, origin: Origin): HeldTrigger[] {
   const holders = [
     ...state.members.map((m) => m.id),
     ...state.relics.map((r) => r.id),
@@ -115,7 +117,7 @@ function matchingTriggers(state: CombatState, registry: Registry, event: EngineE
       ? [source, ...holders.filter((h) => h !== source)]
       : holders;
   return [...ordered.flatMap((holder) => triggersOf(state, registry, holder)), ...domainTriggers(state, registry)].filter(
-    ({ holder, trigger }) => trigger.on === event.type && filterMatches(trigger, event, holder),
+    ({ holder, trigger }) => trigger.on === event.type && filterMatches(trigger, event, holder, origin),
   );
 }
 
@@ -150,9 +152,10 @@ function triggersOf(state: CombatState, registry: Registry, holder: EntityId): H
   );
 }
 
-function filterMatches(trigger: TriggerDef, event: EngineEvent, holder: EntityId): boolean {
+function filterMatches(trigger: TriggerDef, event: EngineEvent, holder: EntityId, origin: Origin): boolean {
   const f = trigger.filter;
   if (!f) return true;
+  if (f.direct && origin.depth > 0) return false;
   if (f.source === 'self' && event.source !== holder) return false;
   if (f.source === 'other' && event.source === holder) return false;
   if (f.target === 'self' && event.target !== holder) return false;

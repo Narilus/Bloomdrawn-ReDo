@@ -22,6 +22,7 @@ export const EVENT_TYPES = [
   'damageDealt',
   'damageTaken',
   'shieldGained',
+  'healed',
   'statusApplied',
   'statusRemoved',
   'resourceGained',

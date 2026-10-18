@@ -39,4 +39,15 @@ describe('applyStatus', () => {
   it('describes itself', () => {
     expect(applyStatusOp.describe(applyStatus({ id: 'status.bleed' }, 2), formulaText, registry)).toBe('Apply 2 Bleed');
   });
+
+  it('applies to every living enemy with allEnemies', () => {
+    const draft = fixtureCombat(['test.dummy', 'test.dummy', 'test.dummy']);
+    draft.enemies[1]!.hp = 0;
+    const { events } = applyStatusOp.resolve(draft, applyStatus({ id: 'test.add' }, 2, 'allEnemies'), { source: 'm0' }, registry);
+    expect(events.map((e) => e.target)).toEqual(['e20', 'e22']);
+    expect(draft.enemies.map((e) => e.statuses.length)).toEqual([1, 0, 1]);
+    expect(applyStatusOp.describe(applyStatus({ id: 'status.poison' }, 2, 'allEnemies'), formulaText, registry)).toBe(
+      'Apply 2 Poison to all enemies',
+    );
+  });
 });

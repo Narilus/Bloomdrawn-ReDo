@@ -1,4 +1,4 @@
-import type { CardDef, Registry } from './defs.ts';
+import type { CardDef, OpCall, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
@@ -17,7 +17,10 @@ import {
   type EntityId,
 } from './state.ts';
 
-export type Command = { type: 'playCard'; card: EntityId; target?: EntityId } | { type: 'endTurn' };
+export type Command =
+  | { type: 'playCard'; card: EntityId; target?: EntityId }
+  | { type: 'fireUltimate'; member: EntityId }
+  | { type: 'endTurn' };
 
 export type ApplyResult =
   | { ok: true; state: CombatState; events: EngineEvent[] }
@@ -78,6 +81,7 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
     maxMana: BASE_MANA,
     manaDebt: 0,
     manaSpent: 0,
+    usedThisTurn: [],
     next: { costDelta: 0, repeat: 0 },
     party: { hp: Math.min(setup.partyHp ?? maxHp, maxHp), maxHp, shield: 0 },
     members,
@@ -123,6 +127,7 @@ export function apply(state: CombatState, command: Command, registry: Registry):
 
   const rc = createResolution(structuredClone(state), registry);
   if (command.type === 'playCard') playCard(rc, command);
+  else if (command.type === 'fireUltimate') fireUltimate(rc, command.member);
   else endTurn(rc);
   return { ok: true, state: rc.state, events: rc.events };
 }
@@ -130,6 +135,7 @@ export function apply(state: CombatState, command: Command, registry: Registry):
 export function validate(state: CombatState, command: Command, registry: Registry): string | undefined {
   if (state.phase !== 'player') return 'It is not the player phase.';
   if (command.type === 'endTurn') return undefined;
+  if (command.type === 'fireUltimate') return validateUltimate(state, command.member, registry);
 
   const card = state.piles.hand.find((c) => c.uid === command.card);
   if (!card) return 'That card is not in hand.';
@@ -144,8 +150,19 @@ export function validate(state: CombatState, command: Command, registry: Registr
     return 'This card does not take a target.';
   }
 
-  const ctx = playContext(card, command.target);
-  for (const call of def.effects) {
+  return validateCalls(state, def.effects, playContext(card, command.target), registry);
+}
+
+function validateUltimate(state: CombatState, memberId: EntityId, registry: Registry): string | undefined {
+  const member = state.members.find((m) => m.id === memberId);
+  const ultimate = member && registry.characters[member.character]?.ultimate;
+  if (!member || !ultimate) return 'No such ultimate.';
+  if (member.gauge < GAUGE_MAX) return 'That ultimate is not charged.';
+  return validateCalls(state, ultimate.effects, { source: member.id, owner: member.id }, registry);
+}
+
+function validateCalls(state: CombatState, calls: readonly OpCall[], ctx: OpContext, registry: Registry): string | undefined {
+  for (const call of calls) {
     const op = getOp(registry, call.op);
     if (!op) return `Unknown operation "${call.op}".`;
     const why = op.validate?.(state, call, ctx, registry);
@@ -182,6 +199,17 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
   emit(rc, played, ROOT);
   drain(rc);
   s.piles.discard.push(card);
+}
+
+/** Empties the gauge and resolves the ultimate. Costs no Mana. */
+function fireUltimate(rc: Resolution, memberId: EntityId): void {
+  const member = rc.state.members.find((m) => m.id === memberId);
+  const ultimate = member && rc.registry.characters[member.character]?.ultimate;
+  if (!member || !ultimate) throw new Error(`No ultimate for "${memberId}"`);
+  member.gauge = 0;
+  enqueue(rc, ultimate.effects, { source: member.id, owner: member.id }, ROOT);
+  emit(rc, { type: 'ultimateFired', source: member.id, owner: member.id }, ROOT);
+  drain(rc);
 }
 
 /** A card's ultimate charge, as an operation call so it shows in previews and text. */
@@ -230,6 +258,7 @@ function beginTurn(rc: Resolution): void {
   s.mana = s.maxMana - debt;
   s.manaDebt = 0;
   s.manaSpent = 0;
+  s.usedThisTurn = [];
   emit(rc, { type: 'turnStart' }, ROOT);
   drain(rc);
   if (isOver(rc)) return;

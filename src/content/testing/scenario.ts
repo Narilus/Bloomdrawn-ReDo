@@ -2,9 +2,11 @@ import { expect, it } from 'vitest';
 import {
   apply,
   previewCard,
+  previewUltimate,
   startCombat,
   type CardInstance,
   type CombatState,
+  type Command,
   type EngineEvent,
   type Preview,
   type Registry,
@@ -22,11 +24,15 @@ export interface ScenarioSpec {
     hand?: string[];
     resources?: Record<string, number>;
     mana?: number;
+    /** Ultimate gauges by character ID. */
+    gauges?: Record<string, number>;
+    partyHp?: number;
   };
-  /** `target` is an enemy slot index. */
-  play: { card: string; target?: number }[];
+  /** In order: play a card (`target` is an enemy slot index), fire a character's ultimate, or end the turn. */
+  play: ({ card: string; target?: number } | { ultimate: string } | { endTurn: true })[];
   expect?: {
     resources?: Record<string, number>;
+    gauges?: Record<string, number>;
     handSize?: number;
     mana?: number;
     enemyHp?: number[];
@@ -37,6 +43,7 @@ export interface ScenarioSpec {
 }
 
 export interface ScenarioPlay {
+  /** Empty for End Turn. */
   preview: Preview[];
   events: EngineEvent[];
   before: CombatState;
@@ -62,20 +69,38 @@ export function runScenario(spec: ScenarioSpec, registry: Registry = gameRegistr
   }
   Object.assign(state.resources, spec.setup?.resources);
   if (spec.setup?.mana !== undefined) state.mana = spec.setup.mana;
+  if (spec.setup?.partyHp !== undefined) state.party.hp = spec.setup.partyHp;
+  for (const [character, gauge] of Object.entries(spec.setup?.gauges ?? {})) memberOf(state, character).gauge = gauge;
 
   const plays: ScenarioPlay[] = [];
   for (const step of spec.play) {
-    const instance = state.piles.hand.find((c) => c.card === step.card);
-    if (!instance) throw new Error(`Scenario: ${step.card} is not in hand`);
-    const target = step.target === undefined ? undefined : state.enemies[step.target]?.id;
-    const command = { type: 'playCard' as const, card: instance.uid, ...(target ? { target } : {}) };
-    const preview = previewCard(state, command, registry);
+    let command: Command;
+    let preview: Preview[] | undefined = [];
+    if ('endTurn' in step) {
+      command = { type: 'endTurn' };
+    } else if ('ultimate' in step) {
+      command = { type: 'fireUltimate', member: memberOf(state, step.ultimate).id };
+      preview = previewUltimate(state, command.member, registry);
+    } else {
+      const instance = state.piles.hand.find((c) => c.card === step.card);
+      if (!instance) throw new Error(`Scenario: ${step.card} is not in hand`);
+      const target = step.target === undefined ? undefined : state.enemies[step.target]?.id;
+      const play = { type: 'playCard' as const, card: instance.uid, ...(target ? { target } : {}) };
+      preview = previewCard(state, play, registry);
+      command = play;
+    }
     const result = apply(state, command, registry);
-    if (!result.ok || !preview) throw new Error(`Scenario: ${step.card} was rejected: ${result.ok ? '' : result.reason}`);
+    if (!result.ok || !preview) throw new Error(`Scenario: ${JSON.stringify(step)} was rejected: ${result.ok ? '' : result.reason}`);
     plays.push({ preview, events: result.events, before: state, after: result.state });
     state = result.state;
   }
   return { state, plays };
+}
+
+function memberOf(state: CombatState, character: string) {
+  const member = state.members.find((m) => m.character === character);
+  if (!member) throw new Error(`Scenario: ${character} is not in the party`);
+  return member;
 }
 
 function takeOrMake(state: CombatState, pool: CardInstance[], id: string, registry: Registry): CardInstance {
@@ -93,6 +118,7 @@ export function scenario(name: string, spec: ScenarioSpec, registry?: Registry):
     const { state } = run;
     const want = spec.expect ?? {};
     for (const [key, value] of Object.entries(want.resources ?? {})) expect(state.resources[key] ?? 0, key).toBe(value);
+    for (const [key, value] of Object.entries(want.gauges ?? {})) expect(memberOf(state, key).gauge, `${key} gauge`).toBe(value);
     if (want.handSize !== undefined) expect(state.piles.hand).toHaveLength(want.handSize);
     if (want.mana !== undefined) expect(state.mana).toBe(want.mana);
     if (want.enemyHp) expect(state.enemies.map((e) => e.hp)).toEqual(want.enemyHp);

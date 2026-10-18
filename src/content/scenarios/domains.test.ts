@@ -19,7 +19,8 @@ const endTurn: Command = { type: 'endTurn' };
 
 describe('Rapture', () => {
   it('starts damage per hit at 3 only when a Rapture character is in the party', () => {
-    expect(begin(['agathe', 'maelia']).resources).toMatchObject({ tentacles: 0, potency: 3 });
+    // Agathe's First Hymn adds the 1 Tentacle; the Domain starts it at 0.
+    expect(begin(['agathe', 'maelia']).resources).toMatchObject({ tentacles: 1, potency: 3 });
     expect(begin(['maelia', 'leonora']).resources['potency']).toBeUndefined();
   });
 
@@ -69,7 +70,8 @@ describe('Spirit', () => {
     let { state } = held;
     for (let turn = 0; turn < 5; turn++) state = run(state, endTurn).state;
     const after = run(state, { type: 'playCard', card: card.uid }).state;
-    expect([after.mana, after.resources['essence']]).toEqual([6, 1]);
+    // Anthe's Vigil has also been adding Essence each turn; the Ritual adds 1 more.
+    expect([after.mana, after.resources['essence']]).toEqual([6, (state.resources['essence'] ?? 0) + 1]);
     expect(after.piles.discard.find((c) => c.uid === card.uid)).toEqual({ uid: card.uid, card: ritual.id, owner: 'm0' });
   });
 });

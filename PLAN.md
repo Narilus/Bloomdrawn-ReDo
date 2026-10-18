@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M1 First fight (M0 signed off; M0.6 art runs in parallel)
-**Current task:** M1.2 The starter four
+**Current task:** M1.3 The Bloom-Rib Hound
 
 ## Milestones
 
@@ -111,6 +111,8 @@ _Done 19 Oct. Domains are content modules (`src/content/domains/`) whose hooks r
 ### M1.2 The starter four
 Stats, cards, passives and ultimates for Maelia, Agathe, Anthe and Leonora as data. The ultimate command and gauges; Strike and Defense charge 10.
 **Done when:** every card, passive and ultimate has a kit scenario, a golden replay of a scripted fight is stable, and the content contains no engine code.
+
+_Done 19 Oct. Kits are data in `src/content/characters/`, with authored text whose `{path}` slots show live numbers (validated at build). New engine pieces: the `fireUltimate` command and its preview, `heal`, `when`/`gte`, Poison on all enemies, and once-per-turn and `direct` trigger limits. `src/content/scenarios/kits.test.ts` has a scenario per card, passive and ultimate; `golden.test.ts` replays a fixed-policy fight against `golden/slice.txt` (update deliberately with `npx vitest -u`). The slice starts gauges at 70; firing them in the UI is M1.4._
 
 ### M1.3 The Bloom-Rib Hound
 The enemy phase with intents from a seeded cycle, each previewed with its exact number. Win and loss end the combat.

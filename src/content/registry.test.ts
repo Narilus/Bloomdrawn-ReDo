@@ -70,4 +70,12 @@ describe('content registry', () => {
       'src/content/characters/t.ts › test.t: transcend cost 2 is outside 3–5',
     ]);
   });
+
+  it('reports a text slot that does not point at a formula', () => {
+    const texty = card({
+      id: 'test.texty', name: 'X', owner: 'tester', cost: 0, target: 'none', effects: [gainShield(1)],
+      text: 'Gain {effects.0.amount} Shield, {effects.0.op}.',
+    });
+    expect(errorsFor({ texty })).toContain('src/content/cards/broken.ts › test.texty: text: slot {effects.0.op} is not a formula');
+  });
 });

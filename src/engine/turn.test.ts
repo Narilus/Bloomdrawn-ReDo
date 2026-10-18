@@ -129,3 +129,28 @@ describe('Domain hooks', () => {
     expect(run(begin.state, endTurn, elsewhere).events.some((e) => e.resource === 'order')).toBe(false);
   });
 });
+
+describe('trigger limits', () => {
+  // test.w0 gains 'order' whenever any card is played; this variant does it once a turn, and only
+  // for gains raised by a card itself.
+  const limited: Registry = {
+    ...registry,
+    characters: {
+      ...registry.characters,
+      'test.a': {
+        ...registry.characters['test.a']!,
+        passive: { triggers: [{ on: 'resourceGained', filter: { resource: 'bumps', direct: true }, once: 'turn', do: [testGain('bumps')] }] },
+      },
+    },
+  };
+
+  it('once a turn: fires on the first matching event only, and again next turn', () => {
+    const [s1, a] = withCardInHand(fixtureCombat(['test.dummy'], [], limited), 'test.a.bump');
+    const [s2, b] = withCardInHand(s1, 'test.a.bump');
+    const turn1 = run(run(s2, playUid(a.uid), limited).state, playUid(b.uid), limited).state;
+    // Two plays, one extra from the trigger. The trigger's own gain is not direct, so it doesn't re-fire.
+    expect(turn1.resources['bumps']).toBe(3);
+    const [s3, c] = withCardInHand(run(turn1, endTurn, limited).state, 'test.a.bump');
+    expect(run(s3, playUid(c.uid), limited).state.resources['bumps']).toBe(5);
+  });
+});

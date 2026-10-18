@@ -8,11 +8,13 @@ import { drawOp } from './draw.ts';
 import { gainManaOp } from './gainMana.ts';
 import { gainResourceOp } from './gainResource.ts';
 import { gainShieldOp } from './gainShield.ts';
+import { healOp } from './heal.ts';
 import { ifConsumeOp } from './ifConsume.ts';
 import { loseHpOp } from './loseHp.ts';
 import { manaDebtOp } from './manaDebt.ts';
 import { repeatNextOp } from './repeatNext.ts';
 import { volleyOp } from './volley.ts';
+import { whenOp } from './when.ts';
 
 /** The shared operation library, keyed by operation name. */
 export const library: Readonly<Record<string, Operation>> = {
@@ -29,6 +31,8 @@ export const library: Readonly<Record<string, Operation>> = {
   volley: volleyOp,
   changeCost: changeCostOp,
   repeatNext: repeatNextOp,
+  heal: healOp,
+  when: whenOp,
 };
 
 export function getOp(registry: Registry, name: string): Operation | undefined {
@@ -48,3 +52,5 @@ export { loseHp } from './loseHp.ts';
 export { manaDebt } from './manaDebt.ts';
 export { repeatNext } from './repeatNext.ts';
 export { volley } from './volley.ts';
+export { heal } from './heal.ts';
+export { gte, when } from './when.ts';

@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { getOp, type CardSlot, type Hooks, type OpCall, type Registry } from '../engine/index.ts';
+import { getOp, slotAt, templateSlots, type CardSlot, type Hooks, type OpCall, type Registry } from '../engine/index.ts';
 import { KINDS, schemas, type Kind } from './schema.ts';
 
 /** Docs/DESIGN.md cost bands by personal card slot. */
@@ -77,6 +77,12 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
   };
   const checkHooks = (kind: Kind, defId: string, hooks: Hooks | undefined, at: string) =>
     hooks?.triggers?.forEach((t, i) => checkCalls(kind, defId, t.do, `${at}triggers[${i}].do`));
+  // Every `{path}` slot in authored text must point at a formula inside its own definition.
+  const checkText = (kind: Kind, defId: string, text: string | undefined, root: unknown, at: string) => {
+    for (const path of templateSlots(text ?? '')) {
+      if (!slotAt(root, path)) fail(where(kind, defId), defId, `${at}text: slot {${path}} is not a formula`);
+    }
+  };
 
   for (const card of Object.values(reg.cards)) {
     const owner = reg.characters[card.owner];
@@ -89,6 +95,7 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       }
     }
     checkCalls('card', card.id, card.effects, 'effects');
+    checkText('card', card.id, card.text, card, '');
   }
   for (const c of Object.values(reg.characters)) {
     for (const cardId of c.cards) {
@@ -97,6 +104,11 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       else if (card.owner !== c.id) fail(where('character', c.id), c.id, `card "${cardId}" is owned by ${card.owner}`);
     }
     checkHooks('character', c.id, c.passive, 'passive.');
+    checkText('character', c.id, c.passive?.text, c.passive, 'passive.');
+    if (c.ultimate) {
+      checkCalls('character', c.id, c.ultimate.effects, 'ultimate.effects');
+      checkText('character', c.id, c.ultimate.text, c.ultimate, 'ultimate.');
+    }
     if (!reg.domains[c.domain]) fail(where('character', c.id), c.id, `domain "${c.domain}" is not defined`);
   }
   for (const e of Object.values(reg.enemies)) checkHooks('enemy', e.id, e, '');

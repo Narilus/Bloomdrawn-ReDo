@@ -16,11 +16,15 @@ export interface TriggerFilter {
   source?: 'self' | 'other';
   target?: 'self';
   resource?: string;
+  /** Raised by a card or ultimate itself, not by another trigger. */
+  direct?: true;
 }
 
 export interface TriggerDef {
   on: EventType;
   filter?: TriggerFilter;
+  /** `turn`: fires at most once per turn. */
+  once?: 'turn';
   do: OpCall[];
 }
 
@@ -56,8 +60,30 @@ export interface CardDef {
   cost: number;
   target: CardTarget;
   keywords?: Keyword[];
+  /**
+   * Authored rules text. `{path}` slots point at formulas inside this card, e.g.
+   * `{effects.0.amount}`, and show live numbers. Without it, text is generated from the effects.
+   */
+  text?: string;
   /** Ultimate charge for the owner, once per play (a repeated card does not charge again). */
   charge?: number;
+  effects: OpCall[];
+}
+
+/**
+ * A passive: always combat- or run-scoped. Its text slots point inside it, e.g.
+ * `{triggers.0.do.0.amount}`. Content requires the name, scope and text; engine fixtures may omit them.
+ */
+export interface PassiveDef extends Hooks {
+  name?: string;
+  scope?: 'combat' | 'run';
+  text?: string;
+}
+
+/** Fired at a full gauge by a deliberate confirm; costs no Mana. Its text slots point inside it. */
+export interface UltimateDef {
+  name: string;
+  text: string;
   effects: OpCall[];
 }
 
@@ -67,7 +93,8 @@ export interface CharacterDef {
   domain: string;
   stats: { hp: number; attack: number; defense: number };
   cards: string[];
-  passive?: Hooks;
+  passive?: PassiveDef;
+  ultimate?: UltimateDef;
 }
 
 export interface EnemyDef extends Hooks {

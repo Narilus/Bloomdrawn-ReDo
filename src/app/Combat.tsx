@@ -18,9 +18,20 @@ import { Hand, type Aim } from './Hand.tsx';
 
 // Slice line-up: the starter four with their picked Bloomdrawn sprites, Agathe in front.
 const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
-const ENEMIES = ['enemy.training-dummy', 'enemy.training-dummy', 'enemy.training-dummy'];
+const DEFAULT_ENEMIES = ['enemy.training-dummy', 'enemy.training-dummy', 'enemy.training-dummy'];
 
-const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES }, registry).state;
+/** Dev builds only: `?enemies=id,id` picks the enemies (a first piece of the content lab). */
+function enemiesFromUrl(): string[] {
+  if (!import.meta.env.DEV) return DEFAULT_ENEMIES;
+  const ids = new URLSearchParams(window.location.search).get('enemies')?.split(',') ?? [];
+  return ids.length > 0 && ids.every((id) => registry.enemies[id]) ? ids : DEFAULT_ENEMIES;
+}
+const ENEMIES = enemiesFromUrl();
+
+// Every gauge starts at 70, as if mid-run, so each ultimate can fire in one slice fight (DECISIONS.md).
+const GAUGES = PARTY.map(() => 70);
+
+const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES, gauges: GAUGES }, registry).state;
 
 export function Combat() {
   const { fit, stageHost } = useFrame();

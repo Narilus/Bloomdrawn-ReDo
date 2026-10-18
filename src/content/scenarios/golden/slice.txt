@@ -1,0 +1,211 @@
+combatStart
+resourceGained src=m0 tentacles amt=1
+turnStart
+cardDrawn card=c14
+cardDrawn card=c0
+cardDrawn card=c4
+cardDrawn card=c15
+cardDrawn card=c12
+> playCard leonora.promissory-note
+  cardPlayed src=m3 card=c14
+  resourceGained src=m3 mana amt=4
+  resourceGained src=m3 manaDebt amt=2
+> playCard agathe.strike
+  cardPlayed src=m0 tgt=e16 card=c0
+  damageDealt src=m0 tgt=e16 amt=10
+  damageTaken src=m0 tgt=e16 amt=10
+  ultimateCharged src=m0 tgt=m0 amt=10
+> playCard maelia.strike
+  cardPlayed src=m1 tgt=e16 card=c4
+  damageDealt src=m1 tgt=e16 amt=9
+  damageTaken src=m1 tgt=e16 amt=9
+  ultimateCharged src=m1 tgt=m1 amt=10
+> playCard leonora.requisition
+  cardPlayed src=m3 card=c15
+  cardDrawn src=m3 card=c8
+  cardDrawn src=m3 card=c6
+> playCard leonora.strike
+  cardPlayed src=m3 tgt=e16 card=c12
+  damageDealt src=m3 tgt=e16 amt=11
+  damageTaken src=m3 tgt=e16 amt=11
+  ultimateCharged src=m3 tgt=m3 amt=10
+> playCard anthe.strike
+  cardPlayed src=m2 tgt=e16 card=c8
+  damageDealt src=m2 tgt=e16 amt=9
+  damageTaken src=m2 tgt=e16 amt=9
+  ultimateCharged src=m2 tgt=m2 amt=10
+> playCard maelia.swollen-pod
+  cardPlayed src=m1 card=c6
+  resourceGained src=m1 embryo amt=3
+  statusApplied src=m1 tgt=e16 status.poison amt=2
+  statusApplied src=m1 tgt=e17 status.poison amt=2
+  statusApplied src=m1 tgt=e18 status.poison amt=2
+  resourceGained src=m1 embryo amt=1
+> endTurn
+  cleanup
+  turnEnd
+  resourceGained src=m2 essence amt=0
+  damageDealt src=m0 tgt=e16 amt=3
+  damageTaken src=m0 tgt=e16 amt=3
+  statusTick
+  damageDealt src=e16 tgt=e16 amt=2
+  damageTaken src=e16 tgt=e16 amt=2
+  damageDealt src=e17 tgt=e17 amt=2
+  damageTaken src=e17 tgt=e17 amt=2
+  damageDealt src=e18 tgt=e18 amt=2
+  damageTaken src=e18 tgt=e18 amt=2
+  enemyPhaseStart
+  turnStart
+  cardDrawn card=c2
+  cardDrawn card=c10
+  cardDrawn card=c11
+  cardDrawn card=c13
+  cardDrawn card=c7
+  manaDebtPaid amt=2
+  cardDrawn src=m3 card=c5
+> playCard agathe.call-the-choir
+  cardPlayed src=m0 card=c2
+  resourceGained src=m0 tentacles amt=2
+> playCard anthe.gilded-thread
+  cardPlayed src=m2 card=c11
+  resourceGained src=m2 essence amt=1
+  cardDrawn src=m2 card=c3
+> endTurn
+  cleanup
+  turnEnd
+  resourceGained src=m2 essence amt=1
+  damageDealt src=m0 tgt=e16 amt=3
+  damageTaken src=m0 tgt=e16 amt=3
+  damageDealt src=m0 tgt=e16 amt=3
+  damageTaken src=m0 tgt=e16 amt=3
+  damageDealt src=m0 tgt=e16 amt=3
+  damageTaken src=m0 tgt=e16 amt=3
+  statusTick
+  damageDealt src=e16 tgt=e16 amt=2
+  damageTaken src=e16 tgt=e16 amt=2
+  damageDealt src=e17 tgt=e17 amt=2
+  damageTaken src=e17 tgt=e17 amt=2
+  damageDealt src=e18 tgt=e18 amt=2
+  damageTaken src=e18 tgt=e18 amt=2
+  enemyPhaseStart
+  turnStart
+  cardDrawn card=c9
+  cardDrawn card=c1
+  deckShuffled
+  cardDrawn card=c2
+  cardDrawn card=c5
+> playCard anthe.votive-candle
+  cardPlayed src=m2 tgt=e16 card=c10
+  damageDealt src=m2 tgt=e16 amt=14
+  damageTaken src=m2 tgt=e16 amt=14
+  enemyDefeated src=m2 tgt=e16
+> playCard anthe.defense
+  cardPlayed src=m2 card=c9
+  shieldGained src=m2 tgt=party amt=10
+  ultimateCharged src=m2 tgt=m2 amt=10
+> playCard agathe.defense
+  cardPlayed src=m0 card=c1
+  shieldGained src=m0 tgt=party amt=9
+  ultimateCharged src=m0 tgt=m0 amt=10
+> playCard maelia.defense
+  cardPlayed src=m1 card=c5
+  shieldGained src=m1 tgt=party amt=10
+  ultimateCharged src=m1 tgt=m1 amt=10
+> endTurn
+  cleanup
+  turnEnd
+  resourceGained src=m2 essence amt=0
+  damageDealt src=m0 tgt=e17 amt=3
+  damageTaken src=m0 tgt=e17 amt=3
+  damageDealt src=m0 tgt=e17 amt=3
+  damageTaken src=m0 tgt=e17 amt=3
+  damageDealt src=m0 tgt=e17 amt=3
+  damageTaken src=m0 tgt=e17 amt=3
+  statusTick
+  damageDealt src=e17 tgt=e17 amt=2
+  damageTaken src=e17 tgt=e17 amt=2
+  damageDealt src=e18 tgt=e18 amt=2
+  damageTaken src=e18 tgt=e18 amt=2
+  enemyPhaseStart
+  turnStart
+  cardDrawn card=c4
+  cardDrawn card=c0
+  cardDrawn card=c3
+  cardDrawn card=c13
+  cardDrawn card=c6
+> playCard maelia.strike
+  cardPlayed src=m1 tgt=e17 card=c4
+  damageDealt src=m1 tgt=e17 amt=9
+  damageTaken src=m1 tgt=e17 amt=9
+  ultimateCharged src=m1 tgt=m1 amt=10
+> fireUltimate m1
+  ultimateFired src=m1
+  resourceConsumed src=m1 embryo amt=4
+  healed src=m1 tgt=party amt=0
+  shieldGained src=m1 tgt=party amt=16
+> playCard agathe.strike
+  cardPlayed src=m0 tgt=e17 card=c0
+  damageDealt src=m0 tgt=e17 amt=10
+  damageTaken src=m0 tgt=e17 amt=10
+  ultimateCharged src=m0 tgt=m0 amt=10
+> fireUltimate m0
+  ultimateFired src=m0
+  resourceGained src=m0 tentacles amt=3
+> playCard agathe.censer-rite
+  cardPlayed src=m0 card=c3
+  resourceGained src=m0 potency amt=2
+  damageDealt src=m0 tgt=e17 amt=5
+  damageTaken src=m0 tgt=e17 amt=5
+  damageDealt src=m0 tgt=e17 amt=5
+  damageTaken src=m0 tgt=e17 amt=5
+  damageDealt src=m0 tgt=e17 amt=5
+  damageTaken src=m0 tgt=e17 amt=5
+  damageDealt src=m0 tgt=e17 amt=5
+  damageTaken src=m0 tgt=e17 amt=5
+  damageDealt src=m0 tgt=e17 amt=5
+  damageTaken src=m0 tgt=e17 amt=5
+  damageDealt src=m0 tgt=e17 amt=1
+  damageTaken src=m0 tgt=e17 amt=1
+  enemyDefeated src=m0 tgt=e17
+  damageDealt src=m0 tgt=e18 amt=4
+  damageTaken src=m0 tgt=e18 amt=4
+> playCard leonora.defense
+  cardPlayed src=m3 card=c13
+  shieldGained src=m3 tgt=party amt=8
+  ultimateCharged src=m3 tgt=m3 amt=10
+> endTurn
+  cleanup
+  turnEnd
+  resourceGained src=m2 essence amt=0
+  damageDealt src=m0 tgt=e18 amt=5
+  damageTaken src=m0 tgt=e18 amt=5
+  damageDealt src=m0 tgt=e18 amt=5
+  damageTaken src=m0 tgt=e18 amt=5
+  damageDealt src=m0 tgt=e18 amt=5
+  damageTaken src=m0 tgt=e18 amt=5
+  damageDealt src=m0 tgt=e18 amt=5
+  damageTaken src=m0 tgt=e18 amt=5
+  damageDealt src=m0 tgt=e18 amt=5
+  damageTaken src=m0 tgt=e18 amt=5
+  damageDealt src=m0 tgt=e18 amt=5
+  damageTaken src=m0 tgt=e18 amt=5
+  statusTick
+  damageDealt src=e18 tgt=e18 amt=2
+  damageTaken src=e18 tgt=e18 amt=2
+  enemyPhaseStart
+  turnStart
+  cardDrawn card=c7
+  cardDrawn card=c8
+  cardDrawn card=c15
+  cardDrawn card=c14
+  cardDrawn card=c12
+> playCard maelia.bud-cutting
+  cardPlayed src=m1 card=c7
+> playCard anthe.strike
+  cardPlayed src=m2 tgt=e18 card=c8
+  damageDealt src=m2 tgt=e18 amt=9
+  damageTaken src=m2 tgt=e18 amt=9
+  damageDealt src=m2 tgt=e18 amt=9
+  combatEnd victory
+
+final: {"turn":5,"outcome":"victory","party":{"hp":210,"maxHp":210,"shield":0},"enemies":[0,0,0],"resources":{"tentacles":6,"potency":5,"embryo":0,"essence":2},"gauges":[0,0,90,90]}

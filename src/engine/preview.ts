@@ -2,7 +2,7 @@ import { cardCost, chargeOf, playContext, validate, type Command } from './comba
 import type { OpCall, Registry } from './defs.ts';
 import type { OpContext, Preview } from './operation.ts';
 import { getOp } from './ops/index.ts';
-import type { CardInstance, CombatState } from './state.ts';
+import type { CardInstance, CombatState, EntityId } from './state.ts';
 
 /**
  * What playing a card would do, from the same code that resolves it. Runs the card's
@@ -29,6 +29,17 @@ export function previewCard(
   scratch.next = { costDelta: 0, repeat: 0 };
   const calls = [...Array.from({ length: repeats }, () => def.effects).flat(), ...chargeOf(def)];
   return previewOps(scratch, calls, playContext(card, command.target), registry);
+}
+
+/** What firing a member's ultimate would do, or undefined if it would be rejected. */
+export function previewUltimate(state: CombatState, member: EntityId, registry: Registry): Preview[] | undefined {
+  if (validate(state, { type: 'fireUltimate', member }, registry) !== undefined) return undefined;
+  const scratch = structuredClone(state);
+  const m = scratch.members.find((x) => x.id === member);
+  const ultimate = m && registry.characters[m.character]?.ultimate;
+  if (!m || !ultimate) return undefined;
+  m.gauge = 0;
+  return previewOps(scratch, ultimate.effects, { source: m.id, owner: m.id }, registry);
 }
 
 function previewOps(scratch: CombatState, calls: readonly OpCall[], ctx: OpContext, registry: Registry): Preview[] {

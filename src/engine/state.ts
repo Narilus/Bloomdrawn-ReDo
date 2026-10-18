@@ -72,6 +72,8 @@ export interface CombatState {
   manaDebt: number;
   /** Mana paid for cards this turn. */
   manaSpent: number;
+  /** Keys of once-per-turn triggers that have fired this turn. */
+  usedThisTurn: string[];
   /** Effects waiting for the next card played this turn. Cleared at cleanup. */
   next: { costDelta: number; repeat: number };
   /** The party shares one HP pool and one Shield. */

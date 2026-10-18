@@ -14,8 +14,10 @@ const trigger = z.strictObject({
       source: z.enum(['self', 'other']).optional(),
       target: z.literal('self').optional(),
       resource: z.string().optional(),
+      direct: z.literal(true).optional(),
     })
     .optional(),
+  once: z.literal('turn').optional(),
   do: z.array(opCall).min(1),
 });
 
@@ -40,6 +42,7 @@ export const schemas = {
     cost: z.int().min(0),
     target: z.enum(['none', 'self', 'party', 'chosenEnemy', 'allEnemies']),
     keywords: z.array(z.enum(['retain', 'ritual'])).optional(),
+    text: z.string().min(1).optional(),
     charge: z.int().positive().optional(),
     effects: z.array(opCall).min(1),
   }),
@@ -50,7 +53,8 @@ export const schemas = {
     domain: z.enum(['flesh', 'rapture', 'spirit', 'unbound']),
     stats: z.strictObject({ hp: z.int().positive(), attack: z.int().min(0), defense: z.int().min(0) }),
     cards: z.array(id),
-    passive: z.strictObject(hooks).optional(),
+    passive: z.strictObject({ name: z.string().min(1), scope: z.enum(['combat', 'run']), text: z.string().min(1), ...hooks }).optional(),
+    ultimate: z.strictObject({ name: z.string().min(1), text: z.string().min(1), effects: z.array(opCall).min(1) }).optional(),
   }),
   enemy: z.strictObject({ kind: z.literal('enemy'), id, name: z.string().min(1), hp: z.int().positive(), ...hooks }),
   status: z.strictObject({ kind: z.literal('status'), id, stacking: z.enum(['add', 'refresh', 'highest']), ...hooks }),

@@ -10,7 +10,9 @@ interface ActorSnapshot {
 }
 
 test('after 20 rapid plays every actor settles back at its home point', async ({ page }) => {
-  await page.goto('/');
+  // Practice dummies, so the fight lasts all 20 plays.
+  const dummy = 'enemy.practice-dummy';
+  await page.goto(`/?enemies=${dummy},${dummy},${dummy}`);
   await expect(page.locator('.hand-card')).toHaveCount(5);
   const mana = page.locator('.mana strong');
 

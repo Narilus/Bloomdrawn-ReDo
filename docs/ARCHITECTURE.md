@@ -104,7 +104,7 @@ Each operation is one file that exports:
 | Ultimates | chargeUltimate, transcend |
 | Domain engines | volley (hits that take the lowest-HP enemy, overflow carrying on) |
 | Enemies | delay, stun, changeIntent |
-| Control flow | if, ifConsume (spend a resource for a bonus branch), repeat, forEachTarget, choose |
+| Control flow | when (a condition such as `gte`), ifConsume (spend a resource for a bonus branch), repeat, forEachTarget, choose |
 
 Control-flow operations hold lists of other operations, so complex cards are nested data, not code. `ifConsume` encodes the Flesh rule once: Embryo is consumed only when the bonus branch actually resolves.
 
@@ -125,7 +125,9 @@ Everything that reacts — passives, statuses, relics, weapons, Symptoms, Domain
 
 ### Events
 
-Lifecycle: `combatStart`, `turnStart`, `manaDebtPaid` (after the turn's draw), `cleanup`, `turnEnd`, `statusTick` (damage over time), `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `ultimateCharged`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
+Lifecycle: `combatStart`, `turnStart`, `manaDebtPaid` (after the turn's draw), `cleanup`, `turnEnd`, `statusTick` (damage over time), `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `healed`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `ultimateCharged`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
+
+A trigger may be limited to `once: 'turn'`, and its filter may require `direct` (raised by a card or ultimate itself, not by another trigger), which is how "the first time each turn a card gains Embryo" is written.
 
 Every event carries its source, owner, target and amount, so filters can say things like "when a Rapture card owned by me is played" or "when Embryo is consumed by a spender".
 
