@@ -72,6 +72,7 @@ export const schemas = {
     name: z.string().min(1),
     resources: z.array(z.strictObject({ id, name: z.string().min(1), start: z.int().min(0).optional() })),
     triggers: hooks.triggers,
+    counter: z.strictObject({ label: z.string().min(1), count: formulaSchema, each: formulaSchema.optional() }).optional(),
   }),
 };
 

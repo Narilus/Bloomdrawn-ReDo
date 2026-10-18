@@ -226,6 +226,28 @@ body,
   font-size: 22px;
 }
 
+.counter-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.counter-label small {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+.counter:has(small) {
+  align-items: center;
+  padding: 4px 14px;
+}
+
+.counter:has(small) strong {
+  font-size: 26px;
+}
+
 .counter.domain-flesh { border-color: var(--flesh); }
 .counter.domain-rapture { border-color: var(--rapture); }
 .counter.domain-spirit { border-color: var(--spirit); }
@@ -349,7 +371,7 @@ body,
 .bar-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--arterial), var(--raw-pink));
-  transition: width 0.35s ease-out 0.12s;
+  transition: width 0.25s ease-out;
 }
 
 .bar-ghost {
@@ -709,6 +731,29 @@ kbd {
 .text-long .card-text { font-size: 15px; }
 .text-xlong .card-art { height: 50px; }
 .text-xlong .card-text { font-size: 13.5px; line-height: 1.2; }
+
+.card-keywords {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: -2px 0 4px;
+}
+
+.keyword {
+  padding: 0 10px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #d8b878, var(--antique-gold));
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Rules text on parchment: damage numbers red, Shield numbers violet-blue, status names in their badge colour. */
+.card-text .num-damage { color: var(--arterial); }
+.card-text .num-shield { color: #4b3f8f; }
+.card-text .status-poison { color: #66661a; }
 
 .card-charge {
   position: absolute;

@@ -20,9 +20,10 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
   const owner = member ? registry.characters[member.character] : undefined;
   const portrait = owner ? portraitArt[owner.id] : undefined;
   const domain = owner?.domain ?? '';
-  // The charge shows as a tag, so the text box holds only the card's effect.
-  const text = describeCardLive(card, state, registry, { charge: false });
-  const length = text.length > 95 ? ' text-xlong' : text.length > 55 ? ' text-long' : '';
+  // Keywords and the charge show as tags, so the text box holds only the card's effect.
+  const text = describeCardLive(card, state, registry, { charge: false, keywords: false, mark });
+  const plain = text.replace(MARK, '$2');
+  const length = plain.length > 95 ? ' text-xlong' : plain.length > 55 ? ' text-long' : '';
   return (
     <div
       className={`card domain-${domain}${playable ? '' : ' unplayable'}${highlight ? ' highlight' : ''}${length}`}
@@ -36,7 +37,18 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
       <div className="card-type">
         {owner?.name} · {DOMAIN_LABEL[domain] ?? domain}
       </div>
-      <div className="card-text">{text}</div>
+      {def?.keywords?.length ? (
+        <div className="card-keywords">
+          {def.keywords.map((k) => (
+            <span key={k} className="keyword">
+              {k.charAt(0).toUpperCase() + k.slice(1)}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div className="card-text">
+        <RulesText text={text} registry={registry} />
+      </div>
       {def?.charge && (
         <div className="card-charge" title={`Charges her ultimate by ${def.charge}`}>
           Ult +{def.charge}
@@ -55,5 +67,42 @@ function CostGem({ printed, now }: { printed: number | undefined; now: number | 
       {now ?? '?'}
       {changed && <s className="printed-cost">{printed}</s>}
     </div>
+  );
+}
+
+// Live numbers arrive wrapped as ⟦kind:text⟧ so they can be coloured by kind.
+const MARK = /⟦(\w*):([^⟧]*)⟧/g;
+const mark = (text: string, value?: 'damage' | 'shield') => `⟦${value ?? ''}:${text}⟧`;
+
+/** Card text with damage and Shield numbers and status names highlighted. The words carry the meaning; colour only helps. */
+function RulesText({ text, registry }: { text: string; registry: Registry }) {
+  const statuses = Object.keys(registry.statuses).map((id) => id.replace(/^status\./, '').replace(/^./, (c) => c.toUpperCase()));
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(MARK)) {
+    parts.push(...withStatuses(text.slice(last, m.index), statuses, parts.length));
+    parts.push(
+      <b key={parts.length} className={m[1] ? `num-${m[1]}` : 'num'}>
+        {m[2]}
+      </b>,
+    );
+    last = m.index + m[0].length;
+  }
+  parts.push(...withStatuses(text.slice(last), statuses, parts.length));
+  // One span, so the centred text box lays it out as a single paragraph.
+  return <span>{parts}</span>;
+}
+
+function withStatuses(text: string, statuses: string[], key: number): React.ReactNode[] {
+  if (statuses.length === 0) return [text];
+  const pattern = new RegExp(`\\b(${statuses.join('|')})\\b`, 'g');
+  return text.split(pattern).map((piece, i) =>
+    i % 2 === 1 ? (
+      <b key={`${key}-${i}`} className={`status-word status-${piece.toLowerCase()}`}>
+        {piece}
+      </b>
+    ) : (
+      piece
+    ),
   );
 }

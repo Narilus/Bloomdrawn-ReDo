@@ -1,5 +1,7 @@
 import { cardCost, chargeOf, intentOf, playContext, validate, type Command } from './combat.ts';
 import type { OpCall, Registry } from './defs.ts';
+import { evaluate } from './formula.ts';
+import { pipeline } from './modifiers.ts';
 import type { OpContext, Preview } from './operation.ts';
 import { getOp } from './ops/index.ts';
 import { PARTY, type CardInstance, type CombatState, type EntityId } from './state.ts';
@@ -69,6 +71,34 @@ function previewOps(scratch: CombatState, calls: readonly OpCall[], ctx: OpConte
       last.branch = previewOps(scratch, result.then, branchCtx, registry);
     }
     out.push(...previews);
+  }
+  return out;
+}
+
+export interface DomainCounter {
+  domain: string;
+  label: string;
+  count: number;
+  /** Damage per count after the Domain holder's outgoing modifiers, and the product. */
+  each?: number;
+  total?: number;
+}
+
+/** One HUD badge per Domain present in the party, in order of first appearance by slot. */
+export function domainCounters(state: CombatState, registry: Registry): DomainCounter[] {
+  const out: DomainCounter[] = [];
+  for (const m of state.members) {
+    const id = registry.characters[m.character]?.domain;
+    const counter = id === undefined ? undefined : registry.domains[id]?.counter;
+    if (id === undefined || !counter || out.some((c) => c.domain === id)) continue;
+    const ctx = { source: m.id };
+    const count = Math.max(0, Math.floor(evaluate(counter.count, state, ctx, registry)));
+    if (counter.each === undefined) {
+      out.push({ domain: id, label: counter.label, count });
+    } else {
+      const each = pipeline('damage', counter.each, state, ctx, registry);
+      out.push({ domain: id, label: counter.label, count, each, total: count * each });
+    }
   }
   return out;
 }

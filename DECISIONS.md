@@ -97,6 +97,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - A card repeated by Bud Cutting charges its owner's ultimate once. Ritual costs bottom out at 0 (owner, 19 Oct).
 - M1 task breakdown agreed (owner, 19 Oct).
 - The M1 slice fight starts every ultimate gauge at 70, as if mid-run, so each ultimate can fire in one fight. Charge numbers stay as approved (owner, 19 Oct).
+- M1 playtest (owner, 19 Oct): "more or less a complete success". Shield blocks Poison. HP bars move as each hit lands, not at End Turn. Each Domain gets one HUD badge (Tentacles reads as the total, with count × damage per hit). Keep the one-by-one damage ticks.
 - Ideas the owner raised for later, not yet decided: a skin selection; Transcend optionally changing a character's sprite (Maelia-03, with the exposed legs and pregnant body, fits that); enemies drawing alternate skins from their numbered sprites (owner, 19 Oct).
 - A later balance pass may add more sources of ultimate charge, so "battery" characters become a team-building role (owner idea, 19 Oct).
 

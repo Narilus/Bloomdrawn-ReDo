@@ -144,3 +144,16 @@ describe('playing a card', () => {
     expect(apply(result.state, { type: 'endTurn' }, registry).ok).toBe(false);
   });
 });
+
+describe('vitals', () => {
+  it('record HP and Shield right after each event, ending at the final state', () => {
+    const [state, card] = withCardInHand(start(9).state, 'test.b.hit', 'm1');
+    const result = apply(state, { type: 'playCard', card: card.uid, target: 'e20' }, registry);
+    if (!result.ok) throw new Error(result.reason);
+    expect(result.vitals).toHaveLength(result.events.length);
+    // Before the hit lands (cardPlayed) the dummy is whole; after damageDealt it has lost 6.
+    expect(result.vitals.map((v) => v.enemies[0]?.hp)).toEqual([40, 34]);
+    const last = result.vitals.at(-1);
+    expect(last?.party).toEqual({ hp: result.state.party.hp, shield: result.state.party.shield });
+  });
+});

@@ -12,4 +12,5 @@ export const rapture = domain({
     { id: 'potency', name: 'damage per hit', start: 3 },
   ],
   triggers: [{ on: 'turnEnd', do: [tentacleVolley()] }],
+  counter: { label: 'Tentacles', count: resource('tentacles'), each: resource('potency') },
 });

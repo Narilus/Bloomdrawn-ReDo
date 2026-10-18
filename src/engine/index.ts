@@ -1,4 +1,5 @@
 export * from './combat.ts';
+export type { Vitals } from './resolve.ts';
 export type * from './defs.ts';
 export * from './events.ts';
 export type * from './operation.ts';

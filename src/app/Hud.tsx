@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { registry } from '../content/registry.ts';
 import {
   describeKit,
+  domainCounters,
   GAUGE_MAX,
   intentOf,
   previewIntent,
@@ -9,6 +10,7 @@ import {
   type CombatState,
   type EntityId,
   type Preview,
+  type Vitals,
 } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { enemyHome } from '../stage/layout.ts';
@@ -63,19 +65,27 @@ export function Portraits({ state, choosing, onUltimate }: { state: CombatState;
   );
 }
 
-/** Pooled resources of the Domains present, in party order. */
+/** One badge per Domain present. Rapture's reads as total damage, with Tentacles × damage per hit beneath. */
 export function DomainCounters({ state }: { state: CombatState }) {
-  const domains = [...new Set(state.members.map((m) => registry.characters[m.character]?.domain))];
-  const counters = domains.flatMap((id) =>
-    (registry.domains[id ?? '']?.resources ?? []).map((r) => ({ domain: id, id: r.id, name: r.name, value: state.resources[r.id] ?? 0 })),
-  );
+  const counters = domainCounters(state, registry);
   if (counters.length === 0) return null;
   return (
     <div className="domain-counters">
       {counters.map((c) => (
-        <div key={c.id} className={`counter plaque domain-${c.domain}`}>
-          <strong>{c.value}</strong>
-          <span>{c.name}</span>
+        <div
+          key={c.domain}
+          className={`counter plaque domain-${c.domain}`}
+          aria-label={c.total === undefined ? `${c.count} ${c.label}` : `${c.label}: ${c.count} × ${c.each} = ${c.total} damage`}
+        >
+          <strong>{c.total ?? c.count}</strong>
+          <span className="counter-label">
+            {c.label}
+            {c.total !== undefined && (
+              <small>
+                {c.count} × {c.each}
+              </small>
+            )}
+          </span>
         </div>
       ))}
     </div>
@@ -114,11 +124,13 @@ export function UltimatePanel({ state, member, onFire, onClose }: { state: Comba
   );
 }
 
-export function PartyBar({ state, previews }: { state: CombatState; previews: Preview[] }) {
-  const { hp, maxHp, shield } = state.party;
+/** `vitals`: HP and Shield as the battlefield currently shows them, while a sequence plays out. */
+export function PartyBar({ state, vitals, previews }: { state: CombatState; vitals: Vitals | null; previews: Preview[] }) {
+  const { maxHp } = state.party;
+  const { hp, shield } = vitals?.party ?? state.party;
   const shieldGain = previews.filter((p) => p.op === 'gainShield' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
   // Everything the enemies' shown intents will do to the party, with the Shield it has now.
-  const intents = state.phase === 'player' ? state.enemies.flatMap((e) => previewIntent(state, e.id, registry)) : [];
+  const intents = state.phase === 'player' && !vitals ? state.enemies.flatMap((e) => previewIntent(state, e.id, registry)) : [];
   const incoming = intents.filter((p) => p.op === 'damage' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
   const loss = hpLoss(intents, 'party');
   const after = Math.max(0, hp - loss);
@@ -153,14 +165,16 @@ interface PlateProps {
   slot: number;
   id: EntityId;
   state: CombatState;
+  vitals: Vitals | null;
   aimed: boolean;
   previews: Preview[];
 }
 
-export function EnemyPlate({ slot, id, state, aimed, previews }: PlateProps) {
-  const enemy = state.enemies.find((e) => e.id === id);
+export function EnemyPlate({ slot, id, state, vitals, aimed, previews }: PlateProps) {
+  const live = state.enemies.find((e) => e.id === id);
   const home = enemyHome(slot, state.enemies.length);
-  if (!enemy || !home) return null;
+  if (!live || !home) return null;
+  const enemy = { ...live, ...vitals?.enemies.find((e) => e.id === id) };
   const def = registry.enemies[enemy.enemy];
   const loss = hpLoss(previews, id);
   const after = Math.max(0, enemy.hp - loss);

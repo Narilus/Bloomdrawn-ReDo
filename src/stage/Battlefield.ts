@@ -98,12 +98,14 @@ export class Battlefield {
   /**
    * Animates one command's events. Results are already final; this only shows them, in order:
    * end-of-turn beats (Tentacles, then damage over time, then each enemy action) play one after
-   * another, never merged. Returns how long the sequence runs, in seconds.
+   * another, never merged. Returns when each event lands (seconds from now, never decreasing),
+   * so the HUD can move its bars in step, and how long the whole sequence runs.
    */
-  play(events: readonly EngineEvent[]): number {
+  play(events: readonly EngineEvent[]): { times: number[]; duration: number } {
     let clock = 0; // when the current beat starts
     let impact = 0; // when its hits land
     let ticking = false; // between statusTick and the enemy phase: damage over time
+    const times: number[] = [];
     for (const event of events) {
       switch (event.type) {
         case 'cardPlayed': {
@@ -167,8 +169,10 @@ export class Battlefield {
         default:
           break;
       }
+      const lifecycle = event.type === 'turnEnd' || event.type === 'statusTick' || event.type === 'enemyPhaseStart' || event.type === 'turnStart';
+      times.push(Math.max(times.at(-1) ?? 0, lifecycle ? clock : impact));
     }
-    return Math.max(clock, impact);
+    return { times, duration: Math.max(clock, impact) };
   }
 
   /** Every actor's position against its home point (used by the settle check). */

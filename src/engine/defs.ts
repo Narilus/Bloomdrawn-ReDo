@@ -138,6 +138,8 @@ export interface DomainDef {
   name: string;
   resources: ResourceDef[];
   triggers?: TriggerDef[];
+  /** The HUD badge: a count, and optionally damage for each one (shown as count × each = total). */
+  counter?: { label: string; count: Formula; each?: Formula };
 }
 
 export interface Registry {

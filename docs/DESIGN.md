@@ -69,7 +69,7 @@ The party shares one HP pool, equal to the sum of the four characters' Max HP. C
 | Status | Effect |
 | --- | --- |
 | Bleed | Damage equal to stacks at the afflicted side's end of turn, then −1 stack |
-| Poison | Damage at end of turn; does not decay on its own |
+| Poison | Damage equal to stacks at end of turn, blocked by Shield; does not decay on its own |
 | Vulnerable | Takes 50% more damage for N turns |
 | Weak | Deals 25% less damage for N turns |
 | Stun | Skips its next action |

@@ -49,27 +49,37 @@ export function describeCalls(calls: readonly OpCall[], registry: Registry, show
   return calls.map((call) => `${getOp(registry, call.op)?.describe(call, show, registry) ?? call.op}.`).join(' ');
 }
 
+/** What a caller shows separately, and how to mark live numbers (e.g. to colour them by kind). */
+export interface TextOptions {
+  charge?: boolean;
+  keywords?: boolean;
+  mark?: (text: string, value?: 'damage' | 'shield') => string;
+}
+
 /**
  * Card text with formulas shown as written: keywords, then the authored template or text
- * generated from the effects, then the ultimate charge (unless the caller shows it separately).
+ * generated from the effects, then the ultimate charge (unless the caller shows them separately).
  */
-export function describeCard(def: CardDef, registry: Registry, show: ShowAmount = formulaText, options: { charge?: boolean } = {}): string {
-  const keywords = (def.keywords ?? []).map((k) => `${titleCase(k)}.`);
+export function describeCard(def: CardDef, registry: Registry, show: ShowAmount = formulaText, options: TextOptions = {}): string {
+  const keywords = options.keywords === false ? [] : (def.keywords ?? []).map((k) => `${titleCase(k)}.`);
   const body = def.text ? renderTemplate(def.text, def, show) : describeCalls(def.effects, registry, show);
   const charge = options.charge === false ? '' : describeCalls(chargeOf(def), registry, show);
   return [...keywords, body, charge].filter(Boolean).join(' ');
 }
 
 /** Live numbers for one party member: her stats and outgoing modifiers, no target yet. */
-export function showFor(state: CombatState, owner: EntityId, registry: Registry): ShowAmount {
+export function showFor(state: CombatState, owner: EntityId, registry: Registry, mark?: TextOptions['mark']): ShowAmount {
   const ctx = { source: owner, owner };
-  return (f, value) => String(value ? pipeline(value, f, state, ctx, registry) : Math.floor(evaluate(f, state, ctx, registry)));
+  return (f, value) => {
+    const text = String(value ? pipeline(value, f, state, ctx, registry) : Math.floor(evaluate(f, state, ctx, registry)));
+    return mark ? mark(text, value) : text;
+  };
 }
 
 /** Card text with live numbers for this card in this state (`Deal 9 damage.`). */
-export function describeCardLive(card: CardInstance, state: CombatState, registry: Registry, options: { charge?: boolean } = {}): string {
+export function describeCardLive(card: CardInstance, state: CombatState, registry: Registry, options: TextOptions = {}): string {
   const def = registry.cards[card.card];
-  return def ? describeCard(def, registry, showFor(state, card.owner, registry), options) : card.card;
+  return def ? describeCard(def, registry, showFor(state, card.owner, registry, options.mark), options) : card.card;
 }
 
 /** A member's passive and ultimate text with live numbers. */

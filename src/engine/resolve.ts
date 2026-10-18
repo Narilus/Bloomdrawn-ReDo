@@ -18,11 +18,18 @@ interface QueueItem {
   origin: Origin;
 }
 
-/** One command's resolution: a draft state, the FIFO queue and the ordered event list. */
+/** HP and Shield right after an event, so presentation can move bars as each hit lands. */
+export interface Vitals {
+  party: { hp: number; shield: number };
+  enemies: { id: string; hp: number; shield: number }[];
+}
+
+/** One command's resolution: a draft state, the FIFO queue, the ordered events and the vitals after each. */
 export interface Resolution {
   state: CombatState;
   registry: Registry;
   events: EngineEvent[];
+  vitals: Vitals[];
   queue: QueueItem[];
 }
 
@@ -30,8 +37,18 @@ export const createResolution = (draft: CombatState, registry: Registry): Resolu
   state: draft,
   registry,
   events: [],
+  vitals: [],
   queue: [],
 });
+
+function record(rc: Resolution, event: EngineEvent): void {
+  const { party, enemies } = rc.state;
+  rc.events.push(event);
+  rc.vitals.push({
+    party: { hp: party.hp, shield: party.shield },
+    enemies: enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
+  });
+}
 
 export const isOver = (rc: Resolution): boolean => rc.state.phase === 'ended';
 
@@ -42,7 +59,7 @@ export function enqueue(rc: Resolution, calls: readonly OpCall[], ctx: OpContext
 /** Records an event, checks victory and defeat, then queues every matching trigger. */
 export function emit(rc: Resolution, event: EngineEvent, origin: Origin): void {
   if (isOver(rc)) return;
-  rc.events.push(event);
+  record(rc, event);
   if (checkOutcome(rc)) return;
 
   let capped = false;
@@ -61,7 +78,7 @@ export function emit(rc: Resolution, event: EngineEvent, origin: Origin): void {
   if (capped) {
     const note: EngineEvent = { type: 'chainCapped' };
     if (event.source !== undefined) note.source = event.source;
-    rc.events.push(note);
+    record(rc, note);
   }
 }
 
@@ -89,7 +106,7 @@ function checkOutcome(rc: Resolution): boolean {
   s.phase = 'ended';
   s.outcome = outcome;
   rc.queue.length = 0;
-  rc.events.push({ type: 'combatEnd', outcome });
+  record(rc, { type: 'combatEnd', outcome });
   return true;
 }
 

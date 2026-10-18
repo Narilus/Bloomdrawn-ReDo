@@ -4,7 +4,7 @@ import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
-import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution } from './resolve.ts';
+import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution, type Vitals } from './resolve.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
   BASE_MANA,
@@ -25,7 +25,8 @@ export type Command =
   | { type: 'endTurn' };
 
 export type ApplyResult =
-  | { ok: true; state: CombatState; events: EngineEvent[] }
+  /** `vitals[i]` is HP and Shield right after `events[i]`. */
+  | { ok: true; state: CombatState; events: EngineEvent[]; vitals: Vitals[] }
   | { ok: false; reason: string; state: CombatState };
 
 export interface CombatSetup {
@@ -131,7 +132,7 @@ export function apply(state: CombatState, command: Command, registry: Registry):
   if (command.type === 'playCard') playCard(rc, command);
   else if (command.type === 'fireUltimate') fireUltimate(rc, command.member);
   else endTurn(rc);
-  return { ok: true, state: rc.state, events: rc.events };
+  return { ok: true, state: rc.state, events: rc.events, vitals: rc.vitals };
 }
 
 export function validate(state: CombatState, command: Command, registry: Registry): string | undefined {

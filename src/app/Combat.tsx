@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
-import { apply, GAUGE_MAX, previewCard, startCombat, type Command, type EntityId } from '../engine/index.ts';
+import { apply, GAUGE_MAX, previewCard, startCombat, type CombatState, type Command, type EntityId, type Vitals } from '../engine/index.ts';
 import type { Battlefield } from '../stage/Battlefield.ts';
 import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
@@ -38,19 +38,32 @@ export function Combat() {
   const [ultimateFor, setUltimateFor] = useState<EntityId | null>(null);
   // While the end of turn and enemy actions play out, the hand waits.
   const [busy, setBusy] = useState(false);
+  // HP and Shield as the battlefield shows them: they step with each hit as it lands.
+  const [shown, setShown] = useState<Vitals | null>(null);
+  const timers = useRef<number[]>([]);
 
   const run = useCallback((command: Command) => {
-    const result = apply(current.current, command, registry);
+    const before = current.current;
+    const result = apply(before, command, registry);
     if (!result.ok) {
       setToast({ text: result.reason, id: Date.now() });
       return false;
     }
     current.current = result.state;
     setState(result.state);
-    const seconds = field.current?.play(result.events) ?? 0;
-    if (command.type === 'endTurn' && seconds > 0 && result.state.phase === 'player') {
+    const { times, duration } = field.current?.play(result.events) ?? { times: [], duration: 0 };
+    // A new command finishes the previous sequence's bars at once, then steps through its own.
+    for (const t of timers.current) window.clearTimeout(t);
+    timers.current = [];
+    setShown(vitalsOf(before));
+    times.forEach((t, i) => {
+      if (times[i + 1] === t) return; // only the last event at each moment
+      timers.current.push(window.setTimeout(() => setShown(result.vitals[i] ?? null), t * 1000));
+    });
+    timers.current.push(window.setTimeout(() => setShown(null), duration * 1000 + 100));
+    if (command.type === 'endTurn' && duration > 0 && result.state.phase === 'player') {
       setBusy(true);
-      window.setTimeout(() => setBusy(false), seconds * 1000 + 250);
+      timers.current.push(window.setTimeout(() => setBusy(false), duration * 1000 + 250));
     }
     const fired = result.events.find((e) => e.type === 'ultimateFired');
     const member = fired && result.state.members.find((m) => m.id === fired.source);
@@ -77,6 +90,9 @@ export function Combat() {
     current.current = fresh;
     setSeed(next);
     setState(fresh);
+    for (const t of timers.current) window.clearTimeout(t);
+    timers.current = [];
+    setShown(null);
     setBusy(false);
   };
 
@@ -134,9 +150,9 @@ export function Combat() {
         <span>Relics</span>
         <span className="muted">none yet</span>
       </div>
-      <PartyBar state={state} previews={previews} />
+      <PartyBar state={state} vitals={shown} previews={previews} />
       {state.enemies.map((enemy, slot) => (
-        <EnemyPlate key={enemy.id} slot={slot} state={state} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />
+        <EnemyPlate key={enemy.id} slot={slot} state={state} vitals={shown} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />
       ))}
       <div className="mana" aria-label="Mana">
         <strong>{state.mana}</strong>
@@ -167,7 +183,7 @@ export function Combat() {
           {toast.text}
         </div>
       )}
-      {state.phase === 'ended' && (
+      {state.phase === 'ended' && !shown && (
         <div className="result">
           <h2>{state.outcome === 'victory' ? 'Victory' : 'Defeat'}</h2>
           <button className="end-turn" onClick={restart}>
@@ -178,3 +194,8 @@ export function Combat() {
     </div>
   );
 }
+
+const vitalsOf = (state: CombatState): Vitals => ({
+  party: { hp: state.party.hp, shield: state.party.shield },
+  enemies: state.enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
+});
