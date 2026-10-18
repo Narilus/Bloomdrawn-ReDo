@@ -92,6 +92,12 @@ export class Battlefield {
           impact = actor ? actor.lunge(target?.home, 1) : 0;
           break;
         }
+        case 'enemyActed': {
+          const actor = this.actor(event.source);
+          const [front] = this.targets(PARTY);
+          impact = actor ? actor.lunge(front?.home, -1) : 0;
+          break;
+        }
         case 'damageDealt': {
           const hpLoss = (event.amount ?? 0) - (event.absorbed ?? 0);
           for (const target of this.targets(event.target)) {

@@ -6,7 +6,8 @@ import { registry } from '../registry.ts';
 // When a rule or number changes on purpose, review the diff and update with `npx vitest -u`.
 
 const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
-const ENEMIES = ['enemy.training-dummy', 'enemy.training-dummy', 'enemy.training-dummy'];
+// The M1 fight.
+const ENEMIES = ['enemy.bloom-rib-hound'];
 
 /** Fire a charged ultimate, else play the first playable card at the first living enemy, else end the turn. */
 function policy(state: CombatState): Command {

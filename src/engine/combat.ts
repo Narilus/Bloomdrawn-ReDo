@@ -1,4 +1,4 @@
-import type { CardDef, OpCall, Registry } from './defs.ts';
+import type { CardDef, IntentDef, OpCall, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
@@ -12,7 +12,9 @@ import {
   GAUGE_MAX,
   HAND_DRAW,
   isAlive,
+  PARTY,
   type CardInstance,
+  type Enemy,
   type CombatState,
   type EntityId,
 } from './state.ts';
@@ -66,7 +68,7 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
   );
   const enemies = setup.enemies.map((id) => {
     const def = lookup(registry.enemies, id, 'enemy');
-    return { id: next('e'), enemy: id, hp: def.hp, maxHp: def.hp, shield: 0, statuses: [] };
+    return { id: next('e'), enemy: id, hp: def.hp, maxHp: def.hp, shield: 0, statuses: [], ...(def.intents?.length ? { intent: 0 } : {}) };
   });
   const relics = (setup.relics ?? []).map((id) => {
     lookup(registry.relics, id, 'relic');
@@ -242,11 +244,33 @@ function endTurn(rc: Resolution): void {
   }
 
   s.phase = 'enemy';
+  // An enemy's Shield lasts until its own next turn, as the party's lasts until theirs.
+  for (const enemy of s.enemies) enemy.shield = 0;
   emit(rc, { type: 'enemyPhaseStart' }, ROOT);
   drain(rc);
-  // Enemy intents act here from M1.
   if (isOver(rc)) return;
+  for (const enemy of s.enemies) {
+    if (!isAlive(enemy)) continue;
+    actIntent(rc, enemy);
+    if (isOver(rc)) return;
+  }
   beginTurn(rc);
+}
+
+/** The enemy does exactly what its intent showed, then reveals its next intent. */
+function actIntent(rc: Resolution, enemy: Enemy): void {
+  const intent = intentOf(enemy, rc.registry);
+  if (!intent) return;
+  enqueue(rc, intent.effects, { source: enemy.id, target: PARTY }, ROOT);
+  emit(rc, { type: 'enemyActed', source: enemy.id, target: PARTY }, ROOT);
+  drain(rc);
+  const count = rc.registry.enemies[enemy.enemy]?.intents?.length ?? 1;
+  enemy.intent = ((enemy.intent ?? 0) + 1) % count;
+}
+
+/** The intent an enemy is showing now. */
+export function intentOf(enemy: Enemy, registry: Registry): IntentDef | undefined {
+  return enemy.intent === undefined ? undefined : registry.enemies[enemy.enemy]?.intents?.[enemy.intent];
 }
 
 function beginTurn(rc: Resolution): void {

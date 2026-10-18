@@ -56,7 +56,14 @@ export const schemas = {
     passive: z.strictObject({ name: z.string().min(1), scope: z.enum(['combat', 'run']), text: z.string().min(1), ...hooks }).optional(),
     ultimate: z.strictObject({ name: z.string().min(1), text: z.string().min(1), effects: z.array(opCall).min(1) }).optional(),
   }),
-  enemy: z.strictObject({ kind: z.literal('enemy'), id, name: z.string().min(1), hp: z.int().positive(), ...hooks }),
+  enemy: z.strictObject({
+    kind: z.literal('enemy'),
+    id,
+    name: z.string().min(1),
+    hp: z.int().positive(),
+    intents: z.array(z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) })).optional(),
+    ...hooks,
+  }),
   status: z.strictObject({ kind: z.literal('status'), id, stacking: z.enum(['add', 'refresh', 'highest']), ...hooks }),
   relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),
   domain: z.strictObject({

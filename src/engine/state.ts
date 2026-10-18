@@ -36,6 +36,8 @@ export interface Enemy {
   maxHp: number;
   shield: number;
   statuses: StatusStack[];
+  /** Index of the shown intent in its definition's list; absent for an enemy without intents. */
+  intent?: number;
 }
 
 export interface Relic {

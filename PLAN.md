@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M1 First fight (M0 signed off; M0.6 art runs in parallel)
-**Current task:** M1.3 The Bloom-Rib Hound
+**Current task:** M1.4 Combat UI
 
 ## Milestones
 
@@ -117,6 +117,8 @@ _Done 19 Oct. Kits are data in `src/content/characters/`, with authored text who
 ### M1.3 The Bloom-Rib Hound
 The enemy phase with intents from a seeded cycle, each previewed with its exact number. Win and loss end the combat.
 **Done when:** intent tests pass, and the shown intent number always equals the damage dealt.
+
+_Done 19 Oct. Enemies list intents that cycle in order; the enemy phase acts them in slot order and reveals the next. `previewIntent` gives the shown numbers from the resolving code. The slice and the golden replay are now the Hound fight. To confirm with the owner: an enemy's Shield clears when its own turn starts, mirroring the party's._
 
 ### M1.4 Combat UI
 - Domain counters: Embryo, Tentacles × damage per hit, Essence.

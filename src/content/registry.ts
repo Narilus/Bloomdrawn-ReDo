@@ -111,7 +111,10 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
     }
     if (!reg.domains[c.domain]) fail(where('character', c.id), c.id, `domain "${c.domain}" is not defined`);
   }
-  for (const e of Object.values(reg.enemies)) checkHooks('enemy', e.id, e, '');
+  for (const e of Object.values(reg.enemies)) {
+    checkHooks('enemy', e.id, e, '');
+    e.intents?.forEach((intent, i) => checkCalls('enemy', e.id, intent.effects, `intents[${i}].effects`));
+  }
   for (const s of Object.values(reg.statuses)) checkHooks('status', s.id, s, '');
   for (const r of Object.values(reg.relics)) checkHooks('relic', r.id, r, '');
   for (const d of Object.values(reg.domains)) checkHooks('domain', d.id, d, '');

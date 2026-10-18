@@ -1,8 +1,8 @@
-import { cardCost, chargeOf, playContext, validate, type Command } from './combat.ts';
+import { cardCost, chargeOf, intentOf, playContext, validate, type Command } from './combat.ts';
 import type { OpCall, Registry } from './defs.ts';
 import type { OpContext, Preview } from './operation.ts';
 import { getOp } from './ops/index.ts';
-import type { CardInstance, CombatState, EntityId } from './state.ts';
+import { PARTY, type CardInstance, type CombatState, type EntityId } from './state.ts';
 
 /**
  * What playing a card would do, from the same code that resolves it. Runs the card's
@@ -40,6 +40,20 @@ export function previewUltimate(state: CombatState, member: EntityId, registry: 
   if (!m || !ultimate) return undefined;
   m.gauge = 0;
   return previewOps(scratch, ultimate.effects, { source: m.id, owner: m.id }, registry);
+}
+
+/**
+ * What an enemy's shown intent would do if it acted now: the exact numbers for its intent
+ * display, from the same code that resolves it. Party Shield is counted, as it will be.
+ */
+export function previewIntent(state: CombatState, enemyId: EntityId, registry: Registry): Preview[] {
+  const enemy = state.enemies.find((e) => e.id === enemyId);
+  const intent = enemy && enemy.hp > 0 ? intentOf(enemy, registry) : undefined;
+  if (!enemy || !intent) return [];
+  const scratch = structuredClone(state);
+  // The enemy's own Shield clears before it acts.
+  for (const e of scratch.enemies) e.shield = 0;
+  return previewOps(scratch, intent.effects, { source: enemy.id, target: PARTY }, registry);
 }
 
 function previewOps(scratch: CombatState, calls: readonly OpCall[], ctx: OpContext, registry: Registry): Preview[] {

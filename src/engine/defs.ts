@@ -97,10 +97,19 @@ export interface CharacterDef {
   ultimate?: UltimateDef;
 }
 
+/** One thing an enemy can do on its turn, shown in advance with its exact numbers. */
+export interface IntentDef {
+  id: string;
+  name: string;
+  effects: OpCall[];
+}
+
 export interface EnemyDef extends Hooks {
   id: string;
   name: string;
   hp: number;
+  /** Used in order, then from the start again. An enemy without intents does nothing. */
+  intents?: IntentDef[];
 }
 
 export interface StatusDef extends Hooks {

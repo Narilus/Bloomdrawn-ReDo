@@ -18,7 +18,8 @@ import { Hand, type Aim } from './Hand.tsx';
 
 // Slice line-up: the starter four with their picked Bloomdrawn sprites, Agathe in front.
 const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
-const DEFAULT_ENEMIES = ['enemy.training-dummy', 'enemy.training-dummy', 'enemy.training-dummy'];
+// The M1 fight: the starter four against one Bloom-Rib Hound.
+const DEFAULT_ENEMIES = ['enemy.bloom-rib-hound'];
 
 /** Dev builds only: `?enemies=id,id` picks the enemies (a first piece of the content lab). */
 function enemiesFromUrl(): string[] {
