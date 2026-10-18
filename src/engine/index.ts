@@ -1,6 +1,11 @@
 export * from './combat.ts';
 export type * from './defs.ts';
-export type * from './events.ts';
+export * from './events.ts';
 export type * from './operation.ts';
 export * from './rng.ts';
 export * from './state.ts';
+export * from './formula.ts';
+export { library } from './ops/index.ts';
+export * from './ops/index.ts';
+export * from './preview.ts';
+export * from './text.ts';

@@ -1,31 +1,34 @@
 import type { EntityId } from './state.ts';
 
-export type EventType =
+export const EVENT_TYPES = [
   // Lifecycle
-  | 'combatStart'
-  | 'turnStart'
-  | 'turnEnd'
-  | 'enemyPhaseStart'
-  | 'enemyActed'
-  | 'combatEnd'
+  'combatStart',
+  'turnStart',
+  'turnEnd',
+  'enemyPhaseStart',
+  'enemyActed',
+  'combatEnd',
   // Actions
-  | 'cardPlayed'
-  | 'ultimateFired'
-  | 'transcended'
+  'cardPlayed',
+  'ultimateFired',
+  'transcended',
   // Outcomes
-  | 'damageDealt'
-  | 'damageTaken'
-  | 'shieldGained'
-  | 'statusApplied'
-  | 'statusRemoved'
-  | 'resourceGained'
-  | 'resourceConsumed'
-  | 'cardDrawn'
-  | 'cardExhausted'
-  | 'enemyDefeated'
-  | 'deckShuffled'
+  'damageDealt',
+  'damageTaken',
+  'shieldGained',
+  'statusApplied',
+  'statusRemoved',
+  'resourceGained',
+  'resourceConsumed',
+  'cardDrawn',
+  'cardExhausted',
+  'enemyDefeated',
+  'deckShuffled',
   // Bookkeeping: a trigger chain hit MAX_CHAIN_DEPTH and its remaining operations were dropped.
-  | 'chainCapped';
+  'chainCapped',
+] as const;
+
+export type EventType = (typeof EVENT_TYPES)[number];
 
 export interface EngineEvent {
   type: EventType;
@@ -33,6 +36,8 @@ export interface EngineEvent {
   owner?: EntityId;
   target?: EntityId;
   amount?: number;
+  /** Damage absorbed by Shield; HP lost is amount − absorbed. */
+  absorbed?: number;
   /** Card instance UID. */
   card?: EntityId;
   resource?: string;

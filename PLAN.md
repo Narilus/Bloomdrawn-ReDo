@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M0 Foundation
-**Current task:** M0.3 First operations and content
+**Current task:** M0.4 Save interface
 
 ## Milestones
 
@@ -44,7 +44,7 @@ _Done 18 Oct. No system Chromium is installed, so Playwright uses its own Chromi
 
 _Done 18 Oct. "No self re-fire" is implemented as: a trigger is skipped if its key is already in the chain's ancestry. Ops mutate a `structuredClone` draft; nested control-flow ops return `then` and run ahead of queued triggers._
 
-### M0.3 First operations and content
+### M0.3 First operations and content ✅
 - Operations: `damage`, `gainShield`, `draw`, `gainResource`, and `ifConsume`, each with validate, resolve, preview and describe.
 - A modifier pipeline covering at least flat-outgoing and the Shield steps.
 - Formula trees.
@@ -55,6 +55,8 @@ _Done 18 Oct. "No self re-fire" is implemented as: a trigger is skipped if its k
 - A `scenario(...)` test plays Strike into the dummy and its preview equals the result.
 - A card pointing at a missing status fails registry validation with the file and ID.
 - `ifConsume` spends nothing when its branch can't resolve.
+
+_Done 18 Oct. Also added `applyStatus`, because the missing-status check needs an op that references a status. The registry is built by globbing content files, so errors carry the file path. Deferred to M1: the "exactly five personal cards per starter" cross-check, since starters only have Strike and Defense so far. Placeholder stats: HP 50, Attack 4, Defense 4; Strike 6 + Attack, Defense 5 + Defense; dummy 60 HP._
 
 ### M0.4 Save interface
 Versioned save envelope (schema and content version). Two adapters: idb-keyval and in-memory for tests. Keep the previous good save. Export/import as a JSON file.

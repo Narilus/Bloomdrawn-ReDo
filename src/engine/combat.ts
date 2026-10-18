@@ -2,7 +2,8 @@ import type { Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
-import { createResolution, drain, emit, enqueue, getOp, isOver, ROOT, type Resolution } from './resolve.ts';
+import { getOp } from './ops/index.ts';
+import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution } from './resolve.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
   BASE_MANA,
@@ -125,7 +126,7 @@ export function validate(state: CombatState, command: Command, registry: Registr
   return undefined;
 }
 
-function playContext(card: CardInstance, target: EntityId | undefined): OpContext {
+export function playContext(card: CardInstance, target: EntityId | undefined): OpContext {
   const ctx: OpContext = { source: card.owner, owner: card.owner };
   if (target !== undefined) ctx.target = target;
   return ctx;

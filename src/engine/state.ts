@@ -12,6 +12,9 @@ export type CombatStream = (typeof COMBAT_STREAMS)[number];
 /** Instance IDs inside one combat: `m0`–`m3` party members, `e*` enemies, `r*` relics, `c*` cards. */
 export type EntityId = string;
 
+/** The shared party HP and Shield pool, as a damage or Shield target. */
+export const PARTY: EntityId = 'party';
+
 export interface StatusStack {
   status: string;
   stacks: number;

@@ -124,7 +124,7 @@ Everything that reacts — passives, statuses, relics, weapons, Symptoms, Domain
 
 ### Events
 
-Lifecycle: `combatStart`, `turnStart`, `turnEnd`, `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `cardDrawn`, `cardExhausted`, `enemyDefeated`.
+Lifecycle: `combatStart`, `turnStart`, `turnEnd`, `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
 
 Every event carries its source, owner, target and amount, so filters can say things like "when a Rapture card owned by me is played" or "when Embryo is consumed by a spender".
 

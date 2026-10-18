@@ -1,7 +1,7 @@
 import type { OpCall, Registry, TriggerDef } from './defs.ts';
 import type { EngineEvent } from './events.ts';
-import type { Operation, OpContext } from './operation.ts';
-import { library } from './ops/index.ts';
+import type { OpContext } from './operation.ts';
+import { getOp } from './ops/index.ts';
 import { isAlive, MAX_CHAIN_DEPTH, type CombatState, type EntityId } from './state.ts';
 
 /** Where an operation sits in a trigger chain: its depth and the triggers that led to it. */
@@ -34,10 +34,6 @@ export const createResolution = (draft: CombatState, registry: Registry): Resolu
 });
 
 export const isOver = (rc: Resolution): boolean => rc.state.phase === 'ended';
-
-export function getOp(registry: Registry, name: string): Operation | undefined {
-  return library[name] ?? registry.customOps?.[name];
-}
 
 export function enqueue(rc: Resolution, calls: readonly OpCall[], ctx: OpContext, origin: Origin): void {
   for (const call of calls) rc.queue.push({ call, ctx, origin });
@@ -77,7 +73,8 @@ export function drain(rc: Resolution): void {
     if (op.validate?.(rc.state, item.call, item.ctx, rc.registry) !== undefined) continue;
     const result = op.resolve(rc.state, item.call, item.ctx, rc.registry);
     if (result.then?.length) {
-      rc.queue.unshift(...result.then.map((call) => ({ call, ctx: item.ctx, origin: item.origin })));
+      const ctx = result.consumed === undefined ? item.ctx : { ...item.ctx, consumed: result.consumed };
+      rc.queue.unshift(...result.then.map((call) => ({ call, ctx, origin: item.origin })));
     }
     for (const event of result.events) emit(rc, event, item.origin);
   }
