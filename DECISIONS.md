@@ -83,6 +83,11 @@ An append-only log. One line per decision: date, what was decided, and why if it
 ### Art tooling
 - Claude has no native image generation. Use `codex exec` (Codex CLI, owner's ChatGPT login) for concept work, and an OpenAI API key plus a script for bulk later. Claude writes prompts from the style guide and reviews the outputs; the owner picks.
 
+## 2026-10-18 · M0 feel spike
+
+- Owner signed off the M0.5 feel spike: "All expected animations play, keybinds work and the card feel is extremely smooth." PixiJS + React + Motion confirmed as the presentation stack.
+- Hand interaction as built is the baseline: drag past the play line arms; single-target cards aim with an arrow; release over an enemy casts; drag back, Esc or right-click cancels; click-select then click an enemy; 1–0 select, Enter confirm, ←/→ change target, E ends the turn.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

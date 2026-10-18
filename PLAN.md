@@ -1,7 +1,7 @@
 # PLAN
 
-**Current milestone:** M0 Foundation
-**Current task:** M0.5 Feel spike: built, waiting on the owner's verdict
+**Current milestone:** M1 First fight (M0 signed off; M0.6 art runs in parallel)
+**Current task:** M1 task breakdown, to agree with the owner
 
 ## Milestones
 
@@ -67,7 +67,7 @@ Versioned save envelope (schema and content version). Two adapters: idb-keyval a
 
 _Done 18 Oct. Saves are stored as JSON text. A write checks that the new save reads back before storing it, and only copies `current` to `previous` if `current` is readable. The idb adapter was checked once in Chromium. Export and import are text in and out; the file buttons come with the first UI that needs them. Real save kinds (profile, run) are defined when their state exists._
 
-### M0.5 Feel spike (owner gate for M0)
+### M0.5 Feel spike (owner gate for M0) ✅
 - The PixiJS v8 stage mounted in React, at 1920×1080 logical size and scaled to fit.
 - Party of four on the SW→NE diagonal, drawn front-last, using Gloomdrawn sprites from `reference/legacy-sprites/` and silhouettes where art is missing. Three placeholder enemies on the right.
 - Idle breathing offset per actor.
@@ -84,7 +84,7 @@ _Done 18 Oct. Saves are stored as JSON text. A write checks that the new save re
 - The owner plays it and says the hand and lunges feel at least as good as Gloomdrawn.
 - One small Playwright check confirms that after 20 rapid plays every actor settles back at its home point.
 
-_Built 18 Oct; waiting on the owner. The line-up is Maelia, Virelle and Kibane (the three Gloomdrawn sprites) plus Leonora as a silhouette, against three training dummies. Virelle and Kibane got placeholder Strike/Defense for this. The settle check passes, and it fails when lunges are made to start from the current position instead of home. Input: drag, click-then-click, and keys (1–0, Enter, Esc, ←/→ to change target, E for End Turn). Right-click, Esc or dragging back down all cancel._
+_Signed off by the owner 18 Oct. The line-up is Maelia, Virelle and Kibane (the three Gloomdrawn sprites) plus Leonora as a silhouette, against three training dummies. Virelle and Kibane got placeholder Strike/Defense for this. The settle check passes, and it fails when lunges are made to start from the current position instead of home. Input: drag, click-then-click, and keys (1–0, Enter, Esc, ←/→ to change target, E for End Turn). Right-click, Esc or dragging back down all cancel._
 
 ### M0.6 Art pipeline (parallel, owner-paced)
 Owner installs the Codex CLI. Then confirm `codex exec` can generate an image from the prompt stem. Write briefs for the starter four (Maelia, Agathe, Anthe, Leonora) from DESIGN.md, generate 2–3 options each into `art/raw/<character>/`, and keep the prompt text beside each.
