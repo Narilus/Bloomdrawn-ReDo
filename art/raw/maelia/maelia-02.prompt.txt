@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a150ae-71d3-7260-bd00-25f4134aa109
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing right: body and face turned toward the right edge of the image. A tall woman in her 40s, a midwife-priestess. Hooded robes of layered petal-membrane in blush and ivory, with fine veins running through the folds; a brass staff ending in a glass orb with a curled pink embryo bud inside; seed pods hanging from her sleeves on cords like rosary beads. Brass fittings, pale hair under the hood, gentle and watchful expression.
+
+Background: fully transparent.
