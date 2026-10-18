@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bloomdrawn combat concept</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#8E2C3A}a:hover{color:#6E1E30}
+.bd-panel{background:rgba(251,246,240,0.9);border:1px solid #CDB3A3;border-radius:14px;box-shadow:0 6px 18px rgba(58,38,51,0.12)}
+.bd-card{position:absolute;width:210px;height:296px;box-sizing:border-box;background:#FBF5EE;border-radius:14px;box-shadow:0 12px 26px rgba(58,38,51,0.28);overflow:hidden;display:flex;flex-direction:column;transform-origin:50% 100%}
+.bd-gem{position:absolute;left:8px;top:8px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFF8F2;font-weight:800;font-size:22px;box-shadow:0 0 0 3px #FBF5EE,0 2px 6px rgba(58,38,51,0.35);z-index:2}
+.bd-cardname{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;line-height:1.05;padding:12px 40px 6px 54px;min-height:44px;display:flex;align-items:center;color:#3A2633}
+.bd-owner{position:absolute;right:8px;top:10px;width:30px;height:30px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #FBF5EE}
+.bd-art{height:100px;margin:0 10px;border-radius:8px;overflow:hidden;position:relative}
+.bd-art img{width:100%;height:100%;object-fit:cover}
+.bd-type{font-size:10.5px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;padding:8px 14px 2px;color:#6B5562}
+.bd-rules{font-size:13.5px;line-height:1.38;padding:2px 14px 0;color:#3A2633}
+.bd-kw{text-decoration:underline dotted;text-underline-offset:3px}
+.bd-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(251,246,240,0.92);border:1px solid #CDB3A3;color:#3A2633}
+</style>
+
+</head>
+<body>
+
+
+
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #EBDCD6; font-family: 'Nunito Sans', sans-serif; color: #3A2633">
+
+<!-- Background: a Labyrinth chamber at the Rooted stage -->
+<svg viewBox="0 0 1920 1080" width="1920" height="1080" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<defs>
+<linearGradient id="bd-sky" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#D6CBE2"/>
+<stop offset="0.5" stop-color="#EAD2CF"/>
+<stop offset="1" stop-color="#F1DED6"/>
+</linearGradient>
+<linearGradient id="bd-floor" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#E8D3CA"/>
+<stop offset="1" stop-color="#D3B3AA"/>
+</linearGradient>
+<radialGradient id="bd-glow" cx="50%" cy="50%" r="50%">
+<stop offset="0" stop-color="#FFF7F0" stop-opacity="0.85"/>
+<stop offset="1" stop-color="#FFF7F0" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="bd-vig" cx="50%" cy="48%" r="72%">
+<stop offset="0.55" stop-color="#3A2633" stop-opacity="0"/>
+<stop offset="1" stop-color="#3A2633" stop-opacity="0.38"/>
+</radialGradient>
+<radialGradient id="bd-petal" cx="50%" cy="100%" r="100%">
+<stop offset="0" stop-color="#C8636C"/>
+<stop offset="0.45" stop-color="#E9A39B"/>
+<stop offset="1" stop-color="#FBEDE4"/>
+</radialGradient>
+<radialGradient id="bd-heart" cx="50%" cy="45%" r="55%">
+<stop offset="0" stop-color="#B23B50"/>
+<stop offset="1" stop-color="#6E1E30"/>
+</radialGradient>
+<radialGradient id="bd-lantern" cx="50%" cy="50%" r="50%">
+<stop offset="0" stop-color="#FFE9C2" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#FFE9C2" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="1920" height="1080" fill="url(#bd-sky)"/>
+<!-- back wall arches -->
+<path d="M300 660 V340 A130 130 0 0 1 560 340 V660 Z" fill="#D9B9B8" opacity="0.55"/>
+<path d="M300 660 V340 A130 130 0 0 1 560 340 V660" fill="none" stroke="#C9A7A6" stroke-width="16"/>
+<path d="M760 650 V300 A200 200 0 0 1 1160 300 V650 Z" fill="#CFAFB3" opacity="0.5"/>
+<path d="M760 650 V300 A200 200 0 0 1 1160 300 V650" fill="none" stroke="#C9A7A6" stroke-width="20"/>
+<path d="M1360 660 V340 A130 130 0 0 1 1620 340 V660 Z" fill="#D9B9B8" opacity="0.55"/>
+<path d="M1360 660 V340 A130 130 0 0 1 1620 340 V660" fill="none" stroke="#C9A7A6" stroke-width="16"/>
+<rect x="600" y="200" width="120" height="460" fill="#E6CFCA" opacity="0.7"/>
+<rect x="1200" y="200" width="120" height="460" fill="#E6CFCA" opacity="0.7"/>
+<!-- floor -->
+<path d="M0 650 L1920 630 L1920 1080 L0 1080 Z" fill="url(#bd-floor)"/>
+<g stroke="#C9A69E" stroke-width="1.5" opacity="0.55">
+<line x1="160" y1="648" x2="-800" y2="1080"/>
+<line x1="480" y1="645" x2="-100" y2="1080"/>
+<line x1="800" y1="642" x2="620" y2="1080"/>
+<line x1="1120" y1="638" x2="1300" y2="1080"/>
+<line x1="1440" y1="635" x2="2010" y2="1080"/>
+<line x1="1760" y1="632" x2="2700" y2="1080"/>
+<line x1="0" y1="720" x2="1920" y2="705"/>
+<line x1="0" y1="830" x2="1920" y2="820"/>
+<line x1="0" y1="980" x2="1920" y2="975"/>
+</g>
+<ellipse cx="960" cy="770" rx="760" ry="170" fill="url(#bd-glow)"/>
+<!-- Rooted: veins across the floor -->
+<g fill="none" stroke-linecap="round">
+<path d="M1920 760 C1720 790 1600 730 1460 805 S1150 905 990 870 S760 930 640 1080" stroke="#C66D76" stroke-width="8" opacity="0.7"/>
+<path d="M1920 760 C1720 790 1600 730 1460 805 S1150 905 990 870 S760 930 640 1080" stroke="#9E3A4A" stroke-width="2" opacity="0.6"/>
+<path d="M1460 805 C1420 860 1480 930 1440 1080" stroke="#C66D76" stroke-width="4" opacity="0.6"/>
+<path d="M990 870 C940 820 860 830 820 790" stroke="#C66D76" stroke-width="3" opacity="0.55"/>
+<path d="M0 900 C140 880 220 960 360 940 S560 990 640 1080" stroke="#C66D76" stroke-width="6" opacity="0.6"/>
+<path d="M360 940 C380 900 440 880 470 850" stroke="#C66D76" stroke-width="3" opacity="0.5"/>
+<path d="M1700 1080 C1660 1000 1720 960 1780 930" stroke="#C66D76" stroke-width="5" opacity="0.6"/>
+</g>
+<!-- wall vines -->
+<g fill="none" stroke-linecap="round">
+<path d="M-20 110 C120 170 210 60 330 120 S520 270 560 205 S640 120 700 160" stroke="#DE8F8C" stroke-width="18"/>
+<path d="M-20 110 C120 170 210 60 330 120 S520 270 560 205 S640 120 700 160" stroke="#B85A64" stroke-width="4" stroke-dasharray="2 10" opacity="0.7"/>
+<path d="M1940 130 C1800 180 1720 80 1600 140 S1420 270 1380 215 S1290 140 1230 170" stroke="#DE8F8C" stroke-width="18"/>
+<path d="M1940 130 C1800 180 1720 80 1600 140 S1420 270 1380 215 S1290 140 1230 170" stroke="#B85A64" stroke-width="4" stroke-dasharray="2 10" opacity="0.7"/>
+<path d="M960 100 C930 150 990 190 950 250 S980 320 960 360" stroke="#DE8F8C" stroke-width="10"/>
+<path d="M560 205 C590 260 560 320 590 380" stroke="#DE8F8C" stroke-width="7"/>
+<path d="M1380 215 C1350 270 1380 330 1350 400" stroke="#DE8F8C" stroke-width="7"/>
+</g>
+<!-- flowers of skin and membrane -->
+<g transform="translate(330 120) scale(0.9)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(45)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(90)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(135)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(180)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(225)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(270)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(315)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(22)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(82)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(142)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(202)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(262)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(322)"/>
+<circle r="16" fill="url(#bd-heart)"/>
+<circle cx="10" cy="0" r="2.6" fill="#FFF3E8"/><circle cx="5" cy="8.7" r="2.6" fill="#FFF3E8"/><circle cx="-5" cy="8.7" r="2.6" fill="#FFF3E8"/><circle cx="-10" cy="0" r="2.6" fill="#FFF3E8"/><circle cx="-5" cy="-8.7" r="2.6" fill="#FFF3E8"/><circle cx="5" cy="-8.7" r="2.6" fill="#FFF3E8"/>
+</g>
+<g transform="translate(1610 145) scale(1.1)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(45)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(90)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(135)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(180)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(225)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(270)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(315)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(22)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(82)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(142)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(202)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(262)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(322)"/>
+<circle r="16" fill="url(#bd-heart)"/>
+<circle cx="10" cy="0" r="2.6" fill="#FFF3E8"/><circle cx="5" cy="8.7" r="2.6" fill="#FFF3E8"/><circle cx="-5" cy="8.7" r="2.6" fill="#FFF3E8"/><circle cx="-10" cy="0" r="2.6" fill="#FFF3E8"/><circle cx="-5" cy="-8.7" r="2.6" fill="#FFF3E8"/><circle cx="5" cy="-8.7" r="2.6" fill="#FFF3E8"/>
+</g>
+<g transform="translate(960 300) scale(0.6)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(60)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(120)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(180)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(240)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(300)"/>
+<circle r="16" fill="url(#bd-heart)"/>
+</g>
+<g transform="translate(1810 1000) scale(1.4)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(45)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(90)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(270)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(315)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(22)"/>
+<ellipse cx="0" cy="-24" rx="14" ry="28" fill="#E58C8D" transform="rotate(302)"/>
+<circle r="16" fill="url(#bd-heart)"/>
+</g>
+<!-- pollen motes -->
+<g fill="#FFF4EC" opacity="0.85">
+<circle cx="420" cy="420" r="3"/><circle cx="520" cy="300" r="2"/><circle cx="700" cy="380" r="2.5"/><circle cx="880" cy="460" r="2"/><circle cx="1040" cy="410" r="3"/><circle cx="1180" cy="330" r="2"/><circle cx="1290" cy="470" r="2.5"/><circle cx="1470" cy="380" r="2"/><circle cx="1690" cy="430" r="3"/><circle cx="1520" cy="520" r="2"/><circle cx="640" cy="520" r="2"/><circle cx="980" cy="560" r="2.5"/>
+</g>
+<rect width="1920" height="1080" fill="url(#bd-vig)"/>
+</svg>
+
+<!-- Party: shadows, owner highlight, sprites -->
+<svg viewBox="0 0 1920 1080" width="1920" height="1080" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<ellipse cx="180" cy="672" rx="90" ry="14" fill="#3A2633" opacity="0.18"/>
+<ellipse cx="390" cy="712" rx="110" ry="16" fill="#3A2633" opacity="0.18"/>
+<ellipse cx="640" cy="742" rx="150" ry="22" fill="#D9767A" opacity="0.35"/>
+<ellipse cx="640" cy="742" rx="120" ry="16" fill="#3A2633" opacity="0.16"/>
+<ellipse cx="840" cy="772" rx="130" ry="18" fill="#3A2633" opacity="0.18"/>
+</svg>
+
+<div style="position: absolute; left: 76px; top: 328px; width: 210px; height: 344px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end">
+<svg viewBox="0 0 200 330" width="200" height="330" role="img" aria-label="Leonora, art pending">
+<path d="M100 20 C80 20 70 38 72 56 C74 74 86 84 100 84 C114 84 126 74 128 56 C130 38 120 20 100 20 Z" fill="#7A3B32" fill-opacity="0.22" stroke="#7A3B32" stroke-width="2" stroke-dasharray="6 5"/>
+<path d="M70 96 C90 88 110 88 130 96 L156 316 L44 316 Z" fill="#7A3B32" fill-opacity="0.22" stroke="#7A3B32" stroke-width="2" stroke-dasharray="6 5"/>
+<rect x="128" y="160" width="34" height="44" rx="3" fill="#7A3B32" fill-opacity="0.3"/>
+</svg>
+<div class="bd-chip" style="margin-top: -6px">Leonora · art pending</div>
+</div>
+<img src="../legacy-sprites/maelia-battle.png" alt="Maelia, Midwife of the Bloom" style="position: absolute; left: 200px; top: 352px; height: 360px">
+<img src="../legacy-sprites/virelle-battle.png" alt="Virelle, the Open Wound" style="position: absolute; left: 380px; top: 382px; height: 360px">
+<img src="../legacy-sprites/kibane-battle.png" alt="Kibane, the Nine-Tailed" style="position: absolute; left: 560px; top: 412px; height: 360px">
+
+<!-- Shared survival bar -->
+<div class="bd-panel" style="position: absolute; left: 96px; top: 812px; width: 700px; padding: 12px 18px; box-sizing: border-box">
+<div style="display: flex; align-items: baseline; gap: 14px">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px">Party</span>
+<span style="font-size: 20px; font-weight: 800">312 <span style="font-weight: 600; color: #6B5562">/ 435</span></span>
+<span class="bd-chip" style="margin-left: 4px">
+<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 3 L20 6 V12 C20 16.5 16.5 19.5 12 21 C7.5 19.5 4 16.5 4 12 V6 Z" fill="none" stroke="#3A2633" stroke-width="2"/></svg>Shield 18</span>
+<span style="margin-left: auto; font-size: 14px; font-weight: 700; color: #8E2C3A">Incoming 30 · 12 after Shield</span>
+</div>
+<div style="position: relative; margin-top: 10px; height: 16px; border-radius: 8px; background: #E6D3CB; overflow: hidden">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 71.7%; background: #C4566A"></div>
+<div style="position: absolute; left: 69%; top: 0; bottom: 0; width: 2.7%; background: repeating-linear-gradient(135deg, #6E1E30 0 4px, #C4566A 4px 8px)"></div>
+<div style="position: absolute; left: 71.7%; top: 0; bottom: 0; width: 4.1%; background: #A9B7C9"></div>
+</div>
+</div>
+
+<!-- Enemies -->
+<svg viewBox="0 0 1920 1080" width="1920" height="1080" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<ellipse cx="1385" cy="782" rx="190" ry="26" fill="none" stroke="#C4566A" stroke-width="3" stroke-dasharray="10 8"/>
+<ellipse cx="1385" cy="782" rx="170" ry="20" fill="#3A2633" opacity="0.16"/>
+<ellipse cx="1690" cy="772" rx="100" ry="16" fill="#3A2633" opacity="0.18"/>
+</svg>
+
+<svg viewBox="0 0 400 260" width="400" height="260" role="img" aria-label="Rooted Hound, concept silhouette" style="position: absolute; left: 1186px; top: 528px">
+<path d="M352 140 Q388 110 394 64" fill="none" stroke="#4B3644" stroke-width="12" stroke-linecap="round"/>
+<rect x="84" y="168" width="20" height="82" rx="10" fill="#4B3644" transform="rotate(6 94 168)"/>
+<rect x="124" y="172" width="20" height="78" rx="10" fill="#3F2E3A"/>
+<rect x="286" y="166" width="20" height="82" rx="10" fill="#3F2E3A" transform="rotate(-6 296 166)"/>
+<rect x="322" y="160" width="20" height="86" rx="10" fill="#4B3644" transform="rotate(8 332 160)"/>
+<ellipse cx="216" cy="148" rx="144" ry="46" fill="#4B3644"/>
+<ellipse cx="104" cy="146" rx="62" ry="54" fill="#4B3644"/>
+<path d="M86 118 Q66 64 34 72 Q8 80 8 102 Q10 120 44 122 Z" fill="#4B3644"/>
+<path d="M50 80 L62 48 L70 84 Z" fill="#4B3644"/>
+<path d="M10 104 Q28 120 48 112 L42 106 Q26 112 12 100 Z" fill="#8E2C3A"/>
+<circle cx="30" cy="90" r="3.5" fill="#F3C6A8"/>
+<g fill="none" stroke="#6A5260" stroke-width="3" stroke-linecap="round" opacity="0.8">
+<path d="M170 128 Q176 150 168 172"/><path d="M200 126 Q206 150 198 176"/><path d="M230 126 Q236 150 228 176"/><path d="M260 128 Q266 150 258 174"/>
+</g>
+<g fill="none" stroke="#E08A8C" stroke-width="4" stroke-linecap="round">
+<path d="M140 106 Q132 84 140 70"/><path d="M180 104 Q190 80 182 62"/><path d="M220 104 Q214 82 224 66"/><path d="M262 108 Q272 88 264 74"/><path d="M300 116 Q298 96 308 84"/>
+</g>
+<g fill="#F2B7AE" stroke="#C8636C" stroke-width="1.5">
+<ellipse cx="140" cy="66" rx="7" ry="10"/><ellipse cx="182" cy="58" rx="8" ry="11"/><ellipse cx="224" cy="62" rx="7" ry="10"/><ellipse cx="264" cy="70" rx="6" ry="9"/><ellipse cx="308" cy="80" rx="6" ry="9"/>
+</g>
+<g transform="translate(108 104) scale(0.42)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(72)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(144)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(216)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(288)"/>
+<circle r="16" fill="url(#bd-heart)"/>
+</g>
+</svg>
+
+<svg viewBox="0 0 260 440" width="260" height="440" role="img" aria-label="Lost Surveyor, concept silhouette" style="position: absolute; left: 1560px; top: 334px">
+<circle cx="40" cy="86" r="46" fill="url(#bd-lantern)"/>
+<line x1="44" y1="54" x2="62" y2="432" stroke="#5B4652" stroke-width="7" stroke-linecap="round"/>
+<line x1="44" y1="58" x2="40" y2="70" stroke="#5B4652" stroke-width="3"/>
+<rect x="28" y="70" width="26" height="34" rx="4" fill="#B08D57"/>
+<rect x="33" y="76" width="16" height="22" rx="2" fill="#FFE9C2"/>
+<rect x="158" y="138" width="62" height="124" rx="8" fill="#5B4652"/>
+<circle cx="190" cy="134" r="18" fill="#6A5260"/>
+<path d="M92 132 Q130 112 168 132 L212 412 Q150 432 70 412 Z" fill="#4B3644"/>
+<path d="M100 150 L190 300" stroke="#6A5260" stroke-width="6"/>
+<rect x="92" y="404" width="34" height="28" rx="6" fill="#3F2E3A"/>
+<rect x="150" y="404" width="34" height="28" rx="6" fill="#3F2E3A"/>
+<path d="M104 156 Q80 196 56 232" fill="none" stroke="#4B3644" stroke-width="26" stroke-linecap="round"/>
+<circle cx="128" cy="98" r="38" fill="#4B3644"/>
+<ellipse cx="120" cy="104" rx="22" ry="26" fill="#2E2029"/>
+<g transform="translate(120 104) scale(0.36)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(60)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(120)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(180)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(240)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(300)"/>
+<circle r="16" fill="url(#bd-heart)"/>
+<circle cx="10" cy="0" r="2.6" fill="#FFF3E8"/><circle cx="-5" cy="8.7" r="2.6" fill="#FFF3E8"/><circle cx="-5" cy="-8.7" r="2.6" fill="#FFF3E8"/>
+</g>
+<g transform="translate(176 146) scale(0.5)">
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(20)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(80)"/>
+<ellipse cx="0" cy="-42" rx="24" ry="50" fill="url(#bd-petal)" stroke="#F8E7DD" stroke-width="2" transform="rotate(320)"/>
+<circle r="14" fill="url(#bd-heart)"/>
+</g>
+</svg>
+
+<!-- Enemy intents -->
+<div style="position: absolute; left: 1290px; top: 470px; display: flex; flex-direction: column; align-items: center; gap: 6px">
+<div class="bd-chip" style="font-size: 18px; padding: 6px 14px; border-color: #C4566A">
+<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 20 L14 10 M14 10 L19 4 L20 5 L14 11 M7 14 L10 17" fill="none" stroke="#8E2C3A" stroke-width="2.2" stroke-linecap="round"/></svg>9 × 2</div>
+</div>
+<div style="position: absolute; left: 1646px; top: 282px; display: flex; flex-direction: column; align-items: center; gap: 6px">
+<div class="bd-chip" style="font-size: 18px; padding: 6px 14px; border-color: #C4566A">
+<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 20 L14 10 M14 10 L19 4 L20 5 L14 11 M7 14 L10 17" fill="none" stroke="#8E2C3A" stroke-width="2.2" stroke-linecap="round"/></svg>12</div>
+</div>
+
+<!-- Enemy plates -->
+<div class="bd-panel" style="position: absolute; left: 1250px; top: 812px; width: 270px; padding: 10px 14px; box-sizing: border-box">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 20px">Rooted Hound</span>
+<span style="font-size: 14px; font-weight: 800">46 / 60</span>
+</div>
+<div style="margin-top: 6px; height: 10px; border-radius: 5px; background: #E6D3CB; overflow: hidden"><div style="width: 76.7%; height: 100%; background: #8E2C3A"></div></div>
+<div style="display: flex; gap: 6px; margin-top: 8px">
+<span class="bd-chip"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M12 3 C12 3 6 11 6 15 A6 6 0 0 0 18 15 C18 11 12 3 12 3 Z" fill="#B23B50"/></svg>Bleed 4</span>
+<span class="bd-chip"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M12 3 L20 6 V12 C20 16.5 16.5 19.5 12 21 C7.5 19.5 4 16.5 4 12 V6 Z M9 8 L13 12 L10 16" fill="none" stroke="#3A2633" stroke-width="2"/></svg>Vulnerable 1</span>
+</div>
+</div>
+<div class="bd-panel" style="position: absolute; left: 1560px; top: 812px; width: 270px; padding: 10px 14px; box-sizing: border-box">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 20px">Lost Surveyor</span>
+<span style="font-size: 14px; font-weight: 800">71 / 80</span>
+</div>
+<div style="margin-top: 6px; height: 10px; border-radius: 5px; background: #E6D3CB; overflow: hidden"><div style="width: 88.7%; height: 100%; background: #8E2C3A"></div></div>
+<div style="display: flex; gap: 6px; margin-top: 8px">
+<span class="bd-chip"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M12 3 C12 3 6 11 6 15 A6 6 0 0 0 18 15 C18 11 12 3 12 3 Z" fill="#6E8B4E"/></svg>Poison 3</span>
+</div>
+</div>
+
+<!-- Top left: portraits, persistent ultimate gauges, Domain counters -->
+<div class="bd-panel" style="position: absolute; left: 28px; top: 24px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 14px">
+<div style="width: 104px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<img src="../legacy-sprites/maelia-portrait.png" alt="Maelia" style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px #B8455C">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px">Maelia</span>
+<div style="width: 96px; height: 7px; border-radius: 4px; background: #E6D3CB; overflow: hidden"><div style="width: 64%; height: 100%; background: #B8455C"></div></div>
+<span style="font-size: 11px; font-weight: 700; color: #6B5562">64 / 100</span>
+</div>
+<div style="width: 104px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<img src="../legacy-sprites/virelle-portrait.png" alt="Virelle" style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px #B8455C, 0 0 0 7px rgba(217,118,122,0.45)">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px">Virelle</span>
+<div style="width: 96px; height: 7px; border-radius: 4px; background: #E6D3CB; overflow: hidden"><div style="width: 38%; height: 100%; background: #B8455C"></div></div>
+<span style="font-size: 11px; font-weight: 700; color: #6B5562">38 / 100</span>
+</div>
+<div style="width: 104px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<img src="../legacy-sprites/kibane-portrait.png" alt="Kibane" style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px #A8823A, 0 0 14px 4px rgba(232,196,110,0.8)">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px">Kibane</span>
+<div style="width: 96px; height: 7px; border-radius: 4px; background: #E6D3CB; overflow: hidden"><div style="width: 100%; height: 100%; background: #A8823A"></div></div>
+<span style="font-size: 11px; font-weight: 800; color: #7A5A1E; letter-spacing: 0.08em">ULTIMATE READY</span>
+</div>
+<div style="width: 104px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="width: 68px; height: 68px; border-radius: 50%; background: #E9D8D2; box-shadow: 0 0 0 3px #7A3B32; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 32px; color: #7A3B32">L</div>
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px">Leonora</span>
+<div style="width: 96px; height: 7px; border-radius: 4px; background: #E6D3CB; overflow: hidden"><div style="width: 52%; height: 100%; background: #7A3B32"></div></div>
+<span style="font-size: 11px; font-weight: 700; color: #6B5562">52 / 100</span>
+</div>
+</div>
+<div style="display: flex; gap: 8px">
+<span class="bd-chip" style="font-size: 14px; padding: 5px 12px; border-color: #B8455C">
+<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><ellipse cx="12" cy="13" rx="7" ry="9" fill="#F2B7AE" stroke="#B8455C" stroke-width="2"/><path d="M10 10 Q14 12 11 16" fill="none" stroke="#B8455C" stroke-width="1.6"/></svg>Embryo 3</span>
+<span class="bd-chip" style="font-size: 14px; padding: 5px 12px; border-color: #A8823A">
+<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3 C15 8 18 10 18 14 A6 6 0 0 1 6 14 C6 10 9 8 12 3 Z" fill="#F3DFA8" stroke="#A8823A" stroke-width="2"/></svg>Essence 5</span>
+</div>
+</div>
+
+<!-- Top centre: Bloom clock and turn -->
+<div class="bd-panel" style="position: absolute; left: 700px; top: 24px; width: 520px; padding: 12px 22px 14px; box-sizing: border-box">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<span style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 22px">The Bloom · Rooted</span>
+<span style="font-size: 14px; font-weight: 800; color: #6B5562">Turn 3</span>
+</div>
+<div style="position: relative; margin-top: 12px; height: 42px">
+<div style="position: absolute; left: 18px; right: 18px; top: 10px; height: 3px; background: #E2CCC4"></div>
+<div style="position: absolute; left: 18px; width: 47%; top: 10px; height: 3px; background: #C4566A"></div>
+<div style="position: absolute; inset: 0; display: flex; justify-content: space-between">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #C4566A"></div><span style="font-size: 11px; font-weight: 700; color: #6B5562">Dormant</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #C4566A"></div><span style="font-size: 11px; font-weight: 700; color: #6B5562">Seeded</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #8E2C3A; box-shadow: 0 0 0 4px #FBF6F0, 0 0 0 6px #C4566A"></div><span style="font-size: 11px; font-weight: 800; color: #8E2C3A">Rooted</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #FBF6F0; border: 2px solid #D8BFB6; box-sizing: border-box"></div><span style="font-size: 11px; font-weight: 700; color: #6B5562">Flowering</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #FBF6F0; border: 2px solid #D8BFB6; box-sizing: border-box"></div><span style="font-size: 11px; font-weight: 700; color: #6B5562">Fruiting</span></div>
+</div>
+</div>
+</div>
+
+<!-- Top right: relics and log -->
+<div style="position: absolute; right: 28px; top: 24px; display: flex; gap: 10px; align-items: center">
+<div class="bd-panel" style="width: 52px; height: 52px; display: flex; align-items: center; justify-content: center" title="Pressed Heartflower">
+<svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label="Relic: Pressed Heartflower"><circle cx="12" cy="12" r="3" fill="#8E2C3A"/><g fill="none" stroke="#C4566A" stroke-width="1.8"><ellipse cx="12" cy="6" rx="3" ry="4"/><ellipse cx="12" cy="18" rx="3" ry="4"/><ellipse cx="6" cy="12" rx="4" ry="3"/><ellipse cx="18" cy="12" rx="4" ry="3"/></g></svg>
+</div>
+<div class="bd-panel" style="width: 52px; height: 52px; display: flex; align-items: center; justify-content: center" title="Brass Ledger Key">
+<svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label="Relic: Brass Ledger Key"><circle cx="8" cy="8" r="4" fill="none" stroke="#A9844E" stroke-width="2"/><path d="M11 11 L20 20 M16 16 L18 14 M18 18 L20 16" fill="none" stroke="#A9844E" stroke-width="2" stroke-linecap="round"/></svg>
+</div>
+<div class="bd-panel" style="width: 52px; height: 52px; display: flex; align-items: center; justify-content: center" title="Votive Stub">
+<svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label="Relic: Votive Stub"><rect x="8" y="10" width="8" height="10" rx="1.5" fill="none" stroke="#A8823A" stroke-width="2"/><path d="M12 4 C14 6 14 8 12 9 C10 8 10 6 12 4 Z" fill="#E8C46E"/></svg>
+</div>
+<button style="height: 52px; padding: 0 18px; border-radius: 14px; border: 1px solid #CDB3A3; background: rgba(251,246,240,0.9); font-family: 'Nunito Sans', sans-serif; font-weight: 800; font-size: 15px; color: #3A2633; display: flex; align-items: center; gap: 8px; cursor: pointer">
+<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 7 H19 M5 12 H19 M5 17 H14" fill="none" stroke="#3A2633" stroke-width="2" stroke-linecap="round"/></svg>Log</button>
+</div>
+
+<!-- Bottom left: Mana and piles -->
+<div style="position: absolute; left: 36px; top: 924px; display: flex; align-items: center; gap: 18px">
+<div style="width: 124px; height: 124px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #FFF8F2, #F1D9D1 70%); box-shadow: 0 0 0 4px #C4566A, 0 8px 20px rgba(58,38,51,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center">
+<span style="font-size: 44px; font-weight: 800; line-height: 1">4<span style="font-size: 22px; color: #6B5562">/6</span></span>
+<span style="font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: #6B5562">MANA</span>
+</div>
+<div style="display: flex; gap: 10px">
+<button class="bd-panel" style="width: 64px; height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: 'Nunito Sans', sans-serif; color: #3A2633; cursor: pointer"><span style="font-size: 22px; font-weight: 800">9</span><span style="font-size: 11px; font-weight: 700; color: #6B5562">Draw</span></button>
+<button class="bd-panel" style="width: 64px; height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: 'Nunito Sans', sans-serif; color: #3A2633; cursor: pointer"><span style="font-size: 22px; font-weight: 800">4</span><span style="font-size: 11px; font-weight: 700; color: #6B5562">Discard</span></button>
+<button class="bd-panel" style="width: 76px; height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: 'Nunito Sans', sans-serif; color: #3A2633; cursor: pointer"><span style="font-size: 22px; font-weight: 800">1</span><span style="font-size: 11px; font-weight: 700; color: #6B5562">Graveyard</span></button>
+</div>
+</div>
+
+<!-- Bottom right: End Turn -->
+<button style="position: absolute; right: 40px; top: 962px; width: 220px; height: 68px; border-radius: 16px; border: none; background: #4A2E3F; color: #FBF1EA; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 28px; box-shadow: 0 8px 20px rgba(58,38,51,0.35); cursor: pointer">End Turn</button>
+
+<!-- The hand -->
+<div class="bd-card" style="left: 555px; top: 792px; transform: rotate(-10deg); border: 2px solid #B8455C">
+<div class="bd-gem" style="background: #B8455C">2</div>
+<img class="bd-owner" src="../legacy-sprites/maelia-portrait.png" alt="Owner: Maelia">
+<div class="bd-cardname">Graft Bud</div>
+<div class="bd-art" style="background: #F3D3CC"><img src="../legacy-sprites/maelia-battle.png" alt="" style="object-position: 30% 12%"></div>
+<div class="bd-type">Builder · Flesh</div>
+<div class="bd-rules">Gain <b style="color: #B8455C">2</b> <span class="bd-kw">Embryo</span>. Apply <b style="color: #B8455C">3</b> <span class="bd-kw">Poison</span> to all enemies.</div>
+</div>
+
+<div class="bd-card" style="left: 855px; top: 766px; transform: rotate(0deg); border: 2px solid #A8823A">
+<div class="bd-gem" style="background: #A8823A">3</div>
+<span style="position: absolute; left: 52px; top: 8px; font-size: 13px; font-weight: 800; color: #6B5562; text-decoration: line-through; z-index: 2">5</span>
+<img class="bd-owner" src="../legacy-sprites/kibane-portrait.png" alt="Owner: Kibane">
+<div class="bd-cardname">Ninefold Rite</div>
+<div class="bd-art" style="background: #F3E6C9"><img src="../legacy-sprites/kibane-battle.png" alt="" style="object-position: 20% 10%"></div>
+<div class="bd-type">Ritual · Spirit</div>
+<div class="bd-rules">Deal <b style="color: #8E6A26">54</b> damage to all enemies. Grows with <span class="bd-kw">Essence</span>.</div>
+<div style="margin: auto 12px 10px; display: flex; gap: 6px"><span class="bd-chip" style="font-size: 11px; border-color: #A8823A">Ritual · Retain</span><span class="bd-chip" style="font-size: 11px; border-color: #A8823A">−2 held</span></div>
+</div>
+
+<div class="bd-card" style="left: 1005px; top: 772px; transform: rotate(5deg); border: 2px solid #7A3B32">
+<div class="bd-gem" style="background: #7A3B32">0</div>
+<div class="bd-owner" style="background: #E9D8D2; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-weight: 700; color: #7A3B32">L</div>
+<div class="bd-cardname">Ledger Advance</div>
+<div class="bd-art" style="background: repeating-linear-gradient(45deg, #EFE2DC 0 10px, #E7D6CF 10px 20px); display: flex; align-items: center; justify-content: center"><span style="font-size: 12px; font-weight: 700; color: #6B5562">art pending</span></div>
+<div class="bd-type">Economy · Unbound</div>
+<div class="bd-rules">Gain <b style="color: #7A3B32">2</b> Mana and draw <b style="color: #7A3B32">1</b>. Next turn, start with <b style="color: #7A3B32">1</b> less Mana.</div>
+</div>
+
+<div class="bd-card" style="left: 1155px; top: 792px; transform: rotate(10deg); border: 2px solid #A8823A">
+<div class="bd-gem" style="background: #A8823A">1</div>
+<img class="bd-owner" src="../legacy-sprites/kibane-portrait.png" alt="Owner: Kibane">
+<div class="bd-cardname">Clawflame Strike</div>
+<div class="bd-art" style="background: #F3E6C9"><img src="../legacy-sprites/kibane-battle.png" alt="" style="object-position: 70% 30%"></div>
+<div class="bd-type">Strike · Spirit</div>
+<div class="bd-rules">Deal <b style="color: #8E6A26">17</b> damage.</div>
+</div>
+
+<div class="bd-card" style="left: 680px; top: 690px; transform: rotate(0deg) scale(1.1); border: 3px solid #B8455C; box-shadow: 0 0 0 4px rgba(217,118,122,0.45), 0 20px 36px rgba(58,38,51,0.35); z-index: 5">
+<div class="bd-gem" style="background: #B8455C">3</div>
+<img class="bd-owner" src="../legacy-sprites/virelle-portrait.png" alt="Owner: Virelle">
+<div class="bd-cardname">Rupture Bloom</div>
+<div class="bd-art" style="background: #F3D3CC"><img src="../legacy-sprites/virelle-battle.png" alt="" style="object-position: 55% 18%"></div>
+<div class="bd-type">Spender · Flesh</div>
+<div class="bd-rules">Deal <b style="color: #B8455C">22</b> damage. If you consume <b style="color: #B8455C">2</b> <span class="bd-kw">Embryo</span>, detonate all <span class="bd-kw">Bleed</span>.</div>
+</div>
+
+</div>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1920,"height":1080}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
