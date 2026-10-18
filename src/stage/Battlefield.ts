@@ -3,11 +3,22 @@ import { createStreams, nextFloat, PARTY, type CombatState, type EngineEvent } f
 import { Actor } from './Actor.ts';
 import { battleArt } from './art.ts';
 import { downscale, sharpen, type Pixels } from './resample.ts';
-import { ENEMY_HEIGHT, ENEMY_HOMES, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
+import { ENEMY_HEIGHT, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
 
 const COLOURS = {
   damage: '#F6E6DC',
   shield: '#D6B8E8',
+  tentacle: '#E8A0A8',
+  poison: '#D8D88A',
+  heal: '#F2C4C4',
+  ultimate: '#D6B8E8',
+};
+
+/** Seconds between beats when one command's events play out in sequence. */
+const BEAT = {
+  volleyHit: 0.11,
+  phase: 0.35,
+  enemyAction: 0.6,
 };
 
 /**
@@ -21,9 +32,9 @@ export class Battlefield {
   static async create(app: Application, state: CombatState): Promise<Battlefield> {
     const field = new Battlefield();
     await document.fonts.load('800 54px "Nunito Sans"');
-    const textures = await Promise.all(
-      state.members.map((m) => (battleArt[m.character] ? Assets.load<Texture>(battleArt[m.character] as string) : undefined)),
-    );
+    const load = (key: string) => (battleArt[key] ? Assets.load<Texture>(battleArt[key] as string) : undefined);
+    const textures = await Promise.all(state.members.map((m) => load(m.character)));
+    const enemyTextures = await Promise.all(state.enemies.map((e) => load(e.enemy)));
 
     const cosmetic = createStreams(7, ['idle']);
     const breath = () => ({ duration: 2.8 + nextFloat(cosmetic, 'idle') * 0.9, delay: nextFloat(cosmetic, 'idle') * 1.5 });
@@ -36,7 +47,7 @@ export class Battlefield {
       const home = PARTY_HOMES[slot];
       if (!member || !home) continue;
       const texture = textures[slot];
-      const body = texture ? field.sizedSprite(texture, PARTY_HEIGHT * home.scale) : silhouette();
+      const body = texture ? field.sizedSprite(texture, PARTY_HEIGHT * home.scale, home.scale) : silhouette();
       world.addChild(shadow(home.x, home.y, 120 * home.scale));
       const actor = new Actor(member.id, home, body, PARTY_HEIGHT, home.scale, breath());
       world.addChild(actor.root);
@@ -44,10 +55,12 @@ export class Battlefield {
     }
 
     state.enemies.forEach((enemy, slot) => {
-      const home = ENEMY_HOMES[slot];
+      const home = enemyHome(slot, state.enemies.length);
       if (!home) return;
-      world.addChild(shadow(home.x, home.y, 100));
-      const actor = new Actor(enemy.id, home, trainingDummy(slot), ENEMY_HEIGHT, 1, breath());
+      const texture = enemyTextures[slot];
+      world.addChild(shadow(home.x, home.y, texture ? 170 : 100));
+      const body = texture ? field.sizedSprite(texture, ENEMY_HEIGHT, 1) : trainingDummy(slot);
+      const actor = new Actor(enemy.id, home, body, ENEMY_HEIGHT, 1, breath());
       if (enemy.hp <= 0) actor.root.alpha = 0;
       world.addChild(actor.root);
       field.actors.set(enemy.id, actor);
@@ -73,43 +86,79 @@ export class Battlefield {
     }
   }
 
-  private sizedSprite(source: Texture, height: number): Sprite {
+  /** A sprite drawn `height` tall on screen inside an actor scaled by `depth`. */
+  private sizedSprite(source: Texture, height: number, depth: number): Sprite {
     const sprite = new Sprite(source);
     sprite.anchor.set(0.5, 0.97);
-    sprite.scale.set(PARTY_HEIGHT / source.height);
-    this.sprites.push({ sprite, source, height, depth: height / PARTY_HEIGHT });
+    sprite.scale.set(height / depth / source.height);
+    this.sprites.push({ sprite, source, height, depth });
     return sprite;
   }
 
-  /** Animates one command's events. Results are already final; this only shows them. */
-  play(events: readonly EngineEvent[]): void {
-    let impact = 0;
+  /**
+   * Animates one command's events. Results are already final; this only shows them, in order:
+   * end-of-turn beats (Tentacles, then damage over time, then each enemy action) play one after
+   * another, never merged. Returns how long the sequence runs, in seconds.
+   */
+  play(events: readonly EngineEvent[]): number {
+    let clock = 0; // when the current beat starts
+    let impact = 0; // when its hits land
+    let ticking = false; // between statusTick and the enemy phase: damage over time
     for (const event of events) {
       switch (event.type) {
         case 'cardPlayed': {
           const actor = this.actor(event.source);
-          const target = this.actor(event.target);
-          impact = actor ? actor.lunge(target?.home, 1) : 0;
+          impact = actor ? actor.lunge(this.actor(event.target)?.home, 1, clock) : clock;
           break;
         }
-        case 'enemyActed': {
+        case 'ultimateFired': {
           const actor = this.actor(event.source);
-          const [front] = this.targets(PARTY);
-          impact = actor ? actor.lunge(front?.home, -1) : 0;
+          actor?.burst(clock);
+          impact = actor ? actor.lunge(undefined, 1, clock + 0.25) : clock;
+          break;
+        }
+        case 'turnEnd':
+        case 'enemyPhaseStart':
+          clock = Math.max(clock, impact) + BEAT.phase;
+          impact = clock;
+          ticking = false;
+          break;
+        case 'statusTick':
+          clock = Math.max(clock, impact) + BEAT.phase;
+          impact = clock;
+          ticking = true;
+          break;
+        case 'enemyActed': {
+          clock = Math.max(clock, impact) + BEAT.enemyAction;
+          const actor = this.actor(event.source);
+          impact = actor ? actor.lunge(this.targets(PARTY)[0]?.home, -1, clock) : clock;
           break;
         }
         case 'damageDealt': {
+          const volley = event.via === 'volley';
+          // Tentacle hits land one after another.
+          if (volley) impact += BEAT.volleyHit;
           const hpLoss = (event.amount ?? 0) - (event.absorbed ?? 0);
           for (const target of this.targets(event.target)) {
             target.recoil(event.target === PARTY ? -1 : 1, impact);
             if (event.absorbed) target.popup(`−${event.absorbed}`, COLOURS.shield, impact);
-            target.popup(String(hpLoss), COLOURS.damage, impact);
+            if (ticking) target.popup(`${hpLoss} Poison`, COLOURS.poison, impact, 40);
+            else target.popup(String(hpLoss), volley ? COLOURS.tentacle : COLOURS.damage, impact, volley ? 44 : 54);
           }
           break;
         }
         case 'shieldGained': {
           const [holder] = this.targets(event.target);
           holder?.popup(`+${event.amount ?? 0}`, COLOURS.shield, impact);
+          break;
+        }
+        case 'healed': {
+          const [holder] = this.targets(event.target);
+          if (event.amount) holder?.popup(`+${event.amount} HP`, COLOURS.heal, impact, 44);
+          break;
+        }
+        case 'statusApplied': {
+          this.actor(event.target)?.popup(`${event.amount ?? 0} ${statusName(event.status)}`, COLOURS.poison, impact, 34);
           break;
         }
         case 'enemyDefeated':
@@ -119,6 +168,7 @@ export class Battlefield {
           break;
       }
     }
+    return Math.max(clock, impact);
   }
 
   /** Every actor's position against its home point (used by the settle check). */
@@ -146,6 +196,8 @@ export class Battlefield {
     return actor ? [actor] : [];
   }
 }
+
+const statusName = (id: string | undefined) => (id ?? '').replace(/^status\./, '').replace(/^./, (c) => c.toUpperCase());
 
 interface SizedSprite {
   sprite: Sprite;

@@ -1,20 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
-import {
-  apply,
-  previewCard,
-  startCombat,
-  type CombatState,
-  type Command,
-  type EntityId,
-  type Preview,
-} from '../engine/index.ts';
-import { portraitArt } from '../stage/art.ts';
+import { apply, GAUGE_MAX, previewCard, startCombat, type Command, type EntityId } from '../engine/index.ts';
 import type { Battlefield } from '../stage/Battlefield.ts';
-import { ENEMY_HOMES } from '../stage/layout.ts';
 import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
+import { DomainCounters, EnemyPlate, PartyBar, Pile, Portraits, UltimatePanel } from './Hud.tsx';
 
 // Slice line-up: the starter four with their picked Bloomdrawn sprites, Agathe in front.
 const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
@@ -43,6 +34,10 @@ export function Combat() {
   const field = useRef<Battlefield | null>(null);
   const [aim, setAim] = useState<Aim | null>(null);
   const [toast, setToast] = useState<{ text: string; id: number } | null>(null);
+  const [banner, setBanner] = useState<{ text: string; id: number } | null>(null);
+  const [ultimateFor, setUltimateFor] = useState<EntityId | null>(null);
+  // While the end of turn and enemy actions play out, the hand waits.
+  const [busy, setBusy] = useState(false);
 
   const run = useCallback((command: Command) => {
     const result = apply(current.current, command, registry);
@@ -52,7 +47,15 @@ export function Combat() {
     }
     current.current = result.state;
     setState(result.state);
-    field.current?.play(result.events);
+    const seconds = field.current?.play(result.events) ?? 0;
+    if (command.type === 'endTurn' && seconds > 0 && result.state.phase === 'player') {
+      setBusy(true);
+      window.setTimeout(() => setBusy(false), seconds * 1000 + 250);
+    }
+    const fired = result.events.find((e) => e.type === 'ultimateFired');
+    const member = fired && result.state.members.find((m) => m.id === fired.source);
+    const ultimate = member && registry.characters[member.character]?.ultimate;
+    if (ultimate) setBanner({ text: ultimate.name, id: Date.now() });
     return true;
   }, []);
 
@@ -60,22 +63,35 @@ export function Combat() {
     (card: EntityId, target?: EntityId) => run(target ? { type: 'playCard', card, target } : { type: 'playCard', card }),
     [run],
   );
-  const endTurn = useCallback(() => run({ type: 'endTurn' }), [run]);
+  const endTurn = useCallback(() => {
+    if (!busy) run({ type: 'endTurn' });
+  }, [run, busy]);
+  const fireUltimate = useCallback(() => {
+    if (ultimateFor) run({ type: 'fireUltimate', member: ultimateFor });
+    setUltimateFor(null);
+  }, [run, ultimateFor]);
+  const closeUltimate = useCallback(() => setUltimateFor(null), []);
   const restart = () => {
     const next = seed + 1;
     const fresh = newCombat(next);
     current.current = fresh;
     setSeed(next);
     setState(fresh);
+    setBusy(false);
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (busy || ultimateFor) return;
       if (e.key === 'e' || e.key === 'E') endTurn();
+      // Shift + 1–4 opens that party member's ultimate when it is ready.
+      const slot = e.shiftKey && /^Digit[1-4]$/.test(e.code) ? Number(e.code.slice(5)) - 1 : -1;
+      const member = current.current.members[slot];
+      if (member && member.gauge >= GAUGE_MAX) setUltimateFor(member.id);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [endTurn]);
+  }, [endTurn, busy, ultimateFor]);
 
   useEffect(() => {
     if (!toast) return;
@@ -83,17 +99,27 @@ export function Combat() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  useEffect(() => {
+    if (!banner) return;
+    const timer = window.setTimeout(() => setBanner(null), 1500);
+    return () => window.clearTimeout(timer);
+  }, [banner]);
+
   // Dev and e2e only: lets the settle check read actor positions.
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     (window as unknown as { __bloomdrawn?: unknown }).__bloomdrawn = { actors: () => field.current?.snapshot() ?? [] };
   }, []);
 
+  const handOpen = state.phase === 'player' && !busy && !ultimateFor;
+  const readied = handOpen ? aim : null;
   const previews = useMemo(() => {
-    if (!aim) return [];
-    const command = aim.target ? { type: 'playCard' as const, card: aim.card, target: aim.target } : { type: 'playCard' as const, card: aim.card };
+    if (!readied) return [];
+    const command = readied.target
+      ? { type: 'playCard' as const, card: readied.card, target: readied.target }
+      : { type: 'playCard' as const, card: readied.card };
     return previewCard(state, command, registry) ?? [];
-  }, [aim, state]);
+  }, [readied, state]);
 
   const onReady = useCallback((f: Battlefield | null) => {
     field.current = f;
@@ -102,19 +128,21 @@ export function Combat() {
   return (
     <div className="combat">
       {stageHost && <StageView key={seed} initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
-      <Portraits state={state} />
+      <Portraits state={state} choosing={ultimateFor !== null} onUltimate={(m) => !busy && setUltimateFor(m)} />
+      <DomainCounters state={state} />
       <div className="relics plaque" aria-label="Relics">
         <span>Relics</span>
         <span className="muted">none yet</span>
       </div>
       <PartyBar state={state} previews={previews} />
       {state.enemies.map((enemy, slot) => (
-        <EnemyPlate key={enemy.id} slot={slot} state={state} id={enemy.id} aimed={aim?.target === enemy.id} previews={previews} />
+        <EnemyPlate key={enemy.id} slot={slot} state={state} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />
       ))}
       <div className="mana" aria-label="Mana">
         <strong>{state.mana}</strong>
         <span>/{state.maxMana}</span>
         <small>Mana</small>
+        {state.manaDebt > 0 && <em className="mana-debt">−{state.manaDebt} next turn</em>}
       </div>
       <div className="piles">
         <Pile label="Draw" count={state.piles.draw.length} />
@@ -122,10 +150,18 @@ export function Combat() {
         <Pile label="Graveyard" count={state.piles.graveyard.length} />
       </div>
       <div className="turn plaque">Turn {state.turn}</div>
-      <button className="end-turn" onClick={endTurn} disabled={state.phase !== 'player'}>
-        End Turn <kbd>E</kbd>
+      <button className="end-turn" onClick={endTurn} disabled={state.phase !== 'player' || busy}>
+        {busy ? 'Enemy turn' : <>End Turn <kbd>E</kbd></>}
       </button>
-      {state.phase !== 'ended' && <Hand state={state} registry={registry} onPlay={onPlay} onAim={setAim} />}
+      {handOpen && <Hand state={state} registry={registry} onPlay={onPlay} onAim={setAim} />}
+      {ultimateFor && state.phase === 'player' && (
+        <UltimatePanel state={state} member={ultimateFor} onFire={fireUltimate} onClose={closeUltimate} />
+      )}
+      {banner && (
+        <div key={banner.id} className="ultimate-banner" role="status">
+          {banner.text}
+        </div>
+      )}
       {toast && (
         <div key={toast.id} className="toast" role="status">
           {toast.text}
@@ -139,93 +175,6 @@ export function Combat() {
           </button>
         </div>
       )}
-    </div>
-  );
-}
-
-function Portraits({ state }: { state: CombatState }) {
-  return (
-    <div className="portraits plaque">
-      {state.members.map((m) => {
-        const def = registry.characters[m.character];
-        const art = portraitArt[m.character];
-        return (
-          <div key={m.id} className={`portrait domain-${def?.domain ?? ''}`}>
-            <div className="portrait-ring">{art ? <img src={art} alt="" /> : <span>{def?.name.charAt(0)}</span>}</div>
-            <span>{def?.name}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function PartyBar({ state, previews }: { state: CombatState; previews: Preview[] }) {
-  const { hp, maxHp, shield } = state.party;
-  const shieldGain = previews.filter((p) => p.op === 'gainShield').reduce((n, p) => n + (p.amount ?? 0), 0);
-  return (
-    <div className="party-bar plaque">
-      <div className="bar-label">
-        <span>Party</span>
-        <strong>
-          {hp} / {maxHp}
-        </strong>
-        {(shield > 0 || shieldGain > 0) && (
-          <span className="shield-badge">
-            Shield {shield}
-            {shieldGain > 0 && <em> +{shieldGain}</em>}
-          </span>
-        )}
-      </div>
-      <div className="bar">
-        <div className="bar-fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
-      </div>
-    </div>
-  );
-}
-
-interface PlateProps {
-  slot: number;
-  id: EntityId;
-  state: CombatState;
-  aimed: boolean;
-  previews: Preview[];
-}
-
-function EnemyPlate({ slot, id, state, aimed, previews }: PlateProps) {
-  const enemy = state.enemies.find((e) => e.id === id);
-  const home = ENEMY_HOMES[slot];
-  if (!enemy || !home) return null;
-  const def = registry.enemies[enemy.enemy];
-  const incoming = previews.filter((p) => p.op === 'damage' && p.target === id);
-  const loss = incoming.reduce((n, p) => n + (p.amount ?? 0) - (p.absorbed ?? 0), 0);
-  const after = Math.max(0, enemy.hp - loss);
-  return (
-    <div
-      className={`enemy-plate plaque${aimed ? ' aimed' : ''}${enemy.hp <= 0 ? ' defeated' : ''}`}
-      style={{ left: home.x - 110, top: home.y + 22 }}
-    >
-      <div className="bar-label">
-        <span>{def?.name}</span>
-        <strong>
-          {enemy.hp} / {enemy.maxHp}
-        </strong>
-      </div>
-      <div className="bar small">
-        <div className="bar-fill" style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }} />
-        {loss > 0 && <div className="bar-ghost" style={{ left: `${(after / enemy.maxHp) * 100}%`, width: `${((enemy.hp - after) / enemy.maxHp) * 100}%` }} />}
-      </div>
-      {loss > 0 && <div className="plate-preview">−{loss}</div>}
-      {enemy.shield > 0 && <span className="shield-badge">Shield {enemy.shield}</span>}
-    </div>
-  );
-}
-
-function Pile({ label, count }: { label: string; count: number }) {
-  return (
-    <div className="pile plaque">
-      <strong>{count}</strong>
-      <small>{label}</small>
     </div>
   );
 }

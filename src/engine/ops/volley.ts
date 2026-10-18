@@ -33,7 +33,7 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
       target.shield -= absorbed;
       target.hp -= hpLoss;
       remaining -= absorbed + hpLoss;
-      const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: target.id, amount: absorbed + hpLoss, absorbed };
+      const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: target.id, amount: absorbed + hpLoss, absorbed, via: 'volley' };
       events.push(base, { ...base, type: 'damageTaken' });
       if (!isAlive(target)) events.push({ type: 'enemyDefeated', source: ctx.source, target: target.id });
       target = remaining > 0 ? lowest(draft) : undefined;

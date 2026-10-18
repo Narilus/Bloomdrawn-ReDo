@@ -34,15 +34,21 @@ export const ENEMY_HOMES: readonly Point[] = [
   { x: 1720, y: 690 },
 ];
 
+/** A lone enemy stands centre-right, clear of the party's back slot. */
+const LONE_HOME: Point = { x: 1440, y: 690 };
+
+/** An enemy's feet position, given how many enemies the fight has. */
+export const enemyHome = (slot: number, count: number): Point | undefined => (count === 1 && slot === 0 ? LONE_HOME : ENEMY_HOMES[slot]);
+
 /** Party sprites are drawn at this height before their slot scale. */
 export const PARTY_HEIGHT = 400;
-export const ENEMY_HEIGHT = 300;
+export const ENEMY_HEIGHT = 320;
 
 /** A card dragged above this line is armed. */
 export const PLAY_LINE = 630;
 
 /** The clickable / aimable body area of an enemy. */
-export function enemyBox(slot: number): { x: number; y: number; w: number; h: number } {
-  const home = ENEMY_HOMES[slot] ?? { x: 0, y: 0 };
-  return { x: home.x - 110, y: home.y - ENEMY_HEIGHT - 20, w: 220, h: ENEMY_HEIGHT + 40 };
+export function enemyBox(slot: number, count: number): { x: number; y: number; w: number; h: number } {
+  const home = enemyHome(slot, count) ?? { x: 0, y: 0 };
+  return { x: home.x - 140, y: home.y - ENEMY_HEIGHT - 20, w: 280, h: ENEMY_HEIGHT + 40 };
 }

@@ -41,10 +41,10 @@ export class Actor {
   }
 
   /**
-   * Jumps toward a point and back. Always starts from home; a new lunge cancels the one in flight.
-   * Returns the delay in seconds until the moment of impact.
+   * Jumps toward a point and back, after `delay` seconds. Always starts from home; a new lunge
+   * cancels the one in flight. Returns the delay in seconds until the moment of impact.
    */
-  lunge(toward: Point | undefined, direction: 1 | -1): number {
+  lunge(toward: Point | undefined, direction: 1 | -1, delay = 0): number {
     this.lungeAnim?.stop();
     this.root.position.set(this.home.x, this.home.y);
 
@@ -62,9 +62,14 @@ export class Actor {
     this.lungeAnim = animate(
       this.root,
       { x: [x, x + dx, x + dx * 0.9, x], y: [y, y + dy - 22, y + dy, y] },
-      { duration: 0.42, times: [0, 0.32, 0.5, 1], ease: ['easeOut', 'linear', 'easeInOut'] },
+      { duration: 0.42, delay, times: [0, 0.32, 0.5, 1], ease: ['easeOut', 'linear', 'easeInOut'] },
     );
-    return 0.13;
+    return delay + 0.13;
+  }
+
+  /** A swell and settle for an ultimate. Scales the recoil layer, so it never stacks with breathing. */
+  burst(delay = 0): void {
+    animate(this.recoilLayer.scale, { x: [1, 1.14, 0.97, 1], y: [1, 1.14, 0.97, 1] }, { duration: 0.6, delay, times: [0, 0.35, 0.7, 1] });
   }
 
   /** A short shake away from the hit. Restarts from rest if already shaking. */
@@ -78,14 +83,14 @@ export class Actor {
     );
   }
 
-  /** Floats a number up from above the actor's head. */
-  popup(text: string, colour: string, delay = 0): void {
+  /** Floats a number or word up from above the actor's head. */
+  popup(text: string, colour: string, delay = 0, size = 54): void {
     const label = new Text({
       text,
       style: {
         fontFamily: 'Nunito Sans',
         fontWeight: '800',
-        fontSize: 54,
+        fontSize: size,
         fill: colour,
         stroke: { color: '#1E1519', width: 7, join: 'round' },
       },

@@ -1,8 +1,9 @@
 // Battle art: Bloomdrawn picks from src/assets/battle (made with `npm run art -- pick`), plus
 // Gloomdrawn sprites as placeholders (Virelle, Kibane, and the portraits). Characters without art
-// get a silhouette. The Bloom-Rib Hound's sprite waits for its enemy entry.
+// get a silhouette. Keyed by character ID, or by enemy ID for enemies (who otherwise get a dummy).
 import agatheBattle from '../assets/battle/agathe.png';
 import antheBattle from '../assets/battle/anthe.png';
+import houndBattle from '../assets/battle/bloom-rib-hound.png';
 import leonoraBattle from '../assets/battle/leonora.png';
 import maeliaBattle from '../assets/battle/maelia.png';
 import kibaneBattle from '../../reference/legacy-sprites/kibane-battle.png';
@@ -16,6 +17,7 @@ export const battleArt: Readonly<Record<string, string>> = {
   maelia: maeliaBattle,
   anthe: antheBattle,
   leonora: leonoraBattle,
+  'enemy.bloom-rib-hound': houndBattle,
   virelle: virelleBattle,
   kibane: kibaneBattle,
 };

@@ -51,12 +51,12 @@ export function describeCalls(calls: readonly OpCall[], registry: Registry, show
 
 /**
  * Card text with formulas shown as written: keywords, then the authored template or text
- * generated from the effects, then the ultimate charge.
+ * generated from the effects, then the ultimate charge (unless the caller shows it separately).
  */
-export function describeCard(def: CardDef, registry: Registry, show: ShowAmount = formulaText): string {
+export function describeCard(def: CardDef, registry: Registry, show: ShowAmount = formulaText, options: { charge?: boolean } = {}): string {
   const keywords = (def.keywords ?? []).map((k) => `${titleCase(k)}.`);
   const body = def.text ? renderTemplate(def.text, def, show) : describeCalls(def.effects, registry, show);
-  const charge = describeCalls(chargeOf(def), registry, show);
+  const charge = options.charge === false ? '' : describeCalls(chargeOf(def), registry, show);
   return [...keywords, body, charge].filter(Boolean).join(' ');
 }
 
@@ -67,9 +67,9 @@ export function showFor(state: CombatState, owner: EntityId, registry: Registry)
 }
 
 /** Card text with live numbers for this card in this state (`Deal 9 damage.`). */
-export function describeCardLive(card: CardInstance, state: CombatState, registry: Registry): string {
+export function describeCardLive(card: CardInstance, state: CombatState, registry: Registry, options: { charge?: boolean } = {}): string {
   const def = registry.cards[card.card];
-  return def ? describeCard(def, registry, showFor(state, card.owner, registry)) : card.card;
+  return def ? describeCard(def, registry, showFor(state, card.owner, registry), options) : card.card;
 }
 
 /** A member's passive and ultimate text with live numbers. */

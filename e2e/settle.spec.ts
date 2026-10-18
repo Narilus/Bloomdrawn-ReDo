@@ -19,6 +19,9 @@ test('after 20 rapid plays every actor settles back at its home point', async ({
   // Number key + Enter as fast as possible; End Turn whenever a play doesn't go through.
   let plays = 0;
   while (plays < 20) {
+    // The hand waits while the end of turn plays out.
+    await expect(page.getByRole('button', { name: /End Turn/ })).toBeEnabled({ timeout: 15_000 });
+    await expect(page.locator('.hand-card').first()).toBeVisible({ timeout: 15_000 });
     const before = Number(await mana.textContent());
     await page.keyboard.press('1');
     await page.keyboard.press('Enter');

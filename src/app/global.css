@@ -90,37 +90,211 @@ body,
 }
 
 .portrait {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
   font-family: var(--serif);
   font-weight: 700;
   font-size: 20px;
+  cursor: default;
 }
 
+.portrait.ready {
+  cursor: pointer;
+}
+
+.portrait:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* The ring is the ultimate gauge: a domain-coloured arc filling clockwise. */
 .portrait-ring {
-  width: 76px;
-  height: 76px;
+  --ring: var(--antique-gold);
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  padding: 5px;
+  box-sizing: border-box;
+  background: conic-gradient(var(--ring) var(--gauge, 0deg), rgba(18, 12, 16, 0.85) var(--gauge, 0deg));
+}
+
+.portrait-face {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid var(--antique-gold);
   background: var(--mauve-shadow);
   display: grid;
   place-items: center;
-  font-size: 34px;
+  font-size: 32px;
 }
 
-.portrait-ring img {
+.portrait-face img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.domain-flesh .portrait-ring { border-color: var(--flesh); }
-.domain-rapture .portrait-ring { border-color: var(--rapture); }
-.domain-spirit .portrait-ring { border-color: var(--spirit); }
-.domain-unbound .portrait-ring { border-color: var(--unbound); }
+.domain-flesh .portrait-ring { --ring: var(--flesh); }
+.domain-rapture .portrait-ring { --ring: var(--rapture); }
+.domain-spirit .portrait-ring { --ring: var(--spirit); }
+.domain-unbound .portrait-ring { --ring: var(--unbound); }
+
+.portrait.ready .portrait-ring {
+  box-shadow: 0 0 18px 4px rgba(214, 184, 232, 0.75);
+  animation: ready-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes ready-pulse {
+  50% { box-shadow: 0 0 26px 8px rgba(214, 184, 232, 0.95); }
+}
+
+.portrait-gauge {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.portrait.ready .portrait-gauge {
+  opacity: 1;
+  color: var(--lilac-glow);
+}
+
+.portrait kbd,
+.panel-buttons kbd {
+  font-family: var(--sans);
+  font-size: 12px;
+  padding: 0 4px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+/* Hover a portrait for its passive and ultimate. */
+.kit-card {
+  display: none;
+  background: rgb(46, 30, 42);
+  top: 150px;
+  left: 0;
+  width: 360px;
+  padding: 10px 16px;
+  z-index: 7;
+  text-align: left;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.kit-card p {
+  margin: 6px 0;
+}
+
+.portraits:not(.choosing) .portrait:hover .kit-card,
+.portraits:not(.choosing) .portrait:focus-visible .kit-card {
+  display: block;
+}
+
+.domain-counters {
+  position: absolute;
+  top: 192px;
+  left: 24px;
+  display: flex;
+  gap: 10px;
+}
+
+.counter {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 14px;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.counter strong {
+  font-family: var(--sans);
+  font-size: 22px;
+}
+
+.counter.domain-flesh { border-color: var(--flesh); }
+.counter.domain-rapture { border-color: var(--rapture); }
+.counter.domain-spirit { border-color: var(--spirit); }
+
+.ultimate-panel {
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 460px;
+  padding: 16px 22px;
+  z-index: 6;
+}
+
+.ultimate-panel h3 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-size: 30px;
+}
+
+.ultimate-panel p {
+  margin: 0 0 14px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.panel-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.panel-buttons .end-turn {
+  position: static;
+  padding: 8px 22px;
+  font-size: 24px;
+}
+
+.ghost {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  background: transparent;
+  color: var(--petal-ivory);
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ultimate-banner {
+  position: absolute;
+  top: 300px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 48px;
+  font-family: var(--serif);
+  font-size: 54px;
+  font-weight: 700;
+  color: var(--lilac-glow);
+  text-shadow: 0 0 24px rgba(214, 184, 232, 0.8), 0 3px 0 var(--charcoal-plum);
+  pointer-events: none;
+  animation: banner 1.5s ease-out forwards;
+}
+
+@keyframes banner {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.85); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+  70% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1); }
+}
 
 .relics {
   top: 24px;
@@ -193,6 +367,30 @@ body,
   padding: 12px 20px 16px;
 }
 
+.incoming {
+  position: absolute;
+  right: -14px;
+  top: -18px;
+  padding: 2px 12px;
+  border-radius: 12px;
+  background: var(--arterial);
+  border: 1px solid var(--blush);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.incoming.safe {
+  background: var(--mauve-shadow);
+  border-color: var(--lavender);
+  color: var(--lilac-glow);
+}
+
+.incoming.lethal {
+  background: #120c10;
+  border-color: var(--raw-pink);
+  color: var(--raw-pink);
+}
+
 .shield-badge {
   font-family: var(--sans);
   font-size: 16px;
@@ -209,7 +407,7 @@ body,
 }
 
 .enemy-plate {
-  width: 220px;
+  width: 240px;
   padding: 10px 14px 12px;
   box-sizing: border-box;
   transition: opacity 0.6s 0.4s, border-color 0.15s;
@@ -233,6 +431,47 @@ body,
 
 .enemy-plate.defeated {
   opacity: 0;
+}
+
+.intent {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.intent b {
+  font-family: var(--serif);
+  font-size: 22px;
+  margin-right: 6px;
+}
+
+.intent.attack {
+  color: var(--blush);
+}
+
+.plate-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.plate-tags:empty {
+  display: none;
+}
+
+.status-badge {
+  font-size: 15px;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 12px;
+  border: 1px solid #d8d88a;
+  color: #e8e8b0;
 }
 
 .plate-preview {
@@ -274,6 +513,17 @@ body,
   font-size: 28px;
   font-weight: 700;
   opacity: 0.8;
+}
+
+.mana-debt {
+  position: absolute;
+  bottom: -30px;
+  width: 200px;
+  text-align: center;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--raw-pink);
 }
 
 .mana small {
@@ -407,6 +657,20 @@ kbd {
   border: 2px solid var(--petal-ivory);
 }
 
+/* A Ritual's current cost, highlighted, with the printed cost struck beside it. */
+.card-cost.cheaper {
+  background: radial-gradient(circle at 35% 30%, var(--lilac-glow), var(--rapture));
+  box-shadow: 0 0 12px rgba(214, 184, 232, 0.8);
+}
+
+.printed-cost {
+  position: absolute;
+  right: -22px;
+  top: -6px;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
 .card-name {
   font-family: var(--serif);
   font-size: 26px;
@@ -439,6 +703,24 @@ kbd {
   font-size: 56px;
   font-weight: 700;
   color: var(--antique-gold);
+}
+
+.text-long .card-art { height: 74px; }
+.text-long .card-text { font-size: 15px; }
+.text-xlong .card-art { height: 50px; }
+.text-xlong .card-text { font-size: 13.5px; line-height: 1.2; }
+
+.card-charge {
+  position: absolute;
+  top: 54px;
+  right: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--mauve-shadow);
+  border: 1px solid var(--lavender);
+  color: var(--lilac-glow);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .card-type {
