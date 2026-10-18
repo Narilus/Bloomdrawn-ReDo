@@ -5,6 +5,7 @@ export const BASE_MANA = 6;
 export const HAND_DRAW = 5;
 export const HAND_MAX = 10;
 export const MAX_CHAIN_DEPTH = 8;
+export const GAUGE_MAX = 100;
 
 export const COMBAT_STREAMS = ['shuffle', 'targeting', 'intents'] as const;
 export type CombatStream = (typeof COMBAT_STREAMS)[number];
@@ -24,6 +25,8 @@ export interface Member {
   id: EntityId;
   character: string;
   statuses: StatusStack[];
+  /** Ultimate gauge, 0 to GAUGE_MAX. Carries across the run. */
+  gauge: number;
 }
 
 export interface Enemy {
@@ -45,6 +48,10 @@ export interface CardInstance {
   card: string;
   /** The party member who owns this card. */
   owner: EntityId;
+  /** Cost change while in hand (Ritual discounts and the like). Cleared when it leaves the hand. */
+  costDelta?: number;
+  /** Cleanups this card has been held through. Cleared when it leaves the hand. */
+  held?: number;
 }
 
 export interface Piles {
@@ -61,6 +68,12 @@ export interface CombatState {
   outcome: 'victory' | 'defeat' | null;
   mana: number;
   maxMana: number;
+  /** Taken off the next turn's refill, never below 0 Mana. */
+  manaDebt: number;
+  /** Mana paid for cards this turn. */
+  manaSpent: number;
+  /** Effects waiting for the next card played this turn. Cleared at cleanup. */
+  next: { costDelta: number; repeat: number };
   /** The party shares one HP pool and one Shield. */
   party: { hp: number; maxHp: number; shield: number };
   members: Member[];

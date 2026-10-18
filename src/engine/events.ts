@@ -4,7 +4,13 @@ export const EVENT_TYPES = [
   // Lifecycle
   'combatStart',
   'turnStart',
+  // Mana debt came off this turn's refill; raised after the turn's draw.
+  'manaDebtPaid',
+  // Unplayed cards left the hand; Retained cards were held.
+  'cleanup',
   'turnEnd',
+  // Damage over time, after the end-of-turn effects and Tentacles.
+  'statusTick',
   'enemyPhaseStart',
   'enemyActed',
   'combatEnd',
@@ -20,6 +26,7 @@ export const EVENT_TYPES = [
   'statusRemoved',
   'resourceGained',
   'resourceConsumed',
+  'ultimateCharged',
   'cardDrawn',
   'cardExhausted',
   'enemyDefeated',

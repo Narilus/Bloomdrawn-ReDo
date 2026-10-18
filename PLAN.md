@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M1 First fight (M0 signed off; M0.6 art runs in parallel)
-**Current task:** M1 task breakdown (proposed below), to agree with the owner
+**Current task:** M1.2 The starter four
 
 ## Milestones
 
@@ -98,13 +98,15 @@ _19 Oct: owner picked Agathe-02 (keep the rest for skins or alts) and asked for 
 
 _19 Oct: **done.** Owner picked Maelia-02, Anthe-03, Leonora-02 and Bloom-Rib Hound-02 (all options kept). The slice party is now the starter four with their picked sprites. Portraits are still Gloomdrawn placeholders or letters._
 
-## M1 tasks (proposed, awaiting the owner's agreement)
+## M1 tasks
 
-The kits are in `docs/notes/starter-kits.md` (approved 19 Oct). Transcend waits for M2, so each starter brings four cards here and the deck is 16.
+The kits are in `docs/notes/starter-kits.md` (approved 19 Oct). Transcend waits for M2, so each starter brings four cards here and the deck is 16. The slice fight starts every gauge at 70.
 
 ### M1.1 Domain engines
 Flesh (Embryo, the Poison status), Rapture (Tentacles, damage per hit lasting the combat, the end-of-turn volley, lowest-HP-first with overflow), Spirit (Essence, Retain, the Ritual cleanup discount to 0, held-turn counters) and Unbound (Mana debt). New operations: `gainMana`, `manaDebt`, `chargeUltimate`, `volley`, `changeCost`, `repeatNext`.
 **Done when:** each operation and Domain hook has rule tests, including overflow across enemies, a Ritual reaching 0, and debt that never takes Mana below 0.
+
+_Done 19 Oct. Domains are content modules (`src/content/domains/`) whose hooks resolve after every other trigger. Retain, held-turn counts and next-card effects are engine rules; a card's ultimate charge is a `charge` field, so a repeat doesn't charge twice. Choices to confirm with the owner: Poison is HP loss that ignores Shield; Mana debt beyond one full refill is dropped rather than carried; "when a turn starts with Mana debt" fires after the turn's draw, so an extra draw isn't swallowed by the draw-to-5._
 
 ### M1.2 The starter four
 Stats, cards, passives and ultimates for Maelia, Agathe, Anthe and Leonora as data. The ultimate command and gauges; Strike and Defense charge 10.

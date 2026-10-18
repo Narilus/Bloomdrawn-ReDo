@@ -100,8 +100,9 @@ Each operation is one file that exports:
 | Damage and defence | damage, loseHp, gainShield, heal |
 | Statuses | applyStatus, removeStatus, reduceStacks, detonate (trigger a status's stacks at once) |
 | Resources | gainResource, consumeResource, gainMana, manaDebt |
-| Cards | draw, discard, exhaust, createCard, changeCost, retain, duplicate |
+| Cards | draw, discard, exhaust, createCard, changeCost, repeatNext (the next card resolves twice), retain, duplicate |
 | Ultimates | chargeUltimate, transcend |
+| Domain engines | volley (hits that take the lowest-HP enemy, overflow carrying on) |
 | Enemies | delay, stun, changeIntent |
 | Control flow | if, ifConsume (spend a resource for a bonus branch), repeat, forEachTarget, choose |
 
@@ -124,7 +125,7 @@ Everything that reacts — passives, statuses, relics, weapons, Symptoms, Domain
 
 ### Events
 
-Lifecycle: `combatStart`, `turnStart`, `turnEnd`, `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
+Lifecycle: `combatStart`, `turnStart`, `manaDebtPaid` (after the turn's draw), `cleanup`, `turnEnd`, `statusTick` (damage over time), `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `ultimateCharged`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
 
 Every event carries its source, owner, target and amount, so filters can say things like "when a Rapture card owned by me is played" or "when Embryo is consumed by a spender".
 
@@ -171,14 +172,14 @@ mul(resource('tentacles'), resource('potency')) // Tentacles × damage per hit
 mul(add(12, stat('attack')), add(1, mul(0.5, resource('essence'))))
 ```
 
-Formulas can read owner stats, party stats, Domain resources, status stacks, cards in hand, turn number, and the amount just consumed. Anything outside that list is a compile error.
+Formulas can read owner stats, party stats, Domain resources, status stacks, cards in hand (and those with a keyword, and their turns held), Mana spent this turn, turn number, and the amount just consumed. Anything outside that list is a compile error.
 
 ## Everything else is a composition
 
 Once operations, triggers and modifiers exist, every other system is a way of bundling them. No family below needs engine code of its own.
 
 - **Status:** a stacking rule (add, refresh or highest), decay, an optional cap, tags (debuff, removable, control), triggers and modifiers. Bleed is a trigger; Vulnerable is a modifier with a duration; Delay is a trigger on the afflicted enemy's action. Control resistance is a tag check that converts Stun or Delay into Falter.
-- **Domain:** resources (name, minimum, whether they persist past combat), automatic hooks, and a HUD counter description. Rapture's end-of-turn volley is a hook on `turnEnd`; Spirit's Ritual discount is a hook on cleanup. Unbound declares nothing. A fifth Domain later would be one new module.
+- **Domain:** resources (name and starting value; later, whether they persist past combat), automatic hooks, and a HUD counter description. A Domain's hooks are active while any party member belongs to it, and resolve after every other trigger on the same event, so Tentacles attack after scheduled effects. Rapture's end-of-turn volley is a hook on `turnEnd`; Spirit's Ritual discount is a hook on `cleanup`. Unbound declares nothing. A fifth Domain later would be one new module (`src/content/domains/`).
 - **Character:** a stats table by level and ascension, five card IDs, a passive (triggers and modifiers), and an ultimate (cost, operations, Transcended operations). Skill levels are a level index into number tables inside her definitions, so levelling never changes behaviour.
 - **Enemy:** stats, traits, and an intent pattern: a list or small state machine of named intents, each a list of operations. Intent previews come from those operations' preview functions.
 - **Relic, weapon, Symptom, Curse:** triggers and modifiers with a rarity and a lifetime (run, or profile for weapons). A Symptom is simply a card whose operations include its own cost.
@@ -283,7 +284,7 @@ export const agathe = character({
   ultimate: {
     cost: 100,
     effects: [gainResource('tentacles', 3)],
-    transcended: [gainResource('tentacles', 3), volley()],
+    transcended: [gainResource('tentacles', 3), tentacleVolley()],
   },
 });
 
@@ -297,11 +298,11 @@ export const callTheChoir = card({
 
 export const censerRite = card({
   id: 'agathe.censer-rite', owner: 'agathe', slot: 'flavourB', cost: 3, target: 'auto',
-  effects: [gainResource('potency', 2), volley()], // lasts the combat: Tentacle damage ramps
+  effects: [gainResource('potency', 2), tentacleVolley()], // lasts the combat: Tentacle damage ramps
 });
 ```
 
-The Rapture Domain module supplies the rest: the Tentacle and damage-per-hit resources, the automatic end-of-turn volley, and the HUD counter. Agathe's definitions contain no engine code, and a second Rapture character would reuse every piece.
+`tentacleVolley()` is `volley(resource('tentacles'), resource('potency'))` from the Rapture module. The Rapture Domain module supplies the rest: the Tentacle and damage-per-hit resources, the automatic end-of-turn volley, and the HUD counter. Agathe's definitions contain no engine code, and a second Rapture character would reuse every piece.
 
 ## Testing and the content lab
 

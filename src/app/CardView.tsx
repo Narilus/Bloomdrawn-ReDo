@@ -1,4 +1,4 @@
-import { describeCardLive, type CardInstance, type CombatState, type Registry } from '../engine/index.ts';
+import { cardCost, describeCardLive, type CardInstance, type CombatState, type Registry } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { CARD_H, CARD_W } from './fan.ts';
 
@@ -25,7 +25,7 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
       className={`card domain-${domain}${playable ? '' : ' unplayable'}${highlight ? ' highlight' : ''}`}
       style={{ width: CARD_W, height: CARD_H }}
     >
-      <div className="card-cost">{def?.cost ?? '?'}</div>
+      <div className="card-cost">{def ? cardCost(state, card, registry) : '?'}</div>
       <div className="card-name">{def?.name ?? card.card}</div>
       <div className="card-art">
         {portrait ? <img src={portrait} alt="" draggable={false} /> : <span className="monogram">{owner?.name.charAt(0)}</span>}

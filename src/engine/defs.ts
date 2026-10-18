@@ -43,6 +43,8 @@ export interface Hooks {
 
 export type CardTarget = 'none' | 'self' | 'party' | 'chosenEnemy' | 'allEnemies';
 export type CardSlot = 'strike' | 'defense' | 'transcend' | 'flavourA' | 'flavourB';
+/** Retain: stays in hand at cleanup. Ritual: a Spirit card that Retains. */
+export type Keyword = 'retain' | 'ritual';
 
 export interface CardDef {
   id: string;
@@ -53,6 +55,9 @@ export interface CardDef {
   slot?: CardSlot;
   cost: number;
   target: CardTarget;
+  keywords?: Keyword[];
+  /** Ultimate charge for the owner, once per play (a repeated card does not charge again). */
+  charge?: number;
   effects: OpCall[];
 }
 
@@ -80,12 +85,32 @@ export interface RelicDef extends Hooks {
   id: string;
 }
 
+export interface ResourceDef {
+  id: string;
+  /** Display name, e.g. "damage per hit". */
+  name: string;
+  /** Value at combat start; 0 if absent. */
+  start?: number;
+}
+
+/**
+ * A Domain's pooled resources and automatic hooks. Its hooks are active while any party member
+ * belongs to it, and resolve after everyone else's triggers on the same event.
+ */
+export interface DomainDef {
+  id: string;
+  name: string;
+  resources: ResourceDef[];
+  triggers?: TriggerDef[];
+}
+
 export interface Registry {
   cards: Readonly<Record<string, CardDef>>;
   characters: Readonly<Record<string, CharacterDef>>;
   enemies: Readonly<Record<string, EnemyDef>>;
   statuses: Readonly<Record<string, StatusDef>>;
   relics: Readonly<Record<string, RelicDef>>;
+  domains: Readonly<Record<string, DomainDef>>;
   /** Bounded escape hatch: kit-specific operations, listed so their number stays visible. */
   customOps?: Readonly<Record<string, Operation>>;
 }

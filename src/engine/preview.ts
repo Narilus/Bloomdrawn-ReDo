@@ -1,4 +1,4 @@
-import { playContext, validate, type Command } from './combat.ts';
+import { cardCost, chargeOf, playContext, validate, type Command } from './combat.ts';
 import type { OpCall, Registry } from './defs.ts';
 import type { OpContext, Preview } from './operation.ts';
 import { getOp } from './ops/index.ts';
@@ -6,8 +6,9 @@ import type { CardInstance, CombatState } from './state.ts';
 
 /**
  * What playing a card would do, from the same code that resolves it. Runs the card's
- * operations in order on a scratch copy so later operations see earlier ones. Triggers are
- * not previewed. Returns undefined if the command would be rejected.
+ * operations in order on a scratch copy so later operations see earlier ones, including a
+ * repeat and the card's ultimate charge. Triggers are not previewed. Returns undefined if the
+ * command would be rejected.
  */
 export function previewCard(
   state: CombatState,
@@ -17,11 +18,17 @@ export function previewCard(
   if (validate(state, command, registry) !== undefined) return undefined;
   const scratch = structuredClone(state);
   const index = scratch.piles.hand.findIndex((c) => c.uid === command.card);
-  const [card] = scratch.piles.hand.splice(index, 1) as [CardInstance];
+  const card = scratch.piles.hand[index] as CardInstance;
   const def = registry.cards[card.card];
   if (!def) return undefined;
-  scratch.mana -= def.cost;
-  return previewOps(scratch, def.effects, playContext(card, command.target), registry);
+  const cost = cardCost(scratch, card, registry);
+  scratch.piles.hand.splice(index, 1);
+  scratch.mana -= cost;
+  scratch.manaSpent += cost;
+  const repeats = 1 + scratch.next.repeat;
+  scratch.next = { costDelta: 0, repeat: 0 };
+  const calls = [...Array.from({ length: repeats }, () => def.effects).flat(), ...chargeOf(def)];
+  return previewOps(scratch, calls, playContext(card, command.target), registry);
 }
 
 function previewOps(scratch: CombatState, calls: readonly OpCall[], ctx: OpContext, registry: Registry): Preview[] {

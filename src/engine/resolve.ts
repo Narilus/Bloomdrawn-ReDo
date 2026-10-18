@@ -46,14 +46,14 @@ export function emit(rc: Resolution, event: EngineEvent, origin: Origin): void {
   if (checkOutcome(rc)) return;
 
   let capped = false;
-  for (const { key, holder, trigger } of matchingTriggers(rc.state, rc.registry, event)) {
+  for (const { key, holder, trigger, domain } of matchingTriggers(rc.state, rc.registry, event)) {
     if (origin.chain.includes(key)) continue; // no self re-fire within a chain
     if (origin.depth >= MAX_CHAIN_DEPTH) {
       capped = true;
       continue;
     }
     const ctx: OpContext = { source: holder, event };
-    if (rc.state.members.some((m) => m.id === holder)) ctx.owner = holder;
+    if (!domain && rc.state.members.some((m) => m.id === holder)) ctx.owner = holder;
     enqueue(rc, trigger.do, ctx, { depth: origin.depth + 1, chain: [...origin.chain, key] });
   }
   if (capped) {
@@ -95,11 +95,13 @@ interface HeldTrigger {
   key: string;
   holder: EntityId;
   trigger: TriggerDef;
+  /** A Domain hook: held by the Domain's first party member, but nobody's stats or gauge. */
+  domain?: true;
 }
 
 /**
  * Fixed trigger order: the event's source, then party slot order, then relic acquisition
- * order, then enemy slot order.
+ * order, then enemy slot order, then Domain hooks (so Tentacles attack after scheduled effects).
  */
 function matchingTriggers(state: CombatState, registry: Registry, event: EngineEvent): HeldTrigger[] {
   const holders = [
@@ -112,9 +114,24 @@ function matchingTriggers(state: CombatState, registry: Registry, event: EngineE
     source !== undefined && (holders.includes(source) || state.enemies.some((e) => e.id === source))
       ? [source, ...holders.filter((h) => h !== source)]
       : holders;
-  return ordered
-    .flatMap((holder) => triggersOf(state, registry, holder))
-    .filter(({ holder, trigger }) => trigger.on === event.type && filterMatches(trigger, event, holder));
+  return [...ordered.flatMap((holder) => triggersOf(state, registry, holder)), ...domainTriggers(state, registry)].filter(
+    ({ holder, trigger }) => trigger.on === event.type && filterMatches(trigger, event, holder),
+  );
+}
+
+/** Hooks of each Domain present in the party, in order of first appearance by slot. */
+function domainTriggers(state: CombatState, registry: Registry): HeldTrigger[] {
+  const seen = new Set<string>();
+  const out: HeldTrigger[] = [];
+  for (const m of state.members) {
+    const id = registry.characters[m.character]?.domain;
+    if (id === undefined || seen.has(id)) continue;
+    seen.add(id);
+    (registry.domains[id]?.triggers ?? []).forEach((trigger, i) =>
+      out.push({ key: `domain:${id}:${i}`, holder: m.id, trigger, domain: true }),
+    );
+  }
+  return out;
 }
 
 function triggersOf(state: CombatState, registry: Registry, holder: EntityId): HeldTrigger[] {

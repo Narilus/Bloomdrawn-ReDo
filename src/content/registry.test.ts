@@ -1,21 +1,29 @@
 import { describe, expect, it } from 'vitest';
 import { applyStatus, damage, gainShield, ifConsume } from '../engine/index.ts';
-import { card, character, status } from './define.ts';
+import { card, character, domain, status } from './define.ts';
 import { registry, validateContent } from './registry.ts';
 
 const strike = card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'strike', cost: 1, target: 'chosenEnemy', effects: [damage(6)] });
 const tester = character({ id: 'tester', name: 'Tester', domain: 'flesh', stats: { hp: 10, attack: 1, defense: 1 }, cards: [strike] });
+const flesh = domain({ id: 'flesh', name: 'Flesh', resources: [] });
 const errorsFor = (extra: Record<string, unknown>) =>
-  validateContent({ './characters/tester.ts': { strike, tester }, './cards/broken.ts': extra }).errors;
+  validateContent({ './characters/tester.ts': { strike, tester }, './domains/flesh.ts': { flesh }, './cards/broken.ts': extra }).errors;
 
 describe('content registry', () => {
   it('the shipped content validates', () => {
     expect(Object.keys(registry.characters).sort()).toEqual(['agathe', 'anthe', 'kibane', 'leonora', 'maelia', 'virelle']);
     expect(registry.enemies['enemy.training-dummy']).toBeDefined();
+    expect(Object.keys(registry.domains).sort()).toEqual(['flesh', 'rapture', 'spirit', 'unbound']);
+  });
+
+  it('reports a character whose Domain has no module', () => {
+    expect(validateContent({ './characters/tester.ts': { strike, tester } }).errors).toEqual([
+      'src/content/characters/tester.ts › tester: domain "flesh" is not defined',
+    ]);
   });
 
   it('a valid fixture has no errors', () => {
-    expect(validateContent({ './characters/tester.ts': { strike, tester } }).errors).toEqual([]);
+    expect(validateContent({ './characters/tester.ts': { strike, tester }, './domains/flesh.ts': { flesh } }).errors).toEqual([]);
   });
 
   it('a card pointing at a missing status fails with its file and ID', () => {
@@ -58,7 +66,7 @@ describe('content registry', () => {
   it('reports a slot cost outside its band', () => {
     const transcend = card({ id: 'test.t', name: 'X', owner: 'tester', slot: 'transcend', cost: 2, target: 'none', effects: [gainShield(1)] });
     const t = character({ id: 'tester', name: 'Tester', domain: 'flesh', stats: { hp: 10, attack: 1, defense: 1 }, cards: [transcend] });
-    expect(validateContent({ './characters/t.ts': { transcend, t } }).errors).toEqual([
+    expect(validateContent({ './characters/t.ts': { transcend, t }, './domains/flesh.ts': { flesh } }).errors).toEqual([
       'src/content/characters/t.ts › test.t: transcend cost 2 is outside 3–5',
     ]);
   });

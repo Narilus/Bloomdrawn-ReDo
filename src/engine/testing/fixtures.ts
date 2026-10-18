@@ -115,6 +115,7 @@ export const fixtureRegistry: Registry = {
   ]),
   statuses: byId(statuses),
   relics: byId(relics),
+  domains: {},
   customOps: { 'test.gain': gain, 'test.hit': hit, 'test.fail': fail },
 };
 

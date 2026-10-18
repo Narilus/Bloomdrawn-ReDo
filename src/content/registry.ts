@@ -11,7 +11,14 @@ const COST_BANDS: Record<CardSlot, [number, number]> = {
   flavourB: [2, 5],
 };
 
-const FAMILY = { card: 'cards', character: 'characters', enemy: 'enemies', status: 'statuses', relic: 'relics' } as const;
+const FAMILY = {
+  card: 'cards',
+  character: 'characters',
+  enemy: 'enemies',
+  status: 'statuses',
+  relic: 'relics',
+  domain: 'domains',
+} as const;
 
 type Modules = Record<string, Record<string, unknown>>;
 interface Found {
@@ -26,7 +33,7 @@ interface Found {
  */
 export function validateContent(modules: Modules): { registry: Registry; errors: string[] } {
   const errors: string[] = [];
-  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {} } as {
+  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {} } as {
     [K in keyof typeof FAMILY as (typeof FAMILY)[K]]: Record<string, never>;
   };
   const fileOf = new Map<string, string>();
@@ -90,10 +97,12 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       else if (card.owner !== c.id) fail(where('character', c.id), c.id, `card "${cardId}" is owned by ${card.owner}`);
     }
     checkHooks('character', c.id, c.passive, 'passive.');
+    if (!reg.domains[c.domain]) fail(where('character', c.id), c.id, `domain "${c.domain}" is not defined`);
   }
   for (const e of Object.values(reg.enemies)) checkHooks('enemy', e.id, e, '');
   for (const s of Object.values(reg.statuses)) checkHooks('status', s.id, s, '');
   for (const r of Object.values(reg.relics)) checkHooks('relic', r.id, r, '');
+  for (const d of Object.values(reg.domains)) checkHooks('domain', d.id, d, '');
 
   return { registry: reg, errors };
 }
@@ -128,7 +137,8 @@ const pathOf = (issue: z.core.$ZodIssue) => (issue.path.length ? `${issue.path.j
 
 /** The game's content registry, built from every content file. */
 export const registry: Registry = buildRegistry(
-  import.meta.glob(['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', '!**/*.test.ts'], {
-    eager: true,
-  }),
+  import.meta.glob(
+    ['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', '!**/*.test.ts'],
+    { eager: true },
+  ),
 );

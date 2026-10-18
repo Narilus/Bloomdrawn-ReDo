@@ -39,6 +39,8 @@ export const schemas = {
     slot: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']).optional(),
     cost: z.int().min(0),
     target: z.enum(['none', 'self', 'party', 'chosenEnemy', 'allEnemies']),
+    keywords: z.array(z.enum(['retain', 'ritual'])).optional(),
+    charge: z.int().positive().optional(),
     effects: z.array(opCall).min(1),
   }),
   character: z.strictObject({
@@ -53,6 +55,13 @@ export const schemas = {
   enemy: z.strictObject({ kind: z.literal('enemy'), id, name: z.string().min(1), hp: z.int().positive(), ...hooks }),
   status: z.strictObject({ kind: z.literal('status'), id, stacking: z.enum(['add', 'refresh', 'highest']), ...hooks }),
   relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),
+  domain: z.strictObject({
+    kind: z.literal('domain'),
+    id,
+    name: z.string().min(1),
+    resources: z.array(z.strictObject({ id, name: z.string().min(1), start: z.int().min(0).optional() })),
+    triggers: hooks.triggers,
+  }),
 };
 
 export type Kind = keyof typeof schemas;
