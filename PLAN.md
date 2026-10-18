@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M0 Foundation
-**Current task:** M0.4 Save interface
+**Current task:** M0.5 Feel spike
 
 ## Milestones
 
@@ -58,12 +58,14 @@ _Done 18 Oct. "No self re-fire" is implemented as: a trigger is skipped if its k
 
 _Done 18 Oct. Also added `applyStatus`, because the missing-status check needs an op that references a status. The registry is built by globbing content files, so errors carry the file path. Deferred to M1: the "exactly five personal cards per starter" cross-check, since starters only have Strike and Defense so far. Placeholder stats: HP 50, Attack 4, Defense 4; Strike 6 + Attack, Defense 5 + Defense; dummy 60 HP._
 
-### M0.4 Save interface
+### M0.4 Save interface ✅
 Versioned save envelope (schema and content version). Two adapters: idb-keyval and in-memory for tests. Keep the previous good save. Export/import as a JSON file.
 **Done when:**
 - A round-trip test passes.
 - A simulated failed write leaves the last good save readable.
 - A v0→v1 migration fixture passes.
+
+_Done 18 Oct. Saves are stored as JSON text. A write checks that the new save reads back before storing it, and only copies `current` to `previous` if `current` is readable. The idb adapter was checked once in Chromium. Export and import are text in and out; the file buttons come with the first UI that needs them. Real save kinds (profile, run) are defined when their state exists._
 
 ### M0.5 Feel spike (owner gate for M0)
 - The PixiJS v8 stage mounted in React, at 1920×1080 logical size and scaled to fit.

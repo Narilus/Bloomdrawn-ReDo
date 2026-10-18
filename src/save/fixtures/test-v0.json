@@ -1,0 +1,7 @@
+{
+  "format": "bloomdrawn-save",
+  "kind": "test",
+  "schemaVersion": 0,
+  "contentVersion": 1,
+  "data": { "hp": 42, "deck": ["maelia.strike", "maelia.defense"] }
+}
