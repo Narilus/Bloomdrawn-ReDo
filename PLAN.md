@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M0 Foundation
-**Current task:** M0.2 Engine core
+**Current task:** M0.3 First operations and content
 
 ## Milestones
 
@@ -29,7 +29,7 @@ Vite + React + TypeScript (strict) in one package, with the folder layout from A
 
 _Done 18 Oct. No system Chromium is installed, so Playwright uses its own Chromium from `npx playwright install chromium`. TypeScript is pinned to 6.0 because typescript-eslint doesn't support 7 yet._
 
-### M0.2 Engine core
+### M0.2 Engine core ✅
 - State types.
 - `apply(state, command, registry)` returning new state plus ordered events, or a rejection.
 - A FIFO resolution queue, and trigger dispatch with the fixed order from ARCHITECTURE.md.
@@ -41,6 +41,8 @@ _Done 18 Oct. No system Chromium is installed, so Playwright uses its own Chromi
 - a draw on one stream never shifts another;
 - a rejected command leaves state deeply equal;
 - a deliberately looping fixture trigger stops at depth 8 with a log event.
+
+_Done 18 Oct. "No self re-fire" is implemented as: a trigger is skipped if its key is already in the chain's ancestry. Ops mutate a `structuredClone` draft; nested control-flow ops return `then` and run ahead of queued triggers._
 
 ### M0.3 First operations and content
 - Operations: `damage`, `gainShield`, `draw`, `gainResource`, and `ifConsume`, each with validate, resolve, preview and describe.
