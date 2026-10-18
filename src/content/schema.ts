@@ -34,6 +34,7 @@ export const schemas = {
   card: z.strictObject({
     kind: z.literal('card'),
     id,
+    name: z.string().min(1),
     owner: id,
     slot: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']).optional(),
     cost: z.int().min(0),
@@ -43,12 +44,13 @@ export const schemas = {
   character: z.strictObject({
     kind: z.literal('character'),
     id,
+    name: z.string().min(1),
     domain: z.enum(['flesh', 'rapture', 'spirit', 'unbound']),
     stats: z.strictObject({ hp: z.int().positive(), attack: z.int().min(0), defense: z.int().min(0) }),
     cards: z.array(id),
     passive: z.strictObject(hooks).optional(),
   }),
-  enemy: z.strictObject({ kind: z.literal('enemy'), id, hp: z.int().positive(), ...hooks }),
+  enemy: z.strictObject({ kind: z.literal('enemy'), id, name: z.string().min(1), hp: z.int().positive(), ...hooks }),
   status: z.strictObject({ kind: z.literal('status'), id, stacking: z.enum(['add', 'refresh', 'highest']), ...hooks }),
   relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),
 };

@@ -5,7 +5,7 @@ import { describeCard, describeCardLive } from './text.ts';
 import { fixtureCombat, withCardInHand, withCards } from './testing/fixtures.ts';
 
 const card = {
-  id: 'test.a.combo', owner: 'test.a', cost: 1, target: 'chosenEnemy' as const,
+  id: 'test.a.combo', name: 'Combo', owner: 'test.a', cost: 1, target: 'chosenEnemy' as const,
   effects: [damage(add(6, stat('attack'))), gainShield(add(2, stat('defense'))), draw(1)],
 };
 const registry = withCards(card);

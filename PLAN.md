@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M0 Foundation
-**Current task:** M0.5 Feel spike
+**Current task:** M0.5 Feel spike: built, waiting on the owner's verdict
 
 ## Milestones
 
@@ -83,6 +83,8 @@ _Done 18 Oct. Saves are stored as JSON text. A write checks that the new save re
 **Done when:**
 - The owner plays it and says the hand and lunges feel at least as good as Gloomdrawn.
 - One small Playwright check confirms that after 20 rapid plays every actor settles back at its home point.
+
+_Built 18 Oct; waiting on the owner. The line-up is Maelia, Virelle and Kibane (the three Gloomdrawn sprites) plus Leonora as a silhouette, against three training dummies. Virelle and Kibane got placeholder Strike/Defense for this. The settle check passes, and it fails when lunges are made to start from the current position instead of home. Input: drag, click-then-click, and keys (1–0, Enter, Esc, ←/→ to change target, E for End Turn). Right-click, Esc or dragging back down all cancel._
 
 ### M0.6 Art pipeline (parallel, owner-paced)
 Owner installs the Codex CLI. Then confirm `codex exec` can generate an image from the prompt stem. Write briefs for the starter four (Maelia, Agathe, Anthe, Leonora) from DESIGN.md, generate 2–3 options each into `art/raw/<character>/`, and keep the prompt text beside each.

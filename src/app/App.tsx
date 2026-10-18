@@ -1,8 +1,10 @@
+import { Combat } from './Combat.tsx';
+import { Frame } from './Frame.tsx';
+
 export function App() {
   return (
-    <main className="boot">
-      <h1>Bloomdrawn</h1>
-      <p>M0 scaffold</p>
-    </main>
+    <Frame>
+      <Combat />
+    </Frame>
   );
 }

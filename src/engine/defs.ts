@@ -46,6 +46,7 @@ export type CardSlot = 'strike' | 'defense' | 'transcend' | 'flavourA' | 'flavou
 
 export interface CardDef {
   id: string;
+  name: string;
   /** Character ID. */
   owner: string;
   /** Personal card slot; generated cards have none. */
@@ -57,6 +58,7 @@ export interface CardDef {
 
 export interface CharacterDef {
   id: string;
+  name: string;
   domain: string;
   stats: { hp: number; attack: number; defense: number };
   cards: string[];
@@ -65,6 +67,7 @@ export interface CharacterDef {
 
 export interface EnemyDef extends Hooks {
   id: string;
+  name: string;
   hp: number;
 }
 

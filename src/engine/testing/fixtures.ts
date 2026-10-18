@@ -52,15 +52,16 @@ export const testGain = (resource: string, amount = 1): OpCall => ({ op: 'test.g
 const testHit = (amount: number): OpCall => ({ op: 'test.hit', amount });
 
 const fiveCards = (owner: string): CardDef[] => [
-  { id: `${owner}.hit`, owner, cost: 1, target: 'chosenEnemy', effects: [testHit(6)] },
-  { id: `${owner}.gain`, owner, cost: 1, target: 'none', effects: [testGain('essence')] },
-  { id: `${owner}.fail`, owner, cost: 0, target: 'none', effects: [testGain('essence'), { op: 'test.fail' }] },
-  { id: `${owner}.pricey`, owner, cost: 7, target: 'none', effects: [] },
-  { id: `${owner}.big`, owner, cost: 2, target: 'chosenEnemy', effects: [testHit(30)] },
+  { id: `${owner}.hit`, name: 'Hit', owner, cost: 1, target: 'chosenEnemy', effects: [testHit(6)] },
+  { id: `${owner}.gain`, name: 'Gain', owner, cost: 1, target: 'none', effects: [testGain('essence')] },
+  { id: `${owner}.fail`, name: 'Fail', owner, cost: 0, target: 'none', effects: [testGain('essence'), { op: 'test.fail' }] },
+  { id: `${owner}.pricey`, name: 'Pricey', owner, cost: 7, target: 'none', effects: [] },
+  { id: `${owner}.big`, name: 'Big', owner, cost: 2, target: 'chosenEnemy', effects: [testHit(30)] },
 ];
 
 const character = (id: string, triggers?: TriggerDef[]): CharacterDef => ({
   id,
+  name: id,
   domain: 'test',
   stats: { hp: 20, attack: 3, defense: 2 },
   cards: fiveCards(id).map((c) => c.id),
@@ -104,13 +105,13 @@ const byId = <T extends { id: string }>(items: T[]): Record<string, T> =>
 export const fixtureRegistry: Registry = {
   cards: byId([
     ...characters.flatMap((c) => fiveCards(c.id)),
-    { id: 'test.loop-card', owner: 'test.a', cost: 0, target: 'none', effects: [testGain('loop0')] },
+    { id: 'test.loop-card', name: 'Loop', owner: 'test.a', cost: 0, target: 'none', effects: [testGain('loop0')] },
   ]),
   characters: byId(characters),
   enemies: byId([
-    { id: 'test.dummy', hp: 40 },
-    { id: 'test.frail', hp: 5 },
-    { id: 'test.watcher', hp: 40, triggers: onCardPlayedMark },
+    { id: 'test.dummy', name: 'Dummy', hp: 40 },
+    { id: 'test.frail', name: 'Frail', hp: 5 },
+    { id: 'test.watcher', name: 'Watcher', hp: 40, triggers: onCardPlayedMark },
   ]),
   statuses: byId(statuses),
   relics: byId(relics),

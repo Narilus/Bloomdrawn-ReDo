@@ -9,6 +9,7 @@ import { ifConsume, ifConsumeOp } from './ifConsume.ts';
 
 const spender = {
   id: 'test.a.spender',
+  name: 'Spender',
   owner: 'test.a',
   cost: 1,
   target: 'chosenEnemy' as const,
