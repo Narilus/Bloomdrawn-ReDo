@@ -1,0 +1,30 @@
+:root {
+  --charcoal-plum: #1e1519;
+  --aubergine: #2e1e2a;
+  --petal-ivory: #f6e6dc;
+  --antique-gold: #b8955a;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--charcoal-plum);
+  color: var(--petal-ivory);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.boot {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.boot h1 {
+  margin: 0;
+  color: var(--antique-gold);
+  letter-spacing: 0.08em;
+}

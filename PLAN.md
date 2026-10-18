@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M0 Foundation
-**Current task:** M0.1 Scaffold
+**Current task:** M0.2 Engine core
 
 ## Milestones
 
@@ -20,12 +20,14 @@ Each milestone ends with the owner playing the build. **Bold** milestones are ga
 
 ## M0 tasks
 
-### M0.1 Scaffold
+### M0.1 Scaffold ✅
 Vite + React + TypeScript (strict) in one package, with the folder layout from ARCHITECTURE.md (`src/engine`, `src/game`, `src/content`, `src/stage`, `src/app`, `src/save`, `tools/lab`). Set up ESLint with an import-boundary rule, Vitest, and Playwright using the system Chromium. Add the scripts `dev`, `build`, `check`, `e2e`, and an `engines` field matching the installed Node.
 **Done when:**
 - `npm run check` passes.
 - A deliberate `src/engine` → `src/app` import fails lint. Prove it once, then remove it.
 - `npm run e2e` boots the app and takes one screenshot.
+
+_Done 18 Oct. No system Chromium is installed, so Playwright uses its own Chromium from `npx playwright install chromium`. TypeScript is pinned to 6.0 because typescript-eslint doesn't support 7 yet._
 
 ### M0.2 Engine core
 - State types.

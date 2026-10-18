@@ -50,3 +50,5 @@ Only the owner can sign off feel. When something feels-related is ready, give hi
 - Rapture is never aquatic (no fish, fins, scales, coral). Unbound is never cosmic.
 - Battlefield lunges always start from the actor's fixed home point, and a new lunge cancels the one in flight. Otherwise rapid play drifts sprites.
 - The hand fan is recomputed from hand order on every change, never offset incrementally.
+- TypeScript stays on 6.0.x until typescript-eslint supports 7 (its peer range is `<6.1`).
+- Bumping `@playwright/test` needs `npx playwright install chromium` afterwards; there is no system Chromium on this machine.
