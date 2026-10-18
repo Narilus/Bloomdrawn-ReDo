@@ -94,6 +94,8 @@ _18 Oct: pipeline confirmed. `codex exec` with its built-in image tool saved `ar
 
 _18 Oct, owner's note: side-view battlers in HD pixel style, with a background-removal workflow. Built `npm run art` (gen/cut/sheet) with a battle sprite stem in DESIGN.md. Transparent requests return real alpha; chroma key works but leaks into see-through parts. `cut --px N` imposes a true pixel grid, because generated pixel art has none. Agathe options 02–05 are in `art/raw/agathe/` (04–05 use a Gloomdrawn sprite as style reference)._
 
+_19 Oct: owner picked Agathe-02 (keep the rest for skins or alts) and asked for crisp sprites at every resolution. The blur at 1080 was the canvas being CSS-scaled at a fractional offset, plus GPU downscaling; both fixed. `pick` stores sprites at 1024px. Agathe-02 is in the slice, front row. Options for Maelia, Anthe, Leonora and the Bloom-Rib Hound are in `art/raw/`._
+
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
 - Open design items are listed in HANDOVER.md. Settle each with the owner before the milestone that needs it.

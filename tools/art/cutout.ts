@@ -137,35 +137,20 @@ export function trim(image: Rgba, pad: number): Rgba {
   return crop(image, box.x - pad, box.y - pad, box.width + pad * 2, box.height + pad * 2);
 }
 
-/** Pixel art has hard edges: alpha becomes 0 or 255. */
-export function hardenAlpha(image: Rgba, cut = 128): Rgba {
-  const out = { ...image, data: new Uint8Array(image.data) };
-  for (let i = 3; i < out.data.length; i += 4) {
-    if ((out.data[i] ?? 0) >= cut) out.data[i] = 255;
-    else out.data.set([0, 0, 0, 0], i - 3);
-  }
-  return out;
+/** Background removal, then trim with a 2% margin. */
+export function cutout(image: Rgba): Rgba {
+  const clear = hasAlpha(image) ? normaliseAlpha(image) : chromaKey(image, keyColour(image));
+  const box = opaqueBounds(clear);
+  return trim(clear, Math.round((box?.height ?? 0) * 0.02));
 }
 
 /**
- * Resamples to a true pixel grid `height` art pixels tall. Generated "pixel art" has no
- * consistent grid (its pixel size drifts across the image), so the grid is imposed here, which
- * also gives every sprite the same pixel density on screen.
+ * Game sprites are stored at one standard height, at least as tall as the largest size they are
+ * drawn at (a front-row party member on a 4K screen); the stage downscales from there.
  */
-export function pixelate(image: Rgba, height: number): Rgba {
-  const width = Math.max(1, Math.round((image.width * height) / image.height));
-  return hardenAlpha(scaleArea(image, width, height));
-}
+export const SPRITE_HEIGHT = 1024;
 
-export interface CutOptions {
-  /** Art-pixel height of the output. Omit to keep the source resolution with a soft edge. */
-  pixelHeight?: number;
-}
-
-/** Background removal, then trim, then optional pixel grid. */
-export function cutout(image: Rgba, options: CutOptions = {}): Rgba {
-  const clear = hasAlpha(image) ? normaliseAlpha(image) : chromaKey(image, keyColour(image));
-  const box = opaqueBounds(clear);
-  const trimmed = trim(clear, Math.round((box?.height ?? 0) * 0.02));
-  return options.pixelHeight ? pixelate(trimmed, options.pixelHeight) : trimmed;
+export function standardise(image: Rgba): Rgba {
+  if (image.height <= SPRITE_HEIGHT) return image;
+  return scaleArea(image, Math.round((image.width * SPRITE_HEIGHT) / image.height), SPRITE_HEIGHT);
 }

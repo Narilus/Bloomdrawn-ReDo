@@ -9,6 +9,16 @@ export interface Point {
   y: number;
 }
 
+/** Where the logical frame lands on screen, in CSS pixels that fall on whole device pixels. */
+export interface Fit {
+  scale: number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  dpr: number;
+}
+
 /** Party feet positions, slot 0 (front, bottom-left) to slot 3 (back, top-right). */
 export const PARTY_HOMES: readonly (Point & { scale: number })[] = [
   { x: 330, y: 770, scale: 1 },

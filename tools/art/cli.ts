@@ -5,7 +5,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFi
 import { homedir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
-import { cutout } from './cutout.ts';
+import { cutout, standardise } from './cutout.ts';
 import { blank, composite, fill, readPng, scaleArea, scaleNearest, writePng, type Rgba } from './image.ts';
 import { composePrompt, promptProblems, stemFrom, type Background } from './prompt.ts';
 
@@ -14,10 +14,12 @@ const CODEX_HOME = process.env.CODEX_HOME ?? join(homedir(), '.codex');
 const USAGE = `Usage:
   npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>]
       Stem from DESIGN.md + art/briefs/<character>.txt -> art/raw/<character>/<character>-NN.png
-  npm run art -- cut <raw.png...> [--px <art-pixel height>]
-      Background removal and trim -> art/cut/<character>/<name>[-pxN].png
+  npm run art -- cut <raw.png...>
+      Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
-      The cut sprites side by side at in-game height on the stage colour`;
+      The cut sprites side by side at in-game height on the stage colour
+  npm run art -- pick <raw.png>
+      The owner's pick, cut and stored at the standard height -> src/assets/battle/<character>.png`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -26,7 +28,6 @@ async function main() {
       n: { type: 'string', default: '3' },
       bg: { type: 'string', default: 'transparent' },
       ref: { type: 'string' },
-      px: { type: 'string' },
       height: { type: 'string', default: '400' },
     },
   });
@@ -36,7 +37,9 @@ async function main() {
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     await generate(rest[0], Number(values.n), background, values.ref);
   } else if (command === 'cut' && rest.length > 0) {
-    for (const file of rest) cut(file, values.px ? Number(values.px) : undefined);
+    for (const file of rest) cut(file);
+  } else if (command === 'pick' && rest[0]) {
+    pick(rest[0]);
   } else if (command === 'sheet' && rest.length > 1) {
     sheet(rest[0] as string, rest.slice(1), Number(values.height));
   } else {
@@ -65,7 +68,9 @@ async function generate(character: string, count: number, background: Background
   await Promise.all(
     names.map(async (name) => {
       try {
-        const { image, thread } = await codexImage(prompt, background === 'transparent', referencePath);
+        // A run occasionally ends without calling the image tool; one retry covers it.
+        const run = () => codexImage(prompt, background === 'transparent', referencePath);
+        const { image, thread } = await run().catch(run);
         copyFileSync(image, join(dir, `${name}.png`));
         const header = [`Background: ${background}`, ...(reference ? [`Reference: ${reference}`] : []), `Codex thread: ${thread}`];
         writeFileSync(join(dir, `${name}.prompt.txt`), `${header.join('\n')}\n\n${prompt}`);
@@ -116,11 +121,17 @@ function codexImage(prompt: string, transparent: boolean, reference?: string): P
   });
 }
 
-function cut(file: string, pixelHeight?: number) {
-  const character = basename(dirname(file));
-  const out = join(ROOT, 'art/cut', character, `${basename(file, '.png')}${pixelHeight ? `-px${pixelHeight}` : ''}.png`);
+function cut(file: string) {
+  const out = join(ROOT, 'art/cut', basename(dirname(file)), basename(file));
+  save(out, cutout(readPng(file)));
+}
+
+function pick(file: string) {
+  save(join(ROOT, 'src/assets/battle', `${basename(dirname(file))}.png`), standardise(cutout(readPng(file))));
+}
+
+function save(out: string, image: Rgba) {
   mkdirSync(dirname(out), { recursive: true });
-  const image = cutout(readPng(file), pixelHeight ? { pixelHeight } : {});
   writePng(out, image);
   console.log(`${relative(ROOT, out)} (${image.width}×${image.height})`);
 }

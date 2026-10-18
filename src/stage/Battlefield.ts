@@ -1,8 +1,9 @@
-import { Application, Assets, Container, FillGradient, Graphics, Sprite, type Texture } from 'pixi.js';
+import { Application, Assets, Container, FillGradient, Graphics, Sprite, Texture } from 'pixi.js';
 import { createStreams, nextFloat, PARTY, type CombatState, type EngineEvent } from '../engine/index.ts';
 import { Actor } from './Actor.ts';
 import { battleArt } from './art.ts';
-import { ENEMY_HEIGHT, ENEMY_HOMES, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH } from './layout.ts';
+import { downscale, sharpen, type Pixels } from './resample.ts';
+import { ENEMY_HEIGHT, ENEMY_HOMES, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
 
 const COLOURS = {
   damage: '#F6E6DC',
@@ -15,6 +16,7 @@ const COLOURS = {
  */
 export class Battlefield {
   private readonly actors = new Map<string, Actor>();
+  private readonly sprites: SizedSprite[] = [];
 
   static async create(app: Application, state: CombatState): Promise<Battlefield> {
     const field = new Battlefield();
@@ -34,7 +36,7 @@ export class Battlefield {
       const home = PARTY_HOMES[slot];
       if (!member || !home) continue;
       const texture = textures[slot];
-      const body = texture ? spriteBody(texture, PARTY_HEIGHT) : silhouette();
+      const body = texture ? field.sizedSprite(texture, PARTY_HEIGHT * home.scale) : silhouette();
       world.addChild(shadow(home.x, home.y, 120 * home.scale));
       const actor = new Actor(member.id, home, body, PARTY_HEIGHT, home.scale, breath());
       world.addChild(actor.root);
@@ -51,6 +53,32 @@ export class Battlefield {
       field.actors.set(enemy.id, actor);
     });
     return field;
+  }
+
+  /**
+   * Re-renders each sprite at the device-pixel size it is drawn at. Source art is much larger
+   * than the screen, and the GPU's own downscale is either aliased (bilinear) or soft (mipmaps);
+   * one high-quality resample per size keeps sprites crisp at any window size or pixel ratio.
+   */
+  fitTo(fit: Fit): void {
+    for (const entry of this.sprites) {
+      const height = Math.max(1, Math.round(entry.height * fit.scale * fit.dpr));
+      if (entry.sprite.texture.height === height) continue;
+      const previous = entry.sprite.texture;
+      entry.pixels ??= pixelsOf(entry.source);
+      entry.sprite.texture = entry.pixels ? resample(entry.pixels, height) : entry.source;
+      if (previous !== entry.source) previous.destroy(true);
+      // The actor's depth scale is applied by the actor, so undo it here.
+      entry.sprite.scale.set(entry.height / entry.depth / height);
+    }
+  }
+
+  private sizedSprite(source: Texture, height: number): Sprite {
+    const sprite = new Sprite(source);
+    sprite.anchor.set(0.5, 0.97);
+    sprite.scale.set(PARTY_HEIGHT / source.height);
+    this.sprites.push({ sprite, source, height, depth: height / PARTY_HEIGHT });
+    return sprite;
   }
 
   /** Animates one command's events. Results are already final; this only shows them. */
@@ -93,6 +121,7 @@ export class Battlefield {
   }
 
   destroy(): void {
+    for (const { sprite, source } of this.sprites) if (sprite.texture !== source) sprite.texture.destroy(true);
     for (const actor of this.actors.values()) actor.destroy();
     this.actors.clear();
   }
@@ -112,11 +141,40 @@ export class Battlefield {
   }
 }
 
-function spriteBody(texture: Texture, height: number): Sprite {
-  const sprite = new Sprite(texture);
-  sprite.anchor.set(0.5, 0.97);
-  sprite.scale.set(height / texture.height);
-  return sprite;
+interface SizedSprite {
+  sprite: Sprite;
+  source: Texture;
+  /** Logical on-screen height, including the actor's depth scale. */
+  height: number;
+  depth: number;
+  /** The full-size source pixels, read once. */
+  pixels?: Pixels | null;
+}
+
+/** How hard to sharpen after downscaling: enough to restore edges, short of ringing. */
+const SHARPEN = 0.7;
+
+function pixelsOf(source: Texture): Pixels | null {
+  const image = source.source.resource as CanvasImageSource & { width: number; height: number };
+  const context = canvasOf(image.width, image.height);
+  if (!context) return null;
+  context.drawImage(image, 0, 0);
+  return context.getImageData(0, 0, image.width, image.height);
+}
+
+function resample(pixels: Pixels, height: number): Texture {
+  const width = Math.max(1, Math.round((pixels.width * height) / pixels.height));
+  const small = height < pixels.height ? sharpen(downscale(pixels, width, height), SHARPEN) : pixels;
+  const context = canvasOf(small.width, small.height);
+  context?.putImageData(new ImageData(new Uint8ClampedArray(small.data), small.width, small.height), 0, 0);
+  return Texture.from(context?.canvas ?? document.createElement('canvas'));
+}
+
+function canvasOf(width: number, height: number): CanvasRenderingContext2D | null {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas.getContext('2d', { willReadFrequently: true });
 }
 
 function shadow(x: number, y: number, radius: number): Graphics {

@@ -1,36 +1,45 @@
 import { Application } from 'pixi.js';
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { CombatState } from '../engine/index.ts';
 import { Battlefield } from './Battlefield.ts';
-import { HEIGHT, WIDTH } from './layout.ts';
+import type { Fit } from './layout.ts';
 
 interface Props {
   /** Read once at mount; remount (change `key`) for a new combat. */
   initialState: CombatState;
-  /** Current frame scale, so the canvas renders at device resolution. */
-  scale: number;
+  /** Where the frame sits on screen. The canvas is sized to it exactly and scales its own content. */
+  fit: Fit;
+  /** A screen-space element outside any CSS transform, so the canvas is never resampled. */
+  host: HTMLElement;
   onReady: (field: Battlefield | null) => void;
 }
 
 /** Mounts the PixiJS battlefield directly inside a React component. */
-export function StageView({ initialState, scale, onReady }: Props) {
-  const host = useRef<HTMLDivElement>(null);
+export function StageView({ initialState, fit, host, onReady }: Props) {
+  const mount = useRef<HTMLDivElement>(null);
   const appRef = useRef<Application | null>(null);
-  const init = useRef({ initialState, scale, onReady });
+  const fieldRef = useRef<Battlefield | null>(null);
+  const init = useRef({ initialState, fit, onReady });
+  // The latest fit, for an app that finishes starting after a resize.
+  const latest = useRef(fit);
 
   useEffect(() => {
-    const { initialState: state, scale: s, onReady: ready } = init.current;
+    const { initialState: state, fit: f, onReady: ready } = init.current;
     const app = new Application();
     let field: Battlefield | null = null;
     let cancelled = false;
     const started = app
-      .init({ width: WIDTH, height: HEIGHT, resolution: s * window.devicePixelRatio, autoDensity: true, antialias: true, background: '#1E1519' })
+      .init({ width: f.width, height: f.height, resolution: f.dpr, autoDensity: true, antialias: true, background: '#1E1519' })
       .then(async () => {
         if (cancelled) return;
-        host.current?.appendChild(app.canvas);
+        applyFit(app, latest.current);
+        mount.current?.appendChild(app.canvas);
         appRef.current = app;
         field = await Battlefield.create(app, state);
         if (cancelled) return;
+        field.fitTo(latest.current);
+        fieldRef.current = field;
         ready(field);
       });
     return () => {
@@ -39,17 +48,23 @@ export function StageView({ initialState, scale, onReady }: Props) {
       void started.then(() => {
         field?.destroy();
         appRef.current = null;
+        fieldRef.current = null;
         app.destroy(true, { children: true });
       });
     };
   }, []);
 
   useEffect(() => {
-    const app = appRef.current;
-    if (!app) return;
-    app.renderer.resolution = scale * window.devicePixelRatio;
-    app.renderer.resize(WIDTH, HEIGHT);
-  }, [scale]);
+    latest.current = fit;
+    if (appRef.current) applyFit(appRef.current, fit);
+    fieldRef.current?.fitTo(fit);
+  }, [fit]);
 
-  return <div ref={host} className="stage" />;
+  return createPortal(<div ref={mount} className="stage" />, host);
+}
+
+function applyFit(app: Application, fit: Fit) {
+  app.renderer.resolution = fit.dpr;
+  app.renderer.resize(fit.width, fit.height);
+  app.stage.scale.set(fit.scale);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chromaKey, cutout, keyColour, normaliseAlpha, opaqueBounds, pixelate, trim, type Colour } from './cutout.ts';
+import { chromaKey, cutout, keyColour, normaliseAlpha, opaqueBounds, SPRITE_HEIGHT, standardise, trim, type Colour } from './cutout.ts';
 import { blank, fill, scaleArea, scaleNearest, type Rgba } from './image.ts';
 
 const BLUE: Colour = [0, 2, 254];
@@ -70,30 +70,26 @@ describe('trim', () => {
   });
 });
 
-describe('pixelate', () => {
-  it('recovers native pixel art from a 4× upscale with hard edges', () => {
-    const native = blank(6, 8);
-    rect(native, 1, 1, 4, 6, RED);
-    rect(native, 2, 3, 2, 2, VIOLET);
-    const out = pixelate(scaleNearest(native, 24, 32), 8);
-    expect([out.width, out.height]).toEqual([6, 8]);
-    expect(out.data).toEqual(native.data);
-  });
-
+describe('resizing', () => {
   it('never bleeds the colour of transparent pixels into the edge', () => {
     const image = blank(2, 1);
     paint(image, 0, 0, [0, 255, 0], 0);
     paint(image, 1, 0, RED);
     expect(pixel(scaleArea(image, 1, 1), 0, 0)).toEqual([...RED, 128]);
   });
+
+  it('stores sprites at the standard height, never enlarging smaller ones', () => {
+    expect(standardise(blank(1000, 2048))).toMatchObject({ width: 500, height: SPRITE_HEIGHT });
+    expect(standardise(blank(300, 600))).toMatchObject({ width: 300, height: 600 });
+  });
 });
 
 describe('cutout', () => {
-  it('keys, trims and pixelates a keyed image in one pass', () => {
-    const out = cutout(scaleNearest(keyedFigure(), 80, 80), { pixelHeight: 10 });
-    expect(out.height).toBe(10);
+  it('keys and trims a keyed image in one pass', () => {
+    const out = cutout(scaleNearest(keyedFigure(), 80, 80));
+    // The 40×40 red square plus a 1px edge pixel and a 1px margin each side.
+    expect([out.width, out.height]).toEqual([46, 42]);
     expect(pixel(out, 0, 0)[3]).toBe(0);
-    expect(pixel(out, 5, 5)[3]).toBe(255);
-    for (let i = 3; i < out.data.length; i += 4) expect([0, 255]).toContain(out.data[i]);
+    expect(pixel(out, 20, 20)).toEqual([...RED, 255]);
   });
 });

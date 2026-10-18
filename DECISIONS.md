@@ -88,6 +88,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Owner signed off the M0.5 feel spike: "All expected animations play, keybinds work and the card feel is extremely smooth." PixiJS + React + Motion confirmed as the presentation stack.
 - Hand interaction as built is the baseline: drag past the play line arms; single-target cards aim with an arrow; release over an enemy casts; drag back, Esc or right-click cancels; click-select then click an enemy; 1–0 select, Enter confirm, ←/→ change target, E ends the turn.
 - Battle sprites are side-view battlers in an HD pixel style, cut out from their background (owner, 18 Oct). DESIGN.md gains a battle sprite stem for them.
+- Agathe's battle sprite is Agathe-02. The other options are kept as possible skins or alternate characters (owner, 19 Oct).
+- Sprites must stay crisp at every window size; store them large and downscale in game rather than at a small fixed pixel height (owner, 19 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).

@@ -48,6 +48,11 @@ body,
   left: 0;
   transform-origin: 0 0;
   overflow: hidden;
+}
+
+/* The canvas lives outside the scaled frame, at whole device pixels (see Frame.tsx). */
+.stage-layer {
+  position: absolute;
   background: var(--charcoal-plum);
 }
 

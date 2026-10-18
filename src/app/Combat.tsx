@@ -16,14 +16,14 @@ import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
 
-// M0 spike line-up: the three characters with Gloomdrawn sprites, plus Leonora as a silhouette.
-const PARTY = ['maelia', 'virelle', 'kibane', 'leonora'];
+// Slice line-up: Agathe (the first Bloomdrawn sprite) in front, then the Gloomdrawn sprites.
+const PARTY = ['agathe', 'maelia', 'virelle', 'kibane'];
 const ENEMIES = ['enemy.training-dummy', 'enemy.training-dummy', 'enemy.training-dummy'];
 
 const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES }, registry).state;
 
 export function Combat() {
-  const { scale } = useFrame();
+  const { fit, stageHost } = useFrame();
   const [seed, setSeed] = useState(1);
   const [state, setState] = useState(() => newCombat(1));
   // The source of truth between renders, so rapid input never applies a command to a stale state.
@@ -89,7 +89,7 @@ export function Combat() {
 
   return (
     <div className="combat">
-      <StageView key={seed} initialState={state} scale={scale} onReady={onReady} />
+      {stageHost && <StageView key={seed} initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
       <Portraits state={state} />
       <div className="relics plaque" aria-label="Relics">
         <span>Relics</span>
