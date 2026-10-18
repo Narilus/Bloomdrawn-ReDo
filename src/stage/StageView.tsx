@@ -47,8 +47,10 @@ export function StageView({ initialState, fit, host, onReady }: Props) {
       ready(null);
       void started.then(() => {
         field?.destroy();
-        appRef.current = null;
-        fieldRef.current = null;
+        // Under StrictMode this cleanup can run after the remounted app has set the refs; only
+        // clear our own, or the live canvas never hears about a resize again.
+        if (appRef.current === app) appRef.current = null;
+        if (fieldRef.current === field) fieldRef.current = null;
         app.destroy(true, { children: true });
       });
     };
