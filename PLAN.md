@@ -90,6 +90,8 @@ _Signed off by the owner 18 Oct. The line-up is Maelia, Virelle and Kibane (the 
 Owner installs the Codex CLI. Then confirm `codex exec` can generate an image from the prompt stem. Write briefs for the starter four (Maelia, Agathe, Anthe, Leonora) from DESIGN.md, generate 2–3 options each into `art/raw/<character>/`, and keep the prompt text beside each.
 **Done when:** the owner has picked a direction for each starter, or has given notes for a second pass.
 
+_18 Oct: pipeline confirmed. `codex exec` with its built-in image tool saved `art/raw/agathe/agathe-01.png` (1024×1536) from the stem plus brief. Run it with `< /dev/null`. Briefs for the other starters wait on the owner's notes on this test._
+
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
 - Open design items are listed in HANDOVER.md. Settle each with the owner before the milestone that needs it.

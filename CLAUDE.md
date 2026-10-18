@@ -53,3 +53,5 @@ Only the owner can sign off feel. When something feels-related is ready, give hi
 - TypeScript stays on 6.0.x until typescript-eslint supports 7 (its peer range is `<6.1`).
 - Bumping `@playwright/test` needs `npx playwright install chromium` afterwards; there is no system Chromium on this machine.
 - Headless Chromium renders WebGL with SwiftShader (~6 fps with the Pixi stage) unless launched with GPU flags. `playwright.config.ts` passes them; reuse them in any ad-hoc browser script.
+- `codex exec` reads piped stdin until EOF, so in a tool shell it hangs forever. Always run it with `< /dev/null`.
+- `pkill -f <pattern>` inside a tool shell also matches that shell's own command line and kills it (exit 144). Kill by PID, or use a pattern that can't match the calling command.
