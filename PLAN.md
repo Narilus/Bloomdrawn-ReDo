@@ -92,6 +92,8 @@ Owner installs the Codex CLI. Then confirm `codex exec` can generate an image fr
 
 _18 Oct: pipeline confirmed. `codex exec` with its built-in image tool saved `art/raw/agathe/agathe-01.png` (1024×1536) from the stem plus brief. Run it with `< /dev/null`. Briefs for the other starters wait on the owner's notes on this test._
 
+_18 Oct, owner's note: side-view battlers in HD pixel style, with a background-removal workflow. Built `npm run art` (gen/cut/sheet) with a battle sprite stem in DESIGN.md. Transparent requests return real alpha; chroma key works but leaks into see-through parts. `cut --px N` imposes a true pixel grid, because generated pixel art has none. Agathe options 02–05 are in `art/raw/agathe/` (04–05 use a Gloomdrawn sprite as style reference)._
+
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
 - Open design items are listed in HANDOVER.md. Settle each with the owner before the milestone that needs it.

@@ -37,7 +37,7 @@ Only the owner can sign off feel. When something feels-related is ready, give hi
 - Image prompts are the prompt stem from DESIGN.md plus the brief. **Domain names never appear in prompts.**
 - **Banned words:** shimmer, fractal, echo, refraction, mirror, liminal, cosmic, ethereal, impossible geometry, pressure, "wrongness", otherworldly.
 - Never in images: starfields, underwater scenes, crystal sparkle, neon, glitch effects, text.
-- Images come from `codex exec` (owner's ChatGPT login). Save outputs to `art/raw/`, keep the prompt beside each image, and the owner picks.
+- Images come from `codex exec` (owner's ChatGPT login) through `npm run art` (`tools/art/`): `gen` writes options and their prompts to `art/raw/<character>/`, `cut` removes the background into `art/cut/` (not committed; rebuild it from raw), and `sheet` lays cuts out at in-game height. Briefs live in `art/briefs/`. The owner picks.
 
 ## Working style
 - Small commits that each leave the game building and playable. Push when green.
@@ -55,3 +55,5 @@ Only the owner can sign off feel. When something feels-related is ready, give hi
 - Headless Chromium renders WebGL with SwiftShader (~6 fps with the Pixi stage) unless launched with GPU flags. `playwright.config.ts` passes them; reuse them in any ad-hoc browser script.
 - `codex exec` reads piped stdin until EOF, so in a tool shell it hangs forever. Always run it with `< /dev/null`.
 - `pkill -f <pattern>` inside a tool shell also matches that shell's own command line and kills it (exit 144). Kill by PID, or use a pattern that can't match the calling command.
+- Several `codex exec` runs at once can each reply with another run's image path. Find the image by the run's own thread ID (`--json`, then `generated_images/<thread>/`), as `tools/art` does.
+- Chroma-key backgrounds leak the key colour into see-through parts (membrane holes, lace). Ask for a transparent background (the default); its alpha is a clean soft matte. Use `--bg blue|green` only if transparency fails.

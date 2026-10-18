@@ -1,0 +1,11 @@
+Background: transparent
+Reference: reference/legacy-sprites/maelia-battle.png
+Codex thread: 01a14f09-c68a-7291-84cb-116a884dcea5
+
+Image 1 is a style reference only: match its pixel density, outline weight, shading and proportions. Do not copy its character, costume, colours or pose.
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing right: body and face turned toward the right edge of the image. A woman in her 50s, a choir-mother priestess. Heavy bruise-violet robes with an antique-gold embroidered stole; a brass censer on a chain hangs from her lowered right hand; the robe hem is stained with white chalk. Three flesh-pink tentacles tipped with small skin-petal flowers coil around her raised left arm and rise above her shoulder. Candle-wax ivory skin, silver-streaked dark hair pinned up, calm and commanding expression.
+
+Background: fully transparent.

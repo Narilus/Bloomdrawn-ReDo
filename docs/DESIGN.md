@@ -399,6 +399,10 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 
 > Painterly gothic fantasy illustration, fine linework, anime-influenced faces. Deep plum and charcoal background with soft vignette. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac as the main light source. Antique gold filigree accents. No text, no letters, no logos.
 
+**Battle sprite stem**, used instead of the prompt stem for battle sprites, which are side-view battlers in HD pixel style. The brief gives the facing (party right, enemies left), and the art tool adds the background line:
+
+> High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
 **Never in any prompt or image:** starfields, galaxies or nebulae; underwater scenes, fish, coral or shells; crystal sparkle; neon; glitch effects; fractals or mirrors; any text baked into the image (all words are added by the game).
 
 ### Content warnings
