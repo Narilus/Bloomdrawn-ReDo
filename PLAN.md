@@ -96,6 +96,8 @@ _18 Oct, owner's note: side-view battlers in HD pixel style, with a background-r
 
 _19 Oct: owner picked Agathe-02 (keep the rest for skins or alts) and asked for crisp sprites at every resolution. The blur at 1080 was the canvas being CSS-scaled at a fractional offset, plus GPU downscaling; both fixed. `pick` stores sprites at 1024px. Agathe-02 is in the slice, front row. Options for Maelia, Anthe, Leonora and the Bloom-Rib Hound are in `art/raw/`._
 
+_19 Oct: **done.** Owner picked Maelia-02, Anthe-03, Leonora-02 and Bloom-Rib Hound-02 (all options kept). The slice party is now the starter four with their picked sprites. Portraits are still Gloomdrawn placeholders or letters._
+
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
 - Open design items are listed in HANDOVER.md. Settle each with the owner before the milestone that needs it.

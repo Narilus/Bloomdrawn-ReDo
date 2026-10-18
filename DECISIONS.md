@@ -90,6 +90,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Battle sprites are side-view battlers in an HD pixel style, cut out from their background (owner, 18 Oct). DESIGN.md gains a battle sprite stem for them.
 - Agathe's battle sprite is Agathe-02. The other options are kept as possible skins or alternate characters (owner, 19 Oct).
 - Sprites must stay crisp at every window size; store them large and downscale in game rather than at a small fixed pixel height (owner, 19 Oct).
+- Starter battle sprites: Maelia-02 (softer face, better hair), Anthe-03, Leonora-02 (Leonora-03 a very close second). Bloom-Rib Hound: 02. Keep every other option (owner, 19 Oct).
+- Ideas the owner raised for later, not yet decided: a skin selection; Transcend optionally changing a character's sprite (Maelia-03, with the exposed legs and pregnant body, fits that); enemies drawing alternate skins from their numbered sprites (owner, 19 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).

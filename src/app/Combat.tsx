@@ -16,8 +16,8 @@ import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
 
-// Slice line-up: Agathe (the first Bloomdrawn sprite) in front, then the Gloomdrawn sprites.
-const PARTY = ['agathe', 'maelia', 'virelle', 'kibane'];
+// Slice line-up: the starter four with their picked Bloomdrawn sprites, Agathe in front.
+const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
 const ENEMIES = ['enemy.training-dummy', 'enemy.training-dummy', 'enemy.training-dummy'];
 
 const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES }, registry).state;
