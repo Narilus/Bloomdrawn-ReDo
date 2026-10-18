@@ -297,7 +297,7 @@ export const callTheChoir = card({
 
 export const censerRite = card({
   id: 'agathe.censer-rite', owner: 'agathe', slot: 'flavourB', cost: 3, target: 'auto',
-  effects: [gainResource('potency', 1, { until: 'turnEnd' }), volley()],
+  effects: [gainResource('potency', 2), volley()], // lasts the combat: Tentacle damage ramps
 });
 ```
 

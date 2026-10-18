@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M1 First fight (M0 signed off; M0.6 art runs in parallel)
-**Current task:** M1 task breakdown, to agree with the owner
+**Current task:** M1 task breakdown (proposed below), to agree with the owner
 
 ## Milestones
 
@@ -86,7 +86,7 @@ _Done 18 Oct. Saves are stored as JSON text. A write checks that the new save re
 
 _Signed off by the owner 18 Oct. The line-up is Maelia, Virelle and Kibane (the three Gloomdrawn sprites) plus Leonora as a silhouette, against three training dummies. Virelle and Kibane got placeholder Strike/Defense for this. The settle check passes, and it fails when lunges are made to start from the current position instead of home. Input: drag, click-then-click, and keys (1–0, Enter, Esc, ←/→ to change target, E for End Turn). Right-click, Esc or dragging back down all cancel._
 
-### M0.6 Art pipeline (parallel, owner-paced)
+### M0.6 Art pipeline (parallel, owner-paced) ✅
 Owner installs the Codex CLI. Then confirm `codex exec` can generate an image from the prompt stem. Write briefs for the starter four (Maelia, Agathe, Anthe, Leonora) from DESIGN.md, generate 2–3 options each into `art/raw/<character>/`, and keep the prompt text beside each.
 **Done when:** the owner has picked a direction for each starter, or has given notes for a second pass.
 
@@ -97,6 +97,34 @@ _18 Oct, owner's note: side-view battlers in HD pixel style, with a background-r
 _19 Oct: owner picked Agathe-02 (keep the rest for skins or alts) and asked for crisp sprites at every resolution. The blur at 1080 was the canvas being CSS-scaled at a fractional offset, plus GPU downscaling; both fixed. `pick` stores sprites at 1024px. Agathe-02 is in the slice, front row. Options for Maelia, Anthe, Leonora and the Bloom-Rib Hound are in `art/raw/`._
 
 _19 Oct: **done.** Owner picked Maelia-02, Anthe-03, Leonora-02 and Bloom-Rib Hound-02 (all options kept). The slice party is now the starter four with their picked sprites. Portraits are still Gloomdrawn placeholders or letters._
+
+## M1 tasks (proposed, awaiting the owner's agreement)
+
+The kits are in `docs/notes/starter-kits.md` (approved 19 Oct). Transcend waits for M2, so each starter brings four cards here and the deck is 16.
+
+### M1.1 Domain engines
+Flesh (Embryo, the Poison status), Rapture (Tentacles, damage per hit lasting the combat, the end-of-turn volley, lowest-HP-first with overflow), Spirit (Essence, Retain, the Ritual cleanup discount to 0, held-turn counters) and Unbound (Mana debt). New operations: `gainMana`, `manaDebt`, `chargeUltimate`, `volley`, `changeCost`, `repeatNext`.
+**Done when:** each operation and Domain hook has rule tests, including overflow across enemies, a Ritual reaching 0, and debt that never takes Mana below 0.
+
+### M1.2 The starter four
+Stats, cards, passives and ultimates for Maelia, Agathe, Anthe and Leonora as data. The ultimate command and gauges; Strike and Defense charge 10.
+**Done when:** every card, passive and ultimate has a kit scenario, a golden replay of a scripted fight is stable, and the content contains no engine code.
+
+### M1.3 The Bloom-Rib Hound
+The enemy phase with intents from a seeded cycle, each previewed with its exact number. Win and loss end the combat.
+**Done when:** intent tests pass, and the shown intent number always equals the damage dealt.
+
+### M1.4 Combat UI
+- Domain counters: Embryo, Tentacles × damage per hit, Essence.
+- Mana debt in the orb.
+- Ritual costs showing printed and current.
+- Ultimate gauges on the party bar with a confirm to fire.
+- The Hound's intent, Poison on the enemy.
+- A win/lose screen with Restart.
+- Default animations for volleys, ultimates and Poison ticks.
+- The Hound's sprite on the right.
+
+**Done when:** the e2e boots into the M1 fight and plays one full turn. The owner plays the fight and signs off feel (gate).
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
