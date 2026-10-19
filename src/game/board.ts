@@ -16,7 +16,9 @@ export type TileKind =
   | 'symptom'
   | 'collapsing'
   /** A Collapsing tile after the party stepped off it: impassable. */
-  | 'ruin';
+  | 'ruin'
+  /** A Bloom pod swollen on a path tile from Fruiting on: a fight. */
+  | 'pod';
 
 export interface Tile {
   kind: TileKind;
@@ -45,12 +47,12 @@ export const FOG = { layout: 3, contents: 2, landmarks: 4 } as const;
 
 const LANDMARKS: readonly TileKind[] = ['shop', 'elite', 'boss'];
 /** Marked as soon as their layout is revealed, and from then on. */
-const ALWAYS_MARKED: readonly TileKind[] = ['collapsing', 'symptom', 'ruin'];
+const ALWAYS_MARKED: readonly TileKind[] = ['collapsing', 'symptom', 'ruin', 'pod'];
 
 /** A tile with a fight or a choice on it: walking stops there (owner, 19 Oct). */
 export function stopsOn(tile: Tile): boolean {
   if (tile.kind === 'symptom') return !tile.paid;
-  return ['fight', 'elite', 'boss', 'event', 'shop', 'camp'].includes(tile.kind);
+  return ['fight', 'elite', 'boss', 'pod', 'event', 'shop', 'camp'].includes(tile.kind);
 }
 
 export function createBoard(tiles: Record<string, Tile>, start: string): Board {
@@ -133,12 +135,12 @@ export function walk(board: Board, to: string): { board: Board; steps: string[];
   return { board: next, steps, trail };
 }
 
-/** The party has dealt with the tile it stands on: fights, Events and Camps become path; a Symptom is paid. */
+/** The party has dealt with the tile it stands on: fights, pods, Events and Camps become path; a Symptom is paid. */
 export function resolveTile(board: Board): Board {
   const next = structuredClone(board);
   const tile = next.tiles[next.at]!;
   if (tile.kind === 'symptom') tile.paid = true;
-  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'event' || tile.kind === 'camp') {
+  else if (['fight', 'elite', 'pod', 'event', 'camp'].includes(tile.kind)) {
     next.tiles[next.at] = { kind: 'path' };
   }
   return next;

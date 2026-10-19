@@ -99,6 +99,8 @@ export interface CombatState {
   resources: Record<string, number>;
   rng: Streams<CombatStream>;
   nextUid: number;
+  /** Percent added to enemies' max HP and outgoing damage for this fight (the run's Bloom stage). Absent means 0. */
+  enemyScale?: number;
 }
 
 export const isAlive = (enemy: Enemy): boolean => enemy.hp > 0;

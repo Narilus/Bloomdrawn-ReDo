@@ -4,8 +4,8 @@ import type { OpContext } from './operation.ts';
 import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
 
 /**
- * The one modifier pipeline. Steps: base formula, flat outgoing, outgoing multipliers,
- * incoming multipliers (damage with a target only). Rounds down at every step and never
+ * The one modifier pipeline. Steps: base formula, flat outgoing, outgoing multipliers (an enemy's
+ * damage includes the fight's enemy scale), incoming multipliers (damage with a target only). Rounds down at every step and never
  * goes below 0. Shield absorption is the damage operation's step 5.
  */
 export function pipeline(
@@ -24,6 +24,9 @@ export function pipeline(
   let amount = Math.floor(evaluate(base, state, ctx, registry));
   amount += Math.floor(sum(outgoing.filter((m) => m.step === 'flat')));
   amount = scale(amount, outgoing.filter((m) => m.step === 'outgoingMul'));
+  if (value === 'damage' && state.enemyScale && state.enemies.some((e) => e.id === ctx.source)) {
+    amount = Math.floor((amount * (100 + state.enemyScale)) / 100);
+  }
   if (value === 'damage' && target !== undefined) {
     const incoming = modifiersOf(state, registry, target).filter((m) => m.value === value);
     amount = scale(amount, incoming.filter((m) => m.step === 'incomingMul'));

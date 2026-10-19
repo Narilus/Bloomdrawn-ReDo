@@ -1089,6 +1089,57 @@ kbd {
   background: radial-gradient(ellipse at 50% 55%, #2a1c26 0%, #1a1217 70%);
 }
 
+/* The Bloom clock's stage tints the ground, pinker as it closes in (stand-ins for the stage art). */
+.labyrinth.bloom-seeded { background: radial-gradient(ellipse at 50% 55%, #2e1d28 0%, #1b1218 70%); }
+.labyrinth.bloom-rooted { background: radial-gradient(ellipse at 50% 55%, #351f2c 0%, #1e1219 72%); }
+.labyrinth.bloom-flowering { background: radial-gradient(ellipse at 50% 55%, #3e2231 0%, #22131b 74%); }
+.labyrinth.bloom-fruiting { background: radial-gradient(ellipse at 50% 55%, #4a2434 0%, #28131c 76%); }
+
+.bloom-clock {
+  top: 24px;
+  right: 24px;
+  width: 300px;
+  padding: 12px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 16px;
+}
+
+.bloom-pips {
+  display: flex;
+  gap: 6px;
+}
+
+.bloom-pips .pip {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(246, 230, 220, 0.12);
+}
+
+.bloom-pips .pip.filled {
+  background: var(--flesh-pink);
+}
+
+.boss-marker polygon {
+  fill: var(--antique-gold);
+  stroke: #1a1217;
+  stroke-width: 2;
+}
+
+.boss-marker text {
+  fill: var(--antique-gold);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.boss-marker {
+  pointer-events: none;
+}
+
 .labyrinth-map {
   position: absolute;
   inset: 0;
@@ -1124,6 +1175,7 @@ kbd {
 .hex-symptom.paid polygon { fill: #6e6230; }
 .hex-collapsing polygon { fill: #6a1e28; stroke-dasharray: 8 5; }
 .hex-ruin polygon { fill: #140d11; stroke: #2a1e22; }
+.hex-pod polygon { fill: #c4687a; stroke: #f2c4c4; }
 
 .hex.on-route polygon {
   stroke: var(--blush);

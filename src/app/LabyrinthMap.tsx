@@ -23,6 +23,7 @@ const LABEL: Readonly<Record<Shown, string>> = {
   symptom: 'Symptom',
   collapsing: 'Collapsing',
   ruin: '',
+  pod: 'Pod',
   unknown: '?',
 };
 
@@ -30,16 +31,20 @@ const LABEL: Readonly<Record<Shown, string>> = {
 const SIZE = 56;
 /** Where the party's tile sits: the middle of the map area, between the top and bottom plaques. */
 const MIDDLE = { x: WIDTH / 2, y: 530 };
+/** The Boss marker rides this ellipse around the middle, inside the plaques. */
+const EDGE = { x: 840, y: 330 };
 const SQRT3 = Math.sqrt(3);
 
 interface Props {
   board: Board;
   /** While the party walks, the map shows but takes no input. */
   busy: boolean;
+  /** The Boss tile, once the Bloom shows the way: a marker points to it while it is fogged or off screen. */
+  boss?: string | undefined;
   onPick: (key: string) => void;
 }
 
-export function LabyrinthMap({ board, busy, onPick }: Props) {
+export function LabyrinthMap({ board, busy, boss, onPick }: Props) {
   const [hover, setHover] = useState<string | null>(null);
   const route = hover && !busy ? routeTo(board, hover) : undefined;
   const steps = new Map(route?.map((key, i) => [key, i + 1]));
@@ -69,7 +74,7 @@ export function LabyrinthMap({ board, busy, onPick }: Props) {
                 data-kind={shown}
               >
                 <polygon points={corners(SIZE * 0.94)} />
-                {LABEL[shown] && (
+                {LABEL[shown] && key !== board.at && (
                   <text className="hex-label" y={5}>
                     {tile.paid ? 'Paid' : LABEL[shown]}
                   </text>
@@ -86,9 +91,28 @@ export function LabyrinthMap({ board, busy, onPick }: Props) {
         <g className="party-token" transform={`translate(${MIDDLE.x} ${MIDDLE.y})`}>
           <circle r={SIZE * 0.42} />
         </g>
+        {boss && <BossMarker board={board} boss={boss} />}
       </svg>
       {hover && <TileInfo board={board} at={hover} steps={route?.length} busy={busy} />}
     </>
+  );
+}
+
+/** An arrow at the edge of the view toward the Boss, unless its tile is revealed and on screen. */
+function BossMarker({ board, boss }: { board: Board; boss: string }) {
+  const party = centre(parseHex(board.at));
+  const at = centre(parseHex(boss));
+  const dx = at.x - party.x;
+  const dy = at.y - party.y;
+  if (board.seen.includes(boss) && (dx / EDGE.x) ** 2 + (dy / EDGE.y) ** 2 <= 1) return null;
+  const angle = Math.atan2(dy / EDGE.y, dx / EDGE.x);
+  const x = MIDDLE.x + EDGE.x * Math.cos(angle);
+  const y = MIDDLE.y + EDGE.y * Math.sin(angle);
+  return (
+    <g className="boss-marker" transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`} data-boss-marker>
+      <polygon points="22,0 -12,-15 -4,0 -12,15" transform={`rotate(${((Math.atan2(dy, dx) * 180) / Math.PI).toFixed(1)})`} />
+      <text y={36}>Boss</text>
+    </g>
   );
 }
 
@@ -119,6 +143,7 @@ const NAME: Readonly<Record<Shown, string>> = {
 };
 
 const HELP: Partial<Record<Shown, string>> = {
+  pod: 'Swollen by the Bloom: a fight.',
   collapsing: 'Gone once you step off it.',
   ruin: 'Impassable.',
   symptom: 'Take its card to pass.',

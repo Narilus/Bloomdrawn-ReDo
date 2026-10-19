@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
 import type { CombatState } from '../engine/index.ts';
+import { BLOOM_STAGES, bossDirection, stageOf, ticksToNext } from '../game/bloom.ts';
 import {
   canMove,
   chooseExpeditionRelic,
@@ -31,7 +32,7 @@ const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.
 
 /**
  * Dev builds only: `?seed=N` picks the board; `?encounters=id,...` replaces every fight, elite and
- * Boss pool (e2e uses training dummies).
+ * Boss pool (e2e uses training dummies); `?clock=N` starts the Bloom clock at N ticks.
  */
 function defFromUrl(): ExpeditionDef {
   const encounters = (params().get('encounters')?.split(',') ?? []).filter((id) => registry.encounters[id]);
@@ -40,11 +41,13 @@ function defFromUrl(): ExpeditionDef {
 }
 const DEF = defFromUrl();
 const FIRST_SEED = Number(params().get('seed')) || 1;
+const FIRST_CLOCK = Number(params().get('clock')) || 0;
+const begin = (seed: number): Expedition => ({ ...startExpedition(seed, PARTY, DEF, registry.motifs), clock: FIRST_CLOCK });
 const maxHp = PARTY.reduce((sum, id) => sum + (registry.characters[id]?.stats.hp ?? 0), 0);
 
 export function Labyrinth() {
   const [seed, setSeed] = useState(FIRST_SEED);
-  const [exp, setExp] = useState<Expedition>(() => startExpedition(FIRST_SEED, PARTY, DEF, registry.motifs));
+  const [exp, setExp] = useState<Expedition>(() => begin(FIRST_SEED));
   const [walking, setWalking] = useState(false);
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
@@ -66,20 +69,20 @@ export function Labyrinth() {
   const onFightEnd = useCallback((combat: CombatState) => setExp((e) => finishExpeditionFight(e, combat, DEF)), []);
   const again = () => {
     setSeed(seed + 1);
-    setExp(startExpedition(seed + 1, PARTY, DEF, registry.motifs));
+    setExp(begin(seed + 1));
   };
 
   const tile = exp.board.tiles[exp.board.at];
   if (exp.phase === 'fight' && !walking) {
-    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : 'Labyrinth';
+    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : tile?.kind === 'pod' ? 'Pod' : 'Labyrinth';
     return <Combat key={`${seed}:${exp.fightSeed}`} setup={expeditionFight(exp, registry)} label={label} onEnd={onFightEnd} />;
   }
 
   return (
-    <div className="labyrinth">
-      <LabyrinthMap board={exp.board} busy={walking || !canMove(exp)} onPick={pick} />
+    <div className={`labyrinth bloom-${stageOf(exp.clock).id}`}>
+      <LabyrinthMap board={exp.board} busy={walking || !canMove(exp)} boss={bossDirection(exp.board, exp.clock)} onPick={pick} />
       <RelicBar relics={exp.relics} />
-      <div className="turn plaque">The Labyrinth</div>
+      <BloomClock clock={exp.clock} />
       <div className="map-party plaque">
         <div className="bar-label">
           <span>Party</span>
@@ -106,6 +109,31 @@ export function Labyrinth() {
   );
 }
 
+/** The Bloom clock: its stage, the ticks toward the next one, and what the stage does. */
+function BloomClock({ clock }: { clock: number }) {
+  const stage = stageOf(clock);
+  const left = ticksToNext(clock);
+  const span = left === undefined ? 0 : left + clock - stage.from;
+  const effect = stage.id === 'fruiting' ? 'Pods swell near you with every tick' : stage.id === 'flowering' ? 'The Boss shows its way' : '';
+  return (
+    <div className="bloom-clock plaque" aria-label={`Bloom clock: ${stage.name}`}>
+      <div className="bar-label">
+        <span>Bloom</span>
+        <strong>{stage.name}</strong>
+      </div>
+      {span > 0 && (
+        <div className="bloom-pips" title={`${left} more ${left === 1 ? 'tick' : 'ticks'} to ${BLOOM_STAGES.find((s) => s.from === clock + left!)?.name}`}>
+          {Array.from({ length: span }, (_, i) => (
+            <span key={i} className={i < clock - stage.from ? 'pip filled' : 'pip'} />
+          ))}
+        </div>
+      )}
+      <span className="muted">{stage.enemyScale > 0 ? `Enemies +${stage.enemyScale}% HP and damage` : 'Fights, Events and Camps tick it'}</span>
+      {effect && <span className="muted">{effect}</span>}
+    </div>
+  );
+}
+
 /** Standing on a Shop, Camp, Event or Symptom. Their rules arrive in M3.5–M3.6. */
 function TilePanel({ exp, onChange }: { exp: Expedition; onChange: (exp: Expedition) => void }) {
   const tile = exp.board.tiles[exp.board.at]!;
@@ -123,7 +151,7 @@ function TilePanel({ exp, onChange }: { exp: Expedition; onChange: (exp: Expedit
       <h3>{t.title}</h3>
       <p>{t.body}</p>
       <div className="tile-actions">
-        <button className="end-turn" onClick={() => onChange(leaveTile(exp))}>
+        <button className="end-turn" onClick={() => onChange(leaveTile(exp, DEF))}>
           {t.leave}
         </button>
         {tile.kind === 'symptom' && back && (

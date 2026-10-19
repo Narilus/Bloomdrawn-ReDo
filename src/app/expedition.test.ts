@@ -76,7 +76,7 @@ describe('the expedition', () => {
     const toll = go(on({ kind: 'entrance' }, { kind: 'symptom' }, { kind: 'path' }), '1,0').at(-1)!;
     expect([toll.phase, canMove(toll), move(toll, '2,0')]).toEqual(['tile', false, undefined]);
     expect(turnBack(toll)!.board.at).toBe('0,0');
-    const paid = leaveTile(toll);
+    const paid = leaveTile(toll, M3_EXPEDITION);
     expect([paid.phase, paid.board.tiles['1,0']!.paid]).toEqual(['map', true]);
     expect(go(paid, '2,0').at(-1)!.board.at).toBe('2,0');
   });
@@ -86,6 +86,47 @@ describe('the expedition', () => {
     expect([shop.phase, canMove(shop)]).toEqual(['tile', true]);
     const event = go(shop, '2,0').at(-1)!;
     expect(event.board.tiles['1,0']!.kind).toBe('shop');
-    expect(leaveTile(event).board.tiles['2,0']).toEqual({ kind: 'path' });
+    expect(leaveTile(event, M3_EXPEDITION).board.tiles['2,0']).toEqual({ kind: 'path' });
+  });
+});
+
+describe('the Bloom clock on a run', () => {
+  const EVENT = { kind: 'event' } as const;
+
+  it('ticks on a won fight and on an Event; walking, Shops and Symptoms leave it', () => {
+    const fighting = go(on({ kind: 'entrance' }, HOUND, { kind: 'shop' }, EVENT), '1,0').at(-1)!;
+    const won = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
+    expect(won.clock).toBe(1);
+    const shop = leaveTile(go(won, '2,0').at(-1)!, M3_EXPEDITION);
+    expect(shop.clock).toBe(1);
+    expect(leaveTile(go(shop, '3,0').at(-1)!, M3_EXPEDITION).clock).toBe(2);
+    const toll = go(on({ kind: 'entrance' }, { kind: 'symptom' }), '1,0').at(-1)!;
+    expect(leaveTile(toll, M3_EXPEDITION).clock).toBe(0);
+  });
+
+  it('a fight started at a later stage brings scaled enemies', () => {
+    const fighting = go(on({ kind: 'entrance' }, HOUND), '1,0').at(-1)!;
+    expect(expeditionFight(fighting, registry).enemyScale).toBeUndefined();
+    const seeded = expeditionFight({ ...fighting, clock: 3 }, registry);
+    expect(seeded.enemyScale).toBe(10);
+    const hound = registry.enemies['enemy.bloom-rib-hound']!.hp;
+    expect(startCombat(seeded, registry).state.enemies[0]!.maxHp).toBe(Math.floor(hound * 1.1));
+  });
+
+  it('a pod is a fight with its own encounter, and clears to path', () => {
+    const pod = { kind: 'pod', content: 'encounter.hound' } as const;
+    const fighting = go(on({ kind: 'entrance' }, pod), '1,0').at(-1)!;
+    expect(fighting.phase).toBe('fight');
+    expect(expeditionFight(fighting, registry).enemies).toEqual(['enemy.bloom-rib-hound']);
+    const won = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
+    expect(won.board.tiles['1,0']).toEqual({ kind: 'path' });
+  });
+
+  it('winning a fight at Fruiting swells pods from the fight pool around the party', () => {
+    const fighting = { ...go(on({ kind: 'entrance' }, HOUND, { kind: 'path' }, { kind: 'path' }), '1,0').at(-1)!, clock: 12 };
+    const won = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
+    const pods = Object.values(won.board.tiles).filter((t) => t.kind === 'pod');
+    expect(pods).toHaveLength(2);
+    expect(pods.every((t) => M3_EXPEDITION.board.encounters.fight.includes(t.content!))).toBe(true);
   });
 });

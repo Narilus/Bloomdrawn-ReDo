@@ -30,7 +30,7 @@ export const summonOp: Operation<SummonArgs> = {
   resolve(draft, args, ctx, registry: Registry) {
     const events: EngineEvent[] = [];
     for (const slot of room(draft, args)) {
-      const enemy = newEnemy(registry, args.enemy, `e${draft.nextUid++}`, slot);
+      const enemy = newEnemy(registry, args.enemy, `e${draft.nextUid++}`, slot, draft.enemyScale ?? 0);
       draft.enemies.push(enemy);
       events.push({ type: 'enemySummoned', source: ctx.source, target: enemy.id });
     }

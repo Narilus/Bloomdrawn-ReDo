@@ -55,8 +55,14 @@ Fights, Events and using a Camp tick it. Walking, Shops and Symptoms don't.
 
 There is no HP loss at the start of fights: it can brick a run, and later builds may want full HP (owner). The +50% against the Boss is a balance question for later.
 
+As built in M3.4 (`src/game/bloom.ts`; numbers are placeholders):
+- A fight takes the stage it starts at; the tick from winning it comes after. The Boss is scaled like any fight for now.
+- Enemy scale raises max HP (summons included) and the damage enemies deal, rounding down, through the same pipeline previews use.
+- On reaching Flowering, each normal fight you haven't seen yet has a 1 in 3 chance to draw from the elite roster instead. It stays a normal fight tile; fights you've already seen keep their enemies.
+- Obol bonuses come with Obols (M3.5), rarer Events with Events and the Camp tick with Camps (M3.6).
+
 **Fruiting's pressure: pods** (owner). DESIGN's stage art for Fruiting is "pods swell and burst".
-- At Fruiting, and on every tick after, pods swell on a few path tiles near the party (how many and how near are placeholders to tune in M3.4).
+- On the tick that reaches Fruiting, and on every tick after, 2 pods swell on random path tiles within 3 of the party (placeholders). Each holds a fight from the normal pool.
 - Stepping on a pod starts a normal fight. Pods are marked, and the route goes around them like any fight, so the danger is visible and can be planned around. It just keeps growing.
 - Walking a long way back for a Shop gets riskier with every fight you take.
 

@@ -8,15 +8,17 @@ import {
   type Registry,
   type Streams,
 } from '../engine/index.ts';
+import { bloomTick, stageOf } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
 import { generateBoard, M3_LABYRINTH, type LabyrinthDef } from './labyrinth.ts';
 
 // A run through the Labyrinth (docs/notes/m3-labyrinth.md): the party walks the board, fights
 // where it stops on a fight, and wins at the Boss. Party HP, ultimate gauges and relics carry from
-// fight to fight. Pure and seeded, like the engine. Shops, Camps, Events and Symptoms get their
-// rules in M3.5–M3.6; until then the party can only look at them and move on.
+// fight to fight. Won fights and Events tick the Bloom clock (src/game/bloom.ts), which scales the
+// enemies of later fights. Pure and seeded, like the engine. Shops, Camps, Events and Symptoms get
+// their rules in M3.5–M3.6; until then the party can only look at them and move on.
 
-export const EXPEDITION_STREAMS = ['fights', 'rewards'] as const;
+export const EXPEDITION_STREAMS = ['fights', 'rewards', 'bloom'] as const;
 type ExpeditionStream = (typeof EXPEDITION_STREAMS)[number];
 
 export interface ExpeditionDef {
@@ -42,6 +44,8 @@ export interface Expedition {
   fightSeed?: number;
   hp: number | null;
   gauges: number[];
+  /** Bloom clock ticks so far. */
+  clock: number;
   relics: string[];
   offered: string[];
   rng: Streams<ExpeditionStream>;
@@ -54,6 +58,7 @@ export function startExpedition(seed: number, party: string[], def: ExpeditionDe
     phase: 'map',
     hp: null,
     gauges: party.map(() => 0),
+    clock: 0,
     relics: [],
     offered: [],
     rng: createStreams(seed, EXPEDITION_STREAMS),
@@ -91,23 +96,25 @@ export function canMove(exp: Expedition): boolean {
 function arrive(exp: Expedition): void {
   const tile = exp.board.tiles[exp.board.at]!;
   if (!stopsOn(tile)) exp.phase = 'map';
-  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss') {
+  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss' || tile.kind === 'pod') {
     exp.phase = 'fight';
     exp.fightSeed = nextInt(exp.rng, 'fights', 2 ** 31);
   } else exp.phase = 'tile';
 }
 
-/** The combat setup for the fight the party is standing on. */
+/** The combat setup for the fight the party is standing on, scaled by the Bloom's stage. */
 export function expeditionFight(exp: Expedition, registry: Registry): CombatSetup {
   const tile = exp.board.tiles[exp.board.at];
   const encounter = registry.encounters[tile?.content ?? ''];
   if (exp.phase !== 'fight' || !encounter) throw new Error('There is no fight here.');
   const setup: CombatSetup = { seed: exp.fightSeed ?? 0, party: exp.party, enemies: encounter.enemies, relics: exp.relics, gauges: exp.gauges };
   if (exp.hp !== null) setup.partyHp = exp.hp;
+  const scale = stageOf(exp.clock).enemyScale;
+  if (scale > 0) setup.enemyScale = scale;
   return setup;
 }
 
-/** Carries a finished fight back: a loss ends the run, the Boss wins it, an elite offers relics. */
+/** Carries a finished fight back: a loss ends the run, the Boss wins it, an elite offers relics. A won fight ticks the clock. */
 export function finishExpeditionFight(exp: Expedition, combat: CombatState, def: ExpeditionDef): Expedition {
   if (exp.phase !== 'fight' || combat.phase !== 'ended') throw new Error('The fight is not over.');
   const next = structuredClone(exp);
@@ -120,6 +127,7 @@ export function finishExpeditionFight(exp: Expedition, combat: CombatState, def:
   else {
     next.board = resolveTile(next.board);
     next.phase = 'map';
+    tick(next, def);
     if (kind === 'elite') {
       const pool = def.relicPool.filter((id) => !exp.relics.includes(id));
       shuffleInPlace(pool, next.rng, 'rewards');
@@ -142,16 +150,23 @@ export function chooseExpeditionRelic(exp: Expedition, relic: string | null): Ex
 }
 
 /**
- * Done with the tile the party stands on. An Event is used up and a Symptom is paid (M3.6 adds
- * their effects and the card); a Shop or Camp stays for later.
+ * Done with the tile the party stands on. An Event is used up and ticks the clock, and a Symptom is
+ * paid (M3.6 adds their effects and the card); a Shop or Camp stays for later.
  */
-export function leaveTile(exp: Expedition): Expedition {
+export function leaveTile(exp: Expedition, def: ExpeditionDef): Expedition {
   if (exp.phase !== 'tile') throw new Error('There is nothing here to leave.');
   const kind = exp.board.tiles[exp.board.at]?.kind;
   const next = structuredClone(exp);
   if (kind === 'event' || kind === 'symptom') next.board = resolveTile(next.board);
+  if (kind === 'event') tick(next, def);
   next.phase = 'map';
   return next;
+}
+
+/** One Bloom clock tick, and what the new count does to the board. */
+function tick(exp: Expedition, def: ExpeditionDef): void {
+  exp.board = bloomTick(exp.board, exp.clock, exp.rng, 'bloom', def.board.encounters);
+  exp.clock += 1;
 }
 
 /** Steps back off an unpaid Symptom to the tile the party came from, if it is still there. */

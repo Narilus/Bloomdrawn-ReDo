@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.4 The Bloom clock
+**Current task:** M3.5 Obols and Shops
 
 ## Milestones
 
@@ -194,9 +194,11 @@ _Built 19 Oct, for the owner to look at. `src/game/expedition.ts` is the run: wa
 
 _Owner feedback 19 Oct, applied: layout fog at 3 (contents stay at 2) so a tile's edge shows whether it leads on; routes cross only tiles whose contents are known, so the outer ring can't leak a fight; the view is centred on the party and follows it, instead of fitting the whole board. The Victory panel and the Obol counter move to M3.5._
 
-### M3.4 The Bloom clock
+### M3.4 The Bloom clock ✅
 Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start; the Boss direction marker from Flowering; pods from Fruiting.
 **Done when:** tick and stage rules have tests, and scaled enemies preview and resolve the same numbers.
+
+_Done 19 Oct. `src/game/bloom.ts` holds the stages (ticks 3/6/9/12, enemies +10/20/35/50%, placeholders), the Flowering elite draw for unseen fights, pods from Fruiting (2 per tick within 3 of the party), and the Boss direction. Won fights and Events tick the clock. The engine takes an `enemyScale` per fight: enemies' max HP (summons too) and outgoing damage, in the shared pipeline, so intents preview what resolves (`src/engine/scale.test.ts`). The map shows the stage, ticks to the next, a tinted ground per stage, pod tiles and a Boss marker at the view's edge. `?clock=N` starts the clock at N in dev builds; e2e wins a fight from 11 and sees Fruiting's pods._
 
 ### M3.5 Obols and Shops
 Obols from first clears; Shop stock and prices fixed by the seed on first reveal and kept all run; buying relics and services. A Victory panel listing a won fight's rewards before the map returns, and an Obol counter on the map.
