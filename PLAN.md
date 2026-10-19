@@ -1,7 +1,7 @@
 # PLAN
 
-**Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** M2.5 owner playtest (gate): re-check after the playtest fixes and the new enemy sprites
+**Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
+**Current task:** M3 draft (`docs/notes/m3-labyrinth.md`) awaiting the owner's answers; M3.1 meanwhile
 
 ## Milestones
 
@@ -132,7 +132,7 @@ _Done 19 Oct. Enemies list intents that cycle in order; the enemy phase acts the
 
 **Done when:** the e2e boots into the M1 fight and plays one full turn. The owner plays the fight and signs off feel (gate). ✅ Signed off 19 Oct.
 
-_19 Oct: built, awaiting the owner's play. Portrait rings are the ultimate gauges (click, or Shift+1–4, when Ready, then confirm). Domain counters sit under the portraits; hover a portrait for its passive and ultimate. The Hound shows its intent with exact numbers, and the party bar shows incoming damage, Safe or Lethal. End of turn plays out in order (Tentacles, Poison, then each enemy action), and the hand waits until it finishes. Dev builds take `?enemies=` for other fights._
+_Signed off 19 Oct, after playtest fixes: turn counts run on the turns where they matter, combat start's events play, and the enemy sprites are in. Built 19 Oct: Portrait rings are the ultimate gauges (click, or Shift+1–4, when Ready, then confirm). Domain counters sit under the portraits; hover a portrait for its passive and ultimate. The Hound shows its intent with exact numbers, and the party bar shows incoming damage, Safe or Lethal. End of turn plays out in order (Tentacles, Poison, then each enemy action), and the hand waits until it finishes. Dev builds take `?enemies=` for other fights._
 
 _19 Oct, owner's playtest: mechanics all work. Changes made: Shield blocks Poison; HP and Shield bars step as each hit lands (`vitals` from the engine); one badge per Domain (Tentacles shows the total with count × damage per hit); keyword tags on their own gold line and live damage and Shield numbers and status names coloured in card text, for the owner to judge. Then, at the owner's request, an icon set (`src/app/icons.tsx`: tentacle, embryo, essence, shield, poison, attack) replaces badge words, with hover and focus tooltips holding the name and rule; intents show an icon per action._
 
@@ -140,35 +140,67 @@ _19 Oct, owner's playtest: mechanics all work. Changes made: Shield blocks Poiso
 
 Content and rules are in `docs/notes/m2-content.md` (approved 19 Oct). Portraits and enemy sprites run through `npm run art` in parallel, owner-paced.
 
-### M2.1 Launch statuses
+### M2.1 Launch statuses ✅
 Bleed, Vulnerable, Weak, Stun, Delay and Falter. Statuses on the party side apply to the whole party. Statuses tick at the end of their side's turn. Control resistance turns Stun and Delay into Falter. Party statuses show on the party bar, with icons and tooltips.
 **Done when:** each status has rule tests (stacking, timing, decay, interaction with Shield), and previews show Weak, Vulnerable and Falter in the numbers.
 
 _Done 19 Oct. Statuses are content (`src/content/statuses/`) on generic fields; the party has one shared status list. `src/content/scenarios/statuses.test.ts` covers each. After the M2 playtest, a turn count drops at the end of each turn where it matters (Weak: the bearer's own; Vulnerable: the other side's), never in the turn it landed in. See DECISIONS.md._
 
-### M2.2 Transcend
+### M2.2 Transcend ✅
 The fifth card for each starter (deck 20). The `transcend` operation: once per combat, a Graveyard, +35 charge, and a Transcended ultimate for the rest of the combat. Generated cards (Maelia's Seed Pod). The "exactly five personal cards" check turns on. The portrait shows the Transcended state.
 **Done when:** each Transcend card and Transcended ultimate has a kit scenario, and a Transcend card can't resolve twice in one combat.
 
 _Done 19 Oct. `transcend` and `createCard` operations, an `exhaust` keyword (to the Graveyard), `ultimate.transcended` in each kit, and the five-slot check is on. Virelle's and Kibane's M0 placeholders were removed (their kits come in M5). The golden replay now plays a 20-card deck._
 
-### M2.3 Enemy roster
+### M2.3 Enemy roster ✅
 The approved enemies and encounters. Intents that apply statuses, Shield or heal allies, or summon; summons join next round in a free side slot. Multi-enemy layout and aiming.
 **Done when:** each enemy's intent cycle and role has a scenario, summons respect the slot limit, and intent previews equal results.
 
 _Done 19 Oct. Enemies hold a fixed `slot`; a fight lays out its starting enemies plus what they can summon (at most 4), and summons take a free slot and act from the next round. `summon`, Shield for allies, heal the weakest ally, encounters as content with HP overrides, enemy sizes. `enemies.test.ts` covers each role, and checks shown against dealt damage in every encounter. Enemies stand in as dummies until the owner picks sprites (options in `art/raw/`; whelp 03–04 replace 01–02, which missed the brief)._
 
-### M2.4 Relics
+### M2.4 Relics ✅
 The approved relics, as triggers and modifiers, with Common, Uncommon, Rare and Cursed tiers. A relic bar along the top with tooltips.
 **Done when:** each relic has a rule test, and relic trigger order follows acquisition order.
 
 _Done 19 Oct. Seven relics as content (`src/content/relics/m2.ts`) with name, tier and text. New engine pieces: a `handDrawn` moment after the turn's draw, trigger filters by card slot, charge for the triggering card's owner, party damage for relics. A relic bar with tier colours and tooltips; dev builds take `?relics=`._
 
-### M2.5 The gauntlet (owner gate)
+### M2.5 The gauntlet (owner gate) ✅
 A three-fight run: normal, normal, elite. Party HP, gauges and relics carry over; gauges start at 0. Pick one relic from three after each win; "Run again" after a loss or the final win.
 **Done when:** a golden replay of a scripted gauntlet is stable, the e2e plays into fight 2, and the owner plays it and signs off.
 
-_19 Oct: built, awaiting the owner's play. `src/game/run.ts` holds the run (seeded encounters and fight seeds; HP, gauges and relics carry; relic offers; win and loss); the app's Gauntlet screen runs it, with a relic pick after each win and "Run again" at the end. Dev URLs: `?fights=` sets the encounters, `?enemies=`/`?relics=` give a single test fight. The scripted golden run wins all three fights with HP to spare, so expect to tune numbers._
+_Signed off 19 Oct, after playtest fixes: turn counts run on the turns where they matter, combat start's events play, and the enemy sprites are in. Built 19 Oct: `src/game/run.ts` holds the run (seeded encounters and fight seeds; HP, gauges and relics carry; relic offers; win and loss); the app's Gauntlet screen runs it, with a relic pick after each win and "Run again" at the end. Dev URLs: `?fights=` sets the encounters, `?enemies=`/`?relics=` give a single test fight. The scripted golden run wins all three fights with HP to spare, so expect to tune numbers._
+
+## M3 tasks
+
+Content and rules are drafted in `docs/notes/m3-labyrinth.md` (awaiting the owner). M3.1 needs no open answers; the rest wait for them.
+
+### M3.1 The hex board
+Axial hex coordinates, tiles and their lifecycle (cleared tiles become path, Collapsing tiles vanish when stepped off, one-use Camps and Symptoms), adjacency, shortest routes over open tiles, and fog (layout, contents, landmarks). Pure, in `src/game/`.
+**Done when:** board rules have tests: routes, stopping at content, Collapsing on step-off, fog reveal distances.
+
+### M3.2 Motifs and the validator
+Motifs as content (slots with roles and sockets), stitched into one board from the run seed, roles filled from pools. The never-stranded validator replays every Collapsing order. The temptation loop motif, as the owner drew it.
+**Done when:** the validator rejects a hand-made stranding board, and passes boards from many seeds; the temptation loop behaves as drawn (free first visit, Symptom on return).
+
+### M3.3 The map screen
+The board in React/SVG: fog, landmarks, the party token, click-to-move, tile tooltips. Entering a fight plays it and returns to the map.
+**Done when:** e2e walks into a fight and back; the owner can read the board at a glance.
+
+### M3.4 The Bloom clock
+Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start.
+**Done when:** tick and stage rules have tests, and scaled enemies preview and resolve the same numbers.
+
+### M3.5 Obols and Shops
+Obols from first clears; Shop stock and prices fixed by the seed on first reveal and kept all run; buying relics and services.
+**Done when:** a Shop keeps its stock across visits, can't be farmed, and buying is tested.
+
+### M3.6 Camps, Events and Symptoms
+The run's own deck; ownerless Symptom cards; Camp choices; Events as content with choices.
+**Done when:** each Camp choice, Event and Symptom has a scenario test.
+
+### M3.7 A Labyrinth run (owner playtest)
+A whole board from the entrance to the Boss tile, with Run again.
+**Done when:** a golden replay of a scripted run is stable, and the owner plays it and signs off.
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
