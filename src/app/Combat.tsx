@@ -1,42 +1,35 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
-import { apply, GAUGE_MAX, previewCard, startCombat, type CombatState, type Command, type EntityId, type Vitals } from '../engine/index.ts';
+import {
+  apply,
+  GAUGE_MAX,
+  previewCard,
+  startCombat,
+  type CombatSetup,
+  type CombatState,
+  type Command,
+  type EntityId,
+  type Vitals,
+} from '../engine/index.ts';
 import type { Battlefield } from '../stage/Battlefield.ts';
 import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
 import { DomainCounters, EnemyPlate, PartyBar, Pile, Portraits, RelicBar, UltimatePanel } from './Hud.tsx';
 
-// Slice line-up: the starter four with their picked Bloomdrawn sprites, Agathe in front.
-const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
-// The M1 fight: the starter four against one Bloom-Rib Hound.
-const DEFAULT_ENEMIES = ['enemy.bloom-rib-hound'];
-
-/** Dev builds only: `?enemies=id,id` picks the enemies (a first piece of the content lab). */
-function enemiesFromUrl(): string[] {
-  if (!import.meta.env.DEV) return DEFAULT_ENEMIES;
-  const ids = new URLSearchParams(window.location.search).get('enemies')?.split(',') ?? [];
-  return ids.length > 0 && ids.every((id) => registry.enemies[id]) ? ids : DEFAULT_ENEMIES;
+interface Props {
+  /** Read once at mount; remount (change `key`) for the next fight. */
+  setup: CombatSetup;
+  /** Shown beside the turn, e.g. "Fight 2 of 3". */
+  label?: string;
+  /** Called once the fight has ended and its last hits have played out. */
+  onEnd: (state: CombatState) => void;
 }
-const ENEMIES = enemiesFromUrl();
 
-/** Dev builds only: `?relics=id,id` starts the fight holding those relics. */
-function relicsFromUrl(): string[] {
-  if (!import.meta.env.DEV) return [];
-  const ids = new URLSearchParams(window.location.search).get('relics')?.split(',') ?? [];
-  return ids.filter((id) => registry.relics[id]);
-}
-const RELICS = relicsFromUrl();
-
-// Every gauge starts at 70, as if mid-run, so each ultimate can fire in one slice fight (DECISIONS.md).
-const GAUGES = PARTY.map(() => 70);
-
-const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES, gauges: GAUGES, relics: RELICS }, registry).state;
-
-export function Combat() {
+/** One fight: the battlefield, the HUD and the hand. */
+export function Combat({ setup, label, onEnd }: Props) {
   const { fit, stageHost } = useFrame();
-  const [seed, setSeed] = useState(1);
-  const [state, setState] = useState(() => newCombat(1));
+  const [state, setState] = useState(() => startCombat(setup, registry).state);
   // The source of truth between renders, so rapid input never applies a command to a stale state.
   const current = useRef(state);
   const field = useRef<Battlefield | null>(null);
@@ -92,17 +85,6 @@ export function Combat() {
     setUltimateFor(null);
   }, [run, ultimateFor]);
   const closeUltimate = useCallback(() => setUltimateFor(null), []);
-  const restart = () => {
-    const next = seed + 1;
-    const fresh = newCombat(next);
-    current.current = fresh;
-    setSeed(next);
-    setState(fresh);
-    for (const t of timers.current) window.clearTimeout(t);
-    timers.current = [];
-    setShown(null);
-    setBusy(false);
-  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -116,6 +98,18 @@ export function Combat() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [endTurn, busy, ultimateFor]);
+
+  // The fight is over once its last hits have played out on the field.
+  const ended = state.phase === 'ended' && !shown;
+  const reported = useRef(false);
+  useEffect(() => {
+    if (!ended || reported.current) return;
+    reported.current = true;
+    onEnd(current.current);
+  }, [ended, onEnd]);
+
+  // Pending bar steps and the enemy-turn wait die with the fight.
+  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
   useEffect(() => {
     if (!toast) return;
@@ -151,7 +145,7 @@ export function Combat() {
 
   return (
     <div className="combat">
-      {stageHost && <StageView key={seed} initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
+      {stageHost && <StageView initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
       <Portraits state={state} choosing={ultimateFor !== null} onUltimate={(m) => !busy && setUltimateFor(m)} />
       <DomainCounters state={state} />
       <RelicBar state={state} />
@@ -170,7 +164,9 @@ export function Combat() {
         <Pile label="Discard" count={state.piles.discard.length} />
         <Pile label="Graveyard" count={state.piles.graveyard.length} />
       </div>
-      <div className="turn plaque">Turn {state.turn}</div>
+      <div className="turn plaque">
+        {label && <span className="fight-label">{label} · </span>}Turn {state.turn}
+      </div>
       <button className="end-turn" onClick={endTurn} disabled={state.phase !== 'player' || busy}>
         {busy ? 'Enemy turn' : <>End Turn <kbd>E</kbd></>}
       </button>
@@ -186,14 +182,6 @@ export function Combat() {
       {toast && (
         <div key={toast.id} className="toast" role="status">
           {toast.text}
-        </div>
-      )}
-      {state.phase === 'ended' && !shown && (
-        <div className="result">
-          <h2>{state.outcome === 'victory' ? 'Victory' : 'Defeat'}</h2>
-          <button className="end-turn" onClick={restart}>
-            Fight again
-          </button>
         </div>
       )}
     </div>

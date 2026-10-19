@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** M2.5 The gauntlet (enemy sprite options await the owner's pick)
+**Current task:** M2.5 owner playtest (gate); enemy sprite picks
 
 ## Milestones
 
@@ -167,6 +167,8 @@ _Done 19 Oct. Seven relics as content (`src/content/relics/m2.ts`) with name, ti
 ### M2.5 The gauntlet (owner gate)
 A three-fight run: normal, normal, elite. Party HP, gauges and relics carry over; gauges start at 0. Pick one relic from three after each win; "Run again" after a loss or the final win.
 **Done when:** a golden replay of a scripted gauntlet is stable, the e2e plays into fight 2, and the owner plays it and signs off.
+
+_19 Oct: built, awaiting the owner's play. `src/game/run.ts` holds the run (seeded encounters and fight seeds; HP, gauges and relics carry; relic offers; win and loss); the app's Gauntlet screen runs it, with a relic pick after each win and "Run again" at the end. Dev URLs: `?fights=` sets the encounters, `?enemies=`/`?relics=` give a single test fight. The scripted golden run wins all three fights with HP to spare, so expect to tune numbers._
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.

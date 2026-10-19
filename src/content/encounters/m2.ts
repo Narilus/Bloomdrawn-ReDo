@@ -20,3 +20,6 @@ export const twoHounds = encounter({
 export const thornWall = encounter({ id: 'encounter.thorn-wall', tier: 'elite', enemies: ['enemy.thorn-wall-matron'] });
 
 export const houndMother = encounter({ id: 'encounter.hound-mother', tier: 'elite', enemies: ['enemy.hound-mother'] });
+
+// For the lab and tests: one training dummy that never attacks. In no gauntlet pool.
+export const training = encounter({ id: 'encounter.training', tier: 'normal', enemies: ['enemy.training-dummy'] });

@@ -1029,3 +1029,55 @@ kbd {
 .result .end-turn {
   position: static;
 }
+
+.result-line {
+  margin: -8px 0 0;
+  font-size: 22px;
+  opacity: 0.85;
+}
+
+.result.reward {
+  background: rgba(18, 12, 16, 0.72);
+}
+
+/* Relic offers after a win: one card per relic, tier-coloured. */
+.relic-offers {
+  display: flex;
+  gap: 24px;
+}
+
+.relic-offer {
+  position: relative;
+  width: 280px;
+  padding: 20px 22px;
+  color: var(--petal-ivory);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.relic-offer:hover,
+.relic-offer:focus-visible {
+  transform: translateY(-6px);
+  box-shadow: 0 0 0 3px rgba(242, 196, 196, 0.5), 0 14px 30px rgba(0, 0, 0, 0.5);
+}
+
+.relic-offer h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 30px;
+}
+
+.relic-offer p {
+  margin: 10px 0 0;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.relic-offer.tier-uncommon { border-color: var(--lavender); }
+.relic-offer.tier-rare { border-color: #e2c27a; }
+.relic-offer.tier-cursed { border-color: var(--raw-pink); }
+
+.fight-label {
+  opacity: 0.75;
+}
