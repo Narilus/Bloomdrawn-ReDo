@@ -14,6 +14,7 @@ import {
 } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { enemyHome } from '../stage/layout.ts';
+import { hasIcon, Icon } from './icons.tsx';
 
 // The combat HUD (docs/DESIGN.md, "Combat screen"). Every number shown comes from engine state
 // or engine previews; nothing here calculates a rule.
@@ -65,28 +66,66 @@ export function Portraits({ state, choosing, onUltimate }: { state: CombatState;
   );
 }
 
-/** One badge per Domain present, label first: "Embryo 4", or "Tentacles 3 × 5 = 15" (count × damage per hit = total). */
+/**
+ * One badge per Domain present: its icon and number, with count × damage per hit beneath when it
+ * has one (Tentacles). Hover or focus shows the name, the numbers in words and the rule.
+ */
 export function DomainCounters({ state }: { state: CombatState }) {
   const counters = domainCounters(state, registry);
   if (counters.length === 0) return null;
   return (
     <div className="domain-counters">
-      {counters.map((c) => (
-        <div
-          key={c.domain}
-          className={`counter plaque domain-${c.domain}`}
-          aria-label={c.total === undefined ? `${c.count} ${c.label}` : `${c.label}: ${c.count} × ${c.each} = ${c.total} damage`}
-        >
-          <span className="counter-label">{c.label}</span>
-          {c.total !== undefined && (
-            <span className="counter-sum">
-              {c.count} × {c.each} =
+      {counters.map((c) => {
+        const summary =
+          c.total === undefined ? `${c.label}: ${c.count}` : `${c.label}: ${c.count}, each hitting for ${c.each}: ${c.total} damage per volley`;
+        return (
+          <div key={c.domain} className={`counter plaque domain-${c.domain}`} tabIndex={0} aria-label={`${summary}. ${c.help ?? ''}`}>
+            {hasIcon(c.icon) ? <Icon name={c.icon} /> : <span className="counter-label">{c.label}</span>}
+            <span className="counter-value">
+              <strong>{c.total ?? c.count}</strong>
+              {c.total !== undefined && (
+                <small>
+                  {c.count} × {c.each}
+                </small>
+              )}
             </span>
-          )}
-          <strong>{c.total ?? c.count}</strong>
-        </div>
-      ))}
+            <Tip title={c.label}>
+              {c.total !== undefined ? (
+                <p>
+                  <b>{c.count}</b> × <b>{c.each}</b> damage per hit = <b>{c.total}</b> damage per volley.
+                </p>
+              ) : (
+                <p>
+                  You have <b>{c.count}</b>.
+                </p>
+              )}
+              {c.help && <p>{c.help}</p>}
+            </Tip>
+          </div>
+        );
+      })}
     </div>
+  );
+}
+
+/** A hover and focus tooltip below its parent. */
+function Tip({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="tip plaque" role="tooltip">
+      <h4>{title}</h4>
+      {children}
+    </div>
+  );
+}
+
+/** Shield as an icon and a number, with an optional pending gain. */
+function ShieldBadge({ amount, gain = 0 }: { amount: number; gain?: number }) {
+  return (
+    <span className="shield-badge" aria-label={`Shield ${amount}${gain > 0 ? `, +${gain} from this card` : ''}`}>
+      <Icon name="shield" />
+      {amount}
+      {gain > 0 && <em> +{gain}</em>}
+    </span>
   );
 }
 
@@ -140,10 +179,7 @@ export function PartyBar({ state, vitals, previews }: { state: CombatState; vita
           {hp} / {maxHp}
         </strong>
         {(shield > 0 || shieldGain > 0) && (
-          <span className="shield-badge">
-            Shield {shield}
-            {shieldGain > 0 && <em> +{shieldGain}</em>}
-          </span>
+          <ShieldBadge amount={shield} gain={shieldGain} />
         )}
       </div>
       <div className="bar">
@@ -195,29 +231,43 @@ export function EnemyPlate({ slot, id, state, vitals, aimed, previews }: PlatePr
       </div>
       {loss > 0 && <div className="plate-preview">−{loss}</div>}
       <div className="plate-tags">
-        {enemy.shield > 0 && <span className="shield-badge">Shield {enemy.shield}</span>}
-        {enemy.statuses.map((s) => (
-          <span key={s.status} className={`status-badge ${s.status.replace(/\./g, '-')}`}>
-            {statusName(s.status)} {s.stacks}
-          </span>
-        ))}
+        {enemy.shield > 0 && <ShieldBadge amount={enemy.shield} />}
+        {enemy.statuses.map((s) => {
+          const def = registry.statuses[s.status];
+          const name = statusName(s.status);
+          return (
+            <span key={s.status} className={`status-badge ${s.status.replace(/\./g, '-')}`} tabIndex={0} aria-label={`${name} ${s.stacks}. ${def?.help ?? ''}`}>
+              {hasIcon(def?.icon) ? <Icon name={def.icon} /> : name} {s.stacks}
+              <Tip title={`${name} ${s.stacks}`}>{def?.help && <p>{def.help}</p>}</Tip>
+            </span>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-/** An enemy's shown intent with its exact numbers. */
+/** An enemy's shown intent: its name, then an icon and exact number for each thing it will do. */
 function Intent({ name, previews }: { name: string; previews: Preview[] }) {
   const parts = previews.flatMap((p) => {
-    if (p.op === 'damage') return [`${p.amount} damage`];
-    if (p.op === 'gainShield') return [`${p.amount} Shield`];
-    if (p.op === 'applyStatus') return [`${p.amount} ${statusName(p.status ?? '')}`];
+    if (p.op === 'damage') return [{ icon: 'attack', amount: p.amount, words: `${p.amount} damage` }];
+    if (p.op === 'gainShield') return [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield` }];
+    if (p.op === 'applyStatus') {
+      const icon = registry.statuses[p.status ?? '']?.icon;
+      return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}` }];
+    }
     return [];
   });
   const attacks = previews.some((p) => p.op === 'damage');
   return (
-    <div className={`intent${attacks ? ' attack' : ''}`} aria-label={`Intent: ${name}, ${parts.join(', ')}`}>
-      <b>{name}</b> {parts.join(' · ')}
+    <div className={`intent${attacks ? ' attack' : ''}`} aria-label={`Intent: ${name}, ${parts.map((p) => p.words).join(', ')}`}>
+      <b>{name}</b>
+      {parts.map((p, i) => (
+        <span key={i} className={`intent-part ${p.icon ?? ''}`}>
+          {hasIcon(p.icon) ? <Icon name={p.icon} /> : p.words}
+          {hasIcon(p.icon) && p.amount}
+        </span>
+      ))}
     </div>
   );
 }

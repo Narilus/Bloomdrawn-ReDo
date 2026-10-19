@@ -78,6 +78,8 @@ function previewOps(scratch: CombatState, calls: readonly OpCall[], ctx: OpConte
 export interface DomainCounter {
   domain: string;
   label: string;
+  icon?: string;
+  help?: string;
   count: number;
   /** Damage per count after the Domain holder's outgoing modifiers, and the product. */
   each?: number;
@@ -93,11 +95,14 @@ export function domainCounters(state: CombatState, registry: Registry): DomainCo
     if (id === undefined || !counter || out.some((c) => c.domain === id)) continue;
     const ctx = { source: m.id };
     const count = Math.max(0, Math.floor(evaluate(counter.count, state, ctx, registry)));
+    const base: DomainCounter = { domain: id, label: counter.label, count };
+    if (counter.icon !== undefined) base.icon = counter.icon;
+    if (counter.help !== undefined) base.help = counter.help;
     if (counter.each === undefined) {
-      out.push({ domain: id, label: counter.label, count });
+      out.push(base);
     } else {
       const each = pipeline('damage', counter.each, state, ctx, registry);
-      out.push({ domain: id, label: counter.label, count, each, total: count * each });
+      out.push({ ...base, each, total: count * each });
     }
   }
   return out;

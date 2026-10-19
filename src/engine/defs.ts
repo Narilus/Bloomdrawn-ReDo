@@ -115,6 +115,9 @@ export interface EnemyDef extends Hooks {
 export interface StatusDef extends Hooks {
   id: string;
   stacking: 'add' | 'refresh' | 'highest';
+  /** A HUD icon key, and the badge tooltip's plain-language rule. */
+  icon?: string;
+  help?: string;
 }
 
 export interface RelicDef extends Hooks {
@@ -138,8 +141,11 @@ export interface DomainDef {
   name: string;
   resources: ResourceDef[];
   triggers?: TriggerDef[];
-  /** The HUD badge: a count, and optionally damage for each one (shown as count × each = total). */
-  counter?: { label: string; count: Formula; each?: Formula };
+  /**
+   * The HUD badge: a count, and optionally damage for each one (shown as count × each = total).
+   * `icon` names a HUD icon; `help` is the tooltip's plain-language rule.
+   */
+  counter?: { label: string; icon?: string; help?: string; count: Formula; each?: Formula };
 }
 
 export interface Registry {

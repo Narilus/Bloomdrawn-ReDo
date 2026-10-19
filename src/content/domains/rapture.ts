@@ -12,5 +12,8 @@ export const rapture = domain({
     { id: 'potency', name: 'damage per hit', start: 3 },
   ],
   triggers: [{ on: 'turnEnd', do: [tentacleVolley()] }],
-  counter: { label: 'Tentacles', count: resource('tentacles'), each: resource('potency') },
+  counter: {
+    label: 'Tentacles', icon: 'tentacle', count: resource('tentacles'), each: resource('potency'),
+    help: 'At end of turn every Tentacle hits once, lowest-HP enemy first; excess damage carries to the next. Volleys from cards hit the same way and spend nothing.',
+  },
 });

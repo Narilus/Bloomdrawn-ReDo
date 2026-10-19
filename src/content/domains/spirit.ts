@@ -5,6 +5,9 @@ import { domain } from '../define.ts';
 export const spirit = domain({
   id: 'spirit', name: 'Spirit',
   resources: [{ id: 'essence', name: 'Essence' }],
-  counter: { label: 'Essence', count: resource('essence') },
+  counter: {
+    label: 'Essence', icon: 'essence', count: resource('essence'),
+    help: 'Rituals grow stronger with Essence. A held Ritual stays in hand and costs 1 less each turn, down to 0.',
+  },
   triggers: [{ on: 'cleanup', do: [changeCost(-1, 'hand', 'ritual')] }],
 });

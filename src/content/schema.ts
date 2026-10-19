@@ -64,7 +64,14 @@ export const schemas = {
     intents: z.array(z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) })).optional(),
     ...hooks,
   }),
-  status: z.strictObject({ kind: z.literal('status'), id, stacking: z.enum(['add', 'refresh', 'highest']), ...hooks }),
+  status: z.strictObject({
+    kind: z.literal('status'),
+    id,
+    stacking: z.enum(['add', 'refresh', 'highest']),
+    icon: z.string().min(1).optional(),
+    help: z.string().min(1).optional(),
+    ...hooks,
+  }),
   relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),
   domain: z.strictObject({
     kind: z.literal('domain'),
@@ -72,7 +79,15 @@ export const schemas = {
     name: z.string().min(1),
     resources: z.array(z.strictObject({ id, name: z.string().min(1), start: z.int().min(0).optional() })),
     triggers: hooks.triggers,
-    counter: z.strictObject({ label: z.string().min(1), count: formulaSchema, each: formulaSchema.optional() }).optional(),
+    counter: z
+      .strictObject({
+        label: z.string().min(1),
+        icon: z.string().min(1).optional(),
+        help: z.string().min(1).optional(),
+        count: formulaSchema,
+        each: formulaSchema.optional(),
+      })
+      .optional(),
   }),
 };
 

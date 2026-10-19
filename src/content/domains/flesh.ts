@@ -5,5 +5,8 @@ import { domain } from '../define.ts';
 export const flesh = domain({
   id: 'flesh', name: 'Flesh',
   resources: [{ id: 'embryo', name: 'Embryo' }],
-  counter: { label: 'Embryo', count: resource('embryo') },
+  counter: {
+    label: 'Embryo', icon: 'embryo', count: resource('embryo'),
+    help: 'Flesh builders grow Embryo. Spenders consume it for a bonus effect, and only when that bonus actually happens.',
+  },
 });

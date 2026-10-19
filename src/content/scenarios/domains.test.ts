@@ -108,10 +108,12 @@ describe('HUD counters', () => {
   it('one badge per Domain present: Tentacles as count × damage per hit, the rest as a count', () => {
     const state = begin(['agathe', 'maelia', 'anthe', 'leonora']);
     Object.assign(state.resources, { tentacles: 3, potency: 5, embryo: 4, essence: 2 });
-    expect(domainCounters(state, registry)).toEqual([
-      { domain: 'rapture', label: 'Tentacles', count: 3, each: 5, total: 15 },
-      { domain: 'flesh', label: 'Embryo', count: 4 },
-      { domain: 'spirit', label: 'Essence', count: 2 },
+    // Each badge also carries its icon and help text; the numbers are what's checked here.
+    expect(domainCounters(state, registry).map(({ domain, count, each, total }) => ({ domain, count, each, total }))).toEqual([
+      { domain: 'rapture', count: 3, each: 5, total: 15 },
+      { domain: 'flesh', count: 4, each: undefined, total: undefined },
+      { domain: 'spirit', count: 2, each: undefined, total: undefined },
     ]);
+    expect(domainCounters(state, registry).map((c) => c.icon)).toEqual(['tentacle', 'embryo', 'essence']);
   });
 });
