@@ -1,7 +1,7 @@
 # PLAN
 
-**Current milestone:** M1 First fight (M0 signed off; M0.6 art runs in parallel)
-**Current task:** M1.4 Combat UI
+**Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
+**Current task:** owner review of `docs/notes/m2-content.md` (statuses, Transcend, enemies, relics, gauntlet); M2.1 waits on its questions 1–3
 
 ## Milestones
 
@@ -130,11 +130,35 @@ _Done 19 Oct. Enemies list intents that cycle in order; the enemy phase acts the
 - Default animations for volleys, ultimates and Poison ticks.
 - The Hound's sprite on the right.
 
-**Done when:** the e2e boots into the M1 fight and plays one full turn. The owner plays the fight and signs off feel (gate).
+**Done when:** the e2e boots into the M1 fight and plays one full turn. The owner plays the fight and signs off feel (gate). ✅ Signed off 19 Oct.
 
 _19 Oct: built, awaiting the owner's play. Portrait rings are the ultimate gauges (click, or Shift+1–4, when Ready, then confirm). Domain counters sit under the portraits; hover a portrait for its passive and ultimate. The Hound shows its intent with exact numbers, and the party bar shows incoming damage, Safe or Lethal. End of turn plays out in order (Tentacles, Poison, then each enemy action), and the hand waits until it finishes. Dev builds take `?enemies=` for other fights._
 
 _19 Oct, owner's playtest: mechanics all work. Changes made: Shield blocks Poison; HP and Shield bars step as each hit lands (`vitals` from the engine); one badge per Domain (Tentacles shows the total with count × damage per hit); keyword tags on their own gold line and live damage and Shield numbers and status names coloured in card text, for the owner to judge. Then, at the owner's request, an icon set (`src/app/icons.tsx`: tentacle, embryo, essence, shield, poison, attack) replaces badge words, with hover and focus tooltips holding the name and rule; intents show an icon per action._
+
+## M2 tasks (proposed)
+
+Content and open rules are drafted in `docs/notes/m2-content.md` for the owner's review. Portraits and enemy sprites run through `npm run art` in parallel, owner-paced.
+
+### M2.1 Launch statuses
+Bleed, Vulnerable, Weak, Stun, Delay and Falter. Statuses on the party side apply to the whole party. Statuses tick at the end of their side's turn. Control resistance turns Stun and Delay into Falter. Party statuses show on the party bar, with icons and tooltips.
+**Done when:** each status has rule tests (stacking, timing, decay, interaction with Shield), and previews show Weak, Vulnerable and Falter in the numbers.
+
+### M2.2 Transcend
+The fifth card for each starter (deck 20). The `transcend` operation: once per combat, a Graveyard, +35 charge, and a Transcended ultimate for the rest of the combat. Generated cards (Maelia's Seed Pod). The "exactly five personal cards" check turns on. The portrait shows the Transcended state.
+**Done when:** each Transcend card and Transcended ultimate has a kit scenario, and a Transcend card can't resolve twice in one combat.
+
+### M2.3 Enemy roster
+The approved enemies and encounters. Intents that apply statuses, Shield or heal allies, or summon; summons join next round in a free side slot. Multi-enemy layout and aiming.
+**Done when:** each enemy's intent cycle and role has a scenario, summons respect the slot limit, and intent previews equal results.
+
+### M2.4 Relics
+The approved relics, as triggers and modifiers, with Common, Uncommon, Rare and Cursed tiers. A relic bar along the top with tooltips.
+**Done when:** each relic has a rule test, and relic trigger order follows acquisition order.
+
+### M2.5 The gauntlet (owner gate)
+A three-fight run: normal, normal, elite. Party HP, gauges and relics carry over; gauges start at 0. Pick one relic from three after each win; "Run again" after a loss or the final win.
+**Done when:** a golden replay of a scripted gauntlet is stable, the e2e plays into fight 2, and the owner plays it and signs off.
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
