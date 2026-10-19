@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.3 The map screen
+**Current task:** M3.3 owner look at the map; then M3.4 (needs Fruiting's answer)
 
 ## Milestones
 
@@ -189,6 +189,8 @@ _Done 19 Oct. Motifs are drawn as text rows of hexes (`src/content/motifs/m3.ts`
 ### M3.3 The map screen
 The board in React/SVG: fog, landmarks, the party token, click-to-move, tile tooltips. Entering a fight plays it and returns to the map.
 **Done when:** e2e walks into a fight and back; the owner can read the board at a glance.
+
+_Built 19 Oct, for the owner to look at. `src/game/expedition.ts` is the run: walking (the board after each step), fights from tiles, HP, gauges and relics carried, an elite's relic pick from three, a win at the Boss, and Symptoms that must be taken or turned back from. `src/app/LabyrinthMap.tsx` draws the revealed board as SVG hexes with labels, previews the route on hover with step numbers, and walks the party token tile by tile. Shops, Camps, Events and Symptoms show placeholder panels until M3.5–M3.6. The Labyrinth is now the default screen; `?fights=`, `?enemies=` and `?relics=` still open the gauntlet or a test fight, and `?seed=` and `?encounters=` set the board and its fights in dev builds._
 
 ### M3.4 The Bloom clock
 Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start.

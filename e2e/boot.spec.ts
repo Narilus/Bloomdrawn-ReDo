@@ -1,9 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-test('app boots into the combat spike', async ({ page }) => {
+test('app boots into the Labyrinth', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/');
+  await expect(page.locator('.labyrinth-map [data-kind="entrance"]')).toBeVisible();
+  await page.screenshot({ path: 'test-results/screenshots/labyrinth.png' });
+  expect(errors).toEqual([]);
+});
+
+test('a test fight boots into combat', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.goto('/?enemies=enemy.bloom-rib-hound');
   await expect(page.getByRole('button', { name: /End Turn/ })).toBeVisible();
   await expect(page.locator('.hand-card')).toHaveCount(5);
   await page.waitForTimeout(1500);
@@ -14,7 +23,7 @@ test('app boots into the combat spike', async ({ page }) => {
 test('the M1 fight plays one full turn', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
-  // The Hound alone, as a test fight (the default is now the gauntlet).
+  // The Hound alone, as a test fight (the default is now the Labyrinth).
   await page.goto('/?enemies=enemy.bloom-rib-hound');
   await expect(page.locator('.intent')).toContainText('Bite');
   await page.keyboard.press('e');

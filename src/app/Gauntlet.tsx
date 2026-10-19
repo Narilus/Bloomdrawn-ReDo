@@ -30,7 +30,10 @@ function testFightFromUrl(): CombatSetup | null {
 const GAUNTLET = gauntletFromUrl();
 const TEST_FIGHT = testFightFromUrl();
 
-/** The M2 gauntlet: three fights with a relic pick after each win. HP, gauges and relics carry over. */
+/** Dev builds: `?fights=`, `?enemies=` or `?relics=` ask for the gauntlet or a test fight instead of the Labyrinth. */
+export const gauntletRequested = TEST_FIGHT !== null || ids('fights').some((id) => registry.encounters[id]);
+
+/** The M2 gauntlet (dev): three fights with a relic pick after each win. HP, gauges and relics carry over. */
 export function Gauntlet() {
   return TEST_FIGHT ? <TestFight setup={TEST_FIGHT} /> : <Run />;
 }
@@ -48,7 +51,7 @@ function Run() {
   return (
     <>
       <Combat key={`${seed}:${run.fight}`} setup={fightSetup(run, registry)} label={label} onEnd={onEnd} />
-      {run.phase === 'reward' && <RelicChoice run={run} onChoose={(relic) => setRun(chooseRelic(run, relic))} />}
+      {run.phase === 'reward' && <RelicChoice offered={run.offered} onChoose={(relic) => setRun(chooseRelic(run, relic))} />}
       {(run.phase === 'won' || run.phase === 'lost') && (
         <div className="result">
           <h2>{run.phase === 'won' ? 'Gauntlet cleared' : 'Defeat'}</h2>
@@ -67,13 +70,13 @@ function Run() {
 }
 
 /** Pick one relic of those offered, or none. */
-function RelicChoice({ run, onChoose }: { run: RunState; onChoose: (relic: string | null) => void }) {
+export function RelicChoice({ offered, onChoose }: { offered: readonly string[]; onChoose: (relic: string | null) => void }) {
   return (
     <div className="result reward">
       <h2>Victory</h2>
       <p className="result-line">Choose a relic. It lasts the rest of the run.</p>
       <div className="relic-offers">
-        {run.offered.map((id) => {
+        {offered.map((id) => {
           const def = registry.relics[id];
           return (
             <button key={id} className={`relic-offer plaque tier-${def?.tier ?? 'common'}`} onClick={() => onChoose(id)}>

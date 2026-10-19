@@ -107,22 +107,26 @@ export function routeTo(board: Board, to: string): string[] | undefined {
 
 /**
  * Walks toward a tile: each step off a Collapsing tile ruins it, each arrival lifts the fog, and the
- * walk stops on the first tile the party must deal with. Returns the tiles actually stepped on.
+ * walk stops on the first tile the party must deal with. Returns the tiles actually stepped on, and
+ * the board after each step so the walk can be shown tile by tile.
  */
-export function walk(board: Board, to: string): { board: Board; steps: string[] } | undefined {
+export function walk(board: Board, to: string): { board: Board; steps: string[]; trail: Board[] } | undefined {
   const route = routeTo(board, to);
   if (!route) return undefined;
-  const next = structuredClone(board);
+  let next = board;
   const steps: string[] = [];
+  const trail: Board[] = [];
   for (const key of route) {
+    next = structuredClone(next);
     const left = next.tiles[next.at]!;
     if (left.kind === 'collapsing') left.kind = 'ruin';
     next.at = key;
     steps.push(key);
     reveal(next, key);
+    trail.push(next);
     if (stopsOn(next.tiles[key]!)) break;
   }
-  return { board: next, steps };
+  return { board: next, steps, trail };
 }
 
 /** The party has dealt with the tile it stands on: fights, Events and Camps become path; a Symptom is paid. */

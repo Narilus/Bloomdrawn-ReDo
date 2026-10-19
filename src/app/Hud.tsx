@@ -331,17 +331,18 @@ export function Pile({ label, count }: { label: string; count: number }) {
 }
 
 /** The run's relics along the top, in acquisition order, each with its rule on hover or focus. */
-export function RelicBar({ state }: { state: CombatState }) {
+/** The relics held, by ID in acquisition order, with their rules as tooltips. */
+export function RelicBar({ relics }: { relics: readonly string[] }) {
   return (
     <div className="relics plaque" aria-label="Relics">
       <span>Relics</span>
-      {state.relics.length === 0 && <span className="muted">none yet</span>}
-      {state.relics.map((r) => {
-        const def = registry.relics[r.relic];
+      {relics.length === 0 && <span className="muted">none yet</span>}
+      {relics.map((id) => {
+        const def = registry.relics[id];
         return (
-          <span key={r.id} className={`relic tier-${def?.tier ?? 'common'}`} tabIndex={0} aria-label={`${def?.name}, ${def?.tier}: ${def?.text}`}>
-            {def?.name ?? r.relic}
-            <Tip title={def?.name ?? r.relic}>
+          <span key={id} className={`relic tier-${def?.tier ?? 'common'}`} tabIndex={0} aria-label={`${def?.name}, ${def?.tier}: ${def?.text}`}>
+            {def?.name ?? id}
+            <Tip title={def?.name ?? id}>
               <p className="tier-line">{def?.tier}</p>
               <p>{def?.text}</p>
             </Tip>

@@ -1081,3 +1081,143 @@ kbd {
 .fight-label {
   opacity: 0.75;
 }
+
+/* The Labyrinth map (M3): SVG hexes, coloured by what they hold, until the map art pass. */
+.labyrinth {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, #2a1c26 0%, #1a1217 70%);
+}
+
+.labyrinth-map {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+}
+
+.hex polygon {
+  fill: #3a2a34;
+  stroke: #1a1217;
+  stroke-width: 3;
+  transition: fill 0.2s, stroke 0.15s;
+}
+
+.hex.reachable {
+  cursor: pointer;
+}
+
+.hex.reachable:hover polygon {
+  stroke: var(--petal-ivory);
+}
+
+.hex-unknown polygon { fill: #2c2129; }
+.hex-entrance polygon { fill: #5a4a3e; }
+.hex-path polygon { fill: #4a3842; }
+.hex-fight polygon { fill: #7a3440; }
+.hex-elite polygon { fill: #6a3a7a; }
+.hex-boss polygon { fill: #8e2c3a; stroke: #e2c27a; }
+.hex-event polygon { fill: #3e5a62; }
+.hex-shop polygon { fill: #8c6e43; }
+.hex-camp polygon { fill: #4e6a44; }
+.hex-symptom polygon { fill: #b89a2a; }
+.hex-symptom.paid polygon { fill: #6e6230; }
+.hex-collapsing polygon { fill: #6a1e28; stroke-dasharray: 8 5; }
+.hex-ruin polygon { fill: #140d11; stroke: #2a1e22; }
+
+.hex.on-route polygon {
+  stroke: var(--blush);
+  stroke-width: 4;
+}
+
+.hex-label {
+  fill: var(--petal-ivory);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 800;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.hex-unknown .hex-label {
+  opacity: 0.45;
+  font-size: 18px;
+}
+
+.hex-step {
+  fill: var(--blush);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.party-token circle {
+  fill: var(--petal-ivory);
+  stroke: var(--antique-gold);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 8px rgba(242, 196, 196, 0.7));
+  pointer-events: none;
+}
+
+.party-token {
+  transition: transform 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.map-party {
+  left: 40px;
+  top: 24px;
+  width: 360px;
+  padding: 12px 20px 16px;
+}
+
+.tile-info {
+  left: 50%;
+  bottom: 36px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 26px;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.tile-info strong {
+  font-family: var(--serif);
+  font-size: 24px;
+}
+
+.tile-panel {
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 380px;
+  padding: 24px 28px;
+}
+
+.tile-panel h3 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-size: 34px;
+}
+
+.tile-panel p {
+  margin: 0 0 20px;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.tile-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.tile-actions .end-turn {
+  position: static;
+  padding: 10px 24px;
+  font-size: 24px;
+}

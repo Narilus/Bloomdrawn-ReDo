@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 test('the stage canvas follows the frame through live window resizes', async ({ page }) => {
-  await page.goto('/');
+  // A test fight: the stage canvas lives in combat (the default screen is the Labyrinth map).
+  await page.goto('/?enemies=enemy.bloom-rib-hound');
   await expect(page.locator('.hand-card')).toHaveCount(5);
   await page.waitForTimeout(1500);
   for (const [width, height] of [[1061, 963], [1723, 965], [1280, 600]] as const) {

@@ -168,7 +168,7 @@ export function Combat({ setup, label, onEnd }: Props) {
       {stageHost && <StageView initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
       <Portraits state={state} choosing={ultimateFor !== null} onUltimate={(m) => !busy && setUltimateFor(m)} />
       <DomainCounters state={state} />
-      <RelicBar state={state} />
+      <RelicBar relics={state.relics.map((r) => r.relic)} />
       <PartyBar state={state} vitals={shown} previews={previews} />
       {state.enemies.map((enemy) => (
         <EnemyPlate key={enemy.id} state={state} vitals={shown} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />
