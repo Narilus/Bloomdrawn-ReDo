@@ -3,7 +3,8 @@ import { createStreams, nextFloat, PARTY, type CombatState, type EngineEvent } f
 import { Actor } from './Actor.ts';
 import { battleArt } from './art.ts';
 import { downscale, sharpen, type Pixels } from './resample.ts';
-import { ENEMY_HEIGHT, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
+import { registry } from '../content/registry.ts';
+import { ENEMY_HEIGHT, enemyHeight, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
 
 const COLOURS = {
   damage: '#F6E6DC',
@@ -37,17 +38,23 @@ const BEAT = {
 export class Battlefield {
   private readonly actors = new Map<string, Actor>();
   private readonly sprites: SizedSprite[] = [];
+  private world = new Container();
+  private fit: Fit | undefined;
+  private breath: () => { duration: number; delay: number } = () => ({ duration: 3, delay: 0 });
 
   static async create(app: Application, state: CombatState): Promise<Battlefield> {
     const field = new Battlefield();
     await document.fonts.load('800 54px "Nunito Sans"');
     const load = (key: string) => (battleArt[key] ? Assets.load<Texture>(battleArt[key] as string) : undefined);
     const textures = await Promise.all(state.members.map((m) => load(m.character)));
-    const enemyTextures = await Promise.all(state.enemies.map((e) => load(e.enemy)));
+    // Summonable enemies too, so a summon appears at once.
+    const kinds = [...new Set([...state.enemies.map((e) => e.enemy), ...summonable(state)])];
+    await Promise.all(kinds.map(load));
 
     const cosmetic = createStreams(7, ['idle']);
     const breath = () => ({ duration: 2.8 + nextFloat(cosmetic, 'idle') * 0.9, delay: nextFloat(cosmetic, 'idle') * 1.5 });
-    const world = new Container();
+    field.breath = breath;
+    const world = field.world;
     app.stage.addChild(backdrop(), world);
 
     // Party: back slot first so the front slot is drawn last and hides no one.
@@ -63,18 +70,27 @@ export class Battlefield {
       field.actors.set(member.id, actor);
     }
 
-    state.enemies.forEach((enemy, slot) => {
-      const home = enemyHome(slot, state.enemies.length);
-      if (!home) return;
-      const texture = enemyTextures[slot];
-      world.addChild(shadow(home.x, home.y, texture ? 170 : 100));
-      const body = texture ? field.sizedSprite(texture, ENEMY_HEIGHT, 1) : trainingDummy(slot);
-      const actor = new Actor(enemy.id, home, body, ENEMY_HEIGHT, 1, breath());
-      if (enemy.hp <= 0) actor.root.alpha = 0;
-      world.addChild(actor.root);
-      field.actors.set(enemy.id, actor);
-    });
+    for (const enemy of state.enemies) {
+      const actor = field.addEnemy(enemy, state.enemySlots);
+      if (actor && enemy.hp <= 0) actor.root.alpha = 0;
+    }
     return field;
+  }
+
+  /** An enemy's actor at its slot, sized by its definition; art if picked, else a placeholder dummy. */
+  private addEnemy(enemy: CombatState['enemies'][number], slots: number): Actor | undefined {
+    const home = enemyHome(enemy.slot, slots);
+    if (!home) return undefined;
+    const height = enemyHeight(registry.enemies[enemy.enemy]?.size);
+    const art = battleArt[enemy.enemy];
+    const texture = art ? Assets.get<Texture>(art) : undefined;
+    this.world.addChild(shadow(home.x, home.y, texture ? height * 0.5 : 100 * (height / ENEMY_HEIGHT)));
+    const body = texture ? this.sizedSprite(texture, height, 1) : trainingDummy(enemy.slot, height / ENEMY_HEIGHT);
+    const actor = new Actor(enemy.id, home, body, height, 1, this.breath());
+    this.world.addChild(actor.root);
+    this.actors.set(enemy.id, actor);
+    if (this.fit) this.fitTo(this.fit);
+    return actor;
   }
 
   /**
@@ -83,6 +99,7 @@ export class Battlefield {
    * one high-quality resample per size keeps sprites crisp at any window size or pixel ratio.
    */
   fitTo(fit: Fit): void {
+    this.fit = fit;
     for (const entry of this.sprites) {
       const height = Math.max(1, Math.round(entry.height * fit.scale * fit.dpr));
       if (entry.sprite.texture.height === height) continue;
@@ -110,7 +127,7 @@ export class Battlefield {
    * another, never merged. Returns when each event lands (seconds from now, never decreasing),
    * so the HUD can move its bars in step, and how long the whole sequence runs.
    */
-  play(events: readonly EngineEvent[]): { times: number[]; duration: number } {
+  play(events: readonly EngineEvent[], state: CombatState): { times: number[]; duration: number } {
     let clock = 0; // when the current beat starts
     let impact = 0; // when its hits land
     const times: number[] = [];
@@ -190,6 +207,12 @@ export class Battlefield {
         case 'enemyDefeated':
           this.actor(event.target)?.fall(impact);
           break;
+        case 'enemySummoned': {
+          const enemy = state.enemies.find((e) => e.id === event.target);
+          const actor = enemy ? this.addEnemy(enemy, state.enemySlots) : undefined;
+          actor?.appear(impact);
+          break;
+        }
         default:
           break;
       }
@@ -279,8 +302,9 @@ function silhouette(): Container {
 }
 
 /** Placeholder enemy: a straw training dummy with a skin-petal flower on its head. */
-function trainingDummy(slot: number): Container {
+function trainingDummy(slot: number, scale = 1): Container {
   const g = new Graphics();
+  g.scale.set(scale);
   const lean = (slot - 1) * 0.04;
   g.rect(-9, -230, 18, 230).fill('#4A3628');
   g.roundRect(-82, -195, 164, 16, 6).fill('#5A4230');
@@ -368,4 +392,11 @@ function backdrop(): Container {
   });
   layer.addChild(new Graphics().rect(0, 0, WIDTH, HEIGHT).fill(vignette));
   return layer;
+}
+
+/** Enemies the current ones can summon. */
+function summonable(state: CombatState): string[] {
+  return state.enemies.flatMap((e) =>
+    (registry.enemies[e.enemy]?.intents ?? []).flatMap((i) => i.effects).flatMap((c) => (c.op === 'summon' && typeof c.enemy === 'string' ? [c.enemy] : [])),
+  );
 }

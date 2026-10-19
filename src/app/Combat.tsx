@@ -51,7 +51,7 @@ export function Combat() {
     }
     current.current = result.state;
     setState(result.state);
-    const { times, duration } = field.current?.play(result.events) ?? { times: [], duration: 0 };
+    const { times, duration } = field.current?.play(result.events, result.state) ?? { times: [], duration: 0 };
     // A new command finishes the previous sequence's bars at once, then steps through its own.
     for (const t of timers.current) window.clearTimeout(t);
     timers.current = [];
@@ -151,8 +151,8 @@ export function Combat() {
         <span className="muted">none yet</span>
       </div>
       <PartyBar state={state} vitals={shown} previews={previews} />
-      {state.enemies.map((enemy, slot) => (
-        <EnemyPlate key={enemy.id} slot={slot} state={state} vitals={shown} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />
+      {state.enemies.map((enemy) => (
+        <EnemyPlate key={enemy.id} state={state} vitals={shown} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />
       ))}
       <div className="mana" aria-label="Mana">
         <strong>{state.mana}</strong>

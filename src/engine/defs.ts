@@ -118,7 +118,18 @@ export interface EnemyDef extends Hooks {
   intents?: IntentDef[];
   /** `resistsControl`: elites and bosses turn Stun and Delay into Falter. */
   traits?: 'resistsControl'[];
+  /** How large it stands on the field (presentation only). */
+  size?: 'small' | 'normal' | 'large';
 }
+
+/** A fight: which enemies, in slot order, with optional HP overrides for this encounter. */
+export interface EncounterDef {
+  id: string;
+  tier: 'normal' | 'elite' | 'boss';
+  enemies: EnemyEntry[];
+}
+
+export type EnemyEntry = string | { enemy: string; hp: number };
 
 export interface StatusDef extends Hooks {
   id: string;
@@ -169,6 +180,7 @@ export interface Registry {
   statuses: Readonly<Record<string, StatusDef>>;
   relics: Readonly<Record<string, RelicDef>>;
   domains: Readonly<Record<string, DomainDef>>;
+  encounters: Readonly<Record<string, EncounterDef>>;
   /** Bounded escape hatch: kit-specific operations, listed so their number stays visible. */
   customOps?: Readonly<Record<string, Operation>>;
 }

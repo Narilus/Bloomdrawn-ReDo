@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** M2.3 Enemy roster (enemy sprite options ready for the owner's pick)
+**Current task:** M2.4 Relics (enemy sprite options await the owner's pick)
 
 ## Milestones
 
@@ -155,6 +155,8 @@ _Done 19 Oct. `transcend` and `createCard` operations, an `exhaust` keyword (to 
 ### M2.3 Enemy roster
 The approved enemies and encounters. Intents that apply statuses, Shield or heal allies, or summon; summons join next round in a free side slot. Multi-enemy layout and aiming.
 **Done when:** each enemy's intent cycle and role has a scenario, summons respect the slot limit, and intent previews equal results.
+
+_Done 19 Oct. Enemies hold a fixed `slot`; a fight lays out its starting enemies plus what they can summon (at most 4), and summons take a free slot and act from the next round. `summon`, Shield for allies, heal the weakest ally, encounters as content with HP overrides, enemy sizes. `enemies.test.ts` covers each role, and checks shown against dealt damage in every encounter. Enemies stand in as dummies until the owner picks sprites (options in `art/raw/`; whelp 03–04 replace 01–02, which missed the brief)._
 
 ### M2.4 Relics
 The approved relics, as triggers and modifiers, with Common, Uncommon, Rare and Cursed tiers. A relic bar along the top with tooltips.

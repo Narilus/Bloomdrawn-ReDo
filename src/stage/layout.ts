@@ -27,18 +27,23 @@ export const PARTY_HOMES: readonly (Point & { scale: number })[] = [
   { x: 935, y: 568, scale: 0.78 },
 ];
 
-/** Enemy feet positions by slot; bodies never overlap. */
-export const ENEMY_HOMES: readonly Point[] = [
-  { x: 1230, y: 680 },
-  { x: 1480, y: 640 },
-  { x: 1720, y: 690 },
-];
+/**
+ * Enemy feet positions by slot, for a fight laid out with 1–4 slots. A lone enemy stands
+ * centre-right, clear of the party's back slot; with three, slot 0 is the centre anchor and
+ * the others flank it (an elite and its summons). Bodies, plates and intents never overlap.
+ */
+const ENEMY_LAYOUTS: Readonly<Record<number, readonly Point[]>> = {
+  1: [{ x: 1440, y: 690 }],
+  2: [{ x: 1290, y: 690 }, { x: 1640, y: 640 }],
+  3: [{ x: 1480, y: 700 }, { x: 1215, y: 630 }, { x: 1745, y: 630 }],
+  4: [{ x: 1220, y: 700 }, { x: 1420, y: 590 }, { x: 1610, y: 700 }, { x: 1790, y: 590 }],
+};
 
-/** A lone enemy stands centre-right, clear of the party's back slot. */
-const LONE_HOME: Point = { x: 1440, y: 690 };
+/** An enemy's feet position, given its slot and how many slots the fight lays out. */
+export const enemyHome = (slot: number, slots: number): Point | undefined => ENEMY_LAYOUTS[Math.min(4, Math.max(1, slots))]?.[slot];
 
-/** An enemy's feet position, given how many enemies the fight has. */
-export const enemyHome = (slot: number, count: number): Point | undefined => (count === 1 && slot === 0 ? LONE_HOME : ENEMY_HOMES[slot]);
+/** On-screen height of an enemy body by its size. */
+export const enemyHeight = (size?: 'small' | 'normal' | 'large'): number => (size === 'small' ? 190 : size === 'large' ? 400 : ENEMY_HEIGHT);
 
 /** Party sprites are drawn at this height before their slot scale. */
 export const PARTY_HEIGHT = 400;
@@ -48,7 +53,7 @@ export const ENEMY_HEIGHT = 320;
 export const PLAY_LINE = 630;
 
 /** The clickable / aimable body area of an enemy. */
-export function enemyBox(slot: number, count: number): { x: number; y: number; w: number; h: number } {
-  const home = enemyHome(slot, count) ?? { x: 0, y: 0 };
-  return { x: home.x - 140, y: home.y - ENEMY_HEIGHT - 20, w: 280, h: ENEMY_HEIGHT + 40 };
+export function enemyBox(home: Point, height: number): { x: number; y: number; w: number; h: number } {
+  const w = Math.min(280, height * 0.9);
+  return { x: home.x - w / 2, y: home.y - height - 20, w, h: height + 40 };
 }

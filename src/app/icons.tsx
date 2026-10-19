@@ -101,6 +101,16 @@ const PATHS: Record<string, React.ReactNode> = {
       <circle cx="14.5" cy="4.5" r="1" stroke="none" />
     </>
   ),
+  // Healing: a rounded cross.
+  heal: <path d="M9.5 3.5h5v6h6v5h-6v6h-5v-6h-6v-5h6z" fill="none" strokeWidth="2" strokeLinejoin="round" />,
+  // A summon: a sprout breaking the ground.
+  summon: (
+    <>
+      <path d="M12 21v-9" fill="none" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M12 13c-1-4-4-6-8-5.5 0 4 3.5 6.5 8 5.5zM12 11c.8-3.6 3.6-5.6 7.6-5.2 0 3.8-3.4 6.2-7.6 5.2z" stroke="none" />
+      <path d="M4 21h16" fill="none" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
 };
 
 export const hasIcon = (name: string | undefined): name is string => name !== undefined && name in PATHS;

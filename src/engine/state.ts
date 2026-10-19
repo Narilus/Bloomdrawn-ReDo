@@ -6,6 +6,8 @@ export const HAND_DRAW = 5;
 export const HAND_MAX = 10;
 export const MAX_CHAIN_DEPTH = 8;
 export const GAUGE_MAX = 100;
+/** The most enemies a fight can hold at once, summons included. */
+export const ENEMY_SLOTS_MAX = 4;
 
 export const COMBAT_STREAMS = ['shuffle', 'targeting', 'intents'] as const;
 export type CombatStream = (typeof COMBAT_STREAMS)[number];
@@ -33,6 +35,8 @@ export interface Member {
 export interface Enemy {
   id: EntityId;
   enemy: string;
+  /** Its place on the field, fixed for the fight; a summon takes a slot no living enemy holds. */
+  slot: number;
   hp: number;
   maxHp: number;
   shield: number;
@@ -82,7 +86,10 @@ export interface CombatState {
   /** The party shares one HP pool, one Shield and one set of statuses (debuffs land on the whole party). */
   party: { hp: number; maxHp: number; shield: number; statuses: StatusStack[] };
   members: Member[];
+  /** Every enemy that has been in the fight, living or not, in the order they arrived. */
   enemies: Enemy[];
+  /** How many enemy slots this fight lays out: its starting enemies plus what they can summon. */
+  enemySlots: number;
   /** In acquisition order. */
   relics: Relic[];
   piles: Piles;

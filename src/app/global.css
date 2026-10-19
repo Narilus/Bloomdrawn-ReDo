@@ -523,6 +523,18 @@ body,
   font-size: 16px;
 }
 
+.enemy-plate.compact .bar-label {
+  font-size: 16px;
+}
+
+.enemy-plate.compact .bar-label strong {
+  font-size: 14px;
+}
+
+.enemy-plate.compact .intent b {
+  font-size: 18px;
+}
+
 .enemy-plate.aimed {
   border-color: var(--blush);
   box-shadow:
@@ -561,6 +573,9 @@ body,
 }
 
 .intent-part.shield { color: var(--lilac-glow); }
+.intent-part.heal { color: var(--blush); }
+.intent-part.summon { color: #b8d08a; }
+.intent-part small { font-size: 14px; }
 .intent.skipped { color: var(--lavender); }
 .intent.skipped b { text-decoration: line-through; }
 .status-badge.status-bleed { border-color: #e86a78; color: #f2a0a8; }

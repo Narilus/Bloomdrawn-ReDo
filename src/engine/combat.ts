@@ -1,4 +1,4 @@
-import type { CardDef, IntentDef, OpCall, Registry } from './defs.ts';
+import type { CardDef, EnemyEntry, IntentDef, OpCall, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
@@ -9,6 +9,7 @@ import { createStreams, shuffleInPlace } from './rng.ts';
 import {
   BASE_MANA,
   COMBAT_STREAMS,
+  ENEMY_SLOTS_MAX,
   GAUGE_MAX,
   HAND_DRAW,
   isAlive,
@@ -34,8 +35,8 @@ export interface CombatSetup {
   seed: number;
   /** Character IDs in slot order; slot 0 is the front. */
   party: string[];
-  /** Enemy IDs in slot order. */
-  enemies: string[];
+  /** Enemy IDs in slot order, each optionally with an HP override. */
+  enemies: EnemyEntry[];
   /** Relic IDs in acquisition order. */
   relics?: string[];
   /** Current party HP carried in from the run; defaults to full. */
@@ -67,10 +68,12 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
       return { uid: next('c'), card, owner: `m${slot}` };
     }),
   );
-  const enemies = setup.enemies.map((id) => {
-    const def = lookup(registry.enemies, id, 'enemy');
-    return { id: next('e'), enemy: id, hp: def.hp, maxHp: def.hp, shield: 0, statuses: [], ...(def.intents?.length ? { intent: 0 } : {}) };
+  const enemies = setup.enemies.map((entry, slot) => {
+    const id = typeof entry === 'string' ? entry : entry.enemy;
+    lookup(registry.enemies, id, 'enemy');
+    return newEnemy(registry, id, next('e'), slot, typeof entry === 'string' ? undefined : entry.hp);
   });
+  const summons = enemies.reduce((n, e) => n + summonCapacity(registry, e.enemy), 0);
   const relics = (setup.relics ?? []).map((id) => {
     lookup(registry.relics, id, 'relic');
     return { id: next('r'), relic: id };
@@ -89,6 +92,7 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
     party: { hp: Math.min(setup.partyHp ?? maxHp, maxHp), maxHp, shield: 0, statuses: [] },
     members,
     enemies,
+    enemySlots: Math.min(ENEMY_SLOTS_MAX, Math.max(enemies.length, enemies.length + summons)),
     relics,
     piles: { draw: deck, hand: [], discard: [], graveyard: [] },
     resources: startingResources(characters.map((c) => c.domain), registry),
@@ -102,6 +106,19 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
   drain(rc);
   if (!isOver(rc)) beginTurn(rc);
   return { state: rc.state, events: rc.events };
+}
+
+/** A fresh enemy at full HP (or an encounter's HP), showing its first intent. */
+export function newEnemy(registry: Registry, enemy: string, id: EntityId, slot: number, hp?: number): Enemy {
+  const def = registry.enemies[enemy];
+  const max = hp ?? def?.hp ?? 1;
+  return { id, enemy, slot, hp: max, maxHp: max, shield: 0, statuses: [], ...(def?.intents?.length ? { intent: 0 } : {}) };
+}
+
+/** How many enemies one enemy can summon at most, from the `max` of its summon intents. */
+function summonCapacity(registry: Registry, enemy: string): number {
+  const calls = registry.enemies[enemy]?.intents?.flatMap((i) => i.effects) ?? [];
+  return Math.max(0, ...calls.filter((c) => c.op === 'summon').map((c) => Number(c.max ?? 0)));
 }
 
 /** Pooled resources of the Domains present, at their starting values. */
@@ -257,7 +274,7 @@ function endTurn(rc: Resolution): void {
     if (isOver(rc)) return;
   }
   // The enemies' statuses tick at the end of the party's turn, one enemy at a time.
-  for (const enemy of s.enemies) {
+  for (const enemy of [...s.enemies]) {
     if (!isAlive(enemy)) continue;
     tick(rc, enemy.id);
     if (isOver(rc)) return;
@@ -269,7 +286,8 @@ function endTurn(rc: Resolution): void {
   emit(rc, { type: 'enemyPhaseStart' }, ROOT);
   drain(rc);
   if (isOver(rc)) return;
-  for (const enemy of s.enemies) {
+  // Enemies summoned during this phase join the turn order next round.
+  for (const enemy of [...s.enemies]) {
     if (!isAlive(enemy)) continue;
     actIntent(rc, enemy);
     if (isOver(rc)) return;

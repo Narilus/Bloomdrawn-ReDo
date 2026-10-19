@@ -20,6 +20,7 @@ const FAMILY = {
   status: 'statuses',
   relic: 'relics',
   domain: 'domains',
+  encounter: 'encounters',
 } as const;
 
 type Modules = Record<string, Record<string, unknown>>;
@@ -35,7 +36,7 @@ interface Found {
  */
 export function validateContent(modules: Modules): { registry: Registry; errors: string[] } {
   const errors: string[] = [];
-  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {} } as {
+  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {}, encounters: {} } as {
     [K in keyof typeof FAMILY as (typeof FAMILY)[K]]: Record<string, never>;
   };
   const fileOf = new Map<string, string>();
@@ -76,6 +77,9 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       }
       if (typeof call.card === 'string' && !reg.cards[call.card]) {
         fail(where(kind, defId), defId, `${path}: unknown card "${call.card}"`);
+      }
+      if (call.op === 'summon' && typeof call.enemy === 'string' && !reg.enemies[call.enemy]) {
+        fail(where(kind, defId), defId, `${path}: unknown enemy "${call.enemy}"`);
       }
       if (op.children) checkCalls(kind, defId, op.children(call), `${path}.branch`);
     });
@@ -137,6 +141,12 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
   }
   for (const r of Object.values(reg.relics)) checkHooks('relic', r.id, r, '');
   for (const d of Object.values(reg.domains)) checkHooks('domain', d.id, d, '');
+  for (const en of Object.values(reg.encounters)) {
+    for (const entry of en.enemies) {
+      const id = typeof entry === 'string' ? entry : entry.enemy;
+      if (!reg.enemies[id]) fail(where('encounter', en.id), en.id, `enemy "${id}" does not exist`);
+    }
+  }
 
   return { registry: reg, errors };
 }
@@ -172,7 +182,7 @@ const pathOf = (issue: z.core.$ZodIssue) => (issue.path.length ? `${issue.path.j
 /** The game's content registry, built from every content file. */
 export const registry: Registry = buildRegistry(
   import.meta.glob(
-    ['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', '!**/*.test.ts'],
+    ['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', './encounters/**/*.ts', '!**/*.test.ts'],
     { eager: true },
   ),
 );

@@ -15,6 +15,7 @@ import { manaDebtOp } from './manaDebt.ts';
 import { reduceStacksOp } from './reduceStacks.ts';
 import { transcendOp } from './transcend.ts';
 import { createCardOp } from './createCard.ts';
+import { summonOp } from './summon.ts';
 import { repeatNextOp } from './repeatNext.ts';
 import { volleyOp } from './volley.ts';
 import { whenOp } from './when.ts';
@@ -39,6 +40,7 @@ export const library: Readonly<Record<string, Operation>> = {
   reduceStacks: reduceStacksOp,
   transcend: transcendOp,
   createCard: createCardOp,
+  summon: summonOp,
 };
 
 export function getOp(registry: Registry, name: string): Operation | undefined {
@@ -63,3 +65,4 @@ export { gte, when } from './when.ts';
 export { reduceStacks } from './reduceStacks.ts';
 export { transcend } from './transcend.ts';
 export { createCard } from './createCard.ts';
+export { summon } from './summon.ts';

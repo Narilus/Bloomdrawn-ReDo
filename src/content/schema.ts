@@ -71,6 +71,7 @@ export const schemas = {
     hp: z.int().positive(),
     intents: z.array(z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) })).optional(),
     traits: z.array(z.literal('resistsControl')).optional(),
+    size: z.enum(['small', 'normal', 'large']).optional(),
     ...hooks,
   }),
   status: z.strictObject({
@@ -85,6 +86,12 @@ export const schemas = {
     ...hooks,
   }),
   relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),
+  encounter: z.strictObject({
+    kind: z.literal('encounter'),
+    id,
+    tier: z.enum(['normal', 'elite', 'boss']),
+    enemies: z.array(z.union([id, z.strictObject({ enemy: id, hp: z.int().positive() })])).min(1).max(4),
+  }),
   domain: z.strictObject({
     kind: z.literal('domain'),
     id,

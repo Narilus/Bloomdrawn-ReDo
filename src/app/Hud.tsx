@@ -208,7 +208,6 @@ export function PartyBar({ state, vitals, previews }: { state: CombatState; vita
 }
 
 interface PlateProps {
-  slot: number;
   id: EntityId;
   state: CombatState;
   vitals: Vitals | null;
@@ -216,19 +215,22 @@ interface PlateProps {
   previews: Preview[];
 }
 
-export function EnemyPlate({ slot, id, state, vitals, aimed, previews }: PlateProps) {
+export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
   const live = state.enemies.find((e) => e.id === id);
-  const home = enemyHome(slot, state.enemies.length);
+  const home = live ? enemyHome(live.slot, state.enemySlots) : undefined;
   if (!live || !home) return null;
   const enemy = { ...live, ...vitals?.enemies.find((e) => e.id === id) };
+  // Four across leaves less room: narrower plates.
+  const compact = state.enemySlots >= 4;
+  const width = compact ? 184 : 240;
   const def = registry.enemies[enemy.enemy];
   const loss = hpLoss(previews, id);
   const after = Math.max(0, enemy.hp - loss);
   const intent = enemy.hp > 0 ? intentOf(enemy, registry) : undefined;
   return (
     <div
-      className={`enemy-plate plaque${aimed ? ' aimed' : ''}${enemy.hp <= 0 ? ' defeated' : ''}`}
-      style={{ left: home.x - 120, top: home.y + 22 }}
+      className={`enemy-plate plaque${aimed ? ' aimed' : ''}${enemy.hp <= 0 ? ' defeated' : ''}${compact ? ' compact' : ''}`}
+      style={{ left: home.x - width / 2, top: home.y + 22, width }}
     >
       {intent && <Intent name={intent.name} previews={previewIntent(state, id, registry)} skips={skipping(enemy.statuses)} />}
       <div className="bar-label">
@@ -286,9 +288,18 @@ function Intent({ name, previews, skips }: { name: string; previews: Preview[]; 
       </div>
     );
   }
-  const parts = previews.flatMap((p) => {
+  // Shield for every enemy shows once, marked "all".
+  const shields = previews.filter((p) => p.op === 'gainShield');
+  const parts = previews.flatMap((p): { icon?: string | undefined; amount?: number | undefined; words: string; all?: boolean }[] => {
     if (p.op === 'damage') return [{ icon: 'attack', amount: p.amount, words: `${p.amount} damage` }];
-    if (p.op === 'gainShield') return [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield` }];
+    if (p.op === 'gainShield') {
+      if (p !== shields[0]) return [];
+      return shields.length > 1
+        ? [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield to every enemy`, all: true }]
+        : [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield` }];
+    }
+    if (p.op === 'heal') return [{ icon: 'heal', amount: p.amount, words: `heals an ally ${p.amount}` }];
+    if (p.op === 'summon') return [{ icon: 'summon', amount: p.amount, words: `summons ${p.amount}` }];
     if (p.op === 'applyStatus') {
       const icon = registry.statuses[p.status ?? '']?.icon;
       return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}` }];
@@ -303,6 +314,7 @@ function Intent({ name, previews, skips }: { name: string; previews: Preview[]; 
         <span key={i} className={`intent-part ${p.icon ?? ''}`}>
           {hasIcon(p.icon) ? <Icon name={p.icon} /> : p.words}
           {hasIcon(p.icon) && p.amount}
+          {p.all && <small> all</small>}
         </span>
       ))}
     </div>

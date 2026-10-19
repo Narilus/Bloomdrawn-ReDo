@@ -32,6 +32,7 @@ export const EVENT_TYPES = [
   'cardCreated',
   'cardExhausted',
   'enemyDefeated',
+  'enemySummoned',
   'deckShuffled',
   // Bookkeeping: a trigger chain hit MAX_CHAIN_DEPTH and its remaining operations were dropped.
   'chainCapped',

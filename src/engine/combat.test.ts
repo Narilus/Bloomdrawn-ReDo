@@ -99,7 +99,7 @@ describe('rejected commands', () => {
     ['dead target', (s) => {
       const [next, cmd] = withPlay(s, 'test.a.hit', 'e20');
       (next.enemies[0] as { hp: number }).hp = 0;
-      next.enemies.push({ id: 'e99', enemy: 'test.dummy', hp: 10, maxHp: 10, shield: 0, statuses: [] });
+      next.enemies.push({ id: 'e99', enemy: 'test.dummy', slot: 1, hp: 10, maxHp: 10, shield: 0, statuses: [] });
       return [next, cmd];
     }],
     ['wrong phase', (s) => [{ ...structuredClone(s), phase: 'enemy' }, { type: 'endTurn' }]],

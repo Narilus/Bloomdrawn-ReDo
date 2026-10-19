@@ -121,6 +121,12 @@ export class Actor {
     this.track(animate(label.scale, { x: [0.6, 1.15, 1], y: [0.6, 1.15, 1] }, { duration: 0.3, delay }));
   }
 
+  /** Fades in a summoned actor. */
+  appear(delay = 0): void {
+    this.root.alpha = 0;
+    this.track(animate(this.root, { alpha: [0, 1] }, { duration: 0.5, delay }));
+  }
+
   /** Sinks and fades out a defeated actor. */
   fall(delay = 0): void {
     this.track(animate(this.root, { alpha: [1, 0] }, { duration: 0.6, delay: delay + 0.25 }));
