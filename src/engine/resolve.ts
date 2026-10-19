@@ -41,13 +41,14 @@ export const createResolution = (draft: CombatState, registry: Registry): Resolu
   queue: [],
 });
 
+export const vitalsOf = ({ party, enemies }: CombatState): Vitals => ({
+  party: { hp: party.hp, shield: party.shield },
+  enemies: enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
+});
+
 function record(rc: Resolution, event: EngineEvent): void {
-  const { party, enemies } = rc.state;
   rc.events.push(event);
-  rc.vitals.push({
-    party: { hp: party.hp, shield: party.shield },
-    enemies: enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
-  });
+  rc.vitals.push(vitalsOf(rc.state));
 }
 
 export const isOver = (rc: Resolution): boolean => rc.state.phase === 'ended';

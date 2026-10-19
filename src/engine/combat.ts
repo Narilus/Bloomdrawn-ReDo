@@ -4,7 +4,7 @@ import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
-import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution, type Vitals } from './resolve.ts';
+import { createResolution, drain, emit, enqueue, isOver, ROOT, vitalsOf, type Resolution, type Vitals } from './resolve.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
   BASE_MANA,
@@ -45,8 +45,17 @@ export interface CombatSetup {
   gauges?: number[];
 }
 
+/** What combat start resolved, for presentation to play like any command (a Choir Bell volley). */
+export interface CombatStart {
+  state: CombatState;
+  events: EngineEvent[];
+  vitals: Vitals[];
+  /** HP and Shield before combat start resolved. */
+  before: Vitals;
+}
+
 /** Builds a combat, shuffles the deck and resolves combat start through the first draw. */
-export function startCombat(setup: CombatSetup, registry: Registry): { state: CombatState; events: EngineEvent[] } {
+export function startCombat(setup: CombatSetup, registry: Registry): CombatStart {
   let uid = 0;
   const next = (prefix: string): EntityId => `${prefix}${uid++}`;
   const lookup = <T>(table: Readonly<Record<string, T>>, id: string, kind: string): T => {
@@ -101,11 +110,12 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
   };
   shuffleInPlace(state.piles.draw, state.rng, 'shuffle');
 
+  const before = vitalsOf(state);
   const rc = createResolution(state, registry);
   emit(rc, { type: 'combatStart' }, ROOT);
   drain(rc);
   if (!isOver(rc)) beginTurn(rc);
-  return { state: rc.state, events: rc.events };
+  return { state: rc.state, events: rc.events, vitals: rc.vitals, before };
 }
 
 /** A fresh enemy at full HP (or an encounter's HP), showing its first intent. */

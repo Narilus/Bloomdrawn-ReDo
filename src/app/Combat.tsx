@@ -8,8 +8,10 @@ import {
   type CombatSetup,
   type CombatState,
   type Command,
+  type EngineEvent,
   type EntityId,
   type Vitals,
+  vitalsOf,
 } from '../engine/index.ts';
 import type { Battlefield } from '../stage/Battlefield.ts';
 import { StageView } from '../stage/StageView.tsx';
@@ -29,7 +31,8 @@ interface Props {
 /** One fight: the battlefield, the HUD and the hand. */
 export function Combat({ setup, label, onEnd }: Props) {
   const { fit, stageHost } = useFrame();
-  const [state, setState] = useState(() => startCombat(setup, registry).state);
+  const [opening] = useState(() => startCombat(setup, registry));
+  const [state, setState] = useState(opening.state);
   // The source of truth between renders, so rapid input never applies a command to a stale state.
   const current = useRef(state);
   const field = useRef<Battlefield | null>(null);
@@ -39,9 +42,25 @@ export function Combat({ setup, label, onEnd }: Props) {
   const [ultimateFor, setUltimateFor] = useState<EntityId | null>(null);
   // While the end of turn and enemy actions play out, the hand waits.
   const [busy, setBusy] = useState(false);
-  // HP and Shield as the battlefield shows them: they step with each hit as it lands.
-  const [shown, setShown] = useState<Vitals | null>(null);
+  // HP and Shield as the battlefield shows them: they step with each hit as it lands. Until combat
+  // start's own hits have played, the bars show the fight as it began.
+  const [shown, setShown] = useState<Vitals | null>(opening.before);
   const timers = useRef<number[]>([]);
+
+  /** Plays a resolution on the field and steps the bars with its hits. Returns how long it runs. */
+  const present = useCallback((before: Vitals, events: EngineEvent[], vitals: Vitals[], after: CombatState) => {
+    const { times, duration } = field.current?.play(events, after) ?? { times: [], duration: 0 };
+    // A new sequence finishes the previous one's bars at once, then steps through its own.
+    for (const t of timers.current) window.clearTimeout(t);
+    timers.current = [];
+    setShown(before);
+    times.forEach((t, i) => {
+      if (times[i + 1] === t) return; // only the last event at each moment
+      timers.current.push(window.setTimeout(() => setShown(vitals[i] ?? null), t * 1000));
+    });
+    timers.current.push(window.setTimeout(() => setShown(null), duration * 1000 + 100));
+    return duration;
+  }, []);
 
   const run = useCallback((command: Command) => {
     const before = current.current;
@@ -52,16 +71,7 @@ export function Combat({ setup, label, onEnd }: Props) {
     }
     current.current = result.state;
     setState(result.state);
-    const { times, duration } = field.current?.play(result.events, result.state) ?? { times: [], duration: 0 };
-    // A new command finishes the previous sequence's bars at once, then steps through its own.
-    for (const t of timers.current) window.clearTimeout(t);
-    timers.current = [];
-    setShown(vitalsOf(before));
-    times.forEach((t, i) => {
-      if (times[i + 1] === t) return; // only the last event at each moment
-      timers.current.push(window.setTimeout(() => setShown(result.vitals[i] ?? null), t * 1000));
-    });
-    timers.current.push(window.setTimeout(() => setShown(null), duration * 1000 + 100));
+    const duration = present(vitalsOf(before), result.events, result.vitals, result.state);
     if (command.type === 'endTurn' && duration > 0 && result.state.phase === 'player') {
       setBusy(true);
       timers.current.push(window.setTimeout(() => setBusy(false), duration * 1000 + 250));
@@ -71,7 +81,7 @@ export function Combat({ setup, label, onEnd }: Props) {
     const ultimate = member && registry.characters[member.character]?.ultimate;
     if (ultimate) setBanner({ text: ultimate.name, id: Date.now() });
     return true;
-  }, []);
+  }, [present]);
 
   const onPlay = useCallback(
     (card: EntityId, target?: EntityId) => run(target ? { type: 'playCard', card, target } : { type: 'playCard', card }),
@@ -139,9 +149,19 @@ export function Combat({ setup, label, onEnd }: Props) {
     return previewCard(state, command, registry) ?? [];
   }, [readied, state]);
 
-  const onReady = useCallback((f: Battlefield | null) => {
-    field.current = f;
-  }, []);
+  // Combat start's own events (a Choir Bell volley) play once, when the field is first up, after a short lead-in.
+  const openingPending = useRef(true);
+  const onReady = useCallback(
+    (f: Battlefield | null) => {
+      field.current = f;
+      if (!f || !openingPending.current) return;
+      openingPending.current = false;
+      timers.current.push(
+        window.setTimeout(() => present(opening.before, opening.events, opening.vitals, opening.state), OPENING_LEAD_IN * 1000),
+      );
+    },
+    [present, opening],
+  );
 
   return (
     <div className="combat">
@@ -188,7 +208,5 @@ export function Combat({ setup, label, onEnd }: Props) {
   );
 }
 
-const vitalsOf = (state: CombatState): Vitals => ({
-  party: { hp: state.party.hp, shield: state.party.shield },
-  enemies: state.enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
-});
+/** Seconds between the field appearing and combat start's events playing on it. */
+const OPENING_LEAD_IN = 0.5;
