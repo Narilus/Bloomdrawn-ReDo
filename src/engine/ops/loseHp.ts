@@ -8,8 +8,8 @@ import { isAlive, PARTY, type CombatState, type EntityId } from '../state.ts';
 export interface LoseHpArgs extends OpCall {
   op: 'loseHp';
   amount: Formula;
-  /** `self`: the source (a status's bearer); a party member loses from the shared pool. */
-  target?: 'self' | 'chosen';
+  /** `self`: the source (a status's bearer); a party member loses from the shared pool. `party`: the party (relics). */
+  target?: 'self' | 'chosen' | 'party';
   /** Shield absorbs it first (Poison). */
   blockedByShield?: boolean;
   /** The status doing it, carried on the events for presentation. */
@@ -25,7 +25,7 @@ export const loseHp = (amount: Formula, options: Omit<LoseHpArgs, 'op' | 'amount
 });
 
 function victimOf(state: CombatState, args: LoseHpArgs, ctx: OpContext): { id: EntityId; pool: { hp: number; shield: number } } | undefined {
-  const id = args.target === 'chosen' ? ctx.target : ctx.source;
+  const id = args.target === 'party' ? PARTY : args.target === 'chosen' ? ctx.target : ctx.source;
   if (id === PARTY || state.members.some((m) => m.id === id)) return { id: PARTY, pool: state.party };
   const enemy = state.enemies.find((e) => e.id === id);
   return enemy && isAlive(enemy) ? { id: enemy.id, pool: enemy } : undefined;
@@ -35,7 +35,7 @@ export const loseHpOp: Operation<LoseHpArgs> = {
   args: z.strictObject({
     op: z.literal('loseHp'),
     amount: formulaSchema,
-    target: z.enum(['self', 'chosen']).optional(),
+    target: z.enum(['self', 'chosen', 'party']).optional(),
     blockedByShield: z.boolean().optional(),
     status: z.string().min(1).optional(),
   }),

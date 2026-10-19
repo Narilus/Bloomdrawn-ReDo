@@ -1,9 +1,12 @@
+import type { CardSlot } from './defs.ts';
 import type { EntityId } from './state.ts';
 
 export const EVENT_TYPES = [
   // Lifecycle
   'combatStart',
   'turnStart',
+  // The turn's hand has been drawn: "at turn start, draw" effects hang here so the draw-to-5 can't swallow them.
+  'handDrawn',
   // Mana debt came off this turn's refill; raised after the turn's draw.
   'manaDebtPaid',
   // Unplayed cards left the hand; Retained cards were held.
@@ -53,6 +56,8 @@ export interface EngineEvent {
   resource?: string;
   status?: string;
   outcome?: 'victory' | 'defeat';
+  /** For `cardPlayed`: the card's personal slot, if it has one. */
+  slot?: CardSlot;
   /** How it came about, where presentation needs to know: `volley` hits, a control status's `skip`. */
   via?: string;
 }

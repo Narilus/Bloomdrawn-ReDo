@@ -5,7 +5,7 @@ import type { Battlefield } from '../stage/Battlefield.ts';
 import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
-import { DomainCounters, EnemyPlate, PartyBar, Pile, Portraits, UltimatePanel } from './Hud.tsx';
+import { DomainCounters, EnemyPlate, PartyBar, Pile, Portraits, RelicBar, UltimatePanel } from './Hud.tsx';
 
 // Slice line-up: the starter four with their picked Bloomdrawn sprites, Agathe in front.
 const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
@@ -20,10 +20,18 @@ function enemiesFromUrl(): string[] {
 }
 const ENEMIES = enemiesFromUrl();
 
+/** Dev builds only: `?relics=id,id` starts the fight holding those relics. */
+function relicsFromUrl(): string[] {
+  if (!import.meta.env.DEV) return [];
+  const ids = new URLSearchParams(window.location.search).get('relics')?.split(',') ?? [];
+  return ids.filter((id) => registry.relics[id]);
+}
+const RELICS = relicsFromUrl();
+
 // Every gauge starts at 70, as if mid-run, so each ultimate can fire in one slice fight (DECISIONS.md).
 const GAUGES = PARTY.map(() => 70);
 
-const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES, gauges: GAUGES }, registry).state;
+const newCombat = (seed: number) => startCombat({ seed, party: PARTY, enemies: ENEMIES, gauges: GAUGES, relics: RELICS }, registry).state;
 
 export function Combat() {
   const { fit, stageHost } = useFrame();
@@ -146,10 +154,7 @@ export function Combat() {
       {stageHost && <StageView key={seed} initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
       <Portraits state={state} choosing={ultimateFor !== null} onUltimate={(m) => !busy && setUltimateFor(m)} />
       <DomainCounters state={state} />
-      <div className="relics plaque" aria-label="Relics">
-        <span>Relics</span>
-        <span className="muted">none yet</span>
-      </div>
+      <RelicBar state={state} />
       <PartyBar state={state} vitals={shown} previews={previews} />
       {state.enemies.map((enemy) => (
         <EnemyPlate key={enemy.id} state={state} vitals={shown} id={enemy.id} aimed={readied?.target === enemy.id} previews={previews} />

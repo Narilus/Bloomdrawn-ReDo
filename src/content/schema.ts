@@ -15,6 +15,7 @@ const trigger = z.strictObject({
       target: z.literal('self').optional(),
       resource: z.string().optional(),
       direct: z.literal(true).optional(),
+      slots: z.array(z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB'])).optional(),
     })
     .optional(),
   once: z.literal('turn').optional(),
@@ -85,7 +86,14 @@ export const schemas = {
     endsAfterAction: z.boolean().optional(),
     ...hooks,
   }),
-  relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),
+  relic: z.strictObject({
+    kind: z.literal('relic'),
+    id,
+    name: z.string().min(1),
+    tier: z.enum(['common', 'uncommon', 'rare', 'cursed']),
+    text: z.string().min(1),
+    ...hooks,
+  }),
   encounter: z.strictObject({
     kind: z.literal('encounter'),
     id,

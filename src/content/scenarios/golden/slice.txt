@@ -6,6 +6,7 @@ cardDrawn card=c8
 cardDrawn card=c9
 cardDrawn card=c1
 cardDrawn card=c7
+handDrawn
 > playCard leonora.promissory-note
   cardPlayed src=m3 card=c18
   resourceGained src=m3 mana amt=4
@@ -47,6 +48,7 @@ cardDrawn card=c7
   cardDrawn card=c11
   cardDrawn card=c16
   cardDrawn card=c5
+  handDrawn
   manaDebtPaid amt=2
   cardDrawn src=m3 card=c13
 > playCard agathe.strike
@@ -95,6 +97,7 @@ cardDrawn card=c7
   cardDrawn card=c17
   cardDrawn card=c10
   cardDrawn card=c6
+  handDrawn
 > playCard anthe.votive-candle
   cardPlayed src=m2 tgt=e20 card=c13
   damageDealt src=m2 tgt=e20 amt=11 abs=10
@@ -165,6 +168,7 @@ cardDrawn card=c7
   cardDrawn card=c0
   cardDrawn card=c1
   cardDrawn card=c11
+  handDrawn
 > playCard agathe.the-choir-answers
   cardPlayed src=m0 card=c2
   resourceGained src=m0 tentacles amt=2
@@ -211,6 +215,7 @@ cardDrawn card=c7
   cardDrawn card=c9
   cardDrawn card=c13
   cardDrawn card=c18
+  handDrawn
 > playCard leonora.strike
   cardPlayed src=m3 tgt=e20 card=c15
   damageDealt src=m3 tgt=e20 amt=11

@@ -175,6 +175,7 @@ function filterMatches(trigger: TriggerDef, event: EngineEvent, holder: EntityId
   const f = trigger.filter;
   if (!f) return true;
   if (f.direct && origin.depth > 0) return false;
+  if (f.slots && (event.slot === undefined || !f.slots.includes(event.slot))) return false;
   if (f.source === 'self' && event.source !== holder) return false;
   if (f.source === 'other' && event.source === holder) return false;
   if (f.target === 'self' && event.target !== holder) return false;

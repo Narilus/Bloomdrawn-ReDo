@@ -125,7 +125,7 @@ Everything that reacts — passives, statuses, relics, weapons, Symptoms, Domain
 
 ### Events
 
-Lifecycle: `combatStart`, `turnStart`, `manaDebtPaid` (after the turn's draw), `cleanup`, `turnEnd`, `statusTick` (one per bearer, `target` = that bearer: each enemy at the end of the party's turn, the party after the enemy phase), `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `healed`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `ultimateCharged`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
+Lifecycle: `combatStart`, `turnStart`, `handDrawn` (after the turn's draw, where "at turn start, draw" effects hang), `manaDebtPaid`, `cleanup`, `turnEnd`, `statusTick` (one per bearer, `target` = that bearer: each enemy at the end of the party's turn, the party after the enemy phase), `enemyPhaseStart`, `enemyActed`, `combatEnd`. Actions: `cardPlayed`, `ultimateFired`, `transcended`. Outcomes: `damageDealt`, `damageTaken`, `shieldGained`, `healed`, `statusApplied`, `statusRemoved`, `resourceGained`, `resourceConsumed`, `ultimateCharged`, `cardDrawn`, `cardExhausted`, `enemyDefeated`. Bookkeeping: `deckShuffled`, and `chainCapped` (the quiet log line when a chain hits the depth cap).
 
 A trigger may be limited to `once: 'turn'`, and its filter may require `direct` (raised by a card or ultimate itself, not by another trigger), which is how "the first time each turn a card gains Embryo" is written.
 

@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** M2.4 Relics (enemy sprite options await the owner's pick)
+**Current task:** M2.5 The gauntlet (enemy sprite options await the owner's pick)
 
 ## Milestones
 
@@ -161,6 +161,8 @@ _Done 19 Oct. Enemies hold a fixed `slot`; a fight lays out its starting enemies
 ### M2.4 Relics
 The approved relics, as triggers and modifiers, with Common, Uncommon, Rare and Cursed tiers. A relic bar along the top with tooltips.
 **Done when:** each relic has a rule test, and relic trigger order follows acquisition order.
+
+_Done 19 Oct. Seven relics as content (`src/content/relics/m2.ts`) with name, tier and text. New engine pieces: a `handDrawn` moment after the turn's draw, trigger filters by card slot, charge for the triggering card's owner, party damage for relics. A relic bar with tier colours and tooltips; dev builds take `?relics=`._
 
 ### M2.5 The gauntlet (owner gate)
 A three-fight run: normal, normal, elite. Party HP, gauges and relics carry over; gauges start at 0. Pick one relic from three after each win; "Run again" after a loss or the final win.

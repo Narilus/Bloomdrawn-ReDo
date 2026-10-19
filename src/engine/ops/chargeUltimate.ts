@@ -8,21 +8,24 @@ import { GAUGE_MAX, type CombatState, type Member } from '../state.ts';
 export interface ChargeUltimateArgs extends OpCall {
   op: 'chargeUltimate';
   amount: Formula;
-  /** `owner`: the card's or passive's owner. `party`: every party member. */
-  who?: 'owner' | 'party';
+  /** `owner`: the card's or passive's owner. `party`: every party member. `eventOwner`: whoever owns the card in the triggering event (relics). */
+  who?: 'owner' | 'party' | 'eventOwner';
 }
 
-export const chargeUltimate = (amount: Formula, who: 'owner' | 'party' = 'owner'): ChargeUltimateArgs => ({
+export const chargeUltimate = (amount: Formula, who: ChargeUltimateArgs['who'] = 'owner'): ChargeUltimateArgs => ({
   op: 'chargeUltimate',
   amount,
   who,
 });
 
-const chargedOf = (state: CombatState, args: ChargeUltimateArgs, ctx: OpContext): Member[] =>
-  args.who === 'party' ? state.members : state.members.filter((m) => m.id === ctx.owner);
+const chargedOf = (state: CombatState, args: ChargeUltimateArgs, ctx: OpContext): Member[] => {
+  if (args.who === 'party') return state.members;
+  const id = args.who === 'eventOwner' ? ctx.event?.owner : ctx.owner;
+  return state.members.filter((m) => m.id === id);
+};
 
 export const chargeUltimateOp: Operation<ChargeUltimateArgs> = {
-  args: z.strictObject({ op: z.literal('chargeUltimate'), amount: formulaSchema, who: z.enum(['owner', 'party']).optional() }),
+  args: z.strictObject({ op: z.literal('chargeUltimate'), amount: formulaSchema, who: z.enum(['owner', 'party', 'eventOwner']).optional() }),
   validate: (state, args, ctx) => (chargedOf(state, args, ctx).length > 0 ? undefined : 'No ultimate to charge.'),
   resolve(draft, args, ctx, registry) {
     const amount = Math.max(0, Math.floor(evaluate(args.amount, draft, ctx, registry)));
@@ -43,5 +46,9 @@ export const chargeUltimateOp: Operation<ChargeUltimateArgs> = {
     }));
   },
   describe: (args, show) =>
-    args.who === 'party' ? `Charge every party member's ultimate by ${show(args.amount)}` : `Charge her ultimate by ${show(args.amount)}`,
+    args.who === 'party'
+      ? `Charge every party member's ultimate by ${show(args.amount)}`
+      : args.who === 'eventOwner'
+        ? `Charge that card's owner's ultimate by ${show(args.amount)}`
+        : `Charge her ultimate by ${show(args.amount)}`,
 };

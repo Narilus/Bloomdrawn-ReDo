@@ -18,6 +18,8 @@ export interface TriggerFilter {
   resource?: string;
   /** Raised by a card or ultimate itself, not by another trigger. */
   direct?: true;
+  /** For `cardPlayed`: only cards in these personal slots. */
+  slots?: CardSlot[];
 }
 
 export interface TriggerDef {
@@ -145,8 +147,13 @@ export interface StatusDef extends Hooks {
   help?: string;
 }
 
+/** Content requires the name, tier and text; engine fixtures may omit them. */
 export interface RelicDef extends Hooks {
   id: string;
+  name?: string;
+  tier?: 'common' | 'uncommon' | 'rare' | 'cursed';
+  /** Plain rules text for its tooltip. */
+  text?: string;
 }
 
 export interface ResourceDef {

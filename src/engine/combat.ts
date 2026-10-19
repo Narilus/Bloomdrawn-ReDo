@@ -215,6 +215,7 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
   for (let i = 0; i < repeats; i++) enqueue(rc, def.effects, ctx, ROOT);
   enqueue(rc, chargeOf(def), ctx, ROOT);
   const played: EngineEvent = { type: 'cardPlayed', source: card.owner, owner: card.owner, card: card.uid };
+  if (def.slot) played.slot = def.slot;
   if (command.target !== undefined) played.target = command.target;
   emit(rc, played, ROOT);
   drain(rc);
@@ -353,6 +354,9 @@ function beginTurn(rc: Resolution): void {
   drain(rc);
   if (isOver(rc)) return;
   for (const event of drawCards(s, HAND_DRAW - s.piles.hand.length)) emit(rc, event, ROOT);
+  drain(rc);
+  if (isOver(rc)) return;
+  emit(rc, { type: 'handDrawn' }, ROOT);
   drain(rc);
   // After the draw, so "when a turn starts with Mana debt, draw" adds a card instead of being topped up to 5.
   if (debt > 0 && !isOver(rc)) {
