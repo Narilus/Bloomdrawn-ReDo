@@ -16,6 +16,8 @@ export class Actor {
   private lungeAnim: AnimationPlaybackControls | undefined;
   private recoilAnim: AnimationPlaybackControls | undefined;
   private readonly breathAnims: AnimationPlaybackControls[] = [];
+  /** Every one-off animation still running, so destroy() can stop them before Pixi frees their targets. */
+  private readonly running = new Set<AnimationPlaybackControls>();
   private popups = 0;
 
   constructor(
@@ -69,7 +71,13 @@ export class Actor {
 
   /** A swell and settle for an ultimate. Scales the recoil layer, so it never stacks with breathing. */
   burst(delay = 0): void {
-    animate(this.recoilLayer.scale, { x: [1, 1.14, 0.97, 1], y: [1, 1.14, 0.97, 1] }, { duration: 0.6, delay, times: [0, 0.35, 0.7, 1] });
+    this.track(animate(this.recoilLayer.scale, { x: [1, 1.14, 0.97, 1], y: [1, 1.14, 0.97, 1] }, { duration: 0.6, delay, times: [0, 0.35, 0.7, 1] }));
+  }
+
+  private track(controls: AnimationPlaybackControls): AnimationPlaybackControls {
+    this.running.add(controls);
+    void controls.finished.then(() => this.running.delete(controls));
+    return controls;
   }
 
   /** A short shake away from the hit. Restarts from rest if already shaking. */
@@ -103,17 +111,19 @@ export class Actor {
     label.position.set(this.home.x + (stagger - 1.5) * 22, this.home.y - this.height * this.root.scale.y * 0.8);
     parent.addChild(label);
     const y0 = label.y;
-    animate(label, { alpha: [0, 1, 1, 0], y: [y0 + 10, y0 - 40, y0 - 70, y0 - 90] }, { duration: 1.1, delay, times: [0, 0.15, 0.7, 1] })
-      .then(() => {
-        label.destroy();
-        this.popups = Math.max(0, this.popups - 1);
-      });
-    animate(label.scale, { x: [0.6, 1.15, 1], y: [0.6, 1.15, 1] }, { duration: 0.3, delay });
+    const float = this.track(
+      animate(label, { alpha: [0, 1, 1, 0], y: [y0 + 10, y0 - 40, y0 - 70, y0 - 90] }, { duration: 1.1, delay, times: [0, 0.15, 0.7, 1] }),
+    );
+    void float.finished.then(() => {
+      if (!label.destroyed) label.destroy();
+      this.popups = Math.max(0, this.popups - 1);
+    });
+    this.track(animate(label.scale, { x: [0.6, 1.15, 1], y: [0.6, 1.15, 1] }, { duration: 0.3, delay }));
   }
 
   /** Sinks and fades out a defeated actor. */
   fall(delay = 0): void {
-    animate(this.root, { alpha: [1, 0] }, { duration: 0.6, delay: delay + 0.25 });
+    this.track(animate(this.root, { alpha: [1, 0] }, { duration: 0.6, delay: delay + 0.25 }));
   }
 
   /** Current offset from home, for the settle check. */
@@ -132,5 +142,7 @@ export class Actor {
     this.lungeAnim?.stop();
     this.recoilAnim?.stop();
     for (const a of this.breathAnims) a.stop();
+    for (const a of this.running) a.stop();
+    this.running.clear();
   }
 }

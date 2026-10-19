@@ -45,8 +45,14 @@ export function StageView({ initialState, fit, host, onReady }: Props) {
     return () => {
       cancelled = true;
       ready(null);
-      void started.then(() => {
+      void started.then(async () => {
+        // Stop rendering first, so no frame draws a sprite whose texture is being freed.
+        app.stop();
         field?.destroy();
+        // Motion flushes values already queued for this frame even after stop(); free Pixi objects
+        // only once that flush has passed, or it writes to a destroyed sprite and its loop dies.
+        await nextFrame();
+        await nextFrame();
         // Under StrictMode this cleanup can run after the remounted app has set the refs; only
         // clear our own, or the live canvas never hears about a resize again.
         if (appRef.current === app) appRef.current = null;
@@ -70,3 +76,5 @@ function applyFit(app: Application, fit: Fit) {
   app.renderer.resize(fit.width, fit.height);
   app.stage.scale.set(fit.scale);
 }
+
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));

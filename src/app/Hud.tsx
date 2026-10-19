@@ -65,7 +65,7 @@ export function Portraits({ state, choosing, onUltimate }: { state: CombatState;
   );
 }
 
-/** One badge per Domain present. Rapture's reads as total damage, with Tentacles × damage per hit beneath. */
+/** One badge per Domain present, label first: "Embryo 4", or "Tentacles 3 × 5 = 15" (count × damage per hit = total). */
 export function DomainCounters({ state }: { state: CombatState }) {
   const counters = domainCounters(state, registry);
   if (counters.length === 0) return null;
@@ -77,15 +77,13 @@ export function DomainCounters({ state }: { state: CombatState }) {
           className={`counter plaque domain-${c.domain}`}
           aria-label={c.total === undefined ? `${c.count} ${c.label}` : `${c.label}: ${c.count} × ${c.each} = ${c.total} damage`}
         >
+          <span className="counter-label">{c.label}</span>
+          {c.total !== undefined && (
+            <span className="counter-sum">
+              {c.count} × {c.each} =
+            </span>
+          )}
           <strong>{c.total ?? c.count}</strong>
-          <span className="counter-label">
-            {c.label}
-            {c.total !== undefined && (
-              <small>
-                {c.count} × {c.each}
-              </small>
-            )}
-          </span>
         </div>
       ))}
     </div>

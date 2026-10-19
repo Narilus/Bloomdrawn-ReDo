@@ -226,26 +226,11 @@ body,
   font-size: 22px;
 }
 
-.counter-label {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-
-.counter-label small {
+.counter-sum {
   font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 700;
   opacity: 0.8;
-}
-
-.counter:has(small) {
-  align-items: center;
-  padding: 4px 14px;
-}
-
-.counter:has(small) strong {
-  font-size: 26px;
 }
 
 .counter.domain-flesh { border-color: var(--flesh); }
