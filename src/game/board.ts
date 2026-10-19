@@ -37,17 +37,17 @@ export interface Board {
   known: string[];
 }
 
-/** Fog distances (draft): layout within 2 of anywhere the party has stood, contents next to it, landmarks within 4. */
-export const FOG = { layout: 2, contents: 1, landmarks: 4 } as const;
+/** Fog distances (owner, 19 Oct): layout and contents within 2 of anywhere the party has stood, landmarks within 4. */
+export const FOG = { layout: 2, contents: 2, landmarks: 4 } as const;
 
 const LANDMARKS: readonly TileKind[] = ['shop', 'elite', 'boss'];
 /** Marked as soon as their layout is revealed, and from then on. */
 const ALWAYS_MARKED: readonly TileKind[] = ['collapsing', 'symptom', 'ruin'];
 
-/** A tile the party must deal with on entering: walking stops there. */
+/** A tile with a fight or a choice on it: walking stops there (owner, 19 Oct). */
 export function stopsOn(tile: Tile): boolean {
   if (tile.kind === 'symptom') return !tile.paid;
-  return tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss' || tile.kind === 'event';
+  return ['fight', 'elite', 'boss', 'event', 'shop', 'camp'].includes(tile.kind);
 }
 
 export function createBoard(tiles: Record<string, Tile>, start: string): Board {
@@ -68,8 +68,8 @@ export function visibleKind(board: Board, key: string): TileKind | 'unknown' | u
 /**
  * The shortest walk to a revealed tile, as the keys stepped on (ending with `to`), or undefined if
  * there is none. Only revealed tiles are used. The route never crosses a Collapsing tile or an
- * unpaid Symptom (the player chooses those by clicking them), and goes around fights and Events
- * where it can.
+ * unpaid Symptom (the player chooses those by clicking them), and goes around tiles that would
+ * stop it where it can.
  */
 export function routeTo(board: Board, to: string): string[] | undefined {
   const target = board.tiles[to];

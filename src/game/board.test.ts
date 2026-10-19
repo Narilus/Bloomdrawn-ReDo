@@ -28,11 +28,16 @@ describe('walking', () => {
     expect(go(board, '2,0').board.at).toBe('2,0');
   });
 
-  it('stops on the first fight or Event, and goes around one when it can', () => {
+  it('stops on the first fight or choice, and goes around one when it can', () => {
     const straight = createBoard(row('entrance', 'fight', 'path'), '0,0');
     const stopped = go(straight, '2,0');
     expect(stopped.steps).toEqual(['1,0']);
     expect(stopsOn(stopped.board.tiles['1,0']!)).toBe(true);
+
+    // Shops and unused Camps hold a choice, so they stop the walk too (owner, 19 Oct).
+    for (const kind of ['shop', 'camp'] as const) {
+      expect(go(createBoard(row('entrance', kind, 'path'), '0,0'), '2,0').steps).toEqual(['1,0']);
+    }
 
     // The same row with a longer way round above the fight.
     const detour = createBoard({ ...row('entrance', 'fight', 'path'), '1,-1': { kind: 'path' }, '2,-1': { kind: 'path' } }, '0,0');
@@ -71,10 +76,10 @@ describe('walking', () => {
 });
 
 describe('fog of war', () => {
-  it('reveals layout within 2, contents next to the party, and landmarks within 4', () => {
+  it('reveals layout and contents within 2, and landmarks within 4', () => {
     const board = createBoard(row('entrance', 'fight', 'event', 'collapsing', 'shop', 'boss'), '0,0');
-    expect(visibleKind(board, '1,0')).toBe('fight'); // adjacent: contents shown
-    expect(visibleKind(board, '2,0')).toBe('unknown'); // 2 away: layout only
+    expect(visibleKind(board, '1,0')).toBe('fight');
+    expect(visibleKind(board, '2,0')).toBe('event');
     expect(visibleKind(board, '3,0')).toBeUndefined(); // 3 away: fogged
     expect(visibleKind(board, '4,0')).toBe('shop'); // a landmark, 4 away
     expect(visibleKind(board, '5,0')).toBeUndefined(); // the Boss, 5 away
@@ -86,10 +91,9 @@ describe('fog of war', () => {
   });
 
   it('stays lifted where the party has been', () => {
-    const board = go(createBoard(row('entrance', 'path', 'path', 'path', 'path', 'event'), '0,0'), '2,0').board;
+    const board = go(createBoard(row('entrance', 'path', 'path', 'path', 'event'), '0,0'), '2,0').board;
     const back = go(board, '0,0').board;
-    expect(visibleKind(back, '3,0')).toBe('path');
-    expect(visibleKind(back, '4,0')).toBe('unknown');
+    expect(visibleKind(back, '4,0')).toBe('event');
   });
 });
 
