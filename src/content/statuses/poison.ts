@@ -1,7 +1,8 @@
 import { loseHp, stacks } from '../../engine/index.ts';
 import { status } from '../define.ts';
 
-// Damage equal to stacks at the end of its side's turn; it does not decay. Shield blocks it;
+// Damage equal to stacks on `statusTick` (an enemy's at the end of your turn, the party's after the enemy phase);
+// it does not decay. Shield blocks it;
 // modifiers don't change it.
 export const poison = status({
   id: 'status.poison', stacking: 'add', icon: 'poison',

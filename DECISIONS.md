@@ -107,6 +107,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Enemy sprites are generated during M2 (owner, 19 Oct).
 - Ideas the owner raised for later, not yet decided: a skin selection; Transcend optionally changing a character's sprite (Maelia-03, with the exposed legs and pregnant body, fits that); enemies drawing alternate skins from their numbered sprites (owner, 19 Oct).
 - A later balance pass may add more sources of ultimate charge, so "battery" characters become a team-building role (owner idea, 19 Oct).
+- M2 playtest: turn-limited statuses (Vulnerable, Weak) count down only on their bearer's own turn, at its end. This corrects the earlier timing line, which had them drop at the end of the other side's turn. Poison and Bleed damage keep their timing (owner, 19 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).

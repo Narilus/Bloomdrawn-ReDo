@@ -79,7 +79,7 @@ describe('Poison', () => {
 });
 
 describe('Vulnerable and Weak', () => {
-  it('Vulnerable on an enemy: your hits deal 50% more, previewed, until the end of your turn', () => {
+  it('Vulnerable on an enemy: your hits deal 50% more, previewed, until the end of its own turn', () => {
     const state = begin();
     hound(state).statuses.push({ status: 'status.vulnerable', stacks: 1 });
     const strike = hold(state, 'leonora.strike');
@@ -90,7 +90,7 @@ describe('Vulnerable and Weak', () => {
     expect(hound(run(played, endTurn).state).statuses).toEqual([]);
   });
 
-  it('Weak on the party: every member and the Tentacles deal 25% less, then it counts down after the enemy phase', () => {
+  it('Weak on the party: every member and the Tentacles deal 25% less, then it counts down at the end of your turn', () => {
     const state = begin();
     state.party.statuses.push({ status: 'status.weak', stacks: 2 });
     const strike = hold(state, 'leonora.strike');
@@ -102,12 +102,18 @@ describe('Vulnerable and Weak', () => {
   });
 
   it("Vulnerable on the party and Weak on the Hound change the Hound's shown and dealt damage alike", () => {
-    for (const [side, expected] of [['party', 18], ['hound', 9]] as const) {
+    // Turn counts drop at the end of their bearer's own turn (owner, 19 Oct): the party's Vulnerable 1
+    // runs out before the Hound bites, Vulnerable 2 doesn't, and the Hound's Weak 1 lasts through its bite.
+    const cases = [
+      ['party', 1, 12],
+      ['party', 2, 18],
+      ['hound', 1, 9],
+    ] as const;
+    for (const [side, stacks, expected] of cases) {
       const state = begin();
-      if (side === 'party') state.party.statuses.push({ status: 'status.vulnerable', stacks: 1 });
-      else hound(state).statuses.push({ status: 'status.weak', stacks: 2 });
+      if (side === 'party') state.party.statuses.push({ status: 'status.vulnerable', stacks });
+      else hound(state).statuses.push({ status: 'status.weak', stacks });
       expect(previewIntent(state, hound(state).id, registry)[0]?.amount).toBe(expected);
-      // The Hound's statuses tick at the end of your turn, before it bites, so Weak 2 still has a turn left.
       const after = run(state, endTurn).state;
       expect(after.party.hp).toBe(210 - expected);
     }

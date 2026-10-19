@@ -12,8 +12,10 @@ export const EVENT_TYPES = [
   // Unplayed cards left the hand; Retained cards were held.
   'cleanup',
   'turnEnd',
-  // Damage over time, after the end-of-turn effects and Tentacles.
+  // Damage over time, after the end-of-turn effects and Tentacles: the enemies' at the end of the party's turn, the party's after the enemy phase.
   'statusTick',
+  // The bearer's own turn ended (the party's after its turn, each enemy's after the enemy phase): turn counts drop.
+  'turnCountTick',
   'enemyPhaseStart',
   'enemyActed',
   'combatEnd',

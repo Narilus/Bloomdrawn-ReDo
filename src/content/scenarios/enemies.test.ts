@@ -46,10 +46,11 @@ describe('Censer Acolyte (debuffer)', () => {
   it('Smoke puts Weak on the whole party; Incense puts Vulnerable', () => {
     const state = begin(['enemy.censer-acolyte']);
     const one = turns(state, 1);
-    // Weak 2, minus the party tick right after the enemy phase.
-    expect(one.party.statuses).toEqual([{ status: 'status.weak', stacks: 1 }]);
+    // Weak 2, whole: it counts down only at the end of your turns, so it covers the next two.
+    expect(one.party.statuses).toEqual([{ status: 'status.weak', stacks: 2 }]);
+    expect(turns(one, 1).party.statuses).toEqual([{ status: 'status.weak', stacks: 1 }]);
     const three = turns(one, 2);
-    expect(three.party.statuses).toEqual([{ status: 'status.vulnerable', stacks: 1 }]);
+    expect(three.party.statuses).toEqual([{ status: 'status.vulnerable', stacks: 2 }]);
   });
 });
 

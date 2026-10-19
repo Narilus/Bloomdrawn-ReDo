@@ -254,7 +254,7 @@ function leaveHand(card: CardInstance): void {
   delete card.held;
 }
 
-/** Cleanup, then end of turn: scheduled effects and Domain hooks (Tentacles), then damage over time. */
+/** Cleanup, then end of turn: scheduled effects and Domain hooks (Tentacles), then damage over time, then the party's turn counts. */
 function endTurn(rc: Resolution): void {
   const s = rc.state;
   const kept: CardInstance[] = [];
@@ -274,12 +274,15 @@ function endTurn(rc: Resolution): void {
     drain(rc);
     if (isOver(rc)) return;
   }
-  // The enemies' statuses tick at the end of the party's turn, one enemy at a time.
+  // Damage over time on the enemies lands at the end of the party's turn, one enemy at a time.
   for (const enemy of [...s.enemies]) {
     if (!isAlive(enemy)) continue;
-    tick(rc, enemy.id);
+    tick(rc, 'statusTick', enemy.id);
     if (isOver(rc)) return;
   }
+  // Turn counts drop on their bearer's own turn only.
+  tick(rc, 'turnCountTick', PARTY);
+  if (isOver(rc)) return;
 
   s.phase = 'enemy';
   // An enemy's Shield lasts until its own next turn, as the party's lasts until theirs.
@@ -293,15 +296,20 @@ function endTurn(rc: Resolution): void {
     actIntent(rc, enemy);
     if (isOver(rc)) return;
   }
-  // The party's statuses tick after the enemy phase.
-  tick(rc, PARTY);
+  // The enemies' turn is over: their turn counts drop. Then damage over time on the party lands.
+  for (const enemy of [...s.enemies]) {
+    if (!isAlive(enemy)) continue;
+    tick(rc, 'turnCountTick', enemy.id);
+    if (isOver(rc)) return;
+  }
+  tick(rc, 'statusTick', PARTY);
   if (isOver(rc)) return;
   beginTurn(rc);
 }
 
-/** One bearer's statuses tick: damage over time and turn counts (status triggers on `statusTick` for themselves). */
-function tick(rc: Resolution, bearer: EntityId): void {
-  emit(rc, { type: 'statusTick', target: bearer }, ROOT);
+/** One bearer's statuses tick: damage over time on `statusTick`, turn counts on `turnCountTick` (status triggers filter for themselves). */
+function tick(rc: Resolution, type: 'statusTick' | 'turnCountTick', bearer: EntityId): void {
+  emit(rc, { type, target: bearer }, ROOT);
   drain(rc);
 }
 
