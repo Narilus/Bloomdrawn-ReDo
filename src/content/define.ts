@@ -1,4 +1,4 @@
-import type { CardDef, CharacterDef, DomainDef, EncounterDef, EnemyDef, RelicDef, StatusDef } from '../engine/index.ts';
+import type { CardDef, CharacterDef, DomainDef, EncounterDef, EnemyDef, MotifDef, RelicDef, StatusDef } from '../engine/index.ts';
 
 // Typed helpers for content files. They return plain JSON-shaped data tagged with `kind`,
 // which is how the registry finds definitions among a module's exports.
@@ -17,3 +17,4 @@ export const status = (def: StatusDef) => ({ kind: 'status' as const, ...def });
 export const relic = (def: RelicDef) => ({ kind: 'relic' as const, ...def });
 export const domain = (def: DomainDef) => ({ kind: 'domain' as const, ...def });
 export const encounter = (def: EncounterDef) => ({ kind: 'encounter' as const, ...def });
+export const motif = (def: MotifDef) => ({ kind: 'motif' as const, ...def });

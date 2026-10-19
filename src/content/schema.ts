@@ -95,6 +95,13 @@ export const schemas = {
     text: z.string().min(1),
     ...hooks,
   }),
+  motif: z.strictObject({
+    kind: z.literal('motif'),
+    id,
+    place: z.enum(['start', 'route', 'end', 'side']),
+    // Cells from the legend in src/game/motif.ts, or spaces.
+    rows: z.array(z.string().regex(/^[EXo.FLBVSCYK ]*$/, 'only legend characters and spaces')).min(1),
+  }),
   encounter: z.strictObject({
     kind: z.literal('encounter'),
     id,

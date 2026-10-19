@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.2 Motifs and the validator
+**Current task:** M3.3 The map screen
 
 ## Milestones
 
@@ -180,9 +180,11 @@ Axial hex coordinates, tiles and their lifecycle (cleared tiles become path, Col
 
 _Done 19 Oct. `src/game/hex.ts` (axial coordinates) and `src/game/board.ts` (tiles, routes, walking, fog, tile lifecycle), with the owner's fog distances (layout and contents at 2, landmarks at 4) as constants. Walking stops on every fight and choice tile. `board.test.ts` also builds the owner's temptation loop by hand and checks it behaves as drawn: a free first visit through both Collapsing tiles, the Symptom on any return, and taking the Symptom first keeps both Collapsing tiles._
 
-### M3.2 Motifs and the validator
+### M3.2 Motifs and the validator ✅
 Motifs as content (slots with roles and sockets), stitched into one board from the run seed, roles filled from pools. The never-stranded validator replays every Collapsing order. The temptation loop motif, as the owner drew it.
 **Done when:** the validator rejects a hand-made stranding board, and passes boards from many seeds; the temptation loop behaves as drawn (free first visit, Symptom on return).
+
+_Done 19 Oct. Motifs are drawn as text rows of hexes (`src/content/motifs/m3.ts`, legend in `src/game/motif.ts`); `src/game/labyrinth.ts` stitches them (route motifs heading east within a sixth of a turn, side motifs on sockets, touching only at joints, a joint touching only plain path), fills fights from pools and rerolls any board `findStranding` rejects. The M3 set gives 60 tiles, a 17–18 step route, 5–7 fights, 2 elites, 3–4 Events, 1–2 Shops, 2 Camps and 1 Symptom on every one of 200 seeds (`src/app/labyrinth.test.ts`), and the loop's Shop is never reachable without the toll. Found on the way: two Collapsing tiles side by side are a trap (on one, across, back off), which is why the loop pairs its Collapsing tile with the Symptom. The Boss tile draws from the elite pool until M4._
 
 ### M3.3 The map screen
 The board in React/SVG: fog, landmarks, the party token, click-to-move, tile tooltips. Entering a fight plays it and returns to the map.

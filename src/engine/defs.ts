@@ -133,6 +133,17 @@ export interface EncounterDef {
 
 export type EnemyEntry = string | { enemy: string; hp: number };
 
+/**
+ * A hand-authored piece of the Labyrinth (DESIGN.md "Motifs"), drawn as rows of hex cells; the
+ * legend is in src/game/motif.ts. Start motifs hold the entrance, route motifs chain toward the
+ * Boss, the end motif holds the Boss, and side motifs hang off a route motif's socket.
+ */
+export interface MotifDef {
+  id: string;
+  place: 'start' | 'route' | 'end' | 'side';
+  rows: string[];
+}
+
 export interface StatusDef extends Hooks {
   id: string;
   stacking: 'add' | 'refresh' | 'highest';
@@ -194,6 +205,7 @@ export interface Registry {
   relics: Readonly<Record<string, RelicDef>>;
   domains: Readonly<Record<string, DomainDef>>;
   encounters: Readonly<Record<string, EncounterDef>>;
+  motifs: Readonly<Record<string, MotifDef>>;
   /** Bounded escape hatch: kit-specific operations, listed so their number stays visible. */
   customOps?: Readonly<Record<string, Operation>>;
 }

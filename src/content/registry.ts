@@ -21,6 +21,7 @@ const FAMILY = {
   relic: 'relics',
   domain: 'domains',
   encounter: 'encounters',
+  motif: 'motifs',
 } as const;
 
 type Modules = Record<string, Record<string, unknown>>;
@@ -36,7 +37,7 @@ interface Found {
  */
 export function validateContent(modules: Modules): { registry: Registry; errors: string[] } {
   const errors: string[] = [];
-  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {}, encounters: {} } as {
+  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {}, encounters: {}, motifs: {} } as {
     [K in keyof typeof FAMILY as (typeof FAMILY)[K]]: Record<string, never>;
   };
   const fileOf = new Map<string, string>();
@@ -182,7 +183,7 @@ const pathOf = (issue: z.core.$ZodIssue) => (issue.path.length ? `${issue.path.j
 /** The game's content registry, built from every content file. */
 export const registry: Registry = buildRegistry(
   import.meta.glob(
-    ['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', './encounters/**/*.ts', '!**/*.test.ts'],
+    ['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', './encounters/**/*.ts', './motifs/**/*.ts', '!**/*.test.ts'],
     { eager: true },
   ),
 );
