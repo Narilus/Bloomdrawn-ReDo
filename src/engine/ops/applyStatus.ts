@@ -38,12 +38,15 @@ export const applyStatusOp: Operation<ApplyStatusArgs> = {
   validate: (state, args, ctx, registry) => (bearers(state, args, ctx, registry).length > 0 ? undefined : 'No one can bear this status.'),
   resolve(draft, args, ctx, registry) {
     const stacks = Math.max(0, Math.floor(evaluate(args.stacks, draft, ctx, registry)));
+    // The enemies' turn plays as one moment: what an enemy applies in it takes hold once it is over
+    // (owner, 20 Oct). Everything else, the party's statuses and enemy reactions in your turn, holds at once.
+    const pending = draft.phase === 'enemy' && draft.enemies.some((e) => e.id === ctx.source);
     return {
       events: bearers(draft, args, ctx, registry).flatMap((who) => {
         const status = landingStatus(who, args.status, registry);
         const def = registry.statuses[status];
         if (!def) return [];
-        addStacks(who.statuses, def, stacks);
+        addStacks(who.statuses, def, stacks, pending);
         return [{ type: 'statusApplied' as const, source: ctx.source, target: who.id, status, amount: stacks }];
       }),
     };

@@ -327,7 +327,7 @@ function tick(rc: Resolution, bearer: EntityId): void {
 /**
  * A side's turn has ended: every turn-count status that matters on that side's turns loses a
  * stack (Weak on that side, Vulnerable on the other), except stacks that landed this turn. Then
- * nothing is fresh any more.
+ * nothing is fresh or pending any more.
  */
 export function countDown(rc: Resolution, ended: 'party' | 'enemies'): void {
   const s = rc.state;
@@ -343,7 +343,12 @@ export function countDown(rc: Resolution, ended: 'party' | 'enemies'): void {
       if (takeStacks(bearer.statuses, stack.status, 1)) emit(rc, { type: 'statusRemoved', target: bearer.id, status: stack.status }, ROOT);
     }
   }
-  for (const bearer of bearers) for (const stack of bearer.statuses) delete stack.fresh;
+  for (const bearer of bearers) {
+    for (const stack of bearer.statuses) {
+      delete stack.fresh;
+      delete stack.pending;
+    }
+  }
   drain(rc);
 }
 

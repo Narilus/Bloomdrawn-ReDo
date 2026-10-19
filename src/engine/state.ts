@@ -23,6 +23,8 @@ export interface StatusStack {
   stacks: number;
   /** Stacks of a turn-count status that landed this turn; they don't count down until the next. */
   fresh?: number;
+  /** Stacks an enemy applied during the enemy turn: they take hold once that turn is over. */
+  pending?: number;
 }
 
 export interface Member {

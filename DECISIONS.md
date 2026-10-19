@@ -115,6 +115,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Open: Fruiting's pressure ("the Bloom closing in"): pods on path tiles, remaining fights turning elite, or both.
 - M3.3 map feedback (owner, 19 Oct): fog reveals layout within 3 and contents within 2, so you can see whether a tile leads on or is a dead end. The map view stays centred on the party's tile, so the board's shape doesn't give away the Boss. A Victory panel listing rewards after a won fight, and an Obol counter, come with Obols (M3.5).
 - Fruiting's pressure is pods (owner, 19 Oct): from Fruiting on, marked pods appear on path tiles near the party as the clock ticks, and stepping on one starts a fight. This settles the open line above.
+- When statuses take hold (owner, 20 Oct): a status an enemy applies during the enemy turn, buff or debuff, takes hold and starts counting only once that turn is over, so shown damage never changes against you mid-turn. Everything else takes hold at once: statuses the party applies (they are part of your combo, even a relic reacting during the enemy turn) and an enemy's stated reaction during your turn (such as "when struck, apply Weak"). Vulnerable stays available to both sides.
+- Status tooltips state only the effect ("Takes 50% more damage."), not the turn-count mechanics (owner, 20 Oct).
 - M2 enemy sprites: Root-Mat-01, Censer Acolyte-02, Pod-Thrower-01, Seedling-02, Lantern Surveyor-01, Thorn-Wall Matron-01, Hound Mother-01, Bloom-Rib Whelp-02. Pod-Thrower-02 and Seedling-01 are as good and would make visual variants (owner, 19 Oct).
 
 ## Open

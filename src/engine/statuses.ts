@@ -26,15 +26,20 @@ export function stacksOf(statuses: readonly StatusStack[], status: string): numb
   return statuses.find((s) => s.status === status)?.stacks ?? 0;
 }
 
-/** Adds stacks by the status's stacking rule. Turn-count stacks gained this way are fresh for the rest of the turn. */
-export function addStacks(statuses: StatusStack[], def: StatusDef, stacks: number): void {
+/**
+ * Adds stacks by the status's stacking rule. Turn-count stacks gained this way are fresh for the
+ * rest of the turn; `pending` stacks wait for the enemy turn to end before they take hold.
+ */
+export function addStacks(statuses: StatusStack[], def: StatusDef, stacks: number, pending = false): void {
   let existing = statuses.find((s) => s.status === def.id);
   const before = existing?.stacks ?? 0;
   if (!existing) statuses.push((existing = { status: def.id, stacks }));
   else if (def.stacking === 'add') existing.stacks += stacks;
   else if (def.stacking === 'refresh') existing.stacks = stacks;
   else existing.stacks = Math.max(existing.stacks, stacks);
-  if (def.lasts) existing.fresh = Math.min(existing.stacks, Math.max(0, (existing.fresh ?? 0) + existing.stacks - before));
+  const gained = Math.max(0, existing.stacks - before);
+  if (def.lasts) existing.fresh = Math.min(existing.stacks, (existing.fresh ?? 0) + gained);
+  if (pending) existing.pending = Math.min(existing.stacks, (existing.pending ?? 0) + gained);
 }
 
 /** Removes stacks; at 0 the status is gone. Returns whether it was removed. */

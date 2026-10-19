@@ -40,8 +40,8 @@ export function pipeline(
  * own and its statuses'.
  */
 function modifiersOf(state: CombatState, registry: Registry, id: EntityId): ModifierDef[] {
-  // The enemies' turn resolves as one moment: stacks that land during it take hold once it is over.
-  const holds = (s: StatusStack) => state.phase !== 'enemy' || s.stacks - (s.fresh ?? 0) > 0;
+  // Stacks an enemy applied during the enemy turn take hold once that turn is over.
+  const holds = (s: StatusStack) => s.stacks - (s.pending ?? 0) > 0;
   const statusMods = (statuses: StatusStack[]) =>
     statuses.filter(holds).flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
   const relicMods = state.relics.flatMap((r) => registry.relics[r.relic]?.modifiers ?? []);
