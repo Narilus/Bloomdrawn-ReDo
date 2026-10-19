@@ -47,8 +47,8 @@ export interface Hooks {
 
 export type CardTarget = 'none' | 'self' | 'party' | 'chosenEnemy' | 'allEnemies';
 export type CardSlot = 'strike' | 'defense' | 'transcend' | 'flavourA' | 'flavourB';
-/** Retain: stays in hand at cleanup. Ritual: a Spirit card that Retains. */
-export type Keyword = 'retain' | 'ritual';
+/** Retain: stays in hand at cleanup. Ritual: a Spirit card that Retains. Exhaust: goes to the Graveyard when played. */
+export type Keyword = 'retain' | 'ritual' | 'exhaust';
 
 export interface CardDef {
   id: string;
@@ -57,6 +57,8 @@ export interface CardDef {
   owner: string;
   /** Personal card slot; generated cards have none. */
   slot?: CardSlot;
+  /** Made during combat by a card (createCard), not dealt into the deck. */
+  generated?: boolean;
   cost: number;
   target: CardTarget;
   keywords?: Keyword[];
@@ -80,11 +82,15 @@ export interface PassiveDef extends Hooks {
   text?: string;
 }
 
-/** Fired at a full gauge by a deliberate confirm; costs no Mana. Its text slots point inside it. */
+/**
+ * Fired at a full gauge by a deliberate confirm; costs no Mana. Its text slots point inside it.
+ * Once its owner Transcends, `transcended` replaces it for the rest of the combat.
+ */
 export interface UltimateDef {
   name: string;
   text: string;
   effects: OpCall[];
+  transcended?: { text: string; effects: OpCall[] };
 }
 
 export interface CharacterDef {

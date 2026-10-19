@@ -88,6 +88,7 @@ export function describeKit(state: CombatState, member: EntityId, registry: Regi
   const def = m ? registry.characters[m.character] : undefined;
   const show = showFor(state, member, registry);
   const passive = def?.passive?.text ? renderTemplate(def.passive.text, def.passive, show) : undefined;
-  const ultimate = def?.ultimate ? renderTemplate(def.ultimate.text, def.ultimate, show) : undefined;
+  const upgraded = m?.transcended ? def?.ultimate?.transcended : undefined;
+  const ultimate = upgraded ? renderTemplate(upgraded.text, upgraded, show) : def?.ultimate ? renderTemplate(def.ultimate.text, def.ultimate, show) : undefined;
   return { passive, ultimate };
 }

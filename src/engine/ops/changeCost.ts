@@ -24,7 +24,7 @@ export const changeCostOp: Operation<ChangeCostArgs> = {
     op: z.literal('changeCost'),
     amount: formulaSchema,
     cards: z.enum(['hand', 'next']),
-    keyword: z.enum(['retain', 'ritual']).optional(),
+    keyword: z.enum(['retain', 'ritual', 'exhaust']).optional(),
   }),
   resolve(draft, args, ctx, registry) {
     const amount = Math.trunc(evaluate(args.amount, draft, ctx, registry));

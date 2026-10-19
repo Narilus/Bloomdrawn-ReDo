@@ -1,4 +1,4 @@
-import { cardCost, chargeOf, intentOf, playContext, validate, type Command } from './combat.ts';
+import { cardCost, chargeOf, intentOf, playContext, ultimateEffects, validate, type Command } from './combat.ts';
 import type { OpCall, Registry } from './defs.ts';
 import { evaluate } from './formula.ts';
 import { pipeline } from './modifiers.ts';
@@ -41,7 +41,7 @@ export function previewUltimate(state: CombatState, member: EntityId, registry: 
   const ultimate = m && registry.characters[m.character]?.ultimate;
   if (!m || !ultimate) return undefined;
   m.gauge = 0;
-  return previewOps(scratch, ultimate.effects, { source: m.id, owner: m.id }, registry);
+  return previewOps(scratch, ultimateEffects(m, registry), { source: m.id, owner: m.id }, registry);
 }
 
 /**

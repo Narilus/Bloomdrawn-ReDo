@@ -24,6 +24,10 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
   const text = describeCardLive(card, state, registry, { charge: false, keywords: false, mark });
   const plain = text.replace(MARK, '$2');
   const length = plain.length > 95 ? ' text-xlong' : plain.length > 55 ? ' text-long' : '';
+  const tags = [
+    ...(def?.slot === 'transcend' ? ['Transcend'] : []),
+    ...(def?.keywords ?? []).map((k) => k.charAt(0).toUpperCase() + k.slice(1)),
+  ];
   return (
     <div
       className={`card domain-${domain}${playable ? '' : ' unplayable'}${highlight ? ' highlight' : ''}${length}`}
@@ -37,15 +41,15 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
       <div className="card-type">
         {owner?.name} · {DOMAIN_LABEL[domain] ?? domain}
       </div>
-      {def?.keywords?.length ? (
+      {tags.length > 0 && (
         <div className="card-keywords">
-          {def.keywords.map((k) => (
-            <span key={k} className="keyword">
-              {k.charAt(0).toUpperCase() + k.slice(1)}
+          {tags.map((k) => (
+            <span key={k} className={`keyword keyword-${k.toLowerCase()}`}>
+              {k}
             </span>
           ))}
         </div>
-      ) : null}
+      )}
       <div className="card-text">
         <RulesText text={text} registry={registry} />
       </div>

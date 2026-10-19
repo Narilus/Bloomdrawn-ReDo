@@ -17,6 +17,7 @@ import {
   type Enemy,
   type CombatState,
   type EntityId,
+  type Member,
 } from './state.ts';
 
 export type Command =
@@ -160,7 +161,7 @@ function validateUltimate(state: CombatState, memberId: EntityId, registry: Regi
   const ultimate = member && registry.characters[member.character]?.ultimate;
   if (!member || !ultimate) return 'No such ultimate.';
   if (member.gauge < GAUGE_MAX) return 'That ultimate is not charged.';
-  return validateCalls(state, ultimate.effects, { source: member.id, owner: member.id }, registry);
+  return validateCalls(state, ultimateEffects(member, registry), { source: member.id, owner: member.id }, registry);
 }
 
 function validateCalls(state: CombatState, calls: readonly OpCall[], ctx: OpContext, registry: Registry): string | undefined {
@@ -200,7 +201,13 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
   if (command.target !== undefined) played.target = command.target;
   emit(rc, played, ROOT);
   drain(rc);
-  s.piles.discard.push(card);
+  if (hasKeyword(def.keywords, 'exhaust')) {
+    s.piles.graveyard.push(card);
+    emit(rc, { type: 'cardExhausted', source: card.owner, owner: card.owner, card: card.uid }, ROOT);
+    drain(rc);
+  } else {
+    s.piles.discard.push(card);
+  }
 }
 
 /** Empties the gauge and resolves the ultimate. Costs no Mana. */
@@ -209,9 +216,16 @@ function fireUltimate(rc: Resolution, memberId: EntityId): void {
   const ultimate = member && rc.registry.characters[member.character]?.ultimate;
   if (!member || !ultimate) throw new Error(`No ultimate for "${memberId}"`);
   member.gauge = 0;
-  enqueue(rc, ultimate.effects, { source: member.id, owner: member.id }, ROOT);
+  enqueue(rc, ultimateEffects(member, rc.registry), { source: member.id, owner: member.id }, ROOT);
   emit(rc, { type: 'ultimateFired', source: member.id, owner: member.id }, ROOT);
   drain(rc);
+}
+
+/** A member's ultimate operations: the Transcended ones once she has Transcended this combat. */
+export function ultimateEffects(member: Member, registry: Registry): OpCall[] {
+  const ultimate = registry.characters[member.character]?.ultimate;
+  if (!ultimate) return [];
+  return member.transcended && ultimate.transcended ? ultimate.transcended.effects : ultimate.effects;
 }
 
 /** A card's ultimate charge, as an operation call so it shows in previews and text. */

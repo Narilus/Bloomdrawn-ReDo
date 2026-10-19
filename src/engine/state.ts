@@ -26,6 +26,8 @@ export interface Member {
   character: string;
   /** Ultimate gauge, 0 to GAUGE_MAX. Carries across the run. */
   gauge: number;
+  /** Transcended this combat: her ultimate is upgraded until the combat ends. */
+  transcended?: boolean;
 }
 
 export interface Enemy {

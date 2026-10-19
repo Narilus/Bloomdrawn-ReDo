@@ -11,6 +11,8 @@ const COST_BANDS: Record<CardSlot, [number, number]> = {
   flavourB: [2, 5],
 };
 
+const SLOTS = Object.keys(COST_BANDS) as CardSlot[];
+
 const FAMILY = {
   card: 'cards',
   character: 'characters',
@@ -68,9 +70,12 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
         for (const issue of args.error.issues) fail(where(kind, defId), defId, `${path}.${pathOf(issue)}${issue.message}`);
         return;
       }
-      // Convention: an argument named `status` is a status ID.
+      // Conventions: an argument named `status` is a status ID, and one named `card` a card ID.
       if (typeof call.status === 'string' && !reg.statuses[call.status]) {
         fail(where(kind, defId), defId, `${path}: unknown status "${call.status}"`);
+      }
+      if (typeof call.card === 'string' && !reg.cards[call.card]) {
+        fail(where(kind, defId), defId, `${path}: unknown card "${call.card}"`);
       }
       if (op.children) checkCalls(kind, defId, op.children(call), `${path}.branch`);
     });
@@ -87,7 +92,8 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
   for (const card of Object.values(reg.cards)) {
     const owner = reg.characters[card.owner];
     if (!owner) fail(where('card', card.id), card.id, `owner "${card.owner}" is not a character`);
-    else if (!owner.cards.includes(card.id)) fail(where('card', card.id), card.id, `not listed in ${card.owner}'s cards`);
+    else if (card.generated && card.slot) fail(where('card', card.id), card.id, 'a generated card has no personal slot');
+    else if (!card.generated && !owner.cards.includes(card.id)) fail(where('card', card.id), card.id, `not listed in ${card.owner}'s cards`);
     if (card.slot) {
       const [min, max] = COST_BANDS[card.slot];
       if (card.cost < min || card.cost > max) {
@@ -103,11 +109,21 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       if (!card) fail(where('character', c.id), c.id, `card "${cardId}" does not exist`);
       else if (card.owner !== c.id) fail(where('character', c.id), c.id, `card "${cardId}" is owned by ${card.owner}`);
     }
+    // DESIGN.md: exactly five personal cards, one in each slot.
+    const slots = c.cards.map((id) => reg.cards[id]?.slot);
+    if (slots.length !== SLOTS.length || SLOTS.some((slot) => slots.filter((s) => s === slot).length !== 1)) {
+      fail(where('character', c.id), c.id, `needs exactly one card in each slot (${SLOTS.join(', ')})`);
+    }
     checkHooks('character', c.id, c.passive, 'passive.');
     checkText('character', c.id, c.passive?.text, c.passive, 'passive.');
     if (c.ultimate) {
       checkCalls('character', c.id, c.ultimate.effects, 'ultimate.effects');
       checkText('character', c.id, c.ultimate.text, c.ultimate, 'ultimate.');
+      const up = c.ultimate.transcended;
+      if (up) {
+        checkCalls('character', c.id, up.effects, 'ultimate.transcended.effects');
+        checkText('character', c.id, up.text, up, 'ultimate.transcended.');
+      }
     }
     if (!reg.domains[c.domain]) fail(where('character', c.id), c.id, `domain "${c.domain}" is not defined`);
   }

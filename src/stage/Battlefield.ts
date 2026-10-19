@@ -127,6 +127,12 @@ export class Battlefield {
           impact = actor ? actor.lunge(undefined, 1, clock + 0.25) : clock;
           break;
         }
+        case 'transcended': {
+          const actor = this.actor(event.source);
+          actor?.burst(impact);
+          actor?.popup('Transcended', COLOURS.ultimate, impact, 40);
+          break;
+        }
         case 'turnEnd':
         case 'enemyPhaseStart':
           clock = Math.max(clock, impact) + BEAT.phase;

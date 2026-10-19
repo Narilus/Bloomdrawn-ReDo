@@ -13,6 +13,8 @@ import { ifConsumeOp } from './ifConsume.ts';
 import { loseHpOp } from './loseHp.ts';
 import { manaDebtOp } from './manaDebt.ts';
 import { reduceStacksOp } from './reduceStacks.ts';
+import { transcendOp } from './transcend.ts';
+import { createCardOp } from './createCard.ts';
 import { repeatNextOp } from './repeatNext.ts';
 import { volleyOp } from './volley.ts';
 import { whenOp } from './when.ts';
@@ -35,6 +37,8 @@ export const library: Readonly<Record<string, Operation>> = {
   heal: healOp,
   when: whenOp,
   reduceStacks: reduceStacksOp,
+  transcend: transcendOp,
+  createCard: createCardOp,
 };
 
 export function getOp(registry: Registry, name: string): Operation | undefined {
@@ -57,3 +61,5 @@ export { volley } from './volley.ts';
 export { heal } from './heal.ts';
 export { gte, when } from './when.ts';
 export { reduceStacks } from './reduceStacks.ts';
+export { transcend } from './transcend.ts';
+export { createCard } from './createCard.ts';

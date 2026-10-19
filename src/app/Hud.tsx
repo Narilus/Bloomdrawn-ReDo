@@ -38,9 +38,9 @@ export function Portraits({ state, choosing, onUltimate }: { state: CombatState;
         return (
           <button
             key={m.id}
-            className={`portrait domain-${def?.domain ?? ''}${ready ? ' ready' : ''}`}
+            className={`portrait domain-${def?.domain ?? ''}${ready ? ' ready' : ''}${m.transcended ? ' transcended' : ''}`}
             onClick={() => ready && onUltimate(m.id)}
-            aria-label={`${def?.name}: ultimate ${m.gauge} of ${GAUGE_MAX}${ready ? ', ready' : ''}`}
+            aria-label={`${def?.name}: ultimate ${m.gauge} of ${GAUGE_MAX}${ready ? ', ready' : ''}${m.transcended ? ', Transcended' : ''}`}
           >
             <div className="portrait-ring" style={{ '--gauge': `${(m.gauge / GAUGE_MAX) * 360}deg` } as React.CSSProperties}>
               <div className="portrait-face">{art ? <img src={art} alt="" /> : <span>{def?.name.charAt(0)}</span>}</div>
@@ -55,7 +55,11 @@ export function Portraits({ state, choosing, onUltimate }: { state: CombatState;
               )}
               {def?.ultimate && (
                 <p>
-                  <b>Ultimate: {def.ultimate.name}.</b> {kit.ultimate}
+                  <b>
+                    Ultimate: {def.ultimate.name}
+                    {m.transcended ? ' (Transcended)' : ''}.
+                  </b>{' '}
+                  {kit.ultimate}
                 </p>
               )}
             </div>
@@ -147,7 +151,10 @@ export function UltimatePanel({ state, member, onFire, onClose }: { state: Comba
   if (!def?.ultimate) return null;
   return (
     <div className="ultimate-panel plaque" role="dialog" aria-label={`${def.name}'s ultimate`}>
-      <h3>{def.ultimate.name}</h3>
+      <h3>
+        {def.ultimate.name}
+        {m?.transcended && <small className="transcended-tag"> Transcended</small>}
+      </h3>
       <p>{describeKit(state, member, registry).ultimate}</p>
       <div className="panel-buttons">
         <button className="end-turn" onClick={onFire} disabled={!preview}>

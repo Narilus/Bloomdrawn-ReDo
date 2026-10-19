@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { apply, cardCost, startCombat } from '../../engine/index.ts';
 import { registry } from '../registry.ts';
-import { scenario, STARTER_PARTY } from '../testing/scenario.ts';
+import { runScenario, scenario, STARTER_PARTY } from '../testing/scenario.ts';
 
 // The approved starter kits (docs/notes/starter-kits.md), one scenario per card, passive and
 // ultimate. The party is Maelia, Agathe, Anthe, Leonora against a 60-HP training dummy, so
@@ -139,6 +139,63 @@ describe('Leonora', () => {
   });
 });
 
+describe('Transcend', () => {
+  scenario('Ripened Womb: 3 Embryo (+1 Midwife), a Seed Pod in hand, Transcended, 35 charge, then the Graveyard', {
+    setup: { hand: ['maelia.ripened-womb'] },
+    play: [{ card: 'maelia.ripened-womb' }, { card: 'maelia.seed-pod' }],
+    expect: { resources: { embryo: 4 + 2 }, gauges: { maelia: 35 }, mana: 3 },
+    check: ({ state }) => {
+      expect(state.members.find((m) => m.character === 'maelia')?.transcended).toBe(true);
+      expect(state.piles.graveyard.map((c) => c.card)).toEqual(['maelia.ripened-womb', 'maelia.seed-pod']);
+    },
+  });
+
+  scenario('Transcended Birthing Bloom also Poisons every enemy for the Embryo consumed', {
+    enemies: [DUMMY, DUMMY],
+    setup: { hand: ['maelia.ripened-womb'], gauges: { maelia: 100 }, partyHp: 150 },
+    play: [{ card: 'maelia.ripened-womb' }, { ultimate: 'maelia' }],
+    expect: { resources: { embryo: 0 }, partyHp: 150 + 12, partyShield: 16 },
+    check: ({ state }) => expect(state.enemies.map((e) => e.statuses)).toEqual([
+      [{ status: 'status.poison', stacks: 4 }],
+      [{ status: 'status.poison', stacks: 4 }],
+    ]),
+  });
+
+  scenario('The Choir Answers: +2 Tentacles and +1 damage per hit; the Transcended Hymn volleys', {
+    setup: { hand: ['agathe.the-choir-answers'], gauges: { agathe: 100 } },
+    play: [{ card: 'agathe.the-choir-answers' }, { ultimate: 'agathe' }],
+    // 1 + 2 + 3 Tentacles at 4 per hit, all volleyed once by the ultimate.
+    expect: { resources: { tentacles: 6, potency: 4 }, enemyHp: [60 - 24] },
+  });
+
+  scenario('The Riddle Answered: 2 Essence, held Rituals cheaper; Transcended Hours Kept doubles', {
+    setup: { hand: ['anthe.votive-candle', 'anthe.the-riddle-answered'], gauges: { anthe: 100 } },
+    play: [{ card: 'anthe.the-riddle-answered' }, { endTurn: true }, { ultimate: 'anthe' }],
+    // The card 2, Vigil 1, then Votive held 1 turn × 2. Votive: 5, −1 from the card, −1 at cleanup.
+    expect: { resources: { essence: 1 + 2 + 2 } },
+    check: ({ state }) => {
+      const votive = state.piles.hand.find((c) => c.card === 'anthe.votive-candle');
+      expect(votive && cardCost(state, votive, registry)).toBe(3);
+    },
+  });
+
+  scenario('Call in the Debts: draw 2, gain 2 Mana; Transcended Balance the Books also draws 2', {
+    setup: { hand: ['leonora.call-in-the-debts'], gauges: { leonora: 100 } },
+    play: [{ card: 'leonora.call-in-the-debts' }, { ultimate: 'leonora' }],
+    expect: { mana: 6 - 3 + 2 + 3, handSize: 4 },
+  });
+
+  it('a Transcend card resolves once per combat: a repeat of it fizzles and charges once', () => {
+    const run = runScenario({
+      setup: { hand: ['maelia.bud-cutting', 'agathe.the-choir-answers'], mana: 10 },
+      play: [{ card: 'maelia.bud-cutting' }, { card: 'agathe.the-choir-answers' }],
+    });
+    const events = run.plays[1]?.events ?? [];
+    expect(events.filter((e) => e.type === 'transcended')).toHaveLength(1);
+    expect(run.state.members.find((m) => m.character === 'agathe')?.gauge).toBe(35);
+  });
+});
+
 describe('ultimates', () => {
   it('cannot fire below a full gauge, or outside the player phase', () => {
     const { state } = startCombat({ seed: 1, party: STARTER_PARTY, enemies: [DUMMY], gauges: [99, 100] }, registry);
@@ -147,12 +204,10 @@ describe('ultimates', () => {
     expect(apply(state, { type: 'fireUltimate', member: 'm1' }, registry).ok).toBe(true);
   });
 
-  it('a Strike or Defense charges its owner 10; Flavour cards charge nothing unless they say so', () => {
-    const charge = (id: string) => registry.cards[id]?.charge ?? 0;
+  it('Strike and Defense charge their owner 10, Transcend 35, and Flavour cards nothing unless they say so', () => {
     for (const who of STARTER_PARTY) {
-      expect([charge(`${who}.strike`), charge(`${who}.defense`)]).toEqual([10, 10]);
-      const flavour = registry.characters[who]?.cards.filter((c) => !c.endsWith('.strike') && !c.endsWith('.defense')) ?? [];
-      expect(flavour.map(charge)).toEqual([0, 0]);
+      const bySlot = Object.fromEntries((registry.characters[who]?.cards ?? []).map((id) => [registry.cards[id]?.slot, registry.cards[id]?.charge ?? 0]));
+      expect(bySlot).toEqual({ strike: 10, defense: 10, transcend: 35, flavourA: 0, flavourB: 0 });
     }
   });
 });

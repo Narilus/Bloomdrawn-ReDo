@@ -1,4 +1,4 @@
-import { add, changeCost, damage, draw, gainResource, gainShield, handCount, heldTurns, mul, resource, stat } from '../../engine/index.ts';
+import { add, changeCost, damage, draw, gainResource, gainShield, handCount, heldTurns, mul, resource, stat, transcend } from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 
 // Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning.
@@ -24,10 +24,17 @@ export const gildedThread = card({
   effects: [changeCost(-1, 'hand', 'ritual'), gainResource('essence', 1), draw(1)],
 });
 
+export const theRiddleAnswered = card({
+  id: 'anthe.the-riddle-answered', name: 'The Riddle Answered', owner: 'anthe', slot: 'transcend', cost: 4, target: 'none',
+  keywords: ['exhaust'], charge: 35,
+  effects: [gainResource('essence', 2), changeCost(-1, 'hand', 'ritual'), transcend()],
+  text: 'Gain {effects.0.amount} Essence. Every Ritual in your hand costs 1 less. Transcend.',
+});
+
 export const anthe = character({
   id: 'anthe', name: 'Anthe', domain: 'spirit',
   stats: { hp: 60, attack: 3, defense: 5 },
-  cards: [strike, defense, votiveCandle, gildedThread],
+  cards: [strike, defense, theRiddleAnswered, votiveCandle, gildedThread],
   passive: {
     name: 'Vigil', scope: 'combat',
     text: 'At end of turn, gain 1 Essence for each Ritual in hand.',
@@ -37,5 +44,9 @@ export const anthe = character({
     name: 'Hours Kept',
     text: 'Gain 1 Essence for every turn your held Rituals have been held, in total.',
     effects: [gainResource('essence', heldTurns('ritual'))],
+    transcended: {
+      text: 'Gain 2 Essence for every turn your held Rituals have been held, in total.',
+      effects: [gainResource('essence', mul(2, heldTurns('ritual')))],
+    },
   },
 });

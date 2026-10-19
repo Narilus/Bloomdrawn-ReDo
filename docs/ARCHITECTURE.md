@@ -101,7 +101,7 @@ Each operation is one file that exports:
 | Statuses | applyStatus, removeStatus, reduceStacks, detonate (trigger a status's stacks at once) |
 | Resources | gainResource, consumeResource, gainMana, manaDebt |
 | Cards | draw, discard, exhaust, createCard, changeCost, repeatNext (the next card resolves twice), retain, duplicate |
-| Ultimates | chargeUltimate, transcend |
+| Ultimates | chargeUltimate, transcend (once per combat; swaps in `ultimate.transcended`) |
 | Domain engines | volley (hits that take the lowest-HP enemy, overflow carrying on) |
 | Enemies | delay, stun, changeIntent |
 | Control flow | when (a condition such as `gte`), ifConsume (spend a resource for a bonus branch), repeat, forEachTarget, choose |

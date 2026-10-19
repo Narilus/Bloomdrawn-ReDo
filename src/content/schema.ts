@@ -41,7 +41,8 @@ export const schemas = {
     slot: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']).optional(),
     cost: z.int().min(0),
     target: z.enum(['none', 'self', 'party', 'chosenEnemy', 'allEnemies']),
-    keywords: z.array(z.enum(['retain', 'ritual'])).optional(),
+    keywords: z.array(z.enum(['retain', 'ritual', 'exhaust'])).optional(),
+    generated: z.boolean().optional(),
     text: z.string().min(1).optional(),
     charge: z.int().positive().optional(),
     effects: z.array(opCall).min(1),
@@ -54,7 +55,14 @@ export const schemas = {
     stats: z.strictObject({ hp: z.int().positive(), attack: z.int().min(0), defense: z.int().min(0) }),
     cards: z.array(id),
     passive: z.strictObject({ name: z.string().min(1), scope: z.enum(['combat', 'run']), text: z.string().min(1), ...hooks }).optional(),
-    ultimate: z.strictObject({ name: z.string().min(1), text: z.string().min(1), effects: z.array(opCall).min(1) }).optional(),
+    ultimate: z
+      .strictObject({
+        name: z.string().min(1),
+        text: z.string().min(1),
+        effects: z.array(opCall).min(1),
+        transcended: z.strictObject({ text: z.string().min(1), effects: z.array(opCall).min(1) }).optional(),
+      })
+      .optional(),
   }),
   enemy: z.strictObject({
     kind: z.literal('enemy'),

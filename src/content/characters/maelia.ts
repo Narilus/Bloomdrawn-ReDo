@@ -1,4 +1,20 @@
-import { add, applyStatus, chargeUltimate, consumed, damage, gainResource, gainShield, heal, ifConsume, mul, repeatNext, resource, stat } from '../../engine/index.ts';
+import {
+  add,
+  applyStatus,
+  chargeUltimate,
+  consumed,
+  createCard,
+  damage,
+  gainResource,
+  gainShield,
+  heal,
+  ifConsume,
+  mul,
+  repeatNext,
+  resource,
+  stat,
+  transcend,
+} from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 import { poison } from '../statuses/poison.ts';
 
@@ -26,10 +42,22 @@ export const budCutting = card({
   text: "The next card you play this turn resolves twice. Consume {effects.1.amount} Embryo: charge every party member's ultimate by {effects.1.branch.0.amount}.",
 });
 
+export const seedPod = card({
+  id: 'maelia.seed-pod', name: 'Seed Pod', owner: 'maelia', generated: true, cost: 0, target: 'none', keywords: ['exhaust'],
+  effects: [gainResource('embryo', 2)],
+});
+
+export const ripenedWomb = card({
+  id: 'maelia.ripened-womb', name: 'Ripened Womb', owner: 'maelia', slot: 'transcend', cost: 3, target: 'none',
+  keywords: ['exhaust'], charge: 35,
+  effects: [gainResource('embryo', 3), createCard(seedPod), transcend()],
+  text: 'Gain {effects.0.amount} Embryo. Create a Seed Pod in your hand. Transcend.',
+});
+
 export const maelia = character({
   id: 'maelia', name: 'Maelia', domain: 'flesh',
   stats: { hp: 55, attack: 3, defense: 5 },
-  cards: [strike, defense, swollenPod, budCutting],
+  cards: [strike, defense, ripenedWomb, swollenPod, budCutting],
   passive: {
     name: "Midwife's Hands", scope: 'combat',
     text: 'The first time each turn a card gains Embryo, gain {triggers.0.do.0.amount} more.',
@@ -39,5 +67,15 @@ export const maelia = character({
     name: 'Birthing Bloom',
     text: 'Consume all Embryo. The party heals {effects.0.branch.0.amount.mul.0} and gains {effects.0.branch.1.amount.mul.0} Shield per Embryo consumed.',
     effects: [ifConsume('embryo', resource('embryo'), [heal(mul(3, consumed())), gainShield(mul(4, consumed()))])],
+    transcended: {
+      text: 'Consume all Embryo. The party heals {effects.0.branch.0.amount.mul.0} and gains {effects.0.branch.1.amount.mul.0} Shield per Embryo consumed, and every enemy gains Poison equal to the Embryo consumed.',
+      effects: [
+        ifConsume('embryo', resource('embryo'), [
+          heal(mul(3, consumed())),
+          gainShield(mul(4, consumed())),
+          applyStatus(poison, consumed(), 'allEnemies'),
+        ]),
+      ],
+    },
   },
 });

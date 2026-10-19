@@ -29,6 +29,7 @@ export const EVENT_TYPES = [
   'resourceConsumed',
   'ultimateCharged',
   'cardDrawn',
+  'cardCreated',
   'cardExhausted',
   'enemyDefeated',
   'deckShuffled',

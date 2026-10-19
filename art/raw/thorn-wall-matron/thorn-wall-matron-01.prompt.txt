@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a151cf-581d-7b63-a774-9a75d841c97d
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: body and face turned toward the left edge of the image. A towering elite figure of woven thorn-stems and petal-walls, twice the height of a person; a calm woman's face at the crown, framed by a hood of thorns; both forearms are broad shields of overlapping blush rose petals with fine veins; long thorns along her shoulders. Thorn green and blush palette, imposing and still.
+
+Background: fully transparent.

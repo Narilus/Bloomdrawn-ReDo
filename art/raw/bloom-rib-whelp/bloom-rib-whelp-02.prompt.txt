@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a151d1-6a64-7992-a770-b516af768615
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: body and head turned toward the left edge of the image. A small grey hound pup remade by the Bloom, lean and snapping; a few blush skin-petals open along its ribs; tiny pale shoots on its back; raw-pink gums bared. Grey, blush and raw-pink palette, no human features.
+
+Background: fully transparent.

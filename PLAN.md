@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** M2.2 Transcend (enemy sprites generating in parallel)
+**Current task:** M2.3 Enemy roster (enemy sprite options ready for the owner's pick)
 
 ## Milestones
 
@@ -149,6 +149,8 @@ _Done 19 Oct. Statuses are content (`src/content/statuses/`) on generic fields; 
 ### M2.2 Transcend
 The fifth card for each starter (deck 20). The `transcend` operation: once per combat, a Graveyard, +35 charge, and a Transcended ultimate for the rest of the combat. Generated cards (Maelia's Seed Pod). The "exactly five personal cards" check turns on. The portrait shows the Transcended state.
 **Done when:** each Transcend card and Transcended ultimate has a kit scenario, and a Transcend card can't resolve twice in one combat.
+
+_Done 19 Oct. `transcend` and `createCard` operations, an `exhaust` keyword (to the Graveyard), `ultimate.transcended` in each kit, and the five-slot check is on. Virelle's and Kibane's M0 placeholders were removed (their kits come in M5). The golden replay now plays a 20-card deck._
 
 ### M2.3 Enemy roster
 The approved enemies and encounters. Intents that apply statuses, Shield or heal allies, or summon; summons join next round in a free side slot. Multi-enemy layout and aiming.
