@@ -28,6 +28,14 @@ describe('walking', () => {
     expect(go(board, '2,0').board.at).toBe('2,0');
   });
 
+  it('crosses only tiles whose contents are known, though a tile seen in the fog can be the destination', () => {
+    // 3,0, 3,-1 and 3,-2 are all 3 away: their layout is revealed, their contents are not.
+    const board = createBoard({ ...row('entrance', 'path', 'path', 'path'), '3,-1': { kind: 'path' }, '3,-2': { kind: 'path' } }, '0,0');
+    expect(routeTo(board, '3,0')).toEqual(['1,0', '2,0', '3,0']);
+    expect(routeTo(board, '3,-2')).toBeUndefined(); // only through 3,-1, still unknown
+    expect(routeTo(go(board, '1,0').board, '3,-2')).toEqual(['2,0', '3,-1', '3,-2']);
+  });
+
   it('stops on the first fight or choice, and goes around one when it can', () => {
     const straight = createBoard(row('entrance', 'fight', 'path'), '0,0');
     const stopped = go(straight, '2,0');
@@ -76,18 +84,20 @@ describe('walking', () => {
 });
 
 describe('fog of war', () => {
-  it('reveals layout and contents within 2, and landmarks within 4', () => {
-    const board = createBoard(row('entrance', 'fight', 'event', 'collapsing', 'shop', 'boss'), '0,0');
+  it('reveals contents within 2, layout within 3, and landmarks within 4', () => {
+    const board = createBoard(row('entrance', 'fight', 'event', 'camp', 'shop', 'path', 'boss'), '0,0');
     expect(visibleKind(board, '1,0')).toBe('fight');
     expect(visibleKind(board, '2,0')).toBe('event');
-    expect(visibleKind(board, '3,0')).toBeUndefined(); // 3 away: fogged
+    expect(visibleKind(board, '3,0')).toBe('unknown'); // 3 away: there is a tile, contents fogged
     expect(visibleKind(board, '4,0')).toBe('shop'); // a landmark, 4 away
-    expect(visibleKind(board, '5,0')).toBeUndefined(); // the Boss, 5 away
+    expect(visibleKind(board, '5,0')).toBeUndefined(); // 5 away: fogged
+    expect(visibleKind(board, '6,0')).toBeUndefined(); // the Boss, 6 away
   });
 
   it('marks Collapsing and Symptom tiles as soon as their layout is revealed', () => {
-    const board = createBoard(row('entrance', 'path', 'collapsing'), '0,0');
-    expect(visibleKind(board, '2,0')).toBe('collapsing');
+    const board = createBoard({ ...row('entrance', 'path', 'path', 'collapsing'), '0,3': { kind: 'symptom' } }, '0,0');
+    expect(visibleKind(board, '3,0')).toBe('collapsing'); // 3 away: layout only
+    expect(visibleKind(board, '0,3')).toBe('symptom');
   });
 
   it('stays lifted where the party has been', () => {

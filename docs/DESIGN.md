@@ -212,8 +212,9 @@ First visit: in through one Collapsing tile, out through the other, each vanishi
 
 ### Fog of war
 
-- The path's layout is revealed within 2 tiles of where the party has been.
-- A tile's contents are revealed when adjacent.
+- The path's layout is revealed within 3 tiles of where the party has been, so the edge of the known map shows whether a tile leads on or ends.
+- A tile's contents are revealed within 2 tiles.
+- The map view stays centred on the party, so the board's extent never hints where the Boss is.
 - Shops, Elites and the Boss are landmarks, visible from further away.
 - Collapsing and Symptom tiles are always marked once revealed.
 

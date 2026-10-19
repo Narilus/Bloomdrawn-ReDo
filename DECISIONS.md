@@ -113,6 +113,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - M2 signed off: the gauntlet with statuses, Transcend, the enemy roster and sprites, relics and run-persistent ultimates (owner, 19 Oct).
 - M3 draft answered (`docs/notes/m3-labyrinth.md`, owner, 19 Oct): the board size is the baseline to test. Walking stops on every fight and choice tile (fights, Events, Shops, unused Camps, unpaid Symptoms), and the route is shown and walked step by step. Fog reveals layout and contents within 2 and keeps everything discovered; a Boss direction helper comes with a clock stage (Flowering). The clock as drafted, with no HP loss at Fruiting. Shops always offer one relic of each tier. Camps offer Rest only, and Symptoms stay for the run. HP costs on Symptoms and in Events are a share of current HP, with live numbers in the text.
 - Open: Fruiting's pressure ("the Bloom closing in"): pods on path tiles, remaining fights turning elite, or both.
+- M3.3 map feedback (owner, 19 Oct): fog reveals layout within 3 and contents within 2, so you can see whether a tile leads on or is a dead end. The map view stays centred on the party's tile, so the board's shape doesn't give away the Boss. A Victory panel listing rewards after a won fight, and an Obol counter, come with Obols (M3.5).
+- Fruiting's pressure is pods (owner, 19 Oct): from Fruiting on, marked pods appear on path tiles near the party as the clock ticks, and stepping on one starts a fight. This settles the open line above.
 - M2 enemy sprites: Root-Mat-01, Censer Acolyte-02, Pod-Thrower-01, Seedling-02, Lantern Surveyor-01, Thorn-Wall Matron-01, Hound Mother-01, Bloom-Rib Whelp-02. Pod-Thrower-02 and Seedling-01 are as good and would make visual variants (owner, 19 Oct).
 
 ## Open

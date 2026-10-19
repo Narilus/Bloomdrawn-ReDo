@@ -37,8 +37,11 @@ export interface Board {
   known: string[];
 }
 
-/** Fog distances (owner, 19 Oct): layout and contents within 2 of anywhere the party has stood, landmarks within 4. */
-export const FOG = { layout: 2, contents: 2, landmarks: 4 } as const;
+/**
+ * Fog distances (owner, 19 Oct): layout within 3 of anywhere the party has stood, so the edge of what
+ * is known shows whether a tile leads on or ends; contents within 2; landmarks within 4.
+ */
+export const FOG = { layout: 3, contents: 2, landmarks: 4 } as const;
 
 const LANDMARKS: readonly TileKind[] = ['shop', 'elite', 'boss'];
 /** Marked as soon as their layout is revealed, and from then on. */
@@ -67,16 +70,17 @@ export function visibleKind(board: Board, key: string): TileKind | 'unknown' | u
 
 /**
  * The shortest walk to a revealed tile, as the keys stepped on (ending with `to`), or undefined if
- * there is none. Only revealed tiles are used. The route never crosses a Collapsing tile or an
- * unpaid Symptom (the player chooses those by clicking them), and goes around tiles that would
- * stop it where it can.
+ * there is none. Only tiles whose contents are known are crossed, so a route never gives away a
+ * fogged tile's contents or walks into one by surprise; a tile whose layout alone is revealed can
+ * still be the destination. The route never crosses a Collapsing tile or an unpaid Symptom (the
+ * player chooses those by clicking them), and goes around tiles that would stop it where it can.
  */
 export function routeTo(board: Board, to: string): string[] | undefined {
   const target = board.tiles[to];
   if (to === board.at || !target || target.kind === 'ruin' || !board.seen.includes(to)) return undefined;
   const crossable = (key: string) => {
     const tile = board.tiles[key];
-    if (!tile || !board.seen.includes(key)) return false;
+    if (!tile || !board.known.includes(key)) return false;
     return tile.kind !== 'ruin' && tile.kind !== 'collapsing' && !(tile.kind === 'symptom' && !tile.paid);
   };
   // A step onto a tile that would stop the walk costs far more than any detour.

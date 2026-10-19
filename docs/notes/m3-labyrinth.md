@@ -1,6 +1,6 @@
 # M3 Labyrinth
 
-Status: **answered by the owner, 19 Oct** (his answers are folded in below). One question is still open: **Fruiting's pressure**, under the Bloom clock. This note covers what M3 needs that DESIGN.md leaves open: the board's size and shape, movement, fog distances, the Bloom clock, Obols and Shops, Camps, Events and Symptoms. The numbers are placeholders for tuning.
+Status: **answered by the owner, 19 Oct** (his answers and his M3.3 feedback are folded in below). This note covers what M3 needs that DESIGN.md leaves open: the board's size and shape, movement, fog distances, the Bloom clock, Obols and Shops, Camps, Events and Symptoms. The numbers are placeholders for tuning.
 
 M3 ends with a whole Labyrinth you can walk from the entrance to a Boss tile. The real Boss, card rewards, banking and save/resume are M4. Until then, the Boss tile holds the hardest M2 elite, and beating it wins the run.
 
@@ -34,7 +34,9 @@ One board per run, stitched from hand-authored motifs:
 
 ## Fog of war
 
-- Layout and contents are both revealed within **2** tiles of anywhere the party has stood (owner).
+- Layout is revealed within **3** tiles of anywhere the party has stood, contents within **2** (owner). The outer ring shows as unknown tiles, so you can tell whether a tile leads on or ends.
+- Routes cross only tiles whose contents are known. An unknown tile can be clicked as a destination, but the route never runs through one, so it can't give away what's there or walk into a fight unseen.
+- The view stays centred on the party's tile and follows it as it walks, so the board's shape doesn't hint where the Boss is (owner).
 - Landmarks (Shops, Elites, the Boss) are visible from **4** tiles away.
 - Everything discovered stays visible (owner). Collapsing and Symptom tiles are marked as soon as they're revealed.
 - **Boss direction:** from Flowering on, a marker at the board's edge points toward the Boss. The Bloom shows the way out as it closes in (owner's idea).
@@ -49,21 +51,18 @@ Fights, Events and using a Camp tick it. Walking, Shops and Symptoms don't.
 | Seeded | 3–5 | Enemies +10% HP and damage; +10% Obols |
 | Rooted | 6–8 | +20%; +20% Obols; rarer Events can appear |
 | Flowering | 9–11 | +35%; +35% Obols; normal fights may draw from the elite roster; Boss direction shown |
-| Fruiting | 12+ | +50%; the Bloom closes in (open, below) |
+| Fruiting | 12+ | +50%; pods (below) |
 
 There is no HP loss at the start of fights: it can brick a run, and later builds may want full HP (owner). The +50% against the Boss is a balance question for later.
 
-**Open: Fruiting's pressure.** The Bloom "closing in" could mean:
-
-- **A. Pods (recommended).** DESIGN's stage art for Fruiting is "pods swell and burst".
-  - At Fruiting, and on every tick after, pods swell on a few path tiles near the party.
-  - Stepping on a pod starts a normal fight.
-  - Pods are marked, and the route goes around them like any fight, so the danger is visible and can be planned around. It just keeps growing.
-  - Walking a long way back for a Shop gets riskier with every fight you take, which is the pressure the stage wants.
-- **B. Everything left turns elite.** Every fight still on the board becomes elite-grade, with elite rewards. This is simple and readable, but static: it doesn't grow.
-- **A and B together** is also possible.
+**Fruiting's pressure: pods** (owner). DESIGN's stage art for Fruiting is "pods swell and burst".
+- At Fruiting, and on every tick after, pods swell on a few path tiles near the party (how many and how near are placeholders to tune in M3.4).
+- Stepping on a pod starts a normal fight. Pods are marked, and the route goes around them like any fight, so the danger is visible and can be planned around. It just keeps growing.
+- Walking a long way back for a Shop gets riskier with every fight you take.
 
 ## Obols and Shops
+
+After a won fight, a Victory panel lists what it gave (Obols, and an elite's relic pick) before the map returns. The map shows the Obols held next to the relics (owner).
 
 | Source | Obols |
 |---|---|
@@ -146,3 +145,5 @@ The map lives in `src/game/` (pure and seeded). Motifs are content. The map scre
 7. Symptom costs must scale: a share of current HP, with the live number in the text. Sweet Rot poisons the whole field by 1% of max HP.
 8. HP costs in Events are a share of current HP.
 9. The M3 test as suggested.
+
+**After looking at the map (M3.3):** layout fog at 3 and contents at 2; the view centred on the party; Fruiting's pressure is pods. A Victory panel listing a won fight's rewards, and an Obol counter, come with Obols in M3.5.

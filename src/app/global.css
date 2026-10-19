@@ -1161,8 +1161,11 @@ kbd {
   pointer-events: none;
 }
 
-.party-token {
+.map-camera {
   transition: transform 0.2s ease-in-out;
+}
+
+.party-token {
   pointer-events: none;
 }
 

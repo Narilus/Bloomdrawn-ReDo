@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.3 owner look at the map; then M3.4 (needs Fruiting's answer)
+**Current task:** M3.4 The Bloom clock
 
 ## Milestones
 
@@ -172,7 +172,7 @@ _Signed off 19 Oct, after playtest fixes: turn counts run on the turns where the
 
 ## M3 tasks
 
-Content and rules are in `docs/notes/m3-labyrinth.md` (answered 19 Oct; Fruiting's pressure is still open, for M3.4).
+Content and rules are in `docs/notes/m3-labyrinth.md` (answered 19 Oct).
 
 ### M3.1 The hex board ✅
 Axial hex coordinates, tiles and their lifecycle (cleared tiles become path, Collapsing tiles vanish when stepped off, one-use Camps and Symptoms), adjacency, shortest routes over open tiles, and fog (layout, contents, landmarks). Pure, in `src/game/`.
@@ -186,18 +186,20 @@ Motifs as content (slots with roles and sockets), stitched into one board from t
 
 _Done 19 Oct. Motifs are drawn as text rows of hexes (`src/content/motifs/m3.ts`, legend in `src/game/motif.ts`); `src/game/labyrinth.ts` stitches them (route motifs heading east within a sixth of a turn, side motifs on sockets, touching only at joints, a joint touching only plain path), fills fights from pools and rerolls any board `findStranding` rejects. The M3 set gives 60 tiles, a 17–18 step route, 5–7 fights, 2 elites, 3–4 Events, 1–2 Shops, 2 Camps and 1 Symptom on every one of 200 seeds (`src/app/labyrinth.test.ts`), and the loop's Shop is never reachable without the toll. Found on the way: two Collapsing tiles side by side are a trap (on one, across, back off), which is why the loop pairs its Collapsing tile with the Symptom. The Boss tile draws from the elite pool until M4._
 
-### M3.3 The map screen
+### M3.3 The map screen ✅
 The board in React/SVG: fog, landmarks, the party token, click-to-move, tile tooltips. Entering a fight plays it and returns to the map.
 **Done when:** e2e walks into a fight and back; the owner can read the board at a glance.
 
 _Built 19 Oct, for the owner to look at. `src/game/expedition.ts` is the run: walking (the board after each step), fights from tiles, HP, gauges and relics carried, an elite's relic pick from three, a win at the Boss, and Symptoms that must be taken or turned back from. `src/app/LabyrinthMap.tsx` draws the revealed board as SVG hexes with labels, previews the route on hover with step numbers, and walks the party token tile by tile. Shops, Camps, Events and Symptoms show placeholder panels until M3.5–M3.6. The Labyrinth is now the default screen; `?fights=`, `?enemies=` and `?relics=` still open the gauntlet or a test fight, and `?seed=` and `?encounters=` set the board and its fights in dev builds._
 
+_Owner feedback 19 Oct, applied: layout fog at 3 (contents stay at 2) so a tile's edge shows whether it leads on; routes cross only tiles whose contents are known, so the outer ring can't leak a fight; the view is centred on the party and follows it, instead of fitting the whole board. The Victory panel and the Obol counter move to M3.5._
+
 ### M3.4 The Bloom clock
-Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start.
+Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start; the Boss direction marker from Flowering; pods from Fruiting.
 **Done when:** tick and stage rules have tests, and scaled enemies preview and resolve the same numbers.
 
 ### M3.5 Obols and Shops
-Obols from first clears; Shop stock and prices fixed by the seed on first reveal and kept all run; buying relics and services.
+Obols from first clears; Shop stock and prices fixed by the seed on first reveal and kept all run; buying relics and services. A Victory panel listing a won fight's rewards before the map returns, and an Obol counter on the map.
 **Done when:** a Shop keeps its stock across visits, can't be farmed, and buying is tested.
 
 ### M3.6 Camps, Events and Symptoms
