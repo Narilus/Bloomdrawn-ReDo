@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3 draft (`docs/notes/m3-labyrinth.md`) awaiting the owner's answers; M3.1 meanwhile
+**Current task:** M3 draft (`docs/notes/m3-labyrinth.md`) awaiting the owner's answers; then M3.2
 
 ## Milestones
 
@@ -174,9 +174,11 @@ _Signed off 19 Oct, after playtest fixes: turn counts run on the turns where the
 
 Content and rules are drafted in `docs/notes/m3-labyrinth.md` (awaiting the owner). M3.1 needs no open answers; the rest wait for them.
 
-### M3.1 The hex board
+### M3.1 The hex board ✅
 Axial hex coordinates, tiles and their lifecycle (cleared tiles become path, Collapsing tiles vanish when stepped off, one-use Camps and Symptoms), adjacency, shortest routes over open tiles, and fog (layout, contents, landmarks). Pure, in `src/game/`.
 **Done when:** board rules have tests: routes, stopping at content, Collapsing on step-off, fog reveal distances.
+
+_Done 19 Oct. `src/game/hex.ts` (axial coordinates) and `src/game/board.ts` (tiles, routes, walking, fog, tile lifecycle), with the draft's fog distances as constants. `board.test.ts` also builds the owner's temptation loop by hand and checks it behaves as drawn: a free first visit through both Collapsing tiles, the Symptom on any return, and taking the Symptom first keeps both Collapsing tiles._
 
 ### M3.2 Motifs and the validator
 Motifs as content (slots with roles and sockets), stitched into one board from the run seed, roles filled from pools. The never-stranded validator replays every Collapsing order. The temptation loop motif, as the owner drew it.

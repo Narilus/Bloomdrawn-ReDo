@@ -26,7 +26,7 @@ One board per run, stitched from hand-authored motifs:
 
 ## Moving
 
-- **Click any revealed tile you can reach.** The party walks the shortest route over open tiles and stops on the first tile with something on it.
+- **Click any revealed tile you can reach.** The party walks the shortest route over open tiles. It stops on the first fight, Event or unpaid Symptom, and goes around fights where it can. Shops and Camps along the way don't stop the walk; clicking one goes there.
 - **The automatic route never crosses a Collapsing or Symptom tile.** To use one, you click it directly, so you never spend one by accident.
 - **Entering a fight tile starts the fight.** There's no retreat. You avoid a fight by walking around it, where the board allows.
 - Cleared tiles become path and never respawn (DESIGN).
