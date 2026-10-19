@@ -45,13 +45,14 @@ cardDrawn card=c12
   resourceGained src=m2 essence amt=0
   damageDealt src=m0 tgt=e16 amt=3
   damageTaken src=m0 tgt=e16 amt=3
-  statusTick
-  damageDealt src=e16 tgt=e16 amt=2
-  damageTaken src=e16 tgt=e16 amt=2
+  statusTick tgt=e16
+  damageDealt src=e16 tgt=e16 status.poison amt=2
+  damageTaken src=e16 tgt=e16 status.poison amt=2
   enemyPhaseStart
   enemyActed src=e16 tgt=party
   damageDealt src=e16 tgt=party amt=12
   damageTaken src=e16 tgt=party amt=12
+  statusTick tgt=party
   turnStart
   cardDrawn card=c2
   cardDrawn card=c10
@@ -77,14 +78,15 @@ cardDrawn card=c12
   damageTaken src=m0 tgt=e16 amt=3
   damageDealt src=m0 tgt=e16 amt=3
   damageTaken src=m0 tgt=e16 amt=3
-  statusTick
-  damageDealt src=e16 tgt=e16 amt=2
-  damageTaken src=e16 tgt=e16 amt=2
+  statusTick tgt=e16
+  damageDealt src=e16 tgt=e16 status.poison amt=2
+  damageTaken src=e16 tgt=e16 status.poison amt=2
   enemyPhaseStart
   enemyActed src=e16 tgt=party
   shieldGained src=e16 tgt=e16 amt=10
   damageDealt src=e16 tgt=party amt=6
   damageTaken src=e16 tgt=party amt=6
+  statusTick tgt=party
   turnStart
   cardDrawn card=c9
   cardDrawn card=c1
@@ -117,13 +119,14 @@ cardDrawn card=c12
   damageTaken src=m0 tgt=e16 amt=3
   damageDealt src=m0 tgt=e16 amt=3
   damageTaken src=m0 tgt=e16 amt=3
-  statusTick
-  damageDealt src=e16 tgt=e16 amt=2
-  damageTaken src=e16 tgt=e16 amt=2
+  statusTick tgt=e16
+  damageDealt src=e16 tgt=e16 status.poison amt=2
+  damageTaken src=e16 tgt=e16 status.poison amt=2
   enemyPhaseStart
   enemyActed src=e16 tgt=party
   damageDealt src=e16 tgt=party amt=18 abs=18
   damageTaken src=e16 tgt=party amt=18 abs=18
+  statusTick tgt=party
   turnStart
   cardDrawn card=c4
   cardDrawn card=c0
@@ -183,8 +186,8 @@ cardDrawn card=c12
   damageTaken src=m0 tgt=e16 amt=5
   damageDealt src=m0 tgt=e16 amt=5
   damageTaken src=m0 tgt=e16 amt=5
-  statusTick
-  damageDealt src=e16 tgt=e16 amt=2
+  statusTick tgt=e16
+  damageDealt src=e16 tgt=e16 status.poison amt=2
   combatEnd victory
 
-final: {"turn":4,"outcome":"victory","party":{"hp":204,"maxHp":210,"shield":24},"enemies":[0],"resources":{"tentacles":6,"potency":5,"embryo":0,"essence":2},"gauges":[0,0,90,90]}
+final: {"turn":4,"outcome":"victory","party":{"hp":204,"maxHp":210,"shield":24,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":5,"embryo":0,"essence":2},"gauges":[0,0,90,90]}

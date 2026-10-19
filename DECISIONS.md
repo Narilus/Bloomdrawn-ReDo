@@ -99,6 +99,12 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - The M1 slice fight starts every ultimate gauge at 70, as if mid-run, so each ultimate can fire in one fight. Charge numbers stay as approved (owner, 19 Oct).
 - M1 playtest (owner, 19 Oct): "more or less a complete success". Shield blocks Poison. HP bars move as each hit lands, not at End Turn. Each Domain gets one HUD badge (Tentacles reads as the total, with count × damage per hit). Keep the one-by-one damage ticks.
 - M1 signed off: the starter four against the Bloom-Rib Hound, with the playtest fixes and the HUD icon set (owner, 19 Oct). Portrait art is for later.
+- M2 content approved as drafted in `docs/notes/m2-content.md`: Transcend cards, enemies and encounters, relics, and the three-fight gauntlet as the M2 test (owner, 19 Oct).
+- Status timing: enemies' statuses tick at the end of the party's turn (after Tentacles); the party's tick after the enemy phase; turn counts drop at the same moments (owner, 19 Oct).
+- Bleed bypasses Shield, to set it apart from Poison (owner, 19 Oct).
+- Debuffs on the party side apply to the whole party (owner, 19 Oct).
+- Enemy buffers use Shield and heal for now; damage-multiplying enemy buffs are wanted later (owner, 19 Oct).
+- Enemy sprites are generated during M2 (owner, 19 Oct).
 - Ideas the owner raised for later, not yet decided: a skin selection; Transcend optionally changing a character's sprite (Maelia-03, with the exposed legs and pregnant body, fits that); enemies drawing alternate skins from their numbered sprites (owner, 19 Oct).
 - A later balance pass may add more sources of ultimate charge, so "battery" characters become a team-building role (owner idea, 19 Oct).
 

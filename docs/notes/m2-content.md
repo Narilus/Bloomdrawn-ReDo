@@ -1,6 +1,6 @@
 # M2 content and rules: draft for owner review
 
-Status: **draft, not approved.** Covers what M2 needs that DESIGN.md leaves open: status timing, Transcend cards for the starter four, the first enemy roster, the first relics, and the gauntlet that tests run-persistent ultimates. Every number is a placeholder for you to mark up. Questions are numbered at the end.
+Status: **approved by the owner, 19 Oct** (answers below). Covers what M2 needs that DESIGN.md leaves open: status timing, Transcend cards for the starter four, the first enemy roster, the first relics, and the gauntlet that tests run-persistent ultimates. Every number is a placeholder for you to mark up. Questions are numbered at the end.
 
 ## Statuses
 
@@ -108,3 +108,7 @@ Party HP and ultimate gauges carry over, and gauges start at 0, so persistence i
 5. The Transcend cards, enemies, encounters and relics: approve, mark up or cut?
 6. The gauntlet as the M2 test: three fights, gauges from 0, a relic pick after each win?
 7. Shall I generate sprite options for the six new enemies now, and portraits for the starter four, in parallel as in M0.6?
+
+## Owner's answers (19 Oct)
+
+1. Status timing agreed. 2. Bleed bypasses Shield. 3. Debuffs land on the whole party. 4. Shield and heal for buffers now; damage-multiplying enemies later. 5. Content approved. 6. The gauntlet is the M2 test. 7. Generate enemy sprites during M2.

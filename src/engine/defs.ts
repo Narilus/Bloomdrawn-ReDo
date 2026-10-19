@@ -110,11 +110,19 @@ export interface EnemyDef extends Hooks {
   hp: number;
   /** Used in order, then from the start again. An enemy without intents does nothing. */
   intents?: IntentDef[];
+  /** `resistsControl`: elites and bosses turn Stun and Delay into Falter. */
+  traits?: 'resistsControl'[];
 }
 
 export interface StatusDef extends Hooks {
   id: string;
   stacking: 'add' | 'refresh' | 'highest';
+  /** Control: the bearer skips its next action, then this status is removed. `advance` loses that intent (Stun); `hold` keeps it shown for next turn (Delay). */
+  skipsAction?: 'advance' | 'hold';
+  /** On a bearer that resists control, this status is applied instead (Stun and Delay become Falter). */
+  resistedAs?: string;
+  /** Removed right after the bearer's next action (Falter). */
+  endsAfterAction?: boolean;
   /** A HUD icon key, and the badge tooltip's plain-language rule. */
   icon?: string;
   help?: string;

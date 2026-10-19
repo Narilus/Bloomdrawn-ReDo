@@ -12,6 +12,8 @@ export interface LoseHpArgs extends OpCall {
   target?: 'self' | 'chosen';
   /** Shield absorbs it first (Poison). */
   blockedByShield?: boolean;
+  /** The status doing it, carried on the events for presentation. */
+  status?: string;
 }
 
 /** Damage over time: a fixed amount that no modifier changes. Shield absorbs it only if `blockedByShield`. */
@@ -24,7 +26,7 @@ export const loseHp = (amount: Formula, options: Omit<LoseHpArgs, 'op' | 'amount
 
 function victimOf(state: CombatState, args: LoseHpArgs, ctx: OpContext): { id: EntityId; pool: { hp: number; shield: number } } | undefined {
   const id = args.target === 'chosen' ? ctx.target : ctx.source;
-  if (state.members.some((m) => m.id === id)) return { id: PARTY, pool: state.party };
+  if (id === PARTY || state.members.some((m) => m.id === id)) return { id: PARTY, pool: state.party };
   const enemy = state.enemies.find((e) => e.id === id);
   return enemy && isAlive(enemy) ? { id: enemy.id, pool: enemy } : undefined;
 }
@@ -35,6 +37,7 @@ export const loseHpOp: Operation<LoseHpArgs> = {
     amount: formulaSchema,
     target: z.enum(['self', 'chosen']).optional(),
     blockedByShield: z.boolean().optional(),
+    status: z.string().min(1).optional(),
   }),
   validate: (state, args, ctx) => (victimOf(state, args, ctx) ? undefined : 'Nothing living to lose HP.'),
   resolve(draft, args, ctx, registry) {
@@ -45,6 +48,7 @@ export const loseHpOp: Operation<LoseHpArgs> = {
     victim.pool.shield -= absorbed;
     victim.pool.hp = Math.max(0, victim.pool.hp - (amount - absorbed));
     const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: victim.id, amount, absorbed };
+    if (args.status !== undefined) base.status = args.status;
     const events: EngineEvent[] = [base, { ...base, type: 'damageTaken' }];
     if (victim.id !== PARTY && victim.pool.hp <= 0) events.push({ type: 'enemyDefeated', source: ctx.source, target: victim.id });
     return { events };

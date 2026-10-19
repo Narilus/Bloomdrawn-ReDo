@@ -62,6 +62,7 @@ export const schemas = {
     name: z.string().min(1),
     hp: z.int().positive(),
     intents: z.array(z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) })).optional(),
+    traits: z.array(z.literal('resistsControl')).optional(),
     ...hooks,
   }),
   status: z.strictObject({
@@ -70,6 +71,9 @@ export const schemas = {
     stacking: z.enum(['add', 'refresh', 'highest']),
     icon: z.string().min(1).optional(),
     help: z.string().min(1).optional(),
+    skipsAction: z.enum(['advance', 'hold']).optional(),
+    resistedAs: id.optional(),
+    endsAfterAction: z.boolean().optional(),
     ...hooks,
   }),
   relic: z.strictObject({ kind: z.literal('relic'), id, ...hooks }),

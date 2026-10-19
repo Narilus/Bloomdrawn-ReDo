@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { Keyword, Registry } from './defs.ts';
 import type { OpContext } from './operation.ts';
-import type { CombatState } from './state.ts';
+import { PARTY, type CombatState } from './state.ts';
 
 /** A typed amount expression. JSON data, never strings or eval. */
 export type Formula =
@@ -67,8 +67,10 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   if ('handCount' in f) return withKeyword(state, registry, f.handCount).length;
   if ('heldTurns' in f) return withKeyword(state, registry, f.heldTurns).reduce((sum, c) => sum + (c.held ?? 0), 0);
   if ('stacks' in f) {
-    const bearer = [...state.members, ...state.enemies].find((b) => b.id === ctx.source);
-    return bearer?.statuses.find((s) => s.status === f.stacks)?.stacks ?? 0;
+    // The party and its members share one set of statuses.
+    const party = ctx.source === PARTY || state.members.some((m) => m.id === ctx.source);
+    const statuses = party ? state.party.statuses : state.enemies.find((e) => e.id === ctx.source)?.statuses;
+    return statuses?.find((s) => s.status === f.stacks)?.stacks ?? 0;
   }
   if ('manaSpent' in f) return state.manaSpent;
   if ('turn' in f) return state.turn;

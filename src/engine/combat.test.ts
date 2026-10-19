@@ -45,7 +45,7 @@ describe('combat start', () => {
     expect(state.mana).toBe(6);
     expect(state.piles.hand).toHaveLength(HAND_DRAW);
     expect(state.piles.draw).toHaveLength(15);
-    expect(state.party).toEqual({ hp: 80, maxHp: 80, shield: 0 });
+    expect(state.party).toEqual({ hp: 80, maxHp: 80, shield: 0, statuses: [] });
     expect(events.map((e) => e.type).slice(0, 2)).toEqual(['combatStart', 'turnStart']);
     expect(events.filter((e) => e.type === 'cardDrawn')).toHaveLength(5);
   });

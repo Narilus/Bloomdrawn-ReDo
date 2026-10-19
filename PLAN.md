@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** owner review of `docs/notes/m2-content.md` (statuses, Transcend, enemies, relics, gauntlet); M2.1 waits on its questions 1–3
+**Current task:** M2.2 Transcend (enemy sprites generating in parallel)
 
 ## Milestones
 
@@ -136,13 +136,15 @@ _19 Oct: built, awaiting the owner's play. Portrait rings are the ultimate gauge
 
 _19 Oct, owner's playtest: mechanics all work. Changes made: Shield blocks Poison; HP and Shield bars step as each hit lands (`vitals` from the engine); one badge per Domain (Tentacles shows the total with count × damage per hit); keyword tags on their own gold line and live damage and Shield numbers and status names coloured in card text, for the owner to judge. Then, at the owner's request, an icon set (`src/app/icons.tsx`: tentacle, embryo, essence, shield, poison, attack) replaces badge words, with hover and focus tooltips holding the name and rule; intents show an icon per action._
 
-## M2 tasks (proposed)
+## M2 tasks
 
-Content and open rules are drafted in `docs/notes/m2-content.md` for the owner's review. Portraits and enemy sprites run through `npm run art` in parallel, owner-paced.
+Content and rules are in `docs/notes/m2-content.md` (approved 19 Oct). Portraits and enemy sprites run through `npm run art` in parallel, owner-paced.
 
 ### M2.1 Launch statuses
 Bleed, Vulnerable, Weak, Stun, Delay and Falter. Statuses on the party side apply to the whole party. Statuses tick at the end of their side's turn. Control resistance turns Stun and Delay into Falter. Party statuses show on the party bar, with icons and tooltips.
 **Done when:** each status has rule tests (stacking, timing, decay, interaction with Shield), and previews show Weak, Vulnerable and Falter in the numbers.
+
+_Done 19 Oct. Statuses are content (`src/content/statuses/`) on generic fields; the party has one shared status list. `src/content/scenarios/statuses.test.ts` covers each. Consequence of the agreed timing, for tuning: a turn-count debuff an enemy puts on the party loses its first turn right after that enemy phase, so "2 Weak" from an enemy covers one party turn._
 
 ### M2.2 Transcend
 The fifth card for each starter (deck 20). The `transcend` operation: once per combat, a Graveyard, +35 charge, and a Transcended ultimate for the rest of the combat. Generated cards (Maelia's Seed Pod). The "exactly five personal cards" check turns on. The portrait shows the Transcended state.

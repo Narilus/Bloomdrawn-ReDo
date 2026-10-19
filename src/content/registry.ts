@@ -115,7 +115,10 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
     checkHooks('enemy', e.id, e, '');
     e.intents?.forEach((intent, i) => checkCalls('enemy', e.id, intent.effects, `intents[${i}].effects`));
   }
-  for (const s of Object.values(reg.statuses)) checkHooks('status', s.id, s, '');
+  for (const s of Object.values(reg.statuses)) {
+    checkHooks('status', s.id, s, '');
+    if (s.resistedAs && !reg.statuses[s.resistedAs]) fail(where('status', s.id), s.id, `resistedAs "${s.resistedAs}" is not a status`);
+  }
   for (const r of Object.values(reg.relics)) checkHooks('relic', r.id, r, '');
   for (const d of Object.values(reg.domains)) checkHooks('domain', d.id, d, '');
 

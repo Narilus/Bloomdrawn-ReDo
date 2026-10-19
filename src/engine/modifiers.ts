@@ -32,21 +32,20 @@ export function pipeline(
 }
 
 /**
- * Modifiers that belong to an entity's side. A party member: her passive, her statuses and
- * every relic. The whole party: every member's and every relic's. An enemy: its own and its statuses'.
+ * Modifiers that belong to an entity's side. A party member: her passive, the party's statuses and
+ * every relic. The whole party: every member's passive, its statuses and every relic. An enemy: its
+ * own and its statuses'.
  */
 function modifiersOf(state: CombatState, registry: Registry, id: EntityId): ModifierDef[] {
   const statusMods = (statuses: { status: string }[]) =>
     statuses.flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
   const relicMods = state.relics.flatMap((r) => registry.relics[r.relic]?.modifiers ?? []);
-  const memberMods = (m: CombatState['members'][number]) => [
-    ...(registry.characters[m.character]?.passive?.modifiers ?? []),
-    ...statusMods(m.statuses),
-  ];
+  const passive = (m: CombatState['members'][number]) => registry.characters[m.character]?.passive?.modifiers ?? [];
+  const partyStatuses = statusMods(state.party.statuses);
 
-  if (id === PARTY) return [...state.members.flatMap(memberMods), ...relicMods];
+  if (id === PARTY) return [...state.members.flatMap(passive), ...partyStatuses, ...relicMods];
   const member = state.members.find((m) => m.id === id);
-  if (member) return [...memberMods(member), ...relicMods];
+  if (member) return [...passive(member), ...partyStatuses, ...relicMods];
   const enemy = state.enemies.find((e) => e.id === id);
   if (enemy) return [...(registry.enemies[enemy.enemy]?.modifiers ?? []), ...statusMods(enemy.statuses)];
   return [];

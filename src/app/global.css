@@ -546,6 +546,14 @@ body,
 }
 
 .intent-part.shield { color: var(--lilac-glow); }
+.intent.skipped { color: var(--lavender); }
+.intent.skipped b { text-decoration: line-through; }
+.status-badge.status-bleed { border-color: #e86a78; color: #f2a0a8; }
+.status-badge.status-vulnerable { border-color: var(--blush); color: var(--blush); }
+.status-badge.status-weak { border-color: var(--lavender); color: var(--lilac-glow); }
+.status-badge.status-stun,
+.status-badge.status-delay,
+.status-badge.status-falter { border-color: var(--antique-gold); color: #e2c27a; }
 .intent-part.poison { color: #e8e8b0; }
 
 .intent.attack {

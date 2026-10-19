@@ -57,7 +57,6 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
   const members = setup.party.map((character, slot) => ({
     id: `m${slot}`,
     character,
-    statuses: [],
     gauge: Math.min(GAUGE_MAX, Math.max(0, setup.gauges?.[slot] ?? 0)),
   }));
   const maxHp = characters.reduce((sum, c) => sum + c.stats.hp, 0);
@@ -86,7 +85,7 @@ export function startCombat(setup: CombatSetup, registry: Registry): { state: Co
     manaSpent: 0,
     usedThisTurn: [],
     next: { costDelta: 0, repeat: 0 },
-    party: { hp: Math.min(setup.partyHp ?? maxHp, maxHp), maxHp, shield: 0 },
+    party: { hp: Math.min(setup.partyHp ?? maxHp, maxHp), maxHp, shield: 0, statuses: [] },
     members,
     enemies,
     relics,
@@ -238,9 +237,15 @@ function endTurn(rc: Resolution): void {
   }
   s.piles.hand = kept;
   s.next = { costDelta: 0, repeat: 0 };
-  for (const lifecycle of ['cleanup', 'turnEnd', 'statusTick'] as const) {
+  for (const lifecycle of ['cleanup', 'turnEnd'] as const) {
     emit(rc, { type: lifecycle }, ROOT);
     drain(rc);
+    if (isOver(rc)) return;
+  }
+  // The enemies' statuses tick at the end of the party's turn, one enemy at a time.
+  for (const enemy of s.enemies) {
+    if (!isAlive(enemy)) continue;
+    tick(rc, enemy.id);
     if (isOver(rc)) return;
   }
 
@@ -255,17 +260,45 @@ function endTurn(rc: Resolution): void {
     actIntent(rc, enemy);
     if (isOver(rc)) return;
   }
+  // The party's statuses tick after the enemy phase.
+  tick(rc, PARTY);
+  if (isOver(rc)) return;
   beginTurn(rc);
 }
 
-/** The enemy does exactly what its intent showed, then reveals its next intent. */
+/** One bearer's statuses tick: damage over time and turn counts (status triggers on `statusTick` for themselves). */
+function tick(rc: Resolution, bearer: EntityId): void {
+  emit(rc, { type: 'statusTick', target: bearer }, ROOT);
+  drain(rc);
+}
+
+/**
+ * The enemy does exactly what its intent showed, then reveals its next intent. A control status
+ * makes it skip instead: Stun loses that intent, Delay keeps it shown for next turn. A status that
+ * ends after an action (Falter) goes once it has acted.
+ */
 function actIntent(rc: Resolution, enemy: Enemy): void {
   const intent = intentOf(enemy, rc.registry);
   if (!intent) return;
+  const count = rc.registry.enemies[enemy.enemy]?.intents?.length ?? 1;
+  const control = enemy.statuses.find((s) => rc.registry.statuses[s.status]?.skipsAction);
+  if (control) {
+    const mode = rc.registry.statuses[control.status]?.skipsAction;
+    enemy.statuses.splice(enemy.statuses.indexOf(control), 1);
+    emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: control.status, via: 'skip' }, ROOT);
+    drain(rc);
+    if (mode === 'advance') enemy.intent = ((enemy.intent ?? 0) + 1) % count;
+    return;
+  }
   enqueue(rc, intent.effects, { source: enemy.id, target: PARTY }, ROOT);
   emit(rc, { type: 'enemyActed', source: enemy.id, target: PARTY }, ROOT);
   drain(rc);
-  const count = rc.registry.enemies[enemy.enemy]?.intents?.length ?? 1;
+  if (isOver(rc)) return;
+  for (const s of enemy.statuses.filter((x) => rc.registry.statuses[x.status]?.endsAfterAction)) {
+    enemy.statuses.splice(enemy.statuses.indexOf(s), 1);
+    emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
+  }
+  drain(rc);
   enemy.intent = ((enemy.intent ?? 0) + 1) % count;
 }
 

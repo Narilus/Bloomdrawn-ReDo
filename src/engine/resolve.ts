@@ -2,7 +2,7 @@ import type { OpCall, Registry, TriggerDef } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import type { OpContext } from './operation.ts';
 import { getOp } from './ops/index.ts';
-import { isAlive, MAX_CHAIN_DEPTH, type CombatState, type EntityId } from './state.ts';
+import { isAlive, MAX_CHAIN_DEPTH, PARTY, type CombatState, type EntityId } from './state.ts';
 
 /** Where an operation sits in a trigger chain: its depth and the triggers that led to it. */
 export interface Origin {
@@ -119,12 +119,14 @@ interface HeldTrigger {
 }
 
 /**
- * Fixed trigger order: the event's source, then party slot order, then relic acquisition
- * order, then enemy slot order, then Domain hooks (so Tentacles attack after scheduled effects).
+ * Fixed trigger order: the event's source, then party slot order, then the party's statuses, then
+ * relic acquisition order, then enemy slot order, then Domain hooks (so Tentacles attack after
+ * scheduled effects).
  */
 function matchingTriggers(state: CombatState, registry: Registry, event: EngineEvent, origin: Origin): HeldTrigger[] {
   const holders = [
     ...state.members.map((m) => m.id),
+    PARTY,
     ...state.relics.map((r) => r.id),
     ...state.enemies.filter(isAlive).map((e) => e.id),
   ];
@@ -161,7 +163,7 @@ function triggersOf(state: CombatState, registry: Registry, holder: EntityId): H
   if (member) sets.push([member.character, registry.characters[member.character]?.passive?.triggers]);
   if (enemy) sets.push([enemy.enemy, registry.enemies[enemy.enemy]?.triggers]);
   if (relic) sets.push([relic.relic, registry.relics[relic.relic]?.triggers]);
-  for (const s of member?.statuses ?? enemy?.statuses ?? []) {
+  for (const s of holder === PARTY ? state.party.statuses : (enemy?.statuses ?? [])) {
     sets.push([s.status, registry.statuses[s.status]?.triggers]);
   }
   return sets.flatMap(([defId, triggers]) =>

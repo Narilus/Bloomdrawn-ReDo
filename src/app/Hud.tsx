@@ -186,6 +186,11 @@ export function PartyBar({ state, vitals, previews }: { state: CombatState; vita
         <div className="bar-fill" style={{ width: `${(hp / maxHp) * 100}%` }} />
         {loss > 0 && <div className="bar-ghost" style={{ left: `${(after / maxHp) * 100}%`, width: `${((hp - after) / maxHp) * 100}%` }} />}
       </div>
+      {state.party.statuses.length > 0 && (
+        <div className="plate-tags">
+          <StatusBadges statuses={state.party.statuses} />
+        </div>
+      )}
       {incoming > 0 && (
         <div className={`incoming${after <= 0 ? ' lethal' : loss === 0 ? ' safe' : ''}`}>
           {after <= 0 ? '☠ Lethal' : loss === 0 ? 'Safe' : `Incoming −${loss}`}
@@ -218,7 +223,7 @@ export function EnemyPlate({ slot, id, state, vitals, aimed, previews }: PlatePr
       className={`enemy-plate plaque${aimed ? ' aimed' : ''}${enemy.hp <= 0 ? ' defeated' : ''}`}
       style={{ left: home.x - 120, top: home.y + 22 }}
     >
-      {intent && <Intent name={intent.name} previews={previewIntent(state, id, registry)} />}
+      {intent && <Intent name={intent.name} previews={previewIntent(state, id, registry)} skips={skipping(enemy.statuses)} />}
       <div className="bar-label">
         <span>{def?.name}</span>
         <strong>
@@ -232,23 +237,48 @@ export function EnemyPlate({ slot, id, state, vitals, aimed, previews }: PlatePr
       {loss > 0 && <div className="plate-preview">−{loss}</div>}
       <div className="plate-tags">
         {enemy.shield > 0 && <ShieldBadge amount={enemy.shield} />}
-        {enemy.statuses.map((s) => {
-          const def = registry.statuses[s.status];
-          const name = statusName(s.status);
-          return (
-            <span key={s.status} className={`status-badge ${s.status.replace(/\./g, '-')}`} tabIndex={0} aria-label={`${name} ${s.stacks}. ${def?.help ?? ''}`}>
-              {hasIcon(def?.icon) ? <Icon name={def.icon} /> : name} {s.stacks}
-              <Tip title={`${name} ${s.stacks}`}>{def?.help && <p>{def.help}</p>}</Tip>
-            </span>
-          );
-        })}
+        <StatusBadges statuses={enemy.statuses} />
       </div>
     </div>
   );
 }
 
-/** An enemy's shown intent: its name, then an icon and exact number for each thing it will do. */
-function Intent({ name, previews }: { name: string; previews: Preview[] }) {
+/** Icon badges for a bearer's statuses, each with its rule in a tooltip. */
+function StatusBadges({ statuses }: { statuses: readonly { status: string; stacks: number }[] }) {
+  return (
+    <>
+      {statuses.map((s) => {
+        const def = registry.statuses[s.status];
+        const name = statusName(s.status);
+        // Control statuses are one-shot: no count.
+        const count = def?.skipsAction || def?.endsAfterAction ? '' : ` ${s.stacks}`;
+        return (
+          <span key={s.status} className={`status-badge ${s.status.replace(/\./g, '-')}`} tabIndex={0} aria-label={`${name}${count}. ${def?.help ?? ''}`}>
+            {hasIcon(def?.icon) ? <Icon name={def.icon} /> : name}
+            {count}
+            <Tip title={`${name}${count}`}>{def?.help && <p>{def.help}</p>}</Tip>
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
+/** The control status that will make this enemy skip its action, if any. */
+const skipping = (statuses: readonly { status: string }[]) => {
+  const control = statuses.find((s) => registry.statuses[s.status]?.skipsAction);
+  return control ? statusName(control.status) : undefined;
+};
+
+/** An enemy's shown intent: its name, then an icon and exact number for each thing it will do, or that it will skip. */
+function Intent({ name, previews, skips }: { name: string; previews: Preview[]; skips?: string | undefined }) {
+  if (skips) {
+    return (
+      <div className="intent skipped" aria-label={`Intent: ${name}, skipped (${skips})`}>
+        <b>{name}</b> <span className="intent-part">skips ({skips})</span>
+      </div>
+    );
+  }
   const parts = previews.flatMap((p) => {
     if (p.op === 'damage') return [{ icon: 'attack', amount: p.amount, words: `${p.amount} damage` }];
     if (p.op === 'gainShield') return [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield` }];

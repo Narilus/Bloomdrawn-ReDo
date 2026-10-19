@@ -51,6 +51,6 @@ export interface EngineEvent {
   resource?: string;
   status?: string;
   outcome?: 'victory' | 'defeat';
-  /** The operation that raised it, where presentation needs to know (`volley` hits). */
+  /** How it came about, where presentation needs to know: `volley` hits, a control status's `skip`. */
   via?: string;
 }

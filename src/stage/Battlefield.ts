@@ -9,14 +9,23 @@ const COLOURS = {
   damage: '#F6E6DC',
   shield: '#D6B8E8',
   tentacle: '#E8A0A8',
-  poison: '#D8D88A',
   heal: '#F2C4C4',
   ultimate: '#D6B8E8',
+  status: '#E8DCCB',
+};
+
+/** Popup colours for statuses by name; the word is always shown too. */
+const STATUS_COLOURS: Record<string, string> = {
+  Poison: '#D8D88A',
+  Bleed: '#E86A78',
+  Vulnerable: '#F2C4C4',
+  Weak: '#B9A0D0',
 };
 
 /** Seconds between beats when one command's events play out in sequence. */
 const BEAT = {
   volleyHit: 0.11,
+  tick: 0.3,
   phase: 0.35,
   enemyAction: 0.6,
 };
@@ -104,7 +113,6 @@ export class Battlefield {
   play(events: readonly EngineEvent[]): { times: number[]; duration: number } {
     let clock = 0; // when the current beat starts
     let impact = 0; // when its hits land
-    let ticking = false; // between statusTick and the enemy phase: damage over time
     const times: number[] = [];
     for (const event of events) {
       switch (event.type) {
@@ -123,12 +131,6 @@ export class Battlefield {
         case 'enemyPhaseStart':
           clock = Math.max(clock, impact) + BEAT.phase;
           impact = clock;
-          ticking = false;
-          break;
-        case 'statusTick':
-          clock = Math.max(clock, impact) + BEAT.phase;
-          impact = clock;
-          ticking = true;
           break;
         case 'enemyActed': {
           clock = Math.max(clock, impact) + BEAT.enemyAction;
@@ -138,15 +140,29 @@ export class Battlefield {
         }
         case 'damageDealt': {
           const volley = event.via === 'volley';
-          // Tentacle hits land one after another.
+          // Tentacle hits land one after another; each damage-over-time tick gets its own beat.
           if (volley) impact += BEAT.volleyHit;
+          if (event.status) {
+            clock = Math.max(clock, impact) + BEAT.tick;
+            impact = clock;
+          }
           const hpLoss = (event.amount ?? 0) - (event.absorbed ?? 0);
           for (const target of this.targets(event.target)) {
             target.recoil(event.target === PARTY ? -1 : 1, impact);
             if (event.absorbed) target.popup(`−${event.absorbed}`, COLOURS.shield, impact);
-            if (ticking) target.popup(`${hpLoss} Poison`, COLOURS.poison, impact, 40);
-            else target.popup(String(hpLoss), volley ? COLOURS.tentacle : COLOURS.damage, impact, volley ? 44 : 54);
+            if (event.status) {
+              const name = statusName(event.status);
+              target.popup(`${hpLoss} ${name}`, STATUS_COLOURS[name] ?? COLOURS.status, impact, 40);
+            } else target.popup(String(hpLoss), volley ? COLOURS.tentacle : COLOURS.damage, impact, volley ? 44 : 54);
           }
+          break;
+        }
+        case 'statusRemoved': {
+          // A control status spent: the enemy skips its action, in its turn's slot.
+          if (event.via !== 'skip') break;
+          clock = Math.max(clock, impact) + BEAT.enemyAction;
+          impact = clock;
+          this.actor(event.target)?.popup(`${statusName(event.status)}: skips`, COLOURS.status, impact, 38);
           break;
         }
         case 'shieldGained': {
@@ -160,7 +176,9 @@ export class Battlefield {
           break;
         }
         case 'statusApplied': {
-          this.actor(event.target)?.popup(`${event.amount ?? 0} ${statusName(event.status)}`, COLOURS.poison, impact, 34);
+          const name = statusName(event.status);
+          const [bearer] = this.targets(event.target);
+          bearer?.popup(`${event.amount ?? 0} ${name}`, STATUS_COLOURS[name] ?? COLOURS.status, impact, 34);
           break;
         }
         case 'enemyDefeated':
@@ -169,7 +187,7 @@ export class Battlefield {
         default:
           break;
       }
-      const lifecycle = event.type === 'turnEnd' || event.type === 'statusTick' || event.type === 'enemyPhaseStart' || event.type === 'turnStart';
+      const lifecycle = event.type === 'turnEnd' || event.type === 'enemyPhaseStart' || event.type === 'turnStart';
       times.push(Math.max(times.at(-1) ?? 0, lifecycle ? clock : impact));
     }
     return { times, duration: Math.max(clock, impact) };

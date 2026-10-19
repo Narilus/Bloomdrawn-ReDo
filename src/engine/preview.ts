@@ -52,6 +52,8 @@ export function previewIntent(state: CombatState, enemyId: EntityId, registry: R
   const enemy = state.enemies.find((e) => e.id === enemyId);
   const intent = enemy && enemy.hp > 0 ? intentOf(enemy, registry) : undefined;
   if (!enemy || !intent) return [];
+  // A controlled enemy will skip this action.
+  if (enemy.statuses.some((s) => registry.statuses[s.status]?.skipsAction)) return [];
   const scratch = structuredClone(state);
   // The enemy's own Shield clears before it acts.
   for (const e of scratch.enemies) e.shield = 0;

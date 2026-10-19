@@ -48,10 +48,13 @@ describe('cleanup and Retain', () => {
     expect([after.resources['rituals'], after.resources['held'], after.resources['spent']]).toEqual([1, 2, 2]);
   });
 
-  it('lifecycle order at end of turn: cleanup, turnEnd, statusTick, enemy phase', () => {
-    const { events } = run(fixtureCombat(), endTurn);
-    const lifecycle = events.map((e) => e.type).filter((t) => ['cleanup', 'turnEnd', 'statusTick', 'enemyPhaseStart', 'turnStart'].includes(t));
-    expect(lifecycle).toEqual(['cleanup', 'turnEnd', 'statusTick', 'enemyPhaseStart', 'turnStart']);
+  // Owner, 19 Oct: enemies' statuses tick at the end of the party's turn, the party's after the enemy phase.
+  it('lifecycle order at end of turn: cleanup, turnEnd, each enemy ticks, enemy phase, the party ticks', () => {
+    const { events } = run(fixtureCombat(['test.dummy', 'test.dummy']), endTurn);
+    const lifecycle = events
+      .filter((e) => ['cleanup', 'turnEnd', 'statusTick', 'enemyPhaseStart', 'turnStart'].includes(e.type))
+      .map((e) => (e.type === 'statusTick' ? `statusTick:${e.target}` : e.type));
+    expect(lifecycle).toEqual(['cleanup', 'turnEnd', 'statusTick:e20', 'statusTick:e21', 'enemyPhaseStart', 'statusTick:party', 'turnStart']);
   });
 });
 

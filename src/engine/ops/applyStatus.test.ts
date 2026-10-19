@@ -29,10 +29,11 @@ describe('applyStatus', () => {
     expect(stacksAfter('test.highest', 3, 2)).toEqual([{ status: 'test.highest', stacks: 3 }]);
   });
 
-  it('can target the source, and needs a living bearer', () => {
+  // Owner, 19 Oct: statuses on the party side land on the whole party.
+  it("can target the source's side, which for a party member is the whole party, and needs a living bearer", () => {
     const draft = fixtureCombat();
     applyStatusOp.resolve(draft, applyStatus({ id: 'test.add' }, 1, 'self'), ctx, registry);
-    expect(draft.members[0]?.statuses).toEqual([{ status: 'test.add', stacks: 1 }]);
+    expect(draft.party.statuses).toEqual([{ status: 'test.add', stacks: 1 }]);
     expect(applyStatusOp.validate?.(draft, applyStatus({ id: 'test.add' }, 1), { source: 'm0' }, registry)).toBeDefined();
   });
 

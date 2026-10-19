@@ -24,7 +24,6 @@ export interface StatusStack {
 export interface Member {
   id: EntityId;
   character: string;
-  statuses: StatusStack[];
   /** Ultimate gauge, 0 to GAUGE_MAX. Carries across the run. */
   gauge: number;
 }
@@ -78,8 +77,8 @@ export interface CombatState {
   usedThisTurn: string[];
   /** Effects waiting for the next card played this turn. Cleared at cleanup. */
   next: { costDelta: number; repeat: number };
-  /** The party shares one HP pool and one Shield. */
-  party: { hp: number; maxHp: number; shield: number };
+  /** The party shares one HP pool, one Shield and one set of statuses (debuffs land on the whole party). */
+  party: { hp: number; maxHp: number; shield: number; statuses: StatusStack[] };
   members: Member[];
   enemies: Enemy[];
   /** In acquisition order. */
