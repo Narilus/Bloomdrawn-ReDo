@@ -50,7 +50,8 @@ describe('relics', () => {
     state.resources['embryo'] = 2;
     const card = hold(state, 'maelia.bud-cutting');
     const after = run(state, { type: 'playCard', card: card.uid }).state;
-    expect(after.enemies[0]!.statuses).toEqual([{ status: 'status.vulnerable', stacks: 1 }]);
+    // Fresh: it landed this turn, so this turn's end won't count it down.
+    expect(after.enemies[0]!.statuses).toEqual([{ status: 'status.vulnerable', stacks: 1, fresh: 1 }]);
   });
 
   it('Choir Bell: the Tentacles also volley at turn start', () => {

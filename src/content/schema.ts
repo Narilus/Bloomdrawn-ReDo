@@ -84,6 +84,7 @@ export const schemas = {
     skipsAction: z.enum(['advance', 'hold']).optional(),
     resistedAs: id.optional(),
     endsAfterAction: z.boolean().optional(),
+    lasts: z.enum(['ownTurns', 'opposingTurns']).optional(),
     ...hooks,
   }),
   relic: z.strictObject({

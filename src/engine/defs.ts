@@ -142,6 +142,12 @@ export interface StatusDef extends Hooks {
   resistedAs?: string;
   /** Removed right after the bearer's next action (Falter). */
   endsAfterAction?: boolean;
+  /**
+   * Stacks are turns, counted on the turns where the status matters: the bearer's own (Weak) or
+   * the other side's (Vulnerable). One comes off at the end of each such turn, except the turn
+   * the stacks landed in.
+   */
+  lasts?: 'ownTurns' | 'opposingTurns';
   /** A HUD icon key, and the badge tooltip's plain-language rule. */
   icon?: string;
   help?: string;

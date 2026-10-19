@@ -37,12 +37,10 @@ handDrawn
   statusTick tgt=e20
   damageDealt src=e20 tgt=e20 status.poison amt=2
   damageTaken src=e20 tgt=e20 status.poison amt=2
-  turnCountTick tgt=party
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   damageDealt src=e20 tgt=party amt=12 abs=12
   damageTaken src=e20 tgt=party amt=12 abs=12
-  turnCountTick tgt=e20
   statusTick tgt=party
   turnStart
   cardDrawn card=c0
@@ -88,13 +86,11 @@ handDrawn
   statusTick tgt=e20
   damageDealt src=e20 tgt=e20 status.poison amt=2
   damageTaken src=e20 tgt=e20 status.poison amt=2
-  turnCountTick tgt=party
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   shieldGained src=e20 tgt=e20 amt=10
   damageDealt src=e20 tgt=party amt=6 abs=6
   damageTaken src=e20 tgt=party amt=6 abs=6
-  turnCountTick tgt=e20
   statusTick tgt=party
   turnStart
   cardDrawn card=c15
@@ -160,12 +156,10 @@ handDrawn
   statusTick tgt=e20
   damageDealt src=e20 tgt=e20 status.poison amt=2
   damageTaken src=e20 tgt=e20 status.poison amt=2
-  turnCountTick tgt=party
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   damageDealt src=e20 tgt=party amt=18 abs=10
   damageTaken src=e20 tgt=party amt=18 abs=10
-  turnCountTick tgt=e20
   statusTick tgt=party
   turnStart
   cardDrawn card=c2
@@ -210,12 +204,10 @@ handDrawn
   statusTick tgt=e20
   damageDealt src=e20 tgt=e20 status.poison amt=2
   damageTaken src=e20 tgt=e20 status.poison amt=2
-  turnCountTick tgt=party
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   damageDealt src=e20 tgt=party amt=12 abs=9
   damageTaken src=e20 tgt=party amt=12 abs=9
-  turnCountTick tgt=e20
   statusTick tgt=party
   turnStart
   cardDrawn card=c15

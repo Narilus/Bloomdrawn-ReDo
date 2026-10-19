@@ -16,7 +16,7 @@ DESIGN.md defines the seven launch statuses. This is how I'd make them exact.
 | Delay | Skips its next action; the same intent stays shown for next turn. | Once |
 | Falter | Replaces Stun or Delay on enemies with control resistance (elites, bosses): its next action deals and shields 25% less. | Once |
 
-**Timing (Q1).** _Corrected after the M2 playtest: turn counts drop at the end of their bearer's own turn; the damage timing below stands._ Each side's statuses tick at the end of that side's turn:
+**Timing (Q1).** _Corrected after the M2 playtest: a turn count drops at the end of each turn where it matters (Weak: the bearer's own; Vulnerable: the other side's), never in the turn it landed in; the damage timing below stands._ Each side's statuses tick at the end of that side's turn:
 
 - **Statuses on enemies** tick at the end of your turn, after the Tentacles, as Poison does now. Damage lands where you can see your setup pay off.
 - **Statuses on the party** tick after the enemy phase.

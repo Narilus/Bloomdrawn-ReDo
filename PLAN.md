@@ -144,7 +144,7 @@ Content and rules are in `docs/notes/m2-content.md` (approved 19 Oct). Portraits
 Bleed, Vulnerable, Weak, Stun, Delay and Falter. Statuses on the party side apply to the whole party. Statuses tick at the end of their side's turn. Control resistance turns Stun and Delay into Falter. Party statuses show on the party bar, with icons and tooltips.
 **Done when:** each status has rule tests (stacking, timing, decay, interaction with Shield), and previews show Weak, Vulnerable and Falter in the numbers.
 
-_Done 19 Oct. Statuses are content (`src/content/statuses/`) on generic fields; the party has one shared status list. `src/content/scenarios/statuses.test.ts` covers each. After the M2 playtest, turn counts drop at the end of their bearer's own turn, so "2 Weak" from an enemy covers two party turns, and Weak 1 on an enemy covers its next action._
+_Done 19 Oct. Statuses are content (`src/content/statuses/`) on generic fields; the party has one shared status list. `src/content/scenarios/statuses.test.ts` covers each. After the M2 playtest, a turn count drops at the end of each turn where it matters (Weak: the bearer's own; Vulnerable: the other side's), never in the turn it landed in. See DECISIONS.md._
 
 ### M2.2 Transcend
 The fifth card for each starter (deck 20). The `transcend` operation: once per combat, a Graveyard, +35 charge, and a Transcended ultimate for the rest of the combat. Generated cards (Maelia's Seed Pod). The "exactly five personal cards" check turns on. The portrait shows the Transcended state.

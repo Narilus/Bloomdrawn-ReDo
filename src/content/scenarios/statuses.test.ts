@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   apply,
   applyStatus,
+  damage,
   intentOf,
   previewCard,
   previewIntent,
@@ -15,17 +16,29 @@ import {
 import { registry as gameRegistry } from '../registry.ts';
 import { STARTER_PARTY } from '../testing/scenario.ts';
 
-// The launch statuses (DESIGN.md, docs/notes/m2-content.md). Enemies' statuses tick at the end of
-// the party's turn, the party's after the enemy phase (owner, 19 Oct). Agathe's First Hymn Tentacle
-// (3 damage) hits at every end of turn.
+// The launch statuses (DESIGN.md, docs/notes/m2-content.md). Damage over time on enemies lands at
+// the end of the party's turn, on the party after the enemy phase. Turn counts drop at the end of
+// the turns they matter on, except the turn they land in (owner, 19 Oct). Agathe's First Hymn
+// Tentacle (3 damage) hits at every end of turn.
 
 const stunCard: CardDef = { id: 'test.stun', name: 'Stun', owner: 'leonora', cost: 0, target: 'chosenEnemy', effects: [applyStatus({ id: 'status.stun' }, 1)] };
 const delayCard: CardDef = { ...stunCard, id: 'test.delay', effects: [applyStatus({ id: 'status.delay' }, 1)] };
+const vulnerableCard: CardDef = { ...stunCard, id: 'test.vulnerable', effects: [applyStatus({ id: 'status.vulnerable' }, 1)] };
+const weakCard: CardDef = { ...stunCard, id: 'test.weak', effects: [applyStatus({ id: 'status.weak' }, 1)] };
 const resister: EnemyDef = { ...gameRegistry.enemies['enemy.bloom-rib-hound']!, id: 'test.resister', traits: ['resistsControl'] };
+// Hex: the party gains Vulnerable 1; then Strike 10.
+const hexer: EnemyDef = {
+  id: 'test.hexer', name: 'Hexer', hp: 100,
+  intents: [
+    { id: 'hex', name: 'Hex', effects: [applyStatus({ id: 'status.vulnerable' }, 1)] },
+    { id: 'strike', name: 'Strike', effects: [damage(10, { target: 'party' })] },
+  ],
+};
+const testCards = [stunCard, delayCard, vulnerableCard, weakCard];
 const registry: Registry = {
   ...gameRegistry,
-  cards: { ...gameRegistry.cards, [stunCard.id]: stunCard, [delayCard.id]: delayCard },
-  enemies: { ...gameRegistry.enemies, [resister.id]: resister },
+  cards: { ...gameRegistry.cards, ...Object.fromEntries(testCards.map((c) => [c.id, c])) },
+  enemies: { ...gameRegistry.enemies, [resister.id]: resister, [hexer.id]: hexer },
 };
 const HOUND = 'enemy.bloom-rib-hound';
 
@@ -79,7 +92,7 @@ describe('Poison', () => {
 });
 
 describe('Vulnerable and Weak', () => {
-  it('Vulnerable on an enemy: your hits deal 50% more, previewed, until the end of its own turn', () => {
+  it('Vulnerable on an enemy: your hits deal 50% more, previewed, until the end of your turn', () => {
     const state = begin();
     hound(state).statuses.push({ status: 'status.vulnerable', stacks: 1 });
     const strike = hold(state, 'leonora.strike');
@@ -102,11 +115,9 @@ describe('Vulnerable and Weak', () => {
   });
 
   it("Vulnerable on the party and Weak on the Hound change the Hound's shown and dealt damage alike", () => {
-    // Turn counts drop at the end of their bearer's own turn (owner, 19 Oct): the party's Vulnerable 1
-    // runs out before the Hound bites, Vulnerable 2 doesn't, and the Hound's Weak 1 lasts through its bite.
+    // Both matter on the enemies' turn and count down at its end, so a single stack covers the bite.
     const cases = [
-      ['party', 1, 12],
-      ['party', 2, 18],
+      ['party', 1, 18],
       ['hound', 1, 9],
     ] as const;
     for (const [side, stacks, expected] of cases) {
@@ -116,7 +127,51 @@ describe('Vulnerable and Weak', () => {
       expect(previewIntent(state, hound(state).id, registry)[0]?.amount).toBe(expected);
       const after = run(state, endTurn).state;
       expect(after.party.hp).toBe(210 - expected);
+      expect([...after.party.statuses, ...hound(after).statuses]).toEqual([]);
     }
+  });
+
+  it('Vulnerable you put on an enemy: the rest of this turn, then your whole next turn', () => {
+    const state = begin();
+    const vulnerable = hold(state, 'test.vulnerable');
+    const marked = run(state, { type: 'playCard', card: vulnerable.uid, target: hound(state).id }).state;
+    const strike = (s: CombatState) => run(s, { type: 'playCard', card: hold(s, 'leonora.strike').uid, target: hound(s).id }).state;
+    expect(150 - hound(strike(marked)).hp).toBe(16);
+    // It landed this turn, so this turn's end doesn't count.
+    const next = run(marked, endTurn).state;
+    expect(hound(next).statuses).toEqual([{ status: 'status.vulnerable', stacks: 1 }]);
+    expect(hound(next).hp - hound(strike(next)).hp).toBe(16);
+    expect(hound(run(next, endTurn).state).statuses).toEqual([]);
+  });
+
+  it('Weak you put on an enemy: its next action, then gone', () => {
+    const state = begin();
+    const weak = hold(state, 'test.weak');
+    const marked = run(state, { type: 'playCard', card: weak.uid, target: hound(state).id }).state;
+    expect(previewIntent(marked, hound(marked).id, registry)[0]?.amount).toBe(9);
+    const after = run(marked, endTurn).state;
+    expect(after.party.hp).toBe(210 - 9);
+    expect(hound(after).statuses).toEqual([]);
+  });
+
+  it('Vulnerable an enemy puts on the party: it shows through your turn and lasts through the next enemy turn', () => {
+    const hexed = run(begin(['test.hexer']), endTurn).state;
+    // It landed in the enemy turn, so that turn's end doesn't count.
+    expect(hexed.party.statuses).toEqual([{ status: 'status.vulnerable', stacks: 1 }]);
+    expect(previewIntent(hexed, hound(hexed).id, registry)[0]?.amount).toBe(15);
+    const after = run(hexed, endTurn).state;
+    expect(hexed.party.hp - after.party.hp).toBe(15);
+    expect(after.party.statuses).toEqual([]);
+  });
+
+  it("the enemies' turn is one moment: Vulnerable an enemy applies doesn't boost the enemies after it that turn", () => {
+    const state = begin(['test.hexer', HOUND]);
+    const houndOf = (s: CombatState) => s.enemies[1]!;
+    expect(previewIntent(state, houndOf(state).id, registry)[0]?.amount).toBe(12);
+    const hexed = run(state, endTurn).state;
+    expect(210 - hexed.party.hp).toBe(12);
+    // From the next enemy turn it holds: Bristle's 6 becomes 9.
+    expect(previewIntent(hexed, houndOf(hexed).id, registry).find((p) => p.op === 'damage')?.amount).toBe(9);
   });
 });
 

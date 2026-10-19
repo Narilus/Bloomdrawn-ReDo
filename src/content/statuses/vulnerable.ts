@@ -1,10 +1,8 @@
-import { reduceStacks } from '../../engine/index.ts';
 import { status } from '../define.ts';
 
-// Stacks are turns; one comes off at the end of its bearer's own turn (owner, 19 Oct).
+// Stacks are the other side's turns, the ones where it is hit, after the turn it lands in (owner, 19 Oct).
 export const vulnerable = status({
-  id: 'status.vulnerable', stacking: 'add', icon: 'vulnerable',
-  help: 'Takes 50% more damage. Lasts this many turns.',
+  id: 'status.vulnerable', stacking: 'add', icon: 'vulnerable', lasts: 'opposingTurns',
+  help: "Takes 50% more damage. Lasts this many of the other side's turns, after the one it lands in.",
   modifiers: [{ value: 'damage', step: 'incomingMul', amount: 1.5 }],
-  triggers: [{ on: 'turnCountTick', filter: { target: 'self' }, do: [reduceStacks('status.vulnerable')] }],
 });

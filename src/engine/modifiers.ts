@@ -1,7 +1,7 @@
 import type { ModifierDef, Registry } from './defs.ts';
 import { evaluate, type Formula } from './formula.ts';
 import type { OpContext } from './operation.ts';
-import { PARTY, type CombatState, type EntityId } from './state.ts';
+import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
 
 /**
  * The one modifier pipeline. Steps: base formula, flat outgoing, outgoing multipliers,
@@ -37,8 +37,10 @@ export function pipeline(
  * own and its statuses'.
  */
 function modifiersOf(state: CombatState, registry: Registry, id: EntityId): ModifierDef[] {
-  const statusMods = (statuses: { status: string }[]) =>
-    statuses.flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
+  // The enemies' turn resolves as one moment: stacks that land during it take hold once it is over.
+  const holds = (s: StatusStack) => state.phase !== 'enemy' || s.stacks - (s.fresh ?? 0) > 0;
+  const statusMods = (statuses: StatusStack[]) =>
+    statuses.filter(holds).flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
   const relicMods = state.relics.flatMap((r) => registry.relics[r.relic]?.modifiers ?? []);
   const passive = (m: CombatState['members'][number]) => registry.characters[m.character]?.passive?.modifiers ?? [];
   const partyStatuses = statusMods(state.party.statuses);

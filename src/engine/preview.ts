@@ -1,10 +1,10 @@
-import { cardCost, chargeOf, intentOf, playContext, ultimateEffects, validate, type Command } from './combat.ts';
+import { cardCost, chargeOf, countDown, intentOf, playContext, ultimateEffects, validate, type Command } from './combat.ts';
 import type { OpCall, Registry } from './defs.ts';
 import { evaluate } from './formula.ts';
 import { pipeline } from './modifiers.ts';
 import type { OpContext, Preview } from './operation.ts';
 import { getOp } from './ops/index.ts';
-import { createResolution, drain, emit, ROOT } from './resolve.ts';
+import { createResolution } from './resolve.ts';
 import { PARTY, type CardInstance, type CombatState, type EntityId } from './state.ts';
 
 /**
@@ -47,8 +47,8 @@ export function previewUltimate(state: CombatState, member: EntityId, registry: 
 
 /**
  * What an enemy's shown intent would do if it acted now: the exact numbers for its intent
- * display, from the same code that resolves it. Party Shield is counted, as it will be; party
- * turn counts that run out at the end of your turn (Vulnerable 1) are not.
+ * display, from the same code that resolves it. Party Shield is counted, as it will be, and
+ * turn counts that run out at the end of your turn are not.
  */
 export function previewIntent(state: CombatState, enemyId: EntityId, registry: Registry): Preview[] {
   const enemy = state.enemies.find((e) => e.id === enemyId);
@@ -57,10 +57,8 @@ export function previewIntent(state: CombatState, enemyId: EntityId, registry: R
   // A controlled enemy will skip this action.
   if (enemy.statuses.some((s) => registry.statuses[s.status]?.skipsAction)) return [];
   const scratch = structuredClone(state);
-  // The party's turn counts drop at the end of its turn, and the enemy's own Shield clears, before it acts.
-  const rc = createResolution(scratch, registry);
-  emit(rc, { type: 'turnCountTick', target: PARTY }, ROOT);
-  drain(rc);
+  // Turn counts drop at the end of your turn, and the enemy's own Shield clears, before it acts.
+  countDown(createResolution(scratch, registry), 'party');
   for (const e of scratch.enemies) e.shield = 0;
   return previewOps(scratch, intent.effects, { source: enemy.id, target: PARTY }, registry);
 }

@@ -26,13 +26,15 @@ export function stacksOf(statuses: readonly StatusStack[], status: string): numb
   return statuses.find((s) => s.status === status)?.stacks ?? 0;
 }
 
-/** Adds stacks by the status's stacking rule. */
+/** Adds stacks by the status's stacking rule. Turn-count stacks gained this way are fresh for the rest of the turn. */
 export function addStacks(statuses: StatusStack[], def: StatusDef, stacks: number): void {
-  const existing = statuses.find((s) => s.status === def.id);
-  if (!existing) statuses.push({ status: def.id, stacks });
+  let existing = statuses.find((s) => s.status === def.id);
+  const before = existing?.stacks ?? 0;
+  if (!existing) statuses.push((existing = { status: def.id, stacks }));
   else if (def.stacking === 'add') existing.stacks += stacks;
   else if (def.stacking === 'refresh') existing.stacks = stacks;
   else existing.stacks = Math.max(existing.stacks, stacks);
+  if (def.lasts) existing.fresh = Math.min(existing.stacks, Math.max(0, (existing.fresh ?? 0) + existing.stacks - before));
 }
 
 /** Removes stacks; at 0 the status is gone. Returns whether it was removed. */

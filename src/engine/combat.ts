@@ -5,6 +5,7 @@ import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
 import { createResolution, drain, emit, enqueue, isOver, ROOT, vitalsOf, type Resolution, type Vitals } from './resolve.ts';
+import { takeStacks } from './statuses.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
   BASE_MANA,
@@ -287,11 +288,11 @@ function endTurn(rc: Resolution): void {
   // Damage over time on the enemies lands at the end of the party's turn, one enemy at a time.
   for (const enemy of [...s.enemies]) {
     if (!isAlive(enemy)) continue;
-    tick(rc, 'statusTick', enemy.id);
+    tick(rc, enemy.id);
     if (isOver(rc)) return;
   }
-  // Turn counts drop on their bearer's own turn only.
-  tick(rc, 'turnCountTick', PARTY);
+  // The party's turn is over: Weak on the party and Vulnerable on the enemies count down.
+  countDown(rc, 'party');
   if (isOver(rc)) return;
 
   s.phase = 'enemy';
@@ -306,20 +307,40 @@ function endTurn(rc: Resolution): void {
     actIntent(rc, enemy);
     if (isOver(rc)) return;
   }
-  // The enemies' turn is over: their turn counts drop. Then damage over time on the party lands.
-  for (const enemy of [...s.enemies]) {
-    if (!isAlive(enemy)) continue;
-    tick(rc, 'turnCountTick', enemy.id);
-    if (isOver(rc)) return;
-  }
-  tick(rc, 'statusTick', PARTY);
+  // The enemies' turn is over: Weak on them and Vulnerable on the party count down. Then damage over time on the party lands.
+  countDown(rc, 'enemies');
+  if (isOver(rc)) return;
+  tick(rc, PARTY);
   if (isOver(rc)) return;
   beginTurn(rc);
 }
 
-/** One bearer's statuses tick: damage over time on `statusTick`, turn counts on `turnCountTick` (status triggers filter for themselves). */
-function tick(rc: Resolution, type: 'statusTick' | 'turnCountTick', bearer: EntityId): void {
-  emit(rc, { type, target: bearer }, ROOT);
+/** One bearer's damage over time (status triggers on `statusTick` filter for themselves). */
+function tick(rc: Resolution, bearer: EntityId): void {
+  emit(rc, { type: 'statusTick', target: bearer }, ROOT);
+  drain(rc);
+}
+
+/**
+ * A side's turn has ended: every turn-count status that matters on that side's turns loses a
+ * stack (Weak on that side, Vulnerable on the other), except stacks that landed this turn. Then
+ * nothing is fresh any more.
+ */
+export function countDown(rc: Resolution, ended: 'party' | 'enemies'): void {
+  const s = rc.state;
+  const bearers = [
+    { id: PARTY as EntityId, side: 'party', statuses: s.party.statuses },
+    ...s.enemies.filter(isAlive).map((e) => ({ id: e.id, side: 'enemies', statuses: e.statuses })),
+  ];
+  for (const bearer of bearers) {
+    for (const stack of [...bearer.statuses]) {
+      const lasts = rc.registry.statuses[stack.status]?.lasts;
+      if (!lasts || (lasts === 'ownTurns') !== (bearer.side === ended)) continue;
+      if (stack.stacks - (stack.fresh ?? 0) <= 0) continue;
+      if (takeStacks(bearer.statuses, stack.status, 1)) emit(rc, { type: 'statusRemoved', target: bearer.id, status: stack.status }, ROOT);
+    }
+  }
+  for (const bearer of bearers) for (const stack of bearer.statuses) delete stack.fresh;
   drain(rc);
 }
 

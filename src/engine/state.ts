@@ -21,6 +21,8 @@ export const PARTY: EntityId = 'party';
 export interface StatusStack {
   status: string;
   stacks: number;
+  /** Stacks of a turn-count status that landed this turn; they don't count down until the next. */
+  fresh?: number;
 }
 
 export interface Member {

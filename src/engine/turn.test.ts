@@ -49,17 +49,13 @@ describe('cleanup and Retain', () => {
   });
 
   // Owner, 19 Oct: damage over time on enemies lands at the end of the party's turn, on the party after
-  // the enemy phase; turn counts drop at the end of their bearer's own turn.
-  it('lifecycle order at end of turn: cleanup, turnEnd, enemy damage ticks, party turn counts, enemy phase, enemy turn counts, party damage ticks', () => {
+  // the enemy phase. (Turn counts are covered in content/scenarios/statuses.test.ts.)
+  it('lifecycle order at end of turn: cleanup, turnEnd, each enemy ticks, enemy phase, the party ticks', () => {
     const { events } = run(fixtureCombat(['test.dummy', 'test.dummy']), endTurn);
-    const ticks = ['statusTick', 'turnCountTick'];
     const lifecycle = events
-      .filter((e) => ['cleanup', 'turnEnd', ...ticks, 'enemyPhaseStart', 'turnStart'].includes(e.type))
-      .map((e) => (ticks.includes(e.type) ? `${e.type}:${e.target}` : e.type));
-    expect(lifecycle).toEqual([
-      'cleanup', 'turnEnd', 'statusTick:e20', 'statusTick:e21', 'turnCountTick:party',
-      'enemyPhaseStart', 'turnCountTick:e20', 'turnCountTick:e21', 'statusTick:party', 'turnStart',
-    ]);
+      .filter((e) => ['cleanup', 'turnEnd', 'statusTick', 'enemyPhaseStart', 'turnStart'].includes(e.type))
+      .map((e) => (e.type === 'statusTick' ? `statusTick:${e.target}` : e.type));
+    expect(lifecycle).toEqual(['cleanup', 'turnEnd', 'statusTick:e20', 'statusTick:e21', 'enemyPhaseStart', 'statusTick:party', 'turnStart']);
   });
 });
 
