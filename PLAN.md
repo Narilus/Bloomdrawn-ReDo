@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M2 Combat breadth (M1 signed off 19 Oct)
-**Current task:** M2.5 owner playtest (gate); enemy sprite picks
+**Current task:** M2.5 owner playtest (gate): re-check after the playtest fixes and the new enemy sprites
 
 ## Milestones
 

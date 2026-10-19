@@ -108,6 +108,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Ideas the owner raised for later, not yet decided: a skin selection; Transcend optionally changing a character's sprite (Maelia-03, with the exposed legs and pregnant body, fits that); enemies drawing alternate skins from their numbered sprites (owner, 19 Oct).
 - A later balance pass may add more sources of ultimate charge, so "battery" characters become a team-building role (owner idea, 19 Oct).
 - M2 playtest: turn-limited statuses (Vulnerable, Weak) count down only on their bearer's own turn, at its end. This corrects the earlier timing line, which had them drop at the end of the other side's turn. Poison and Bleed damage keep their timing (owner, 19 Oct).
+- M2 enemy sprites: Root-Mat-01, Censer Acolyte-02, Pod-Thrower-01, Seedling-02, Lantern Surveyor-01, Thorn-Wall Matron-01, Hound Mother-01, Bloom-Rib Whelp-02. Pod-Thrower-02 and Seedling-01 are as good and would make visual variants (owner, 19 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).

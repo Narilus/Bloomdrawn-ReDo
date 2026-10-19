@@ -35,7 +35,7 @@ export const PARTY_HOMES: readonly (Point & { scale: number })[] = [
 const ENEMY_LAYOUTS: Readonly<Record<number, readonly Point[]>> = {
   1: [{ x: 1440, y: 690 }],
   2: [{ x: 1290, y: 690 }, { x: 1640, y: 640 }],
-  3: [{ x: 1480, y: 700 }, { x: 1215, y: 630 }, { x: 1745, y: 630 }],
+  3: [{ x: 1480, y: 700 }, { x: 1150, y: 630 }, { x: 1790, y: 630 }],
   4: [{ x: 1220, y: 700 }, { x: 1420, y: 590 }, { x: 1610, y: 700 }, { x: 1790, y: 590 }],
 };
 
