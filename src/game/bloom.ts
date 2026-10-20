@@ -1,6 +1,5 @@
 import { nextInt, type Streams } from '../engine/index.ts';
 import type { Board } from './board.ts';
-import { hexDistance, parseHex } from './hex.ts';
 
 // The Bloom clock (DESIGN.md "The Bloom clock", docs/notes/m3-labyrinth.md): fights, Events and
 // using a Camp tick it, and each stage makes the Labyrinth harder. The numbers are placeholders
@@ -27,8 +26,6 @@ export const BLOOM_STAGES: readonly StageDef[] = [
 
 /** On reaching Flowering, each normal fight whose contents are still unseen draws from the elite roster with a 1 in this chance. */
 export const FLOWERING_ELITE_ODDS = 3;
-/** From Fruiting on, each tick swells this many pods on path tiles within `within` of the party. */
-export const PODS = { perTick: 2, within: 3 } as const;
 
 export function stageOf(clock: number): StageDef {
   return BLOOM_STAGES.findLast((s) => clock >= s.from) ?? BLOOM_STAGES[0]!;
@@ -50,26 +47,14 @@ export function bloomTick<K extends string>(
   before: number,
   rng: Streams<K>,
   stream: K,
-  pools: { fight: readonly string[]; elite: readonly string[] },
+  pools: { elite: readonly string[] },
 ): Board {
   const next = structuredClone(board);
-  const pick = (pool: readonly string[]) => pool[nextInt(rng, stream, pool.length)]!;
   if (!reached(before, 'flowering') && reached(before + 1, 'flowering') && pools.elite.length > 0) {
     for (const [key, tile] of Object.entries(next.tiles)) {
       if (tile.kind === 'fight' && !next.known.includes(key) && nextInt(rng, stream, FLOWERING_ELITE_ODDS) === 0) {
-        tile.content = pick(pools.elite);
+        tile.content = pools.elite[nextInt(rng, stream, pools.elite.length)]!;
       }
-    }
-  }
-  if (reached(before + 1, 'fruiting') && pools.fight.length > 0) {
-    const here = parseHex(next.at);
-    const room = Object.keys(next.tiles).filter((key) => {
-      const tile = next.tiles[key]!;
-      return key !== next.at && tile.kind === 'path' && hexDistance(here, parseHex(key)) <= PODS.within;
-    });
-    for (let i = 0; i < PODS.perTick && room.length > 0; i++) {
-      const [key] = room.splice(nextInt(rng, stream, room.length), 1);
-      next.tiles[key!] = { kind: 'pod', content: pick(pools.fight) };
     }
   }
   return next;

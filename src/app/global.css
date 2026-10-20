@@ -1175,7 +1175,6 @@ kbd {
 .hex-symptom.paid polygon { fill: #6e6230; }
 .hex-collapsing polygon { fill: #6a1e28; stroke-dasharray: 8 5; }
 .hex-ruin polygon { fill: #140d11; stroke: #2a1e22; }
-.hex-pod polygon { fill: #c4687a; stroke: #f2c4c4; }
 
 .hex.on-route polygon {
   stroke: var(--blush);

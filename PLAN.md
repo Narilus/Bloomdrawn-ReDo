@@ -195,18 +195,20 @@ _Built 19 Oct, for the owner to look at. `src/game/expedition.ts` is the run: wa
 _Owner feedback 19 Oct, applied: layout fog at 3 (contents stay at 2) so a tile's edge shows whether it leads on; routes cross only tiles whose contents are known, so the outer ring can't leak a fight; the view is centred on the party and follows it, instead of fitting the whole board. The Victory panel and the Obol counter move to M3.5._
 
 ### M3.4 The Bloom clock ✅
-Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start; the Boss direction marker from Flowering; pods from Fruiting.
+Ticks on fights, Events and Camp use; stages on the map; enemy scaling by stage at fight start; the Boss direction marker from Flowering; pods from Fruiting (removed after play, below).
 **Done when:** tick and stage rules have tests, and scaled enemies preview and resolve the same numbers.
 
 _Done 19 Oct. `src/game/bloom.ts` holds the stages (ticks 3/6/9/12, enemies +10/20/35/50%, placeholders), the Flowering elite draw for unseen fights, pods from Fruiting (2 per tick within 3 of the party), and the Boss direction. Won fights and Events tick the clock. The engine takes an `enemyScale` per fight: enemies' max HP (summons too) and outgoing damage, in the shared pipeline, so intents preview what resolves (`src/engine/scale.test.ts`). The map shows the stage, ticks to the next, a tinted ground per stage, pod tiles and a Boss marker at the view's edge. `?clock=N` starts the clock at N in dev builds; e2e wins a fight from 11 and sees Fruiting's pods._
+
+_Owner feedback 20 Oct, applied: pods made single-lane paths a slog and are removed; Fruiting's pressure becomes Bloom nodes in M3.6. Fixed a bug found in play: Whelps summoned into a fatal Choir Bell volley kept their sprites and shadows, because a volley reported only its final HP and a win partway through dropped its remaining hits and deaths. Status timing now goes by source (DECISIONS, 20 Oct)._
 
 ### M3.5 Obols and Shops
 Obols from first clears; Shop stock and prices fixed by the seed on first reveal and kept all run; buying relics and services. A Victory panel listing a won fight's rewards before the map returns, and an Obol counter on the map.
 **Done when:** a Shop keeps its stock across visits, can't be farmed, and buying is tested.
 
 ### M3.6 Camps, Events and Symptoms
-The run's own deck; ownerless Symptom cards; Camp choices; Events as content with choices.
-**Done when:** each Camp choice, Event and Symptom has a scenario test.
+The run's own deck; ownerless Symptom cards; Camp choices; Events as content with choices; Fruiting's Bloom nodes (a fight, a ±10% current HP gamble, or a Symptom card; DECISIONS 20 Oct).
+**Done when:** each Camp choice, Event, Symptom and Bloom node choice has a scenario test.
 
 ### M3.7 A Labyrinth run (owner playtest)
 A whole board from the entrance to the Boss tile, with Run again.

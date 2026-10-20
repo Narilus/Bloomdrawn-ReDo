@@ -113,20 +113,4 @@ describe('the Bloom clock on a run', () => {
     expect(startCombat(seeded, registry).state.enemies[0]!.maxHp).toBe(Math.floor(hound * 1.1));
   });
 
-  it('a pod is a fight with its own encounter, and clears to path', () => {
-    const pod = { kind: 'pod', content: 'encounter.hound' } as const;
-    const fighting = go(on({ kind: 'entrance' }, pod), '1,0').at(-1)!;
-    expect(fighting.phase).toBe('fight');
-    expect(expeditionFight(fighting, registry).enemies).toEqual(['enemy.bloom-rib-hound']);
-    const won = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
-    expect(won.board.tiles['1,0']).toEqual({ kind: 'path' });
-  });
-
-  it('winning a fight at Fruiting swells pods from the fight pool around the party', () => {
-    const fighting = { ...go(on({ kind: 'entrance' }, HOUND, { kind: 'path' }, { kind: 'path' }), '1,0').at(-1)!, clock: 12 };
-    const won = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
-    const pods = Object.values(won.board.tiles).filter((t) => t.kind === 'pod');
-    expect(pods).toHaveLength(2);
-    expect(pods.every((t) => M3_EXPEDITION.board.encounters.fight.includes(t.content!))).toBe(true);
-  });
 });

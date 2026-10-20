@@ -51,7 +51,7 @@ Fights, Events and using a Camp tick it. Walking, Shops and Symptoms don't.
 | Seeded | 3–5 | Enemies +10% HP and damage; +10% Obols |
 | Rooted | 6–8 | +20%; +20% Obols; rarer Events can appear |
 | Flowering | 9–11 | +35%; +35% Obols; normal fights may draw from the elite roster; Boss direction shown |
-| Fruiting | 12+ | +50%; pods (below) |
+| Fruiting | 12+ | +50%; Bloom nodes (below, M3.6) |
 
 There is no HP loss at the start of fights: it can brick a run, and later builds may want full HP (owner). The +50% against the Boss is a balance question for later.
 
@@ -61,10 +61,11 @@ As built in M3.4 (`src/game/bloom.ts`; numbers are placeholders):
 - On reaching Flowering, each normal fight you haven't seen yet has a 1 in 3 chance to draw from the elite roster instead. It stays a normal fight tile; fights you've already seen keep their enemies.
 - Obol bonuses come with Obols (M3.5), rarer Events with Events and the Camp tick with Camps (M3.6).
 
-**Fruiting's pressure: pods** (owner). DESIGN's stage art for Fruiting is "pods swell and burst".
-- On the tick that reaches Fruiting, and on every tick after, 2 pods swell on random path tiles within 3 of the party (placeholders). Each holds a fight from the normal pool.
-- Stepping on a pod starts a normal fight. Pods are marked, and the route goes around them like any fight, so the danger is visible and can be planned around. It just keeps growing.
-- Walking a long way back for a Shop gets riskier with every fight you take.
+**Fruiting's pressure: Bloom nodes** (owner, 20 Oct). M3.4 built pods (2 fights swelling near the party every tick); in play they made single-lane paths a slog, so they are gone. Bloom nodes replace them in M3.6, since one choice is a Symptom card:
+- From Fruiting on, Bloom nodes appear on path tiles near the party, ideally ahead, roughly one per 6–10 tiles walked (placeholder). They are marked like Symptoms.
+- Landing on one forces a choice, and the node is used up: a fight from the normal pool; a 50/50 gamble to lose or heal 10% of current HP; or take a Symptom card. A player meets several, so the gamble compounds.
+- Choosing doesn't tick the clock: Fruiting is the last stage.
+- Winning the run at Fruiting doubles its meta rewards, once those exist (owner, provisional: 5 pulls, 10 at Fruiting).
 
 ## Obols and Shops
 
@@ -152,4 +153,4 @@ The map lives in `src/game/` (pure and seeded). Motifs are content. The map scre
 8. HP costs in Events are a share of current HP.
 9. The M3 test as suggested.
 
-**After looking at the map (M3.3):** layout fog at 3 and contents at 2; the view centred on the party; Fruiting's pressure is pods. A Victory panel listing a won fight's rewards, and an Obol counter, come with Obols in M3.5.
+**After looking at the map (M3.3):** layout fog at 3 and contents at 2; the view centred on the party; Fruiting's pressure is pods (replaced by Bloom nodes after M3.4). A Victory panel listing a won fight's rewards, and an Obol counter, come with Obols in M3.5.

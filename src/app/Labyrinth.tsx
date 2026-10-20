@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
 import type { CombatState } from '../engine/index.ts';
-import { BLOOM_STAGES, bossDirection, stageOf, ticksToNext } from '../game/bloom.ts';
+import { BLOOM_STAGES, bossDirection, reached, stageOf, ticksToNext } from '../game/bloom.ts';
 import {
   canMove,
   chooseExpeditionRelic,
@@ -74,7 +74,7 @@ export function Labyrinth() {
 
   const tile = exp.board.tiles[exp.board.at];
   if (exp.phase === 'fight' && !walking) {
-    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : tile?.kind === 'pod' ? 'Pod' : 'Labyrinth';
+    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : 'Labyrinth';
     return <Combat key={`${seed}:${exp.fightSeed}`} setup={expeditionFight(exp, registry)} label={label} onEnd={onFightEnd} />;
   }
 
@@ -114,7 +114,7 @@ function BloomClock({ clock }: { clock: number }) {
   const stage = stageOf(clock);
   const left = ticksToNext(clock);
   const span = left === undefined ? 0 : left + clock - stage.from;
-  const effect = stage.id === 'fruiting' ? 'Pods swell near you with every tick' : stage.id === 'flowering' ? 'The Boss shows its way' : '';
+  const effect = reached(clock, 'flowering') ? 'The Boss shows its way' : '';
   return (
     <div className="bloom-clock plaque" aria-label={`Bloom clock: ${stage.name}`}>
       <div className="bar-label">

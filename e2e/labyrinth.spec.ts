@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 // The Labyrinth: walk to the start gate's fight, win it against training dummies, and come back to
-// the map with that tile cleared. The Bloom clock starts one tick short of Fruiting, so the win
-// swells pods and the Boss marker shows.
+// the map with that tile cleared. The Bloom clock starts one tick short of Fruiting, so the Boss
+// marker shows and the win reaches Fruiting.
 test('walks into a fight and back to the map', async ({ page }) => {
   test.setTimeout(60_000);
   const errors: string[] = [];
@@ -32,7 +32,6 @@ test('walks into a fight and back to the map', async ({ page }) => {
   }
   await expect(fight).toHaveAttribute('data-kind', 'path');
   await expect(page.locator('.bloom-clock')).toContainText('Fruiting');
-  await expect(page.locator('.hex-pod')).toHaveCount(2);
   await page.screenshot({ path: 'test-results/screenshots/labyrinth-after-fight.png' });
   expect(errors).toEqual([]);
 });

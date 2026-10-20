@@ -96,7 +96,7 @@ export function canMove(exp: Expedition): boolean {
 function arrive(exp: Expedition): void {
   const tile = exp.board.tiles[exp.board.at]!;
   if (!stopsOn(tile)) exp.phase = 'map';
-  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss' || tile.kind === 'pod') {
+  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss') {
     exp.phase = 'fight';
     exp.fightSeed = nextInt(exp.rng, 'fights', 2 ** 31);
   } else exp.phase = 'tile';

@@ -23,7 +23,6 @@ const LABEL: Readonly<Record<Shown, string>> = {
   symptom: 'Symptom',
   collapsing: 'Collapsing',
   ruin: '',
-  pod: 'Pod',
   unknown: '?',
 };
 
@@ -143,7 +142,6 @@ const NAME: Readonly<Record<Shown, string>> = {
 };
 
 const HELP: Partial<Record<Shown, string>> = {
-  pod: 'Swollen by the Bloom: a fight.',
   collapsing: 'Gone once you step off it.',
   ruin: 'Impassable.',
   symptom: 'Take its card to pass.',
