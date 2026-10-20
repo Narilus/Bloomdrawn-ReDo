@@ -1275,3 +1275,106 @@ kbd {
   padding: 10px 24px;
   font-size: 24px;
 }
+
+.map-obols {
+  left: 40px;
+  top: 118px;
+  width: 360px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: baseline;
+  font-family: var(--serif);
+  font-size: 24px;
+}
+
+.map-obols strong {
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: 22px;
+  color: #f0d898;
+}
+
+/* The Victory panel's spoils line. */
+.spoils {
+  margin: -8px 0 0;
+  font-size: 30px;
+}
+
+.spoils strong {
+  color: #f0d898;
+}
+
+.spoils .muted {
+  font-size: 20px;
+}
+
+/* A Shop: four relics in a grid, Mend below. */
+.shop-panel {
+  width: 640px;
+}
+
+.shop-relics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.shop-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+}
+
+.shop-item h4 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 22px;
+}
+
+.tile-panel .shop-item p {
+  flex: 1;
+  margin: 6px 0 12px;
+  font-size: 15px;
+}
+
+.shop-item.tier-uncommon { border-color: var(--lavender); }
+.shop-item.tier-rare { border-color: #e2c27a; }
+.shop-item.tier-cursed { border-color: var(--raw-pink); }
+.shop-item.sold { opacity: 0.5; }
+
+.buy {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--antique-gold);
+  background: linear-gradient(180deg, var(--dusk-plum), var(--aubergine));
+  color: var(--petal-ivory);
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.buy:hover:not(:disabled) {
+  border-color: var(--blush);
+}
+
+.buy:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.shop-service {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  font-size: 17px;
+}
+
+.shop-service strong {
+  font-family: var(--serif);
+  font-size: 22px;
+}

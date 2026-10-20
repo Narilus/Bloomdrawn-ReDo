@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { registry } from '../content/registry.ts';
 import type { CombatSetup, CombatState } from '../engine/index.ts';
 import { chooseRelic, fightSetup, finishFight, M2_GAUNTLET, startRun, type GauntletDef, type RunState } from '../game/run.ts';
@@ -70,25 +70,31 @@ function Run() {
 }
 
 /** Pick one relic of those offered, or none. */
-export function RelicChoice({ offered, onChoose }: { offered: readonly string[]; onChoose: (relic: string | null) => void }) {
+/** The Victory panel: what the fight gave (`children`), and a relic pick when any are offered. */
+export function RelicChoice({ offered, onChoose, children }: { offered: readonly string[]; onChoose: (relic: string | null) => void; children?: ReactNode }) {
   return (
-    <div className="result reward">
+    <div className="result reward" role="dialog" aria-label="Victory">
       <h2>Victory</h2>
-      <p className="result-line">Choose a relic. It lasts the rest of the run.</p>
-      <div className="relic-offers">
-        {offered.map((id) => {
-          const def = registry.relics[id];
-          return (
-            <button key={id} className={`relic-offer plaque tier-${def?.tier ?? 'common'}`} onClick={() => onChoose(id)}>
-              <h3>{def?.name ?? id}</h3>
-              <span className="tier-line">{def?.tier}</span>
-              <p>{def?.text}</p>
-            </button>
-          );
-        })}
-      </div>
-      <button className="ghost" onClick={() => onChoose(null)}>
-        Take nothing
+      {children}
+      {offered.length > 0 && (
+        <>
+          <p className="result-line">Choose a relic. It lasts the rest of the run.</p>
+          <div className="relic-offers">
+            {offered.map((id) => {
+              const def = registry.relics[id];
+              return (
+                <button key={id} className={`relic-offer plaque tier-${def?.tier ?? 'common'}`} onClick={() => onChoose(id)}>
+                  <h3>{def?.name ?? id}</h3>
+                  <span className="tier-line">{def?.tier}</span>
+                  <p>{def?.text}</p>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+      <button className={offered.length > 0 ? 'ghost' : 'end-turn'} onClick={() => onChoose(null)}>
+        {offered.length > 0 ? 'Take nothing' : 'Continue'}
       </button>
     </div>
   );

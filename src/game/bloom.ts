@@ -14,14 +14,16 @@ export interface StageDef {
   from: number;
   /** Percent added to enemies' HP and damage in fights started at this stage. */
   enemyScale: number;
+  /** Percent added to the Obols a fight started at this stage gives. */
+  obolBonus: number;
 }
 
 export const BLOOM_STAGES: readonly StageDef[] = [
-  { id: 'dormant', name: 'Dormant', from: 0, enemyScale: 0 },
-  { id: 'seeded', name: 'Seeded', from: 3, enemyScale: 10 },
-  { id: 'rooted', name: 'Rooted', from: 6, enemyScale: 20 },
-  { id: 'flowering', name: 'Flowering', from: 9, enemyScale: 35 },
-  { id: 'fruiting', name: 'Fruiting', from: 12, enemyScale: 50 },
+  { id: 'dormant', name: 'Dormant', from: 0, enemyScale: 0, obolBonus: 0 },
+  { id: 'seeded', name: 'Seeded', from: 3, enemyScale: 10, obolBonus: 10 },
+  { id: 'rooted', name: 'Rooted', from: 6, enemyScale: 20, obolBonus: 20 },
+  { id: 'flowering', name: 'Flowering', from: 9, enemyScale: 35, obolBonus: 35 },
+  { id: 'fruiting', name: 'Fruiting', from: 12, enemyScale: 50, obolBonus: 50 },
 ];
 
 /** On reaching Flowering, each normal fight whose contents are still unseen draws from the elite roster with a 1 in this chance. */

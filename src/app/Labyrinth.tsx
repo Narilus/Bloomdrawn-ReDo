@@ -3,17 +3,25 @@ import { registry } from '../content/registry.ts';
 import type { CombatState } from '../engine/index.ts';
 import { BLOOM_STAGES, bossDirection, reached, stageOf, ticksToNext } from '../game/bloom.ts';
 import {
+  buyRelic,
   canMove,
+  cannotBuy,
+  cannotMend,
   chooseExpeditionRelic,
   expeditionFight,
+  expeditionMaxHp,
   finishExpeditionFight,
   leaveTile,
   M3_EXPEDITION,
+  mend,
+  mendHeal,
   move,
+  shopHere,
   startExpedition,
   turnBack,
   type Expedition,
   type ExpeditionDef,
+  type ShopStock,
 } from '../game/expedition.ts';
 import { Combat } from './Combat.tsx';
 import { RelicChoice } from './Gauntlet.tsx';
@@ -32,7 +40,8 @@ const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.
 
 /**
  * Dev builds only: `?seed=N` picks the board; `?encounters=id,...` replaces every fight, elite and
- * Boss pool (e2e uses training dummies); `?clock=N` starts the Bloom clock at N ticks.
+ * Boss pool (e2e uses training dummies); `?clock=N` starts the Bloom clock at N ticks; `?obols=N`
+ * starts with N Obols.
  */
 function defFromUrl(): ExpeditionDef {
   const encounters = (params().get('encounters')?.split(',') ?? []).filter((id) => registry.encounters[id]);
@@ -42,8 +51,8 @@ function defFromUrl(): ExpeditionDef {
 const DEF = defFromUrl();
 const FIRST_SEED = Number(params().get('seed')) || 1;
 const FIRST_CLOCK = Number(params().get('clock')) || 0;
-const begin = (seed: number): Expedition => ({ ...startExpedition(seed, PARTY, DEF, registry.motifs), clock: FIRST_CLOCK });
-const maxHp = PARTY.reduce((sum, id) => sum + (registry.characters[id]?.stats.hp ?? 0), 0);
+const FIRST_OBOLS = Number(params().get('obols')) || 0;
+const begin = (seed: number): Expedition => ({ ...startExpedition(seed, PARTY, DEF, registry.motifs), clock: FIRST_CLOCK, obols: FIRST_OBOLS });
 
 export function Labyrinth() {
   const [seed, setSeed] = useState(FIRST_SEED);
@@ -54,7 +63,7 @@ export function Labyrinth() {
 
   const pick = (key: string) => {
     if (walking) return;
-    const states = move(exp, key);
+    const states = move(exp, key, DEF, registry);
     if (!states) return;
     setWalking(true);
     states.forEach((state, i) => {
@@ -73,6 +82,7 @@ export function Labyrinth() {
   };
 
   const tile = exp.board.tiles[exp.board.at];
+  const maxHp = expeditionMaxHp(exp, registry);
   if (exp.phase === 'fight' && !walking) {
     const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : 'Labyrinth';
     return <Combat key={`${seed}:${exp.fightSeed}`} setup={expeditionFight(exp, registry)} label={label} onEnd={onFightEnd} />;
@@ -83,6 +93,10 @@ export function Labyrinth() {
       <LabyrinthMap board={exp.board} busy={walking || !canMove(exp)} boss={bossDirection(exp.board, exp.clock)} onPick={pick} />
       <RelicBar relics={exp.relics} />
       <BloomClock clock={exp.clock} />
+      <div className="map-obols plaque" aria-label="Obols">
+        <span>Obols</span>
+        <strong>{exp.obols}</strong>
+      </div>
       <div className="map-party plaque">
         <div className="bar-label">
           <span>Party</span>
@@ -95,7 +109,21 @@ export function Labyrinth() {
         </div>
       </div>
       {exp.phase === 'tile' && !walking && <TilePanel exp={exp} onChange={setExp} />}
-      {exp.phase === 'reward' && <RelicChoice offered={exp.offered} onChoose={(relic) => setExp(chooseExpeditionRelic(exp, relic))} />}
+      {exp.phase === 'reward' && (
+        <RelicChoice offered={exp.offered} onChoose={(relic) => setExp(chooseExpeditionRelic(exp, relic))}>
+          {exp.spoils && (
+            <p className="spoils">
+              <strong>+{exp.spoils.obols} Obols</strong>
+              {exp.spoils.bonus > 0 && (
+                <span className="muted">
+                  {' '}
+                  including +{exp.spoils.bonus}% from the Bloom at {BLOOM_STAGES.find((s) => s.id === exp.spoils!.stage)?.name}
+                </span>
+              )}
+            </p>
+          )}
+        </RelicChoice>
+      )}
       {(exp.phase === 'won' || exp.phase === 'lost') && (
         <div className="result">
           <h2>{exp.phase === 'won' ? 'The Labyrinth cleared' : 'Defeat'}</h2>
@@ -134,12 +162,13 @@ function BloomClock({ clock }: { clock: number }) {
   );
 }
 
-/** Standing on a Shop, Camp, Event or Symptom. Their rules arrive in M3.5–M3.6. */
+/** Standing on a Shop, Camp, Event or Symptom. Camps, Events and Symptoms get their rules in M3.6. */
 function TilePanel({ exp, onChange }: { exp: Expedition; onChange: (exp: Expedition) => void }) {
   const tile = exp.board.tiles[exp.board.at]!;
   const back = turnBack(exp);
+  const stock = shopHere(exp);
+  if (stock) return <ShopPanel exp={exp} stock={stock} onChange={onChange} />;
   const text: Partial<Record<typeof tile.kind, { title: string; body: string; leave: string }>> = {
-    shop: { title: 'Shop', body: 'Stock and buying arrive in M3.5. The Shop stays here.', leave: 'Leave' },
     camp: { title: 'Camp', body: 'Resting arrives in M3.6. The Camp stays here until used.', leave: 'Leave' },
     event: { title: 'Event', body: 'Events are written in M3.6. This one is used up.', leave: 'Continue' },
     symptom: { title: 'Symptom', body: 'Taking its card to pass arrives in M3.6. For now, passing is free once taken.', leave: 'Take it and pass' },
@@ -159,6 +188,51 @@ function TilePanel({ exp, onChange }: { exp: Expedition; onChange: (exp: Expedit
             Turn back
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+/** A Shop: one relic of each tier and Mend, at prices fixed all run. Nothing can be sold. */
+function ShopPanel({ exp, stock, onChange }: { exp: Expedition; stock: ShopStock; onChange: (exp: Expedition) => void }) {
+  const mendWhy = cannotMend(exp, registry);
+  return (
+    <div className="tile-panel shop-panel plaque" role="dialog" aria-label="Shop">
+      <h3>Shop</h3>
+      <p className="muted">Its stock and prices stay all run.</p>
+      <div className="shop-relics">
+        {stock.relics.map((offer) => {
+          const def = registry.relics[offer.relic];
+          const why = cannotBuy(exp, offer.relic);
+          const label = offer.sold ? 'Sold' : exp.relics.includes(offer.relic) ? 'Owned' : `Buy · ${offer.price}`;
+          return (
+            <div key={offer.relic} className={`shop-item plaque tier-${def?.tier ?? 'common'}${offer.sold ? ' sold' : ''}`}>
+              <h4>{def?.name ?? offer.relic}</h4>
+              <span className="tier-line">{def?.tier}</span>
+              <p>{def?.text}</p>
+              <button className="buy" disabled={why !== undefined} title={why} onClick={() => onChange(buyRelic(exp, offer.relic))}>
+                {label}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <div className="shop-service">
+        <div>
+          <strong>Mend</strong>
+          <span className="muted">
+            {' '}
+            Heal {stock.mend.percent}% of max HP{!stock.mend.used && mendHeal(exp, registry) > 0 ? ` (${mendHeal(exp, registry)} HP)` : ''}. Once per Shop.
+          </span>
+        </div>
+        <button className="buy" disabled={mendWhy !== undefined} title={mendWhy} onClick={() => onChange(mend(exp, registry))}>
+          {stock.mend.used ? 'Used' : `Mend · ${stock.mend.price}`}
+        </button>
+      </div>
+      <div className="tile-actions">
+        <button className="end-turn" onClick={() => onChange(leaveTile(exp, DEF))}>
+          Leave
+        </button>
       </div>
     </div>
   );

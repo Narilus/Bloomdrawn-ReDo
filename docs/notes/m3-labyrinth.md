@@ -90,6 +90,13 @@ Obols from kit passives, gear and relics can come later as a team-building direc
 
 There's no selling. Cards come into Shops in M4.
 
+As built in M3.5 (`src/game/expedition.ts`; numbers are placeholders):
+- Every won fight except the Boss opens the Victory panel: its Obols, and an elite's relic pick. The Obol bonus is the stage the fight started at, rounded down; Fruiting's is taken as +50%, following the other stages.
+- A Shop's stock is rolled when you first enter it, which is when you first see it. Re-entering never rerolls.
+- It never stocks a relic you own or one already on sale in another Shop. With only seven M2 relics, a tier with none left stays empty. A relic on sale that you then get from an elite shows as Owned.
+- Mend can't be bought at full HP, and heals only up to full.
+- The Obol counter sits under the party's HP on the map.
+
 ## Camps
 
 - **Rest:** heal 30% of max HP. It's the only option (owner).

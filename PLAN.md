@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.5 Obols and Shops
+**Current task:** M3.6 Camps, Events and Symptoms
 
 ## Milestones
 
@@ -202,9 +202,11 @@ _Done 19 Oct. `src/game/bloom.ts` holds the stages (ticks 3/6/9/12, enemies +10/
 
 _Owner feedback 20 Oct, applied: pods made single-lane paths a slog and are removed; Fruiting's pressure becomes Bloom nodes in M3.6. Fixed a bug found in play: Whelps summoned into a fatal Choir Bell volley kept their sprites and shadows, because a volley reported only its final HP and a win partway through dropped its remaining hits and deaths. Status timing now goes by source (DECISIONS, 20 Oct)._
 
-### M3.5 Obols and Shops
+### M3.5 Obols and Shops ✅
 Obols from first clears; Shop stock and prices fixed by the seed on first reveal and kept all run; buying relics and services. A Victory panel listing a won fight's rewards before the map returns, and an Obol counter on the map.
 **Done when:** a Shop keeps its stock across visits, can't be farmed, and buying is tested.
+
+_Done 20 Oct. Won fights give 20 Obols (elites 45) plus the Bloom stage's bonus, shown on a Victory panel that also holds an elite's relic pick; the map shows the Obols held. A Shop rolls its stock on first entry from its own stream (one relic per tier from those not owned or on sale elsewhere, at 50/80/120/30) and keeps it, with what is sold, all run; Mend heals 25% of max HP for 40, once per Shop. Rules and tests in `src/game/expedition.ts` and `src/app/expedition.test.ts`. `?obols=N` starts a dev run with Obols._
 
 ### M3.6 Camps, Events and Symptoms
 The run's own deck; ownerless Symptom cards; Camp choices; Events as content with choices; Fruiting's Bloom nodes (a fight, a ±10% current HP gamble, or a Symptom card; DECISIONS 20 Oct).

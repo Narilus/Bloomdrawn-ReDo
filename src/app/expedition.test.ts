@@ -3,12 +3,17 @@ import { registry } from '../content/registry.ts';
 import { startCombat, type CombatState } from '../engine/index.ts';
 import { createBoard, type Tile } from '../game/board.ts';
 import {
+  buyRelic,
   canMove,
+  cannotBuy,
+  cannotMend,
   chooseExpeditionRelic,
   expeditionFight,
   finishExpeditionFight,
   leaveTile,
   M3_EXPEDITION,
+  mend,
+  mendHeal,
   move,
   startExpedition,
   turnBack,
@@ -24,7 +29,7 @@ const row = (...tiles: Tile[]) => Object.fromEntries(tiles.map((t, q) => [hexKey
 /** A fresh expedition on a hand-made row of tiles. */
 const on = (...tiles: Tile[]): Expedition => ({ ...startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs), board: createBoard(row(...tiles), '0,0') });
 const go = (exp: Expedition, to: string) => {
-  const states = move(exp, to);
+  const states = move(exp, to, M3_EXPEDITION, registry);
   if (!states) throw new Error(`No way to ${to}`);
   return states;
 };
@@ -53,7 +58,7 @@ describe('the expedition', () => {
 
   it('a won fight clears the tile and carries HP and gauges into the next fight', () => {
     const fighting = go(on({ kind: 'entrance' }, HOUND, HOUND), '1,0').at(-1)!;
-    const after = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
+    const after = chooseExpeditionRelic(finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION), null);
     expect([after.phase, after.hp, after.gauges, after.board.tiles['1,0']]).toEqual(['map', 150, [40, 40, 40, 40], { kind: 'path' }]);
     const next = expeditionFight(go(after, '2,0').at(-1)!, registry);
     expect([next.partyHp, next.gauges]).toEqual([150, [40, 40, 40, 40]]);
@@ -74,7 +79,7 @@ describe('the expedition', () => {
 
   it('on an unpaid Symptom the party must take it or turn back; it cannot walk on past', () => {
     const toll = go(on({ kind: 'entrance' }, { kind: 'symptom' }, { kind: 'path' }), '1,0').at(-1)!;
-    expect([toll.phase, canMove(toll), move(toll, '2,0')]).toEqual(['tile', false, undefined]);
+    expect([toll.phase, canMove(toll), move(toll, '2,0', M3_EXPEDITION, registry)]).toEqual(['tile', false, undefined]);
     expect(turnBack(toll)!.board.at).toBe('0,0');
     const paid = leaveTile(toll, M3_EXPEDITION);
     expect([paid.phase, paid.board.tiles['1,0']!.paid]).toEqual(['map', true]);
@@ -95,7 +100,7 @@ describe('the Bloom clock on a run', () => {
 
   it('ticks on a won fight and on an Event; walking, Shops and Symptoms leave it', () => {
     const fighting = go(on({ kind: 'entrance' }, HOUND, { kind: 'shop' }, EVENT), '1,0').at(-1)!;
-    const won = finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION);
+    const won = chooseExpeditionRelic(finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION), null);
     expect(won.clock).toBe(1);
     const shop = leaveTile(go(won, '2,0').at(-1)!, M3_EXPEDITION);
     expect(shop.clock).toBe(1);
@@ -113,4 +118,86 @@ describe('the Bloom clock on a run', () => {
     expect(startCombat(seeded, registry).state.enemies[0]!.maxHp).toBe(Math.floor(hound * 1.1));
   });
 
+});
+
+describe('Obols and the Victory panel', () => {
+  const ELITE = { kind: 'elite', content: 'encounter.thorn-wall' } as const;
+  const win = (exp: Expedition) => finishExpeditionFight(exp, ended(exp, 'victory', 150), M3_EXPEDITION);
+
+  it('a won fight gives 20 Obols and an elite 45, shown on the Victory panel until it is closed', () => {
+    const fight = win(go(on({ kind: 'entrance' }, HOUND), '1,0').at(-1)!);
+    expect([fight.phase, fight.obols, fight.spoils, fight.offered]).toEqual(['reward', 20, { obols: 20, bonus: 0, stage: 'dormant' }, []]);
+    const back = chooseExpeditionRelic(fight, null);
+    expect([back.phase, back.obols, back.spoils]).toEqual(['map', 20, undefined]);
+    const elite = win(go(on({ kind: 'entrance' }, ELITE), '1,0').at(-1)!);
+    expect([elite.obols, elite.offered.length]).toEqual([45, 3]);
+  });
+
+  it('the Bloom stage a fight starts at adds its bonus, rounded down; the Boss gives none', () => {
+    const at = (clock: number) => win({ ...go(on({ kind: 'entrance' }, HOUND), '1,0').at(-1)!, clock });
+    expect([3, 6, 9, 12].map((clock) => at(clock).spoils)).toEqual([
+      { obols: 22, bonus: 10, stage: 'seeded' },
+      { obols: 24, bonus: 20, stage: 'rooted' },
+      { obols: 27, bonus: 35, stage: 'flowering' },
+      { obols: 30, bonus: 50, stage: 'fruiting' },
+    ]);
+    const boss = go(on({ kind: 'entrance' }, { kind: 'boss', content: 'encounter.hound-mother' }), '1,0').at(-1)!;
+    expect(win(boss).obols).toBe(0);
+  });
+});
+
+describe('Shops', () => {
+  const SHOP = { kind: 'shop' } as const;
+  const enter = (exp: Expedition) => go(exp, '1,0').at(-1)!;
+  const tierOf = (id: string) => registry.relics[id]!.tier;
+
+  it('first entry rolls one relic of each tier at its price, and Mend', () => {
+    const shop = enter(on({ kind: 'entrance' }, SHOP)).shops['1,0']!;
+    expect(shop.relics.map((r) => [tierOf(r.relic), r.price])).toEqual([
+      ['common', 50],
+      ['uncommon', 80],
+      ['rare', 120],
+      ['cursed', 30],
+    ]);
+    expect(shop.mend).toEqual({ price: 40, percent: 25 });
+  });
+
+  it('keeps its stock across visits, so leaving and coming back never rerolls it', () => {
+    const first = enter(on({ kind: 'entrance' }, SHOP, { kind: 'path' }));
+    const away = go(first, '2,0').at(-1)!;
+    const again = go(away, '1,0').at(-1)!;
+    expect(again.shops['1,0']).toEqual(first.shops['1,0']);
+  });
+
+  it('is seeded, and never stocks a relic already owned or on sale in another Shop', () => {
+    const owner = { ...on({ kind: 'entrance' }, SHOP), relics: ['relic.brass-thimble'] };
+    expect(enter(owner).shops['1,0']).toEqual(enter(structuredClone(owner)).shops['1,0']);
+    expect(enter(owner).shops['1,0']!.relics.map((r) => r.relic)).toContain('relic.seed-packet');
+    const second = { ...on({ kind: 'entrance' }, SHOP), relics: owner.relics, shops: enter(owner).shops };
+    second.shops = { '9,9': second.shops['1,0']! };
+    const stocked = enter(second).shops['1,0']!;
+    // The only cursed relic and the last common are on sale elsewhere: those tiers stay empty here.
+    expect(stocked.relics.map((r) => tierOf(r.relic))).toEqual(['uncommon', 'rare']);
+  });
+
+  it('buying spends Obols, adds the relic for the rest of the run, and sells it out', () => {
+    const shop = { ...enter(on({ kind: 'entrance' }, SHOP)), obols: 100 };
+    const [common, uncommon, rare] = shop.shops['1,0']!.relics.map((r) => r.relic);
+    const bought = buyRelic(shop, common!);
+    expect([bought.obols, bought.relics, bought.shops['1,0']!.relics[0]!.sold]).toEqual([50, [common], true]);
+    expect([cannotBuy(bought, common!), cannotBuy(bought, rare!), cannotBuy(bought, uncommon!)]).toEqual(['Sold.', 'Not enough Obols.', 'Not enough Obols.']);
+    expect(() => buyRelic(bought, rare!)).toThrow('Not enough Obols.');
+    expect(cannotBuy(go(bought, '0,0').at(-1)!, uncommon!)).toBe('Not for sale here.');
+  });
+
+  it('Mend heals 25% of max HP, up to full, once per Shop', () => {
+    const max = PARTY.reduce((sum, id) => sum + registry.characters[id]!.stats.hp, 0);
+    const hurt = { ...enter(on({ kind: 'entrance' }, SHOP)), obols: 100, hp: 60 };
+    expect(cannotMend({ ...hurt, hp: null }, registry)).toBe('The party is at full HP.');
+    expect(mendHeal(hurt, registry)).toBe(Math.floor(max / 4));
+    const mended = mend(hurt, registry);
+    expect([mended.hp, mended.obols, cannotMend(mended, registry)]).toEqual([60 + Math.floor(max / 4), 60, 'Already used here.']);
+    expect(mend({ ...hurt, hp: max - 5 }, registry).hp).toBe(max);
+    expect(cannotMend({ ...hurt, obols: 39 }, registry)).toBe('Not enough Obols.');
+  });
 });
