@@ -2,7 +2,7 @@ import type { OpCall, Registry, TriggerDef } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import type { OpContext } from './operation.ts';
 import { getOp } from './ops/index.ts';
-import { isAlive, MAX_CHAIN_DEPTH, PARTY, type CombatState, type EntityId } from './state.ts';
+import { isAlive, MAX_CHAIN_DEPTH, PARTY, vitalsOf, type CombatState, type EntityId, type Vitals } from './state.ts';
 
 /** Where an operation sits in a trigger chain: its depth and the triggers that led to it. */
 export interface Origin {
@@ -16,12 +16,6 @@ interface QueueItem {
   call: OpCall;
   ctx: OpContext;
   origin: Origin;
-}
-
-/** HP and Shield right after an event, so presentation can move bars as each hit lands. */
-export interface Vitals {
-  party: { hp: number; shield: number };
-  enemies: { id: string; hp: number; shield: number }[];
 }
 
 /** One command's resolution: a draft state, the FIFO queue, the ordered events and the vitals after each. */
@@ -41,14 +35,9 @@ export const createResolution = (draft: CombatState, registry: Registry): Resolu
   queue: [],
 });
 
-export const vitalsOf = ({ party, enemies }: CombatState): Vitals => ({
-  party: { hp: party.hp, shield: party.shield },
-  enemies: enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
-});
-
-function record(rc: Resolution, event: EngineEvent): void {
+function record(rc: Resolution, event: EngineEvent, vitals = vitalsOf(rc.state)): void {
   rc.events.push(event);
-  rc.vitals.push(vitalsOf(rc.state));
+  rc.vitals.push(vitals);
 }
 
 export const isOver = (rc: Resolution): boolean => rc.state.phase === 'ended';
@@ -57,11 +46,15 @@ export function enqueue(rc: Resolution, calls: readonly OpCall[], ctx: OpContext
   for (const call of calls) rc.queue.push({ call, ctx, origin });
 }
 
-/** Records an event, checks victory and defeat, then queues every matching trigger. */
-export function emit(rc: Resolution, event: EngineEvent, origin: Origin): void {
+/**
+ * Records an event, checks victory and defeat, then queues every matching trigger. `vitals` are
+ * the HP and Shield right after the event when the operation reported them (several hits in one
+ * go); otherwise the state's.
+ */
+export function emit(rc: Resolution, event: EngineEvent, origin: Origin, vitals = vitalsOf(rc.state)): void {
   if (isOver(rc)) return;
-  record(rc, event);
-  if (checkOutcome(rc)) return;
+  record(rc, event, vitals);
+  if (checkOutcome(rc, vitals)) return;
 
   let capped = false;
   for (const { key, holder, trigger, domain } of matchingTriggers(rc.state, rc.registry, event, origin)) {
@@ -96,13 +89,14 @@ export function drain(rc: Resolution): void {
       const ctx = result.consumed === undefined ? item.ctx : { ...item.ctx, consumed: result.consumed };
       rc.queue.unshift(...result.then.map((call) => ({ call, ctx, origin: item.origin })));
     }
-    for (const event of result.events) emit(rc, event, item.origin);
+    result.events.forEach((event, i) => emit(rc, event, item.origin, result.vitals?.[i]));
   }
 }
 
-function checkOutcome(rc: Resolution): boolean {
+/** Judged on the vitals after the event, so a fight won partway through a volley ends on the killing hit. */
+function checkOutcome(rc: Resolution, vitals: Vitals): boolean {
   const s = rc.state;
-  const outcome = s.party.hp <= 0 ? 'defeat' : s.enemies.every((e) => !isAlive(e)) ? 'victory' : null;
+  const outcome = vitals.party.hp <= 0 ? 'defeat' : vitals.enemies.every((e) => e.hp <= 0) ? 'victory' : null;
   if (!outcome) return false;
   s.phase = 'ended';
   s.outcome = outcome;

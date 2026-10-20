@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import type { OpCall, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import type { Formula } from './formula.ts';
-import type { CombatState, EntityId } from './state.ts';
+import type { CombatState, EntityId, Vitals } from './state.ts';
 
 export interface OpContext {
   /** The entity whose card, trigger or intent is resolving. */
@@ -23,6 +23,8 @@ export interface OpResult {
   then?: OpCall[];
   /** Passed to the `then` operations as `ctx.consumed`. */
   consumed?: number;
+  /** HP and Shield right after each of `events`, from an operation that lands several hits in one go. */
+  vitals?: Vitals[];
 }
 
 /** What an operation would do, computed by the same code that resolves it. */

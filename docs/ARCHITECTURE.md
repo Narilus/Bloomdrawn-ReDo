@@ -202,7 +202,7 @@ The previous project banned this outright, which turned simple bespoke kits into
 The same state, content version and commands always produce the same result. That one property gives exact saves, reproducible bug reports and golden-replay tests.
 
 - **State is plain data.** Combat, run and profile state are JSON-serialisable objects with no class instances, functions or references to content objects (only IDs).
-- **Transitions are pure.** `apply(state, command, registry)` returns a new state and events, or a rejection with the old state untouched. It also returns the HP and Shield after each event (`vitals`), so the HUD's bars move as each hit lands on the battlefield.
+- **Transitions are pure.** `apply(state, command, registry)` returns a new state and events, or a rejection with the old state untouched. It also returns the HP and Shield after each event (`vitals`), so the HUD's bars move as each hit lands on the battlefield. An operation that lands several hits in one go (a volley) returns the vitals after each of its events, and victory and defeat are judged on them, so a fight won partway through a volley ends on the killing hit with every earlier death recorded.
 - **Named random streams.** A small seeded generator, with separate streams stored in state: shuffle, targeting and enemy intents per combat; map layout, map content, rewards and shops per run; gacha per banner family. Adding a random call in one stream never shifts another.
 - **No ambient inputs.** The engine never reads the clock, `Math.random` or the screen. Cosmetic randomness (idle offsets, particles) uses its own stream in the presentation layer.
 

@@ -106,3 +106,14 @@ export interface CombatState {
 }
 
 export const isAlive = (enemy: Enemy): boolean => enemy.hp > 0;
+
+/** HP and Shield right after an event, so presentation can move bars as each hit lands. */
+export interface Vitals {
+  party: { hp: number; shield: number };
+  enemies: { id: string; hp: number; shield: number }[];
+}
+
+export const vitalsOf = ({ party, enemies }: CombatState): Vitals => ({
+  party: { hp: party.hp, shield: party.shield },
+  enemies: enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
+});

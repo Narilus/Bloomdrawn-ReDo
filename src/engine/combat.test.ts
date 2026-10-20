@@ -3,7 +3,8 @@ import { apply, startCombat, type Command } from './combat.ts';
 import type { EngineEvent } from './events.ts';
 import { nextFloat } from './rng.ts';
 import { HAND_DRAW, type CombatState } from './state.ts';
-import { fixtureRegistry as registry, STARTERS, withCardInHand } from './testing/fixtures.ts';
+import { fixtureCombat, fixtureRegistry as registry, STARTERS, withCardInHand, withCards } from './testing/fixtures.ts';
+import { volley } from './ops/volley.ts';
 
 const start = (seed: number, extra: { enemies?: string[]; relics?: string[]; party?: string[] } = {}) =>
   startCombat(
@@ -155,5 +156,22 @@ describe('vitals', () => {
     expect(result.vitals.map((v) => v.enemies[0]?.hp)).toEqual([40, 34]);
     const last = result.vitals.at(-1);
     expect(last?.party).toEqual({ hp: result.state.party.hp, shield: result.state.party.shield });
+  });
+
+  it('follow each hit of a volley, and a fight won partway through one ends on the killing hit with every death recorded', () => {
+    // One hit of 12 kills the first 5 HP enemy and carries 7 into the second.
+    const sweep = { id: 'test.sweep', name: 'Sweep', owner: 'test.a', cost: 0, target: 'none' as const, effects: [volley(1, 12)] };
+    const reg = withCards(sweep);
+    const [state, card] = withCardInHand(fixtureCombat(['test.frail', 'test.frail'], [], reg), 'test.sweep');
+    const result = apply(state, { type: 'playCard', card: card.uid }, reg);
+    if (!result.ok) throw new Error(result.reason);
+    const hits = result.events.flatMap((e, i) => (e.type === 'cardPlayed' ? [] : [[e.type, e.target, result.vitals[i]!.enemies.map((v) => v.hp)]]));
+    expect(hits).toEqual([
+      ['damageDealt', 'e20', [0, 5]],
+      ['damageTaken', 'e20', [0, 5]],
+      ['enemyDefeated', 'e20', [0, 5]],
+      ['damageDealt', 'e21', [0, 0]],
+      ['combatEnd', undefined, [0, 0]],
+    ]);
   });
 });

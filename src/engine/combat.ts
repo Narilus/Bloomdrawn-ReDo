@@ -4,7 +4,7 @@ import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
-import { createResolution, drain, emit, enqueue, isOver, ROOT, vitalsOf, type Resolution, type Vitals } from './resolve.ts';
+import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution } from './resolve.ts';
 import { takeStacks } from './statuses.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
@@ -15,11 +15,13 @@ import {
   HAND_DRAW,
   isAlive,
   PARTY,
+  vitalsOf,
   type CardInstance,
   type Enemy,
   type CombatState,
   type EntityId,
   type Member,
+  type Vitals,
 } from './state.ts';
 
 export type Command =

@@ -4,7 +4,7 @@ import type { EngineEvent } from '../events.ts';
 import { evaluate, formulaSchema, type Formula } from '../formula.ts';
 import { pipeline } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
-import { isAlive, type CombatState, type Enemy } from '../state.ts';
+import { isAlive, vitalsOf, type CombatState, type Enemy, type Vitals } from '../state.ts';
 
 export interface VolleyArgs extends OpCall {
   op: 'volley';
@@ -19,8 +19,14 @@ export const volley = (hits: Formula, damage: Formula): VolleyArgs => ({ op: 'vo
 const lowest = (state: CombatState): Enemy | undefined =>
   state.enemies.filter(isAlive).reduce<Enemy | undefined>((best, e) => (!best || e.hp < best.hp ? e : best), undefined);
 
-function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Registry): EngineEvent[] {
+/** Every hit lands in turn; the HP and Shield after each event go with it, so bars and the end check follow the hits. */
+function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Registry): { events: EngineEvent[]; vitals: Vitals[] } {
   const events: EngineEvent[] = [];
+  const vitals: Vitals[] = [];
+  const push = (...landed: EngineEvent[]) => {
+    events.push(...landed);
+    vitals.push(...landed.map(() => vitalsOf(draft)));
+  };
   const hits = Math.max(0, Math.floor(evaluate(args.hits, draft, ctx, registry)));
   for (let i = 0; i < hits; i++) {
     let target = lowest(draft);
@@ -34,20 +40,20 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
       target.hp -= hpLoss;
       remaining -= absorbed + hpLoss;
       const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: target.id, amount: absorbed + hpLoss, absorbed, via: 'volley' };
-      events.push(base, { ...base, type: 'damageTaken' });
-      if (!isAlive(target)) events.push({ type: 'enemyDefeated', source: ctx.source, target: target.id });
+      push(base, { ...base, type: 'damageTaken' });
+      if (!isAlive(target)) push({ type: 'enemyDefeated', source: ctx.source, target: target.id });
       target = remaining > 0 ? lowest(draft) : undefined;
     } while (target);
   }
-  return events;
+  return { events, vitals };
 }
 
 export const volleyOp: Operation<VolleyArgs> = {
   args: z.strictObject({ op: z.literal('volley'), hits: formulaSchema, damage: formulaSchema }),
-  resolve: (draft, args, ctx, registry) => ({ events: fire(draft, args, ctx, registry) }),
+  resolve: (draft, args, ctx, registry) => fire(draft, args, ctx, registry),
   preview(state, args, ctx, registry) {
     return fire(structuredClone(state), args, ctx, registry)
-      .filter((e) => e.type === 'damageDealt')
+      .events.filter((e) => e.type === 'damageDealt')
       .map((e): Preview => ({ op: 'volley', target: e.target as string, amount: e.amount as number, absorbed: e.absorbed as number }));
   },
   describe: (args, show) => `Volley: ${show(args.hits)} hits of ${show(args.damage, 'damage')} damage`,

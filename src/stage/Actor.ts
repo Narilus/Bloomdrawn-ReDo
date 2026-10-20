@@ -19,6 +19,10 @@ export class Actor {
   /** Every one-off animation still running, so destroy() can stop them before Pixi frees their targets. */
   private readonly running = new Set<AnimationPlaybackControls>();
   private popups = 0;
+  /** The ground shadow, drawn under everyone and faded with the actor. */
+  shadow: Container | undefined;
+  /** When a fade-in finishes (performance.now, seconds), so a fall never starts before it. */
+  private shownAt = 0;
 
   constructor(
     readonly id: string,
@@ -121,15 +125,26 @@ export class Actor {
     this.track(animate(label.scale, { x: [0.6, 1.15, 1], y: [0.6, 1.15, 1] }, { duration: 0.3, delay }));
   }
 
-  /** Fades in a summoned actor. */
-  appear(delay = 0): void {
-    this.root.alpha = 0;
-    this.track(animate(this.root, { alpha: [0, 1] }, { duration: 0.5, delay }));
+  /** Hides the actor and its shadow at once (an enemy already defeated). */
+  hide(): void {
+    for (const part of this.parts()) part.alpha = 0;
   }
 
-  /** Sinks and fades out a defeated actor. */
+  /** Fades in a summoned actor. */
+  appear(delay = 0): void {
+    this.hide();
+    for (const part of this.parts()) this.track(animate(part, { alpha: [0, 1] }, { duration: 0.5, delay }));
+    this.shownAt = performance.now() / 1000 + delay + 0.5;
+  }
+
+  /** Sinks and fades out a defeated actor, after any fade-in still under way. */
   fall(delay = 0): void {
-    this.track(animate(this.root, { alpha: [1, 0] }, { duration: 0.6, delay: delay + 0.25 }));
+    const start = Math.max(delay + 0.25, this.shownAt - performance.now() / 1000);
+    for (const part of this.parts()) this.track(animate(part, { alpha: [1, 0] }, { duration: 0.6, delay: start }));
+  }
+
+  private parts(): Container[] {
+    return this.shadow ? [this.root, this.shadow] : [this.root];
   }
 
   /** Current offset from home, for the settle check. */

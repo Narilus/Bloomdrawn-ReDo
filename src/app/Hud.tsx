@@ -218,8 +218,10 @@ interface PlateProps {
 export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
   const live = state.enemies.find((e) => e.id === id);
   const home = live ? enemyHome(live.slot, state.enemySlots) : undefined;
-  if (!live || !home) return null;
-  const enemy = { ...live, ...vitals?.enemies.find((e) => e.id === id) };
+  const shown = vitals?.enemies.find((e) => e.id === id);
+  // A summon still to arrive in the sequence playing out has no plate yet.
+  if (!live || !home || (vitals && !shown)) return null;
+  const enemy = { ...live, ...shown };
   // Four across leaves less room: narrower plates.
   const compact = state.enemySlots >= 4;
   const width = compact ? 184 : 240;

@@ -72,7 +72,7 @@ export class Battlefield {
 
     for (const enemy of state.enemies) {
       const actor = field.addEnemy(enemy, state.enemySlots);
-      if (actor && enemy.hp <= 0) actor.root.alpha = 0;
+      if (actor && enemy.hp <= 0) actor.hide();
     }
     return field;
   }
@@ -84,9 +84,11 @@ export class Battlefield {
     const height = enemyHeight(registry.enemies[enemy.enemy]?.size);
     const art = battleArt[enemy.enemy];
     const texture = art ? Assets.get<Texture>(art) : undefined;
-    this.world.addChild(shadow(home.x, home.y, texture ? height * 0.5 : 100 * (height / ENEMY_HEIGHT)));
+    const ground = shadow(home.x, home.y, texture ? height * 0.5 : 100 * (height / ENEMY_HEIGHT));
+    this.world.addChild(ground);
     const body = texture ? this.sizedSprite(texture, height, 1) : trainingDummy(enemy.slot, height / ENEMY_HEIGHT);
     const actor = new Actor(enemy.id, home, body, height, 1, this.breath());
+    actor.shadow = ground;
     this.world.addChild(actor.root);
     this.actors.set(enemy.id, actor);
     if (this.fit) this.fitTo(this.fit);
