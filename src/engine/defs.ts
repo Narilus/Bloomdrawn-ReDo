@@ -55,8 +55,8 @@ export type Keyword = 'retain' | 'ritual' | 'exhaust';
 export interface CardDef {
   id: string;
   name: string;
-  /** Character ID. */
-  owner: string;
+  /** Character ID. Absent for the party's own cards (Symptoms), which the front member plays. */
+  owner?: string;
   /** Personal card slot; generated cards have none. */
   slot?: CardSlot;
   /** Made during combat by a card (createCard), not dealt into the deck. */

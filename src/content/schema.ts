@@ -38,7 +38,7 @@ export const schemas = {
     kind: z.literal('card'),
     id,
     name: z.string().min(1),
-    owner: id,
+    owner: id.optional(),
     slot: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']).optional(),
     cost: z.int().min(0),
     target: z.enum(['none', 'self', 'party', 'chosenEnemy', 'allEnemies']),

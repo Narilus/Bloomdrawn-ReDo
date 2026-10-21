@@ -121,6 +121,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Fruiting's pressure is Bloom nodes, not pods (owner, 20 Oct, after playing M3.4): pods every tick turned single-lane paths into a slog. From Fruiting on, Bloom nodes appear on path tiles near the party, ideally ahead, roughly one per 6–10 tiles walked. Landing on one forces a choice, and the node is used up: a fight from the normal pool, a 50/50 gamble to lose or heal 10% of current HP, or taking a Symptom card. Choosing doesn't tick the clock. Built in M3.6 with Symptoms; until then Fruiting is +50% enemy strength only. This replaces the pods line above.
 - Run rewards, for when meta rewards arrive (owner, 20 Oct, provisional): a won run gives 5 pulls among its rewards, and winning at Fruiting doubles the run's rewards (10 pulls). The bonus goes by the stage at the Boss win.
 
+- M3.5 signed off: Obols, the Victory panel and Shops as built, including Fruiting's +50% Obols, Shop stock rolled on first entry, the Obol counter under the party HP and no Mend at full HP (owner, 20 Oct).
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

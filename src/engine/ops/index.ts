@@ -5,6 +5,7 @@ import { changeCostOp } from './changeCost.ts';
 import { chargeUltimateOp } from './chargeUltimate.ts';
 import { damageOp } from './damage.ts';
 import { drawOp } from './draw.ts';
+import { drawFewerOp } from './drawFewer.ts';
 import { gainManaOp } from './gainMana.ts';
 import { gainResourceOp } from './gainResource.ts';
 import { gainShieldOp } from './gainShield.ts';
@@ -25,6 +26,7 @@ export const library: Readonly<Record<string, Operation>> = {
   damage: damageOp,
   gainShield: gainShieldOp,
   draw: drawOp,
+  drawFewer: drawFewerOp,
   gainResource: gainResourceOp,
   applyStatus: applyStatusOp,
   ifConsume: ifConsumeOp,
@@ -50,6 +52,7 @@ export function getOp(registry: Registry, name: string): Operation | undefined {
 export { applyStatus } from './applyStatus.ts';
 export { damage } from './damage.ts';
 export { draw } from './draw.ts';
+export { drawFewer } from './drawFewer.ts';
 export { gainResource } from './gainResource.ts';
 export { gainShield } from './gainShield.ts';
 export { ifConsume } from './ifConsume.ts';

@@ -106,7 +106,9 @@ function memberOf(state: CombatState, character: string) {
 function takeOrMake(state: CombatState, pool: CardInstance[], id: string, registry: Registry): CardInstance {
   const index = pool.findIndex((c) => c.card === id);
   if (index >= 0) return pool.splice(index, 1)[0] as CardInstance;
-  const owner = state.members.find((m) => m.character === registry.cards[id]?.owner);
+  const def = registry.cards[id];
+  // The party's own cards (Symptoms) are played by the front member.
+  const owner = def && def.owner === undefined ? state.members[0] : state.members.find((m) => m.character === def?.owner);
   if (!owner) throw new Error(`Scenario: no party member owns ${id}`);
   return { uid: `c${state.nextUid++}`, card: id, owner: owner.id };
 }

@@ -68,7 +68,7 @@ Every piece of content is a definition: a plain, JSON-shaped object with a stabl
 - **Stable IDs.** IDs are namespaced strings (`virelle.rupture-bloom`, `status.bleed`), never reused once shipped. Saves store IDs, never objects.
 - **Typed references.** A card that applies `status.bleed` references the Bleed definition through a typed ID, so a typo is a compile error.
 - **Validation.** Every definition family has a Zod schema. The registry validates everything at startup and in a test, and reports the file and ID of anything broken.
-- **Cross-checks.** The registry also checks relationships: every card has a valid owner, every starter character has exactly five personal cards, every referenced status exists, and cost bands match the design doc.
+- **Cross-checks.** The registry also checks relationships: every card has a valid owner (or none: the party's own cards, Symptoms, which the front member plays and which have no personal slot), every starter character has exactly five personal cards, every referenced status exists, and cost bands match the design doc.
 - **Versioning.** Each definition carries a content version. Changing a shipped definition's meaning means a new version, and the save layer decides whether old runs migrate or end.
 
 | Definition family | Built from |
@@ -174,7 +174,7 @@ mul(resource('tentacles'), resource('potency')) // Tentacles × damage per hit
 mul(add(12, stat('attack')), add(1, mul(0.5, resource('essence'))))
 ```
 
-Formulas can read owner stats, party stats, Domain resources, status stacks, cards in hand (and those with a keyword, and their turns held), Mana spent this turn, turn number, and the amount just consumed. Anything outside that list is a compile error.
+Formulas can read owner stats, party stats, Domain resources, status stacks, cards in hand (and those with a keyword, and their turns held), Mana spent this turn, turn number, a percentage of the party's current or max HP (`percentOf`, for costs that scale), and the amount just consumed. Anything outside that list is a compile error.
 
 ## Everything else is a composition
 

@@ -48,6 +48,8 @@ export interface CombatSetup {
   gauges?: number[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
+  /** The run's own cards (Symptoms), dealt in after the personal cards; the front member plays them. */
+  deck?: string[];
 }
 
 /** What combat start resolved, for presentation to play like any command (a Choir Bell volley). */
@@ -82,6 +84,10 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
       return { uid: next('c'), card, owner: `m${slot}` };
     }),
   );
+  for (const card of setup.deck ?? []) {
+    lookup(registry.cards, card, 'card');
+    deck.push({ uid: next('c'), card, owner: 'm0' });
+  }
   const enemies = setup.enemies.map((entry, slot) => {
     const id = typeof entry === 'string' ? entry : entry.enemy;
     lookup(registry.enemies, id, 'enemy');
@@ -399,10 +405,12 @@ function beginTurn(rc: Resolution): void {
   s.manaDebt = 0;
   s.manaSpent = 0;
   s.usedThisTurn = [];
+  const fewer = s.drawFewer ?? 0;
+  delete s.drawFewer;
   emit(rc, { type: 'turnStart' }, ROOT);
   drain(rc);
   if (isOver(rc)) return;
-  for (const event of drawCards(s, HAND_DRAW - s.piles.hand.length)) emit(rc, event, ROOT);
+  for (const event of drawCards(s, HAND_DRAW - s.piles.hand.length - fewer)) emit(rc, event, ROOT);
   drain(rc);
   if (isOver(rc)) return;
   emit(rc, { type: 'handDrawn' }, ROOT);

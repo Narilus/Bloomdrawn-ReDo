@@ -57,7 +57,7 @@ export interface Relic {
 export interface CardInstance {
   uid: EntityId;
   card: string;
-  /** The party member who owns this card. */
+  /** The party member who owns this card; the front member for the party's own cards (Symptoms). */
   owner: EntityId;
   /** Cost change while in hand (Ritual discounts and the like). Cleared when it leaves the hand. */
   costDelta?: number;
@@ -87,6 +87,8 @@ export interface CombatState {
   usedThisTurn: string[];
   /** Effects waiting for the next card played this turn. Cleared at cleanup. */
   next: { costDelta: number; repeat: number };
+  /** Cards fewer to draw at the start of next turn. Absent means 0. */
+  drawFewer?: number;
   /** The party shares one HP pool, one Shield and one set of statuses (debuffs land on the whole party). */
   party: { hp: number; maxHp: number; shield: number; statuses: StatusStack[] };
   members: Member[];

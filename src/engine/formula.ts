@@ -19,7 +19,11 @@ export type Formula =
   | { stacks: string }
   | { manaSpent: true }
   | { turn: true }
-  | { consumed: true };
+  | { consumed: true }
+  /** A share of the party's current or max HP, so costs scale with a levelled team (owner, 19 Oct). */
+  | { percent: number; of: PartyHp };
+
+export type PartyHp = 'hp' | 'maxHp';
 
 export type StatName = 'hp' | 'attack' | 'defense';
 
@@ -35,6 +39,9 @@ export const manaSpent = (): Formula => ({ manaSpent: true });
 export const turn = (): Formula => ({ turn: true });
 /** The amount the enclosing ifConsume just spent. */
 export const consumed = (): Formula => ({ consumed: true });
+/** `percent`% of the party's current (`hp`) or max HP, before rounding down. */
+export const percentOf = (percent: number, of: PartyHp): Formula => ({ percent, of });
+export const shareOf = (f: { percent: number; of: PartyHp }, party: Record<PartyHp, number>): number => (party[f.of] * f.percent) / 100;
 
 export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
   z.union([
@@ -50,10 +57,11 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
     z.strictObject({ manaSpent: z.literal(true) }),
     z.strictObject({ turn: z.literal(true) }),
     z.strictObject({ consumed: z.literal(true) }),
+    z.strictObject({ percent: z.number().positive(), of: z.enum(['hp', 'maxHp']) }),
   ]),
 );
 
-/** Reads owner stats, pooled resources, the hand, status stacks, Mana spent, the turn and the amount just consumed. */
+/** Reads owner stats, pooled resources, the hand, status stacks, Mana spent, the turn, party HP and the amount just consumed. */
 export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registry: Registry): number {
   if (typeof f === 'number') return f;
   if ('stat' in f) {
@@ -74,6 +82,7 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   }
   if ('manaSpent' in f) return state.manaSpent;
   if ('turn' in f) return state.turn;
+  if ('percent' in f) return shareOf(f, state.party);
   return ctx.consumed ?? 0;
 }
 
@@ -100,5 +109,6 @@ export function formulaText(f: Formula): string {
   if ('stacks' in f) return titleCase(f.stacks.replace(/^status\./, ''));
   if ('manaSpent' in f) return 'the Mana spent this turn';
   if ('turn' in f) return 'the turn number';
+  if ('percent' in f) return `${f.percent}% of the party's ${f.of === 'hp' ? 'current' : 'max'} HP`;
   return 'the amount consumed';
 }

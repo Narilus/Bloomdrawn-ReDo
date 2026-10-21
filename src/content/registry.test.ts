@@ -39,6 +39,14 @@ describe('content registry', () => {
     ]);
   });
 
+  it("the party's own cards (Symptoms) have no owner, so no personal slot", () => {
+    const loose = card({ id: 'test.loose', name: 'X', cost: 0, target: 'none', effects: [gainShield(1)] });
+    const slottedLoose = card({ ...loose, id: 'test.slotted-loose', slot: 'strike', cost: 1 });
+    expect(errorsFor({ loose, slottedLoose })).toEqual([
+      'src/content/cards/broken.ts › test.slotted-loose: a card without an owner has no personal slot and is not generated',
+    ]);
+  });
+
   it('a card pointing at a missing status fails with its file and ID', () => {
     const broken = card({
       id: 'test.broken', name: 'X', owner: 'tester', cost: 1, target: 'chosenEnemy',

@@ -95,8 +95,11 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
   };
 
   for (const card of Object.values(reg.cards)) {
-    const owner = reg.characters[card.owner];
-    if (!owner) fail(where('card', card.id), card.id, `owner "${card.owner}" is not a character`);
+    const owner = card.owner === undefined ? undefined : reg.characters[card.owner];
+    // The party's own cards (Symptoms) have no owner, and so no personal slot.
+    if (card.owner === undefined) {
+      if (card.slot || card.generated) fail(where('card', card.id), card.id, 'a card without an owner has no personal slot and is not generated');
+    } else if (!owner) fail(where('card', card.id), card.id, `owner "${card.owner}" is not a character`);
     else if (card.generated && card.slot) fail(where('card', card.id), card.id, 'a generated card has no personal slot');
     else if (!card.generated && !owner.cards.includes(card.id)) fail(where('card', card.id), card.id, `not listed in ${card.owner}'s cards`);
     if (card.slot) {
@@ -183,7 +186,7 @@ const pathOf = (issue: z.core.$ZodIssue) => (issue.path.length ? `${issue.path.j
 /** The game's content registry, built from every content file. */
 export const registry: Registry = buildRegistry(
   import.meta.glob(
-    ['./characters/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', './encounters/**/*.ts', './motifs/**/*.ts', '!**/*.test.ts'],
+    ['./characters/**/*.ts', './symptoms/**/*.ts', './enemies/**/*.ts', './statuses/**/*.ts', './relics/**/*.ts', './domains/**/*.ts', './encounters/**/*.ts', './motifs/**/*.ts', '!**/*.test.ts'],
     { eager: true },
   ),
 );
