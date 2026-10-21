@@ -120,6 +120,12 @@ Other kinds of cost (Mana debt, Weak, fewer draws) scale on their own, because t
 | **Grafted Hand** | 0 | Draw 2 cards. Next turn, draw 1 fewer. |
 | **Pollen Lung** | 1 | Every member gains 15 ultimate charge. The party gains 1 Weak. |
 
+As built in M3.6 (`src/game/expedition.ts`, `src/content/symptoms/`; numbers are placeholders):
+- Rest heals up to full and can't be used at full HP, like Mend. Resting uses the Camp up.
+- Each Symptom tile holds a card from the Symptom pool, drawn without repeats like Events. Taking it is the toll, and it joins the run's deck.
+- The front member plays Symptoms, so their damage takes her modifiers; the card face reads "Symptom · <her name>".
+- The tile and the card in hand show the live HP cost ("loses 8 HP (4% of current)").
+
 ## Events
 
 Each Event is a short scene with 2–3 choices, from a pool. HP costs are a share of current HP: small, but not nothing (owner).
@@ -136,6 +142,17 @@ Each Event is a short scene with 2–3 choices, from a pool. HP costs are a shar
 4. **The Seed Vault**
    - Pay 40 Obols for a Rare relic.
    - Leave.
+
+As built in M3.6:
+- Choosing is mandatory once the party stands on an Event: DESIGN's tile table gives an Event "a choice" on entry, unlike a Camp you can keep for later. Every choice ticks the clock, including "Snuff it" and "Leave"; the Gardener's shears tick once more. Hovering a known Event shows its name, so you can see which it is before stepping in.
+- An Event that offers a Symptom rolls its card on first entry and shows it in the choice.
+- A random relic is any of that tier you don't own (it may also be on sale in a Shop, which then shows it as Owned). With none left, or too few Obols, that choice is greyed out with the reason.
+- After a choice, a panel lists what happened (the relic you got, HP, Obols, the ticks).
+- The scene text for each Event is a draft for the owner. "Rarer Events from Rooted" waits until rarer Events are written.
+
+As built for Bloom nodes in M3.6 (`src/game/bloom.ts`):
+- The tiles count from the first walk at Fruiting. A node appears once the walk that reaches the count ends (never mid-walk), on a path tile within 3, nearer the Boss than the party where one is free, otherwise anywhere within 3. With no free tile it waits for the next walk. Each node holds its fight (from the normal pool) and its Symptom card, both shown before you choose.
+- The fight gives Obols as a normal fight and no tick. The gamble is even odds to lose or heal 10% of current HP (healing only up to full).
 
 ## Engine needs
 

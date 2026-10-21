@@ -23,6 +23,7 @@ const LABEL: Readonly<Record<Shown, string>> = {
   symptom: 'Symptom',
   collapsing: 'Collapsing',
   ruin: '',
+  bloom: 'Bloom',
   unknown: '?',
 };
 
@@ -127,7 +128,8 @@ function TileInfo({ board, at, steps, busy }: { board: Board; at: string; steps:
     <div className="tile-info plaque" role="status">
       <strong>{known ? NAME[shown] : 'Unexplored'}</strong>
       {known && enemies && <span>{listOf(enemies)}</span>}
-      {known && shown === 'symptom' && tile.paid && <span>Paid: free to pass.</span>}
+      {known && shown === 'symptom' && (tile.paid ? <span>Paid: free to pass.</span> : tile.card && <span>{registry.cards[tile.card]?.name}</span>)}
+      {known && shown === 'event' && tile.content && <span>{registry.events[tile.content]?.name}</span>}
       {known && HELP[shown] && <span className="muted">{HELP[shown]}</span>}
       {!busy && at !== board.at && <span className="muted">{steps === undefined ? 'No way there from here.' : `${steps} ${steps === 1 ? 'step' : 'steps'}`}</span>}
     </div>
@@ -147,9 +149,10 @@ const HELP: Partial<Record<Shown, string>> = {
   symptom: 'Take its card to pass.',
   shop: 'Keeps its stock all run.',
   camp: 'One use: rest now or keep it for later.',
+  bloom: 'Choose one: its fight, a gamble on 10% of current HP, or a Symptom.',
 };
 
-function listOf(names: string[]): string {
+export function listOf(names: string[]): string {
   const counts = new Map<string, number>();
   for (const n of names) counts.set(n, (counts.get(n) ?? 0) + 1);
   const parts = [...counts].map(([n, c]) => (c > 1 ? `${c} × ${n}` : n));

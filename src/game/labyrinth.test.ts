@@ -59,6 +59,8 @@ describe('generating a board', () => {
     route: [['start'], ['middle'], ['end']],
     sides: [['nook']],
     encounters: { fight: ['f'], elite: [], boss: ['b'] },
+    events: [],
+    symptoms: [],
   };
 
   it('is the same board for the same seed, and starts at the entrance', () => {

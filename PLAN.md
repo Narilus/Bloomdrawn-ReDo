@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.6 Camps, Events and Symptoms
+**Current task:** M3.7 A Labyrinth run (owner playtest)
 
 ## Milestones
 
@@ -208,9 +208,11 @@ Obols from first clears; Shop stock and prices fixed by the seed on first reveal
 
 _Done 20 Oct. Won fights give 20 Obols (elites 45) plus the Bloom stage's bonus, shown on a Victory panel that also holds an elite's relic pick; the map shows the Obols held. A Shop rolls its stock on first entry from its own stream (one relic per tier from those not owned or on sale elsewhere, at 50/80/120/30) and keeps it, with what is sold, all run; Mend heals 25% of max HP for 40, once per Shop. Rules and tests in `src/game/expedition.ts` and `src/app/expedition.test.ts`. `?obols=N` starts a dev run with Obols._
 
-### M3.6 Camps, Events and Symptoms
+### M3.6 Camps, Events and Symptoms ✅
 The run's own deck; ownerless Symptom cards; Camp choices; Events as content with choices; Fruiting's Bloom nodes (a fight, a ±10% current HP gamble, or a Symptom card; DECISIONS 20 Oct).
 **Done when:** each Camp choice, Event, Symptom and Bloom node choice has a scenario test.
+
+_Done 21 Oct. Engine: cards without an owner are the party's own, dealt in from `CombatSetup.deck` and played by the front member; `percentOf` reads a share of party HP; `drawFewer`. The four Symptoms are content with scenarios (`src/content/scenarios/symptoms.test.ts`), and the four Events are content (`src/content/events/`). The run keeps its deck; Camps Rest for 30% of max HP and tick; Events are a forced choice that ticks; Bloom nodes are sown from Fruiting on. Tests for each in `src/app/expedition.test.ts`. Choices made without the owner are listed in `docs/notes/m3-labyrinth.md` ("As built in M3.6")._
 
 ### M3.7 A Labyrinth run (owner playtest)
 A whole board from the entrance to the Boss tile, with Run again.

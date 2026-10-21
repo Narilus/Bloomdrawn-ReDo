@@ -144,6 +144,43 @@ export interface MotifDef {
   rows: string[];
 }
 
+/**
+ * A Labyrinth Event (docs/notes/m3-labyrinth.md): a short scene and its choices. Choosing is
+ * mandatory once the party stands on it, and every choice ticks the Bloom clock. The run applies
+ * the outcomes (src/game/expedition.ts); the engine never reads them.
+ */
+export interface EventDef {
+  id: string;
+  name: string;
+  /** The scene, shown above the choices. */
+  text: string;
+  choices: EventChoiceDef[];
+}
+
+export interface EventChoiceDef {
+  /** What the party does, e.g. "Take the Obols". */
+  label: string;
+  /** In order. None: nothing happens. */
+  outcomes: EventOutcome[];
+}
+
+export type EventOutcome =
+  | { do: 'obols'; amount: number }
+  /** A price: the choice can't be taken without the Obols. */
+  | { do: 'pay'; amount: number }
+  /** A random relic of the tier the party doesn't own. The choice can't be taken if none is left. */
+  | { do: 'relic'; tier: NonNullable<RelicDef['tier']> }
+  /** A percentage of current HP, rounded down. */
+  | { do: 'loseHp'; percent: number }
+  /** A percentage of max HP, rounded down, up to full. */
+  | { do: 'heal'; percent: number }
+  /** Ultimate charge for every party member. */
+  | { do: 'charge'; amount: number }
+  /** The Symptom card the Event shows joins the run's deck. */
+  | { do: 'symptom' }
+  /** Extra Bloom clock ticks, on top of the Event's own. */
+  | { do: 'tick'; count: number };
+
 export interface StatusDef extends Hooks {
   id: string;
   stacking: 'add' | 'refresh' | 'highest';
@@ -206,6 +243,7 @@ export interface Registry {
   domains: Readonly<Record<string, DomainDef>>;
   encounters: Readonly<Record<string, EncounterDef>>;
   motifs: Readonly<Record<string, MotifDef>>;
+  events: Readonly<Record<string, EventDef>>;
   /** Bounded escape hatch: kit-specific operations, listed so their number stays visible. */
   customOps?: Readonly<Record<string, Operation>>;
 }

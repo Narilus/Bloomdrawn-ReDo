@@ -16,12 +16,16 @@ export type TileKind =
   | 'symptom'
   | 'collapsing'
   /** A Collapsing tile after the party stepped off it: impassable. */
-  | 'ruin';
+  | 'ruin'
+  /** A Bloom node, from Fruiting on: a forced choice, then path. */
+  | 'bloom';
 
 export interface Tile {
   kind: TileKind;
-  /** What the tile holds: an encounter, Event, Shop or Symptom card ID. */
+  /** What the tile holds: an encounter (a fight's, or a Bloom node's) or an Event ID. */
   content?: string;
+  /** The Symptom card it offers: a Symptom tile's toll, or an Event's or Bloom node's choice. */
+  card?: string;
   /** A Symptom whose card was taken: free to pass from then on. */
   paid?: boolean;
 }
@@ -45,12 +49,12 @@ export const FOG = { layout: 3, contents: 2, landmarks: 4 } as const;
 
 const LANDMARKS: readonly TileKind[] = ['shop', 'elite', 'boss'];
 /** Marked as soon as their layout is revealed, and from then on. */
-const ALWAYS_MARKED: readonly TileKind[] = ['collapsing', 'symptom', 'ruin'];
+const ALWAYS_MARKED: readonly TileKind[] = ['collapsing', 'symptom', 'ruin', 'bloom'];
 
 /** A tile with a fight or a choice on it: walking stops there (owner, 19 Oct). */
 export function stopsOn(tile: Tile): boolean {
   if (tile.kind === 'symptom') return !tile.paid;
-  return ['fight', 'elite', 'boss', 'event', 'shop', 'camp'].includes(tile.kind);
+  return ['fight', 'elite', 'boss', 'event', 'shop', 'camp', 'bloom'].includes(tile.kind);
 }
 
 export function createBoard(tiles: Record<string, Tile>, start: string): Board {
@@ -133,12 +137,12 @@ export function walk(board: Board, to: string): { board: Board; steps: string[];
   return { board: next, steps, trail };
 }
 
-/** The party has dealt with the tile it stands on: fights, Events and Camps become path; a Symptom is paid. */
+/** The party has dealt with the tile it stands on: fights, Events, Camps and Bloom nodes become path; a Symptom is paid. */
 export function resolveTile(board: Board): Board {
   const next = structuredClone(board);
   const tile = next.tiles[next.at]!;
   if (tile.kind === 'symptom') tile.paid = true;
-  else if (['fight', 'elite', 'event', 'camp'].includes(tile.kind)) {
+  else if (['fight', 'elite', 'event', 'camp', 'bloom'].includes(tile.kind)) {
     next.tiles[next.at] = { kind: 'path' };
   }
   return next;

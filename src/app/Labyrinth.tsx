@@ -1,13 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
 import type { CombatState } from '../engine/index.ts';
-import { BLOOM_STAGES, bossDirection, reached, stageOf, ticksToNext } from '../game/bloom.ts';
+import { BLOOM_NODES, BLOOM_STAGES, bossDirection, reached, stageOf, ticksToNext } from '../game/bloom.ts';
 import {
   buyRelic,
   canMove,
   cannotBuy,
+  cannotChoose,
   cannotMend,
+  cannotRest,
+  chooseBloom,
+  chooseEvent,
   chooseExpeditionRelic,
+  closeOutcome,
+  describeChoice,
+  eventHere,
+  gambleStake,
+  onBloomNode,
+  rest,
+  restHeal,
+  symptomText,
+  takeSymptom,
   expeditionFight,
   expeditionMaxHp,
   finishExpeditionFight,
@@ -21,12 +34,13 @@ import {
   turnBack,
   type Expedition,
   type ExpeditionDef,
+  type Outcome,
   type ShopStock,
 } from '../game/expedition.ts';
 import { Combat } from './Combat.tsx';
 import { RelicChoice } from './Gauntlet.tsx';
 import { RelicBar } from './Hud.tsx';
-import { LabyrinthMap } from './LabyrinthMap.tsx';
+import { LabyrinthMap, listOf } from './LabyrinthMap.tsx';
 
 // The M3 run: walk the Labyrinth, fight where you stop, win at the Boss.
 
@@ -84,7 +98,7 @@ export function Labyrinth() {
   const tile = exp.board.tiles[exp.board.at];
   const maxHp = expeditionMaxHp(exp, registry);
   if (exp.phase === 'fight' && !walking) {
-    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : 'Labyrinth';
+    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : tile?.kind === 'bloom' ? 'Bloom node' : 'Labyrinth';
     return <Combat key={`${seed}:${exp.fightSeed}`} setup={expeditionFight(exp, registry)} label={label} onEnd={onFightEnd} />;
   }
 
@@ -97,6 +111,12 @@ export function Labyrinth() {
         <span>Obols</span>
         <strong>{exp.obols}</strong>
       </div>
+      {exp.deck.length > 0 && (
+        <div className="map-deck plaque" aria-label="Symptoms">
+          <span>Symptoms</span>
+          <span className="map-deck-cards">{exp.deck.map((id) => registry.cards[id]?.name ?? id).join(', ')}</span>
+        </div>
+      )}
       <div className="map-party plaque">
         <div className="bar-label">
           <span>Party</span>
@@ -109,6 +129,7 @@ export function Labyrinth() {
         </div>
       </div>
       {exp.phase === 'tile' && !walking && <TilePanel exp={exp} onChange={setExp} />}
+      {exp.phase === 'outcome' && exp.outcome && <OutcomePanel outcome={exp.outcome} onClose={() => setExp(closeOutcome(exp))} />}
       {exp.phase === 'reward' && (
         <RelicChoice offered={exp.offered} onChoose={(relic) => setExp(chooseExpeditionRelic(exp, relic))}>
           {exp.spoils && (
@@ -142,7 +163,7 @@ function BloomClock({ clock }: { clock: number }) {
   const stage = stageOf(clock);
   const left = ticksToNext(clock);
   const span = left === undefined ? 0 : left + clock - stage.from;
-  const effect = reached(clock, 'flowering') ? 'The Boss shows its way' : '';
+  const effects = [...(reached(clock, 'flowering') ? ['The Boss shows its way'] : []), ...(reached(clock, 'fruiting') ? ['Bloom nodes swell on the path'] : [])];
   return (
     <div className="bloom-clock plaque" aria-label={`Bloom clock: ${stage.name}`}>
       <div className="bar-label">
@@ -157,37 +178,146 @@ function BloomClock({ clock }: { clock: number }) {
         </div>
       )}
       <span className="muted">{stage.enemyScale > 0 ? `Enemies +${stage.enemyScale}% HP and damage` : 'Fights, Events and Camps tick it'}</span>
-      {effect && <span className="muted">{effect}</span>}
+      {effects.map((effect) => (
+        <span key={effect} className="muted">
+          {effect}
+        </span>
+      ))}
     </div>
   );
 }
 
-/** Standing on a Shop, Camp, Event or Symptom. Camps, Events and Symptoms get their rules in M3.6. */
+/** Standing on a Shop, Camp, Event, Symptom or Bloom node. */
 function TilePanel({ exp, onChange }: { exp: Expedition; onChange: (exp: Expedition) => void }) {
   const tile = exp.board.tiles[exp.board.at]!;
-  const back = turnBack(exp);
   const stock = shopHere(exp);
+  const event = eventHere(exp, registry);
   if (stock) return <ShopPanel exp={exp} stock={stock} onChange={onChange} />;
-  const text: Partial<Record<typeof tile.kind, { title: string; body: string; leave: string }>> = {
-    camp: { title: 'Camp', body: 'Resting arrives in M3.6. The Camp stays here until used.', leave: 'Leave' },
-    event: { title: 'Event', body: 'Events are written in M3.6. This one is used up.', leave: 'Continue' },
-    symptom: { title: 'Symptom', body: 'Taking its card to pass arrives in M3.6. For now, passing is free once taken.', leave: 'Take it and pass' },
-  };
-  const t = text[tile.kind];
-  if (!t) return null;
-  return (
-    <div className="tile-panel plaque" role="dialog" aria-label={t.title}>
-      <h3>{t.title}</h3>
-      <p>{t.body}</p>
-      <div className="tile-actions">
-        <button className="end-turn" onClick={() => onChange(leaveTile(exp, DEF))}>
-          {t.leave}
-        </button>
-        {tile.kind === 'symptom' && back && (
-          <button className="ghost" onClick={() => onChange(back)}>
-            Turn back
+  if (event) {
+    return (
+      <div className="tile-panel event-panel plaque" role="dialog" aria-label={event.name}>
+        <h3>{event.name}</h3>
+        <p>{event.text}</p>
+        <div className="choices">
+          {event.choices.map((choice, i) => {
+            const why = cannotChoose(exp, i, DEF, registry);
+            return (
+              <button key={choice.label} className="choice" disabled={why !== undefined} title={why} onClick={() => onChange(chooseEvent(exp, i, DEF, registry))}>
+                <strong>{choice.label}</strong>
+                <span>{describeChoice(exp, choice, registry).join(' ')}</span>
+                {why && <span className="why">{why}</span>}
+              </button>
+            );
+          })}
+        </div>
+        <p className="muted">Choosing ticks the Bloom clock.</p>
+      </div>
+    );
+  }
+  if (onBloomNode(exp)) {
+    const encounter = registry.encounters[tile.content ?? ''];
+    const enemies = listOf(encounter?.enemies.map((e) => registry.enemies[typeof e === 'string' ? e : e.enemy]?.name ?? '?') ?? []);
+    const stake = gambleStake(exp, registry);
+    return (
+      <div className="tile-panel event-panel plaque" role="dialog" aria-label="Bloom node">
+        <h3>Bloom node</h3>
+        <p>The Bloom has swollen across the path. Choose one; the node is used up.</p>
+        <div className="choices">
+          <button className="choice" onClick={() => onChange(chooseBloom(exp, 'fight', registry))}>
+            <strong>Fight</strong>
+            <span>{enemies}</span>
           </button>
-        )}
+          <button className="choice" onClick={() => onChange(chooseBloom(exp, 'gamble', registry))}>
+            <strong>Gamble</strong>
+            <span>
+              Even odds: lose {stake} HP or heal {stake} HP, up to full ({BLOOM_NODES.gamble}% of current).
+            </span>
+          </button>
+          <button className="choice" onClick={() => onChange(chooseBloom(exp, 'symptom', registry))}>
+            <strong>Take the Symptom</strong>
+            {tile.card && <SymptomFace exp={exp} card={tile.card} />}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (tile.kind === 'symptom' && tile.card) {
+    const back = turnBack(exp);
+    return (
+      <div className="tile-panel plaque" role="dialog" aria-label="Symptom">
+        <h3>Symptom</h3>
+        <p>Take its card to pass. It joins the deck for the rest of the run.</p>
+        <SymptomFace exp={exp} card={tile.card} />
+        <div className="tile-actions">
+          <button className="end-turn" onClick={() => onChange(takeSymptom(exp))}>
+            Take it and pass
+          </button>
+          {back && (
+            <button className="ghost" onClick={() => onChange(back)}>
+              Turn back
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+  if (tile.kind === 'camp') {
+    const why = cannotRest(exp, DEF, registry);
+    const heal = restHeal(exp, DEF, registry);
+    return (
+      <div className="tile-panel plaque" role="dialog" aria-label="Camp">
+        <h3>Camp</h3>
+        <p>
+          Rest: heal {DEF.camp.percent}% of max HP{heal > 0 ? ` (${heal} HP)` : ''}. Resting ticks the Bloom clock and uses the Camp up. Leave to keep it for later.
+        </p>
+        <div className="tile-actions">
+          <button className="end-turn" disabled={why !== undefined} title={why} onClick={() => onChange(rest(exp, DEF, registry))}>
+            Rest
+          </button>
+          <button className="ghost" onClick={() => onChange(leaveTile(exp))}>
+            Leave
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
+/** A Symptom card as the map shows it, with its HP costs for the party as it stands. */
+function SymptomFace({ exp, card }: { exp: Expedition; card: string }) {
+  const def = registry.cards[card];
+  return (
+    <div className="symptom-face">
+      <span className="symptom-cost">{def?.cost}</span>
+      <strong>{def?.name ?? card}</strong>
+      <span>{symptomText(exp, card, registry)}</span>
+    </div>
+  );
+}
+
+/** What an Event or Bloom node choice did, before the map returns. */
+function OutcomePanel({ outcome, onClose }: { outcome: Outcome; onClose: () => void }) {
+  const lines: string[] = [];
+  if (outcome.obols) lines.push(outcome.obols > 0 ? `+${outcome.obols} Obols` : `${-outcome.obols} Obols spent`);
+  if (outcome.relic) lines.push(`Relic: ${registry.relics[outcome.relic]?.name ?? outcome.relic}`);
+  if (outcome.hp !== undefined) lines.push(outcome.hp >= 0 ? `Healed ${outcome.hp} HP` : `Lost ${-outcome.hp} HP`);
+  if (outcome.charge) lines.push(`+${outcome.charge} ultimate charge for every member`);
+  if (outcome.card) lines.push(`${registry.cards[outcome.card]?.name ?? outcome.card} joins the deck`);
+  if (outcome.ticks) lines.push(`The Bloom clock ticks ${outcome.ticks === 1 ? 'once' : `${outcome.ticks} times`}`);
+  if (lines.length === 0) lines.push('Nothing happens.');
+  return (
+    <div className="tile-panel plaque" role="dialog" aria-label="Outcome">
+      <h3>{outcome.event ? (registry.events[outcome.event]?.name ?? outcome.event) : 'Bloom node'}</h3>
+      <ul className="outcome-lines">
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      <div className="tile-actions">
+        <button className="end-turn" onClick={onClose}>
+          Continue
+        </button>
       </div>
     </div>
   );
@@ -230,7 +360,7 @@ function ShopPanel({ exp, stock, onChange }: { exp: Expedition; stock: ShopStock
         </button>
       </div>
       <div className="tile-actions">
-        <button className="end-turn" onClick={() => onChange(leaveTile(exp, DEF))}>
+        <button className="end-turn" onClick={() => onChange(leaveTile(exp))}>
           Leave
         </button>
       </div>

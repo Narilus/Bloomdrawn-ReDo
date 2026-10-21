@@ -102,6 +102,32 @@ export const schemas = {
     // Cells from the legend in src/game/motif.ts, or spaces.
     rows: z.array(z.string().regex(/^[EXo.FLBVSCYK ]*$/, 'only legend characters and spaces')).min(1),
   }),
+  event: z.strictObject({
+    kind: z.literal('event'),
+    id,
+    name: z.string().min(1),
+    text: z.string().min(1),
+    choices: z
+      .array(
+        z.strictObject({
+          label: z.string().min(1),
+          outcomes: z.array(
+            z.discriminatedUnion('do', [
+              z.strictObject({ do: z.literal('obols'), amount: z.int().positive() }),
+              z.strictObject({ do: z.literal('pay'), amount: z.int().positive() }),
+              z.strictObject({ do: z.literal('relic'), tier: z.enum(['common', 'uncommon', 'rare', 'cursed']) }),
+              z.strictObject({ do: z.literal('loseHp'), percent: z.number().positive().max(100) }),
+              z.strictObject({ do: z.literal('heal'), percent: z.number().positive().max(100) }),
+              z.strictObject({ do: z.literal('charge'), amount: z.int().positive() }),
+              z.strictObject({ do: z.literal('symptom') }),
+              z.strictObject({ do: z.literal('tick'), count: z.int().positive() }),
+            ]),
+          ),
+        }),
+      )
+      .min(2)
+      .max(3),
+  }),
   encounter: z.strictObject({
     kind: z.literal('encounter'),
     id,

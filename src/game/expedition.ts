@@ -1,26 +1,32 @@
 import {
   createStreams,
+  describeCard,
+  formulaText,
+  GAUGE_MAX,
   nextInt,
+  shareOf,
   shuffleInPlace,
   type CombatSetup,
   type CombatState,
+  type EventChoiceDef,
+  type EventDef,
+  type EventOutcome,
   type MotifDef,
   type Registry,
   type RelicDef,
   type Streams,
 } from '../engine/index.ts';
-import { bloomTick, stageOf, type BloomStage } from './bloom.ts';
+import { BLOOM_NODES, bloomNodeDue, bloomTick, reached, spawnBloomNode, stageOf, type BloomStage } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
 import { generateBoard, M3_LABYRINTH, type LabyrinthDef } from './labyrinth.ts';
 
 // A run through the Labyrinth (docs/notes/m3-labyrinth.md): the party walks the board, fights
-// where it stops on a fight, and wins at the Boss. Party HP, ultimate gauges and relics carry from
-// fight to fight. Won fights and Events tick the Bloom clock (src/game/bloom.ts), which scales the
-// enemies of later fights. Won fights give Obols, spent at Shops. Pure and seeded, like the engine.
-// Camps, Events and Symptoms get their rules in M3.6; until then the party can only look at them
-// and move on.
+// where it stops on a fight, and wins at the Boss. Party HP, ultimate gauges, relics and the run's
+// own deck (Symptoms) carry from fight to fight. Won fights, Events and Camp rests tick the Bloom
+// clock (src/game/bloom.ts), which scales the enemies of later fights and, at Fruiting, sows Bloom
+// nodes. Won fights give Obols, spent at Shops. Pure and seeded, like the engine.
 
-export const EXPEDITION_STREAMS = ['fights', 'rewards', 'bloom', 'shops'] as const;
+export const EXPEDITION_STREAMS = ['fights', 'rewards', 'bloom', 'shops', 'events'] as const;
 type ExpeditionStream = (typeof EXPEDITION_STREAMS)[number];
 
 export type RelicTier = NonNullable<RelicDef['tier']>;
@@ -41,6 +47,8 @@ export interface ExpeditionDef {
     /** Heal a share of max HP, once per Shop. */
     mend: { price: number; percent: number };
   };
+  /** A Camp's Rest heals this share of max HP. */
+  camp: { percent: number };
 }
 
 /** One Shop's stock: rolled on first entry, then kept all run with its prices and what is sold. */
@@ -49,16 +57,36 @@ export interface ShopStock {
   mend: { price: number; percent: number; used?: true };
 }
 
+/** What an Event or Bloom node choice did, for the panel shown before the map returns. */
+export interface Outcome {
+  /** The Event chosen in; absent for a Bloom node. */
+  event?: string;
+  /** HP healed, or lost if negative. */
+  hp?: number;
+  /** Obols gained, or spent if negative. */
+  obols?: number;
+  relic?: string;
+  /** A Symptom card that joined the deck. */
+  card?: string;
+  /** Ultimate charge each member gained. */
+  charge?: number;
+  /** Bloom clock ticks. */
+  ticks?: number;
+}
+
+/** A Bloom node's choices (owner, 20 Oct). */
+export type BloomChoice = 'fight' | 'gamble' | 'symptom';
+
 /** Plain JSON, like combat state. */
 export interface Expedition {
   party: string[];
   board: Board;
   /**
-   * map: choosing where to walk. tile: stopped on a Shop, Camp, Event or Symptom. fight: stopped
-   * on a fight. reward: the Victory panel after a won fight, with an elite's relic pick. won and
-   * lost end the run.
+   * map: choosing where to walk. tile: stopped on a Shop, Camp, Event, Symptom or Bloom node.
+   * fight: stopped on a fight. reward: the Victory panel after a won fight, with an elite's relic
+   * pick. outcome: what an Event or Bloom node choice did. won and lost end the run.
    */
-  phase: 'map' | 'tile' | 'fight' | 'reward' | 'won' | 'lost';
+  phase: 'map' | 'tile' | 'fight' | 'reward' | 'outcome' | 'won' | 'lost';
   /** The tile the party stepped from last, for turning back from a Symptom. */
   from?: string;
   /** The current fight's combat seed. */
@@ -69,11 +97,17 @@ export interface Expedition {
   clock: number;
   relics: string[];
   offered: string[];
+  /** The run's own cards (Symptoms), dealt into every fight. */
+  deck: string[];
   obols: number;
   /** What the last won fight gave, for the Victory panel: Obols, including the bonus (percent) of the Bloom stage it started at. */
   spoils?: { obols: number; bonus: number; stage: BloomStage };
   /** Each Shop's stock by tile key, once entered. */
   shops: Record<string, ShopStock>;
+  /** From Fruiting on: tiles still to walk before the next Bloom node. */
+  bloomDue?: number;
+  /** What the last Event or Bloom node choice did, while its panel shows. */
+  outcome?: Outcome;
   rng: Streams<ExpeditionStream>;
 }
 
@@ -87,6 +121,7 @@ export function startExpedition(seed: number, party: string[], def: ExpeditionDe
     clock: 0,
     relics: [],
     offered: [],
+    deck: [],
     obols: 0,
     shops: {},
     rng: createStreams(seed, EXPEDITION_STREAMS),
@@ -95,7 +130,8 @@ export function startExpedition(seed: number, party: string[], def: ExpeditionDe
 
 /**
  * Walks toward a tile. Returns the expedition after each step, so the walk can be shown tile by
- * tile; the last one has stopped and says what happens next. Undefined if the party can't go there.
+ * tile; the last one has stopped and says what happens next. From Fruiting on, the steps count
+ * toward the next Bloom node, which appears once the walk ends. Undefined if the party can't go there.
  */
 export function move(exp: Expedition, to: string, def: ExpeditionDef, registry: Registry): Expedition[] | undefined {
   if (!canMove(exp)) return undefined;
@@ -110,25 +146,48 @@ export function move(exp: Expedition, to: string, def: ExpeditionDef, registry: 
   });
   const last = states.at(-1)!;
   arrive(last, def, registry);
+  if (reached(last.clock, 'fruiting')) sow(last, states.length, def);
   return states;
 }
 
-/** The party can walk from the map, or away from a tile it has looked at (but not past an unpaid Symptom). */
+/**
+ * The party can walk from the map, or away from a Shop or Camp. An Event or Bloom node must be
+ * chosen first, and an unpaid Symptom paid or turned back from.
+ */
 export function canMove(exp: Expedition): boolean {
   if (exp.phase === 'map') return true;
   const tile = exp.board.tiles[exp.board.at];
-  return exp.phase === 'tile' && !(tile?.kind === 'symptom' && !tile.paid);
+  return exp.phase === 'tile' && (tile?.kind === 'shop' || tile?.kind === 'camp');
 }
 
-/** What stopping on the current tile means. A Shop entered for the first time rolls its stock. */
+/** What stopping on the current tile means. A Shop entered for the first time rolls its stock, and an Event its Symptom card. */
 function arrive(exp: Expedition, def: ExpeditionDef, registry: Registry): void {
   const tile = exp.board.tiles[exp.board.at]!;
   if (!stopsOn(tile)) exp.phase = 'map';
-  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss') {
-    exp.phase = 'fight';
-    exp.fightSeed = nextInt(exp.rng, 'fights', 2 ** 31);
-  } else exp.phase = 'tile';
+  else if (tile.kind === 'fight' || tile.kind === 'elite' || tile.kind === 'boss') startFight(exp);
+  else exp.phase = 'tile';
   if (tile.kind === 'shop') exp.shops[exp.board.at] ??= rollShop(exp, def, registry);
+  const offersCard = registry.events[tile.content ?? '']?.choices.some((c) => c.outcomes.some((o) => o.do === 'symptom'));
+  if (tile.kind === 'event' && offersCard && tile.card === undefined && def.board.symptoms.length > 0) {
+    tile.card = def.board.symptoms[nextInt(exp.rng, 'events', def.board.symptoms.length)]!;
+  }
+}
+
+function startFight(exp: Expedition): void {
+  exp.phase = 'fight';
+  exp.fightSeed = nextInt(exp.rng, 'fights', 2 ** 31);
+}
+
+/** Counts a walk's steps toward the next Bloom node, and sows it once they are walked. With no room, it waits for the next walk. */
+function sow(exp: Expedition, steps: number, def: ExpeditionDef): void {
+  const due = (exp.bloomDue ?? bloomNodeDue(exp.rng, 'bloom')) - steps;
+  if (due > 0) {
+    exp.bloomDue = due;
+    return;
+  }
+  const board = spawnBloomNode(exp.board, exp.rng, 'bloom', { fight: def.board.encounters.fight, symptoms: def.board.symptoms });
+  if (board) exp.board = board;
+  exp.bloomDue = board ? bloomNodeDue(exp.rng, 'bloom') : 0;
 }
 
 /** One relic of each tier from those not owned or stocked by another Shop (a tier with none left stays empty), and Mend. */
@@ -149,6 +208,7 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
   if (exp.phase !== 'fight' || !encounter) throw new Error('There is no fight here.');
   const setup: CombatSetup = { seed: exp.fightSeed ?? 0, party: exp.party, enemies: encounter.enemies, relics: exp.relics, gauges: exp.gauges };
   if (exp.hp !== null) setup.partyHp = exp.hp;
+  if (exp.deck.length > 0) setup.deck = exp.deck;
   const scale = stageOf(exp.clock).enemyScale;
   if (scale > 0) setup.enemyScale = scale;
   return setup;
@@ -156,8 +216,8 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
 
 /**
  * Carries a finished fight back: a loss ends the run and the Boss wins it. Any other win gives
- * Obols (more at later Bloom stages), ticks the clock and opens the Victory panel, where an elite
- * also offers relics.
+ * Obols (more at later Bloom stages), ticks the clock (except a Bloom node's fight) and opens the
+ * Victory panel, where an elite also offers relics.
  */
 export function finishExpeditionFight(exp: Expedition, combat: CombatState, def: ExpeditionDef): Expedition {
   if (exp.phase !== 'fight' || combat.phase !== 'ended') throw new Error('The fight is not over.');
@@ -176,7 +236,7 @@ export function finishExpeditionFight(exp: Expedition, combat: CombatState, def:
     next.spoils = { obols, bonus, stage };
     next.board = resolveTile(next.board);
     next.phase = 'reward';
-    tick(next, def);
+    if (kind !== 'bloom') tick(next, def);
     if (kind === 'elite') {
       const pool = def.relicPool.filter((id) => !exp.relics.includes(id));
       shuffleInPlace(pool, next.rng, 'rewards');
@@ -258,19 +318,212 @@ export function mend(exp: Expedition, registry: Registry): Expedition {
   return next;
 }
 
-/**
- * Done with the tile the party stands on. An Event is used up and ticks the clock, and a Symptom is
- * paid (M3.6 adds their effects and the card); a Shop or Camp stays for later.
- */
-export function leaveTile(exp: Expedition, def: ExpeditionDef): Expedition {
-  if (exp.phase !== 'tile') throw new Error('There is nothing here to leave.');
-  const kind = exp.board.tiles[exp.board.at]?.kind;
+/** Steps back onto the map from a Shop or Camp, which stays for later. */
+export function leaveTile(exp: Expedition): Expedition {
+  if (!canMove(exp) || exp.phase !== 'tile') throw new Error('There is nothing here to leave.');
+  return { ...structuredClone(exp), phase: 'map' };
+}
+
+/** The HP a Camp's Rest would heal now: its share of max HP, up to full. */
+export function restHeal(exp: Expedition, def: ExpeditionDef, registry: Registry): number {
+  const max = expeditionMaxHp(exp, registry);
+  return Math.min(Math.floor((max * def.camp.percent) / 100), max - (exp.hp ?? max));
+}
+
+/** Why the party can't Rest here now, or undefined if it can. */
+export function cannotRest(exp: Expedition, def: ExpeditionDef, registry: Registry): string | undefined {
+  if (exp.phase !== 'tile' || exp.board.tiles[exp.board.at]?.kind !== 'camp') return 'There is no Camp here.';
+  if (restHeal(exp, def, registry) <= 0) return 'The party is at full HP.';
+  return undefined;
+}
+
+/** Rests at the Camp: heals, ticks the clock and uses the Camp up. */
+export function rest(exp: Expedition, def: ExpeditionDef, registry: Registry): Expedition {
+  const reason = cannotRest(exp, def, registry);
+  if (reason) throw new Error(reason);
   const next = structuredClone(exp);
-  if (kind === 'event' || kind === 'symptom') next.board = resolveTile(next.board);
-  if (kind === 'event') tick(next, def);
+  next.hp = (exp.hp ?? expeditionMaxHp(exp, registry)) + restHeal(exp, def, registry);
+  next.board = resolveTile(next.board);
+  next.phase = 'map';
+  tick(next, def);
+  return next;
+}
+
+/** Takes the Symptom tile's card into the run's deck, which pays the toll: the tile is free to pass from then on. */
+export function takeSymptom(exp: Expedition): Expedition {
+  const tile = exp.board.tiles[exp.board.at];
+  if (exp.phase !== 'tile' || tile?.kind !== 'symptom' || tile.paid || tile.card === undefined) throw new Error('There is no Symptom to take here.');
+  const next = structuredClone(exp);
+  next.deck.push(tile.card);
+  next.board = resolveTile(next.board);
   next.phase = 'map';
   return next;
 }
+
+/** A Symptom card's text with its numbers for the party as it stands (HP costs are a share of HP). */
+export function symptomText(exp: Expedition, card: string, registry: Registry): string {
+  const def = registry.cards[card];
+  if (!def) return card;
+  const party = { hp: exp.hp ?? expeditionMaxHp(exp, registry), maxHp: expeditionMaxHp(exp, registry) };
+  return describeCard(def, registry, (f) => (typeof f === 'object' && 'percent' in f ? String(Math.floor(shareOf(f, party))) : formulaText(f)));
+}
+
+/** The Event the party is standing on, while it waits for a choice. */
+export function eventHere(exp: Expedition, registry: Registry): EventDef | undefined {
+  const tile = exp.board.tiles[exp.board.at];
+  return exp.phase === 'tile' && tile?.kind === 'event' ? registry.events[tile.content ?? ''] : undefined;
+}
+
+/** Relics of a tier an Event could give: in the pool and not owned. */
+const relicsOf = (exp: Expedition, tier: RelicTier, def: ExpeditionDef, registry: Registry) =>
+  def.relicPool.filter((id) => registry.relics[id]?.tier === tier && !exp.relics.includes(id));
+
+/** One line per outcome of an Event choice, with its numbers for the party as it stands. */
+export function describeChoice(exp: Expedition, choice: EventChoiceDef, registry: Registry): string[] {
+  if (choice.outcomes.length === 0) return ['Nothing happens.'];
+  const max = expeditionMaxHp(exp, registry);
+  const hp = exp.hp ?? max;
+  const card = exp.board.tiles[exp.board.at]?.card;
+  return choice.outcomes.map((o) => {
+    switch (o.do) {
+      case 'obols':
+        return `Gain ${o.amount} Obols.`;
+      case 'pay':
+        return `Pay ${o.amount} Obols.`;
+      case 'relic':
+        return `Gain a random ${titleCase(o.tier)} relic.`;
+      case 'loseHp':
+        return `The party loses ${Math.floor((hp * o.percent) / 100)} HP (${o.percent}% of current).`;
+      case 'heal':
+        return `Heal ${Math.min(Math.floor((max * o.percent) / 100), max - hp)} HP (${o.percent}% of max).`;
+      case 'charge':
+        return `Every party member gains ${o.amount} ultimate charge.`;
+      case 'symptom':
+        return `Take the Symptom ${registry.cards[card ?? '']?.name ?? card}.`;
+      case 'tick':
+        return `The Bloom clock ticks ${o.count === 1 ? 'once' : `${o.count} times`} more.`;
+    }
+  });
+}
+
+/** Why an Event choice can't be taken now, or undefined if it can. */
+export function cannotChoose(exp: Expedition, index: number, def: ExpeditionDef, registry: Registry): string | undefined {
+  const choice = eventHere(exp, registry)?.choices[index];
+  if (!choice) return 'There is no such choice here.';
+  for (const o of choice.outcomes) {
+    if (o.do === 'pay' && exp.obols < o.amount) return 'Not enough Obols.';
+    if (o.do === 'relic' && relicsOf(exp, o.tier, def, registry).length === 0) return `No ${titleCase(o.tier)} relic is left.`;
+    if (o.do === 'symptom' && exp.board.tiles[exp.board.at]?.card === undefined) return 'No Symptom is left.';
+  }
+  return undefined;
+}
+
+/** Takes an Event choice: its outcomes in order, then the Event's own tick. The Event is used up. */
+export function chooseEvent(exp: Expedition, index: number, def: ExpeditionDef, registry: Registry): Expedition {
+  const reason = cannotChoose(exp, index, def, registry);
+  if (reason) throw new Error(reason);
+  const choice = eventHere(exp, registry)!.choices[index]!;
+  const next = structuredClone(exp);
+  const outcome: Outcome = { event: eventHere(exp, registry)!.id, ticks: 1 };
+  for (const o of choice.outcomes) applyOutcome(next, o, outcome, def, registry);
+  next.board = resolveTile(next.board);
+  for (let i = 0; i < outcome.ticks!; i++) tick(next, def);
+  next.outcome = outcome;
+  next.phase = 'outcome';
+  return next;
+}
+
+function applyOutcome(exp: Expedition, o: EventOutcome, out: Outcome, def: ExpeditionDef, registry: Registry): void {
+  const max = expeditionMaxHp(exp, registry);
+  const hp = exp.hp ?? max;
+  const add = (key: 'hp' | 'obols' | 'charge' | 'ticks', n: number) => (out[key] = (out[key] ?? 0) + n);
+  switch (o.do) {
+    case 'obols':
+      exp.obols += o.amount;
+      add('obols', o.amount);
+      break;
+    case 'pay':
+      exp.obols -= o.amount;
+      add('obols', -o.amount);
+      break;
+    case 'relic': {
+      const pool = relicsOf(exp, o.tier, def, registry);
+      out.relic = pool[nextInt(exp.rng, 'events', pool.length)]!;
+      exp.relics.push(out.relic);
+      break;
+    }
+    case 'loseHp': {
+      const lost = Math.floor((hp * o.percent) / 100);
+      exp.hp = hp - lost;
+      add('hp', -lost);
+      break;
+    }
+    case 'heal': {
+      const healed = Math.min(Math.floor((max * o.percent) / 100), max - hp);
+      exp.hp = hp + healed;
+      add('hp', healed);
+      break;
+    }
+    case 'charge':
+      exp.gauges = exp.gauges.map((g) => Math.min(GAUGE_MAX, g + o.amount));
+      add('charge', o.amount);
+      break;
+    case 'symptom':
+      out.card = exp.board.tiles[exp.board.at]!.card!;
+      exp.deck.push(out.card);
+      break;
+    case 'tick':
+      add('ticks', o.count);
+      break;
+  }
+}
+
+/** The HP a Bloom node's gamble puts at stake: a share of current HP, rounded down. */
+export function gambleStake(exp: Expedition, registry: Registry): number {
+  return Math.floor(((exp.hp ?? expeditionMaxHp(exp, registry)) * BLOOM_NODES.gamble) / 100);
+}
+
+/** Whether the party stands on a Bloom node that waits for its choice. */
+export const onBloomNode = (exp: Expedition): boolean => exp.phase === 'tile' && exp.board.tiles[exp.board.at]?.kind === 'bloom';
+
+/**
+ * Takes a Bloom node's choice, which uses the node up and doesn't tick the clock: its fight, a
+ * 50/50 gamble to heal (up to full) or lose a share of current HP, or its Symptom card.
+ */
+export function chooseBloom(exp: Expedition, choice: BloomChoice, registry: Registry): Expedition {
+  if (!onBloomNode(exp)) throw new Error('There is no Bloom node here.');
+  const next = structuredClone(exp);
+  if (choice === 'fight') {
+    startFight(next);
+    return next;
+  }
+  const max = expeditionMaxHp(exp, registry);
+  const hp = exp.hp ?? max;
+  if (choice === 'gamble') {
+    const stake = gambleStake(exp, registry);
+    const change = nextInt(next.rng, 'bloom', 2) === 0 ? -stake : Math.min(stake, max - hp);
+    next.hp = hp + change;
+    next.outcome = { hp: change };
+  } else {
+    const card = exp.board.tiles[exp.board.at]!.card!;
+    next.deck.push(card);
+    next.outcome = { card };
+  }
+  next.board = resolveTile(next.board);
+  next.phase = 'outcome';
+  return next;
+}
+
+/** Closes the panel showing what a choice did, and returns to the map. */
+export function closeOutcome(exp: Expedition): Expedition {
+  if (exp.phase !== 'outcome') throw new Error('There is no outcome to close.');
+  const next = structuredClone(exp);
+  delete next.outcome;
+  next.phase = 'map';
+  return next;
+}
+
+const titleCase = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
 
 /** One Bloom clock tick, and what the new count does to the board. */
 function tick(exp: Expedition, def: ExpeditionDef): void {
@@ -307,4 +560,5 @@ export const M3_EXPEDITION: ExpeditionDef = {
     prices: { common: 50, uncommon: 80, rare: 120, cursed: 30 },
     mend: { price: 40, percent: 25 },
   },
+  camp: { percent: 30 },
 };

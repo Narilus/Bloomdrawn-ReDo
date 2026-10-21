@@ -76,4 +76,15 @@ describe('the M3 Labyrinth', () => {
       expect(new Set(elites).size).toBe(elites.length);
     }
   });
+
+  it('fills Events without repeats from the pool, and gives each Symptom tile a Symptom card', () => {
+    for (const board of boards) {
+      const tiles = Object.values(board.tiles);
+      const events = tiles.filter((t) => t.kind === 'event').map((t) => t.content!);
+      expect(events.every((id) => registry.events[id])).toBe(true);
+      expect(new Set(events).size).toBe(events.length);
+      for (const tile of tiles.filter((t) => t.kind === 'symptom')) expect(registry.cards[tile.card!]?.owner).toBeUndefined();
+      expect(tiles.filter((t) => t.kind === 'symptom').every((t) => registry.cards[t.card!])).toBe(true);
+    }
+  });
 });

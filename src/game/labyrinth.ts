@@ -19,6 +19,10 @@ export interface LabyrinthDef {
   sides: string[][];
   /** Encounters for each fight role; a pool is drawn without repeats while it lasts. */
   encounters: { fight: string[]; elite: string[]; boss: string[] };
+  /** Events for event tiles, drawn the same way. */
+  events: string[];
+  /** Symptom cards for Symptom tiles, and for Events and Bloom nodes that offer one. */
+  symptoms: string[];
 }
 
 const MAX_ATTEMPTS = 200;
@@ -121,18 +125,23 @@ function tryPlace(m: ParsedMotif, at: Hex, turns: number, placed: Map<string, Ro
   return true;
 }
 
-/** Turns roles into tiles, filling fights, elites and the Boss from their pools. */
+/** Turns roles into tiles, filling fights, elites, the Boss and Events from their pools, and each Symptom with its card. */
 function fill(roles: Map<string, Role>, def: LabyrinthDef, rng: Streams<BoardStream>): Record<string, Tile> {
-  const draws = {
+  const draws: Partial<Record<Role, () => string | undefined>> = {
     fight: drawer(def.encounters.fight, rng),
     elite: drawer(def.encounters.elite, rng),
     boss: drawer(def.encounters.boss, rng),
+    event: drawer(def.events, rng),
   };
+  const symptoms = drawer(def.symptoms, rng);
   const tiles: Record<string, Tile> = {};
   for (const [key, role] of roles) {
-    const kind: TileKind = key === '0,0' ? 'entrance' : KIND_OF[role];
-    const content = role === 'fight' || role === 'elite' || role === 'boss' ? draws[role]() : undefined;
-    tiles[key] = content === undefined ? { kind } : { kind, content };
+    const tile: Tile = { kind: key === '0,0' ? 'entrance' : KIND_OF[role] };
+    const content = draws[role]?.();
+    if (content !== undefined) tile.content = content;
+    const card = role === 'symptom' ? symptoms() : undefined;
+    if (card !== undefined) tile.card = card;
+    tiles[key] = tile;
   }
   return tiles;
 }
@@ -218,4 +227,6 @@ export const M3_LABYRINTH: LabyrinthDef = {
     elite: ['encounter.thorn-wall', 'encounter.hound-mother'],
     boss: ['encounter.thorn-wall', 'encounter.hound-mother'],
   },
+  events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
+  symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],
 };

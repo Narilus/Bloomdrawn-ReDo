@@ -19,7 +19,9 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
   const member = state.members.find((m) => m.id === card.owner);
   const owner = member ? registry.characters[member.character] : undefined;
   const portrait = owner ? portraitArt[owner.id] : undefined;
-  const domain = owner?.domain ?? '';
+  // The party's own cards (Symptoms) are played by the front member.
+  const symptom = def !== undefined && def.owner === undefined;
+  const domain = symptom ? 'symptom' : (owner?.domain ?? '');
   // Keywords and the charge show as tags, so the text box holds only the card's effect.
   const text = describeCardLive(card, state, registry, { charge: false, keywords: false, mark });
   const plain = text.replace(MARK, '$2');
@@ -39,7 +41,7 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
         {portrait ? <img src={portrait} alt="" draggable={false} /> : <span className="monogram">{owner?.name.charAt(0)}</span>}
       </div>
       <div className="card-type">
-        {owner?.name} · {DOMAIN_LABEL[domain] ?? domain}
+        {symptom ? `Symptom · ${owner?.name}` : `${owner?.name} · ${DOMAIN_LABEL[domain] ?? domain}`}
       </div>
       {tags.length > 0 && (
         <div className="card-keywords">
