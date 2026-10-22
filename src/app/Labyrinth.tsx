@@ -113,8 +113,18 @@ export function Labyrinth() {
       </div>
       {exp.deck.length > 0 && (
         <div className="map-deck plaque" aria-label="Symptoms">
-          <span>Symptoms</span>
-          <span className="map-deck-cards">{exp.deck.map((id) => registry.cards[id]?.name ?? id).join(', ')}</span>
+          <div className="map-deck-head">
+            <span>Symptoms</span>
+            <strong>{exp.deck.length}</strong>
+          </div>
+          <ul>
+            {[...new Set(exp.deck)].map((id) => (
+              <li key={id} title={symptomText(exp, id, registry)}>
+                <span>{registry.cards[id]?.name ?? id}</span>
+                <span className="count">×{exp.deck.filter((d) => d === id).length}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       <div className="map-party plaque">
