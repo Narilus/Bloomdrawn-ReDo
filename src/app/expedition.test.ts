@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { registry } from '../content/registry.ts';
-import { startCombat, type CombatState } from '../engine/index.ts';
-import { createBoard, type Tile } from '../game/board.ts';
+import { apply, startCombat, validate, type CombatState, type Command } from '../engine/index.ts';
+import { createBoard, routeTo, stopsOn, visibleKind, type Tile } from '../game/board.ts';
 import {
   buyRelic,
   canMove,
@@ -14,6 +14,9 @@ import {
   chooseExpeditionRelic,
   closeOutcome,
   describeChoice,
+  eventHere,
+  onBloomNode,
+  shopHere,
   rest,
   symptomText,
   takeSymptom,
@@ -377,5 +380,135 @@ describe('Bloom nodes', () => {
   it('taking the Symptom adds its card to the deck, with no tick', () => {
     const took = chooseBloom(enter({ ...on({ kind: 'entrance' }, NODE), clock: 12 }), 'symptom', registry);
     expect([took.deck, took.outcome, took.clock, took.board.tiles['1,0']]).toEqual([['symptom.pollen-lung'], { card: 'symptom.pollen-lung' }, 12, { kind: 'path' }]);
+  });
+});
+
+// Golden replay: a scripted party explores a whole board and makes the Boss its last stop. It
+// stops on every fight and choice it finds, rests when hurt, buys what it can afford and takes the
+// first open Event choice, cycling through a Bloom node's three choices. Update on purpose with
+// `npx vitest -u`.
+describe('a whole Labyrinth run', () => {
+  /** Fire a charged ultimate, else play the first playable card at the first living enemy, else end the turn. */
+  function combatPolicy(state: CombatState): Command {
+    const charged = state.members.find((m) => validate(state, { type: 'fireUltimate', member: m.id }, registry) === undefined);
+    if (charged) return { type: 'fireUltimate', member: charged.id };
+    const target = state.enemies.find((e) => e.hp > 0)?.id;
+    for (const card of state.piles.hand) {
+      for (const command of [{ type: 'playCard', card: card.uid }, { type: 'playCard', card: card.uid, target }] as Command[]) {
+        if (validate(state, command, registry) === undefined) return command;
+      }
+    }
+    return { type: 'endTurn' };
+  }
+
+  function fightOut(exp: Expedition): CombatState {
+    let state = startCombat(expeditionFight(exp, registry), registry).state;
+    for (let step = 0; step < 500 && state.phase !== 'ended'; step++) {
+      const result = apply(state, combatPolicy(state), registry);
+      if (!result.ok) throw new Error(result.reason);
+      state = result.state;
+    }
+    return state;
+  }
+
+  /**
+   * Where to walk next: the nearest tile with something on it, else the nearest tile still in fog,
+   * else the Boss, else a Collapsing tile. Shops and Camps it has left don't count again.
+   */
+  function destination(exp: Expedition, left: Set<string>): string | undefined {
+    const board = exp.board;
+    const wanted = (key: string): number | undefined => {
+      const kind = visibleKind(board, key);
+      const tile = board.tiles[key]!;
+      if (kind === 'unknown') return 1;
+      if (kind === 'boss') return 2;
+      if (kind === 'collapsing') return 3;
+      if (kind === 'shop' || kind === 'camp') return left.has(key) ? undefined : 0;
+      return kind !== undefined && stopsOn(tile) ? 0 : undefined;
+    };
+    let best: { key: string; rank: number; steps: number } | undefined;
+    for (const key of board.seen) {
+      const rank = wanted(key);
+      const steps = rank === undefined ? undefined : routeTo(board, key)?.length;
+      if (rank === undefined || steps === undefined) continue;
+      if (!best || rank < best.rank || (rank === best.rank && steps < best.steps)) best = { key, rank, steps };
+    }
+    return best?.key;
+  }
+
+  function play(seed: number): string[] {
+    let exp = startExpedition(seed, PARTY, M3_EXPEDITION, registry.motifs);
+    const left = new Set<string>();
+    const log: string[] = [];
+    const note = (line: string) => log.push(`${line} | HP ${exp.hp ?? 'full'}, clock ${exp.clock}, ${exp.obols} Obols`);
+    let blooms = 0;
+    for (let decision = 0; decision < 400 && exp.phase !== 'won' && exp.phase !== 'lost'; decision++) {
+      const here = exp.board.at;
+      const tile = exp.board.tiles[here]!;
+      if (exp.phase === 'map' || (exp.phase === 'tile' && canMove(exp) && left.has(here))) {
+        const to = destination(exp, left);
+        if (to === undefined) throw new Error('Nowhere left to walk.');
+        exp = go(exp, to).at(-1)!;
+      } else if (exp.phase === 'fight') {
+        const content = tile.content;
+        const combat = fightOut(exp);
+        exp = finishExpeditionFight(exp, combat, M3_EXPEDITION);
+        note(`${here} ${tile.kind} ${content}: ${combat.outcome} on turn ${combat.turn}`);
+      } else if (exp.phase === 'reward') {
+        const relic = exp.offered[0] ?? null;
+        const obols = exp.spoils?.obols;
+        exp = chooseExpeditionRelic(exp, relic);
+        note(`  +${obols} Obols${relic ? `, took ${relic}` : ''}`);
+      } else if (exp.phase === 'outcome') {
+        note(`  ${JSON.stringify(exp.outcome)}`);
+        exp = closeOutcome(exp);
+      } else if (tile.kind === 'shop') {
+        const bought: string[] = [];
+        for (const offer of [...shopHere(exp)!.relics].sort((a, b) => a.price - b.price)) {
+          if (cannotBuy(exp, offer.relic) === undefined) {
+            exp = buyRelic(exp, offer.relic);
+            bought.push(offer.relic);
+          }
+        }
+        const mended = cannotMend(exp, registry) === undefined;
+        if (mended) exp = mend(exp, registry);
+        left.add(here);
+        note(`${here} shop: bought ${bought.join(', ') || 'nothing'}${mended ? ', mended' : ''}`);
+        exp = leaveTile(exp);
+      } else if (tile.kind === 'camp') {
+        if (cannotRest(exp, M3_EXPEDITION, registry) === undefined) {
+          exp = rest(exp, M3_EXPEDITION, registry);
+          note(`${here} camp: rested`);
+        } else {
+          left.add(here);
+          note(`${here} camp: kept for later`);
+          exp = leaveTile(exp);
+        }
+      } else if (tile.kind === 'event') {
+        const event = eventHere(exp, registry)!;
+        const index = event.choices.findIndex((_, i) => cannotChoose(exp, i, M3_EXPEDITION, registry) === undefined);
+        exp = chooseEvent(exp, index, M3_EXPEDITION, registry);
+        note(`${here} ${event.id}: choice ${index + 1}`);
+      } else if (tile.kind === 'symptom') {
+        exp = takeSymptom(exp);
+        note(`${here} symptom: took ${tile.card}`);
+      } else if (onBloomNode(exp)) {
+        const choice = (['fight', 'gamble', 'symptom'] as const)[blooms++ % 3]!;
+        exp = chooseBloom(exp, choice, registry);
+        note(`${here} bloom node: ${choice}`);
+      } else throw new Error(`Stuck in ${exp.phase} on ${tile.kind}.`);
+    }
+    log.push(`run ${exp.phase}: HP ${exp.hp}, clock ${exp.clock}, ${exp.obols} Obols`);
+    log.push(`  relics ${exp.relics.join(', ') || 'none'}`);
+    log.push(`  deck ${exp.deck.join(', ') || 'empty'}`);
+    return log;
+  }
+
+  it('the scripted party can play every board to the end', () => {
+    for (let seed = 1; seed <= 30; seed++) expect(play(seed).at(-3)).toMatch(/^run (won|lost)/);
+  });
+
+  it('a scripted run replays exactly', async () => {
+    await expect(play(7).join('\n') + '\n').toMatchFileSnapshot('golden/labyrinth.txt');
   });
 });

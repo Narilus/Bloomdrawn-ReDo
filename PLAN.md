@@ -218,6 +218,8 @@ _Done 21 Oct. Engine: cards without an owner are the party's own, dealt in from 
 A whole board from the entrance to the Boss tile, with Run again.
 **Done when:** a golden replay of a scripted run is stable, and the owner plays it and signs off.
 
+_Golden replay done 22 Oct (`src/app/expedition.test.ts`, `src/app/golden/labyrinth.txt`): a scripted party explores the whole of board 7, stopping on every fight and choice it finds (resting when hurt, buying what it can, taking the first open Event choice, cycling a Bloom node's choices), and makes the Boss its last stop. It wins on seed 7 and plays every one of 30 boards to an end without getting stuck (19 won). Waiting for the owner's playtest._
+
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
 - Open design items are listed in HANDOVER.md. Settle each with the owner before the milestone that needs it.
