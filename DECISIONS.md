@@ -123,6 +123,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - M3.5 signed off: Obols, the Victory panel and Shops as built, including Fruiting's +50% Obols, Shop stock rolled on first entry, the Obol counter under the party HP and no Mend at full HP (owner, 21 Oct).
 - M3.6 signed off: Camps, Events, Symptoms and Bloom nodes as built, with the choices made without him accepted: an Event is a forced choice once entered, every Event choice ticks the clock (the Gardener's shears once more), Rest can't be used at full HP and heals only up to full, an Event's random relic may also be on sale in a Shop, the Event scene text stands as drafted for now, and rarer Events wait until they are written. The Symptoms plaque lists each card once with its count (owner, 22 Oct).
+- M3 signed off: the whole Labyrinth run as built, from the entrance to the Boss tile with Run again (owner, 23 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).

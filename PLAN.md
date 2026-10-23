@@ -1,7 +1,7 @@
 # PLAN
 
-**Current milestone:** M3 The Labyrinth (M2 signed off 19 Oct)
-**Current task:** M3.7 A Labyrinth run (owner playtest)
+**Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
+**Current task:** M4 draft (`docs/notes/m4-run.md`) waiting for the owner's answers
 
 ## Milestones
 
@@ -214,11 +214,22 @@ The run's own deck; ownerless Symptom cards; Camp choices; Events as content wit
 
 _Done 21 Oct. Engine: cards without an owner are the party's own, dealt in from `CombatSetup.deck` and played by the front member; `percentOf` reads a share of party HP; `drawFewer`. The four Symptoms are content with scenarios (`src/content/scenarios/symptoms.test.ts`), and the four Events are content (`src/content/events/`). The run keeps its deck; Camps Rest for 30% of max HP and tick; Events are a forced choice that ticks; Bloom nodes are sown from Fruiting on. Tests for each in `src/app/expedition.test.ts`. Choices made without the owner are listed in `docs/notes/m3-labyrinth.md` ("As built in M3.6")._
 
-### M3.7 A Labyrinth run (owner playtest)
+### M3.7 A Labyrinth run (owner playtest) ✅
 A whole board from the entrance to the Boss tile, with Run again.
 **Done when:** a golden replay of a scripted run is stable, and the owner plays it and signs off.
 
-_Golden replay done 22 Oct (`src/app/expedition.test.ts`, `src/app/golden/labyrinth.txt`): a scripted party explores the whole of board 7, stopping on every fight and choice it finds (resting when hurt, buying what it can, taking the first open Event choice, cycling a Bloom node's choices), and makes the Boss its last stop. It wins on seed 7 and plays every one of 30 boards to an end without getting stuck (19 won). Waiting for the owner's playtest._
+_Golden replay done 22 Oct (`src/app/expedition.test.ts`, `src/app/golden/labyrinth.txt`): a scripted party explores the whole of board 7, stopping on every fight and choice it finds (resting when hurt, buying what it can, taking the first open Event choice, cycling a Bloom node's choices), and makes the Boss its last stop. It wins on seed 7 and plays every one of 30 boards to an end without getting stuck (19 won). Signed off by the owner 23 Oct._
+
+## M4 tasks
+
+Content and rules are drafted in `docs/notes/m4-run.md` (waiting for the owner's answers). The split below is the draft's; it is settled with the answers.
+
+### M4.1 Card rewards
+### M4.2 The Boss
+### M4.3 Profile and banking
+### M4.4 Save and resume
+### M4.5 A full run (owner gate)
+**Done when:** the owner wins, quits and resumes a full run, and a golden replay of a scripted run through a save and a resume is stable.
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.

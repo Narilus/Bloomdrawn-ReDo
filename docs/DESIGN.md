@@ -112,7 +112,7 @@ A run party is exactly four unique characters. Each brings her stats, five perso
 
 ### Ownership
 
-Every card has an owner. It reads that owner's stats, charges that owner's ultimate if it is a Strike, Defense or Transcend or its text says so, and spends from the shared Domain pool. Cards gained during a run must be assigned to an eligible owner before they enter the deck. No card is ever ownerless.
+Every card has an owner. It reads that owner's stats, charges that owner's ultimate if it is a Strike, Defense or Transcend or its text says so, and spends from the shared Domain pool. Cards gained during a run must be assigned to an eligible owner before they enter the deck. The one exception is Symptoms: they belong to the party, and the front member plays them (owner, 19 Oct).
 
 ### Ultimates persist across the run
 
