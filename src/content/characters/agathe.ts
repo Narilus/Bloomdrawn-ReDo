@@ -33,6 +33,19 @@ export const theChoirAnswers = card({
   text: 'Gain {effects.0.amount} Tentacles. Tentacles deal +{effects.1.amount} damage for the rest of combat. Transcend.',
 });
 
+// Card rewards (docs/notes/m4-run.md), offered after normal fights. Numbers are placeholders.
+
+export const hymnalProcession = card({
+  id: 'agathe.hymnal-procession', name: 'Hymnal Procession', owner: 'agathe', reward: true, cost: 2, target: 'none',
+  effects: [gainResource('tentacles', 3)],
+});
+
+export const thuribleSwing = card({
+  id: 'agathe.thurible-swing', name: 'Thurible Swing', owner: 'agathe', reward: true, cost: 1, target: 'chosenEnemy',
+  effects: [damage(add(4, stat('attack'))), when(gte(resource('tentacles'), 4), [tentacleVolley()])],
+  text: 'Deal {effects.0.amount} damage. If you have {effects.1.condition.gte.1} or more Tentacles, trigger a volley.',
+});
+
 export const agathe = character({
   id: 'agathe', name: 'Agathe', domain: 'rapture',
   stats: { hp: 50, attack: 4, defense: 4 },

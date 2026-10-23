@@ -55,8 +55,15 @@ export type Keyword = 'retain' | 'ritual' | 'exhaust';
 export interface CardDef {
   id: string;
   name: string;
-  /** Character ID. Absent for the party's own cards (Symptoms), which the front member plays. */
+  /**
+   * Character ID. Absent for a Domain's generic card, which goes to a member when gained, and for
+   * the party's own cards (Symptoms), which the front member plays.
+   */
   owner?: string;
+  /** A Domain's generic card: any member of that Domain may own it. */
+  domain?: string;
+  /** Gained as a run's card reward, not dealt from the start. */
+  reward?: boolean;
   /** Personal card slot; generated cards have none. */
   slot?: CardSlot;
   /** Made during combat by a card (createCard), not dealt into the deck. */
@@ -226,6 +233,8 @@ export interface DomainDef {
   id: string;
   name: string;
   resources: ResourceDef[];
+  /** Slots into any team: its generic cards are offered to every party and may go to any member. */
+  anyTeam?: boolean;
   triggers?: TriggerDef[];
   /**
    * The HUD badge: a count, and optionally damage for each one (shown as count × each = total).

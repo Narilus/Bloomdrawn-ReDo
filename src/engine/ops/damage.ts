@@ -4,14 +4,14 @@ import type { EngineEvent } from '../events.ts';
 import { formulaSchema, type Formula } from '../formula.ts';
 import { pipeline } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
-import { isAlive, PARTY, type CombatState, type EntityId } from '../state.ts';
+import { isAlive, PARTY, vitalsOf, type CombatState, type EntityId, type Vitals } from '../state.ts';
 import type { Registry } from '../defs.ts';
 
 export interface DamageArgs extends OpCall {
   op: 'damage';
   amount: Formula;
-  /** `chosen`: the command's target. `party`: the shared party pool. */
-  target?: 'chosen' | 'party';
+  /** `chosen`: the command's target. `party`: the shared party pool. `allEnemies`: every living enemy, in slot order. */
+  target?: 'chosen' | 'party' | 'allEnemies';
   ignoresShield?: boolean;
 }
 
@@ -27,8 +27,10 @@ interface Hit {
   absorbed: number;
 }
 
-function targetOf(args: DamageArgs, ctx: OpContext): EntityId | undefined {
-  return args.target === 'party' ? PARTY : ctx.target;
+function targetsOf(state: CombatState, args: DamageArgs, ctx: OpContext): EntityId[] {
+  if (args.target === 'allEnemies') return state.enemies.filter(isAlive).map((e) => e.id);
+  const target = args.target === 'party' ? PARTY : ctx.target;
+  return target !== undefined && pool(state, target) ? [target] : [];
 }
 
 function pool(state: CombatState, target: EntityId): { hp: number; shield: number } | undefined {
@@ -38,48 +40,57 @@ function pool(state: CombatState, target: EntityId): { hp: number; shield: numbe
 }
 
 /** Shared by resolve and preview: pipeline steps 1–4, then Shield (step 5). */
-function compute(state: CombatState, args: DamageArgs, ctx: OpContext, registry: Registry): Hit | undefined {
-  const target = targetOf(args, ctx);
-  const hit = target === undefined ? undefined : pool(state, target);
-  if (target === undefined || !hit) return undefined;
+function compute(state: CombatState, args: DamageArgs, ctx: OpContext, registry: Registry, target: EntityId): Hit | undefined {
+  const hit = pool(state, target);
+  if (!hit) return undefined;
   const amount = pipeline('damage', args.amount, state, ctx, registry, target);
   const absorbed = args.ignoresShield ? 0 : Math.min(hit.shield, amount);
   return { target, amount, absorbed };
 }
 
-export const damageOp: Operation<DamageArgs> = {
-  args: z.strictObject({
-    op: z.literal('damage'),
-    amount: formulaSchema,
-    target: z.enum(['chosen', 'party']).optional(),
-    ignoresShield: z.boolean().optional(),
-  }),
-  validate(state, args, ctx) {
-    const target = targetOf(args, ctx);
-    return target !== undefined && pool(state, target) ? undefined : 'Damage needs a living target.';
-  },
-  resolve(draft, args, ctx, registry) {
-    const hit = compute(draft, args, ctx, registry);
-    if (!hit) return { events: [] };
+/** Each target is hit in turn; the HP and Shield after each event go with it, so bars follow the hits. */
+function land(draft: CombatState, args: DamageArgs, ctx: OpContext, registry: Registry): { events: EngineEvent[]; vitals: Vitals[] } {
+  const events: EngineEvent[] = [];
+  const vitals: Vitals[] = [];
+  for (const target of targetsOf(draft, args, ctx)) {
+    const hit = compute(draft, args, ctx, registry, target);
+    if (!hit) continue;
     const victim = pool(draft, hit.target) as { hp: number; shield: number };
     victim.shield -= hit.absorbed;
     victim.hp = Math.max(0, victim.hp - (hit.amount - hit.absorbed));
 
     const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: hit.target, amount: hit.amount, absorbed: hit.absorbed };
     if (ctx.owner !== undefined) base.owner = ctx.owner;
-    const events: EngineEvent[] = [base, { ...base, type: 'damageTaken' }];
+    const landed: EngineEvent[] = [base, { ...base, type: 'damageTaken' }];
     if (hit.target !== PARTY && victim.hp <= 0) {
-      events.push({ type: 'enemyDefeated', source: ctx.source, target: hit.target });
+      landed.push({ type: 'enemyDefeated', source: ctx.source, target: hit.target });
     }
-    return { events };
+    events.push(...landed);
+    vitals.push(...landed.map(() => vitalsOf(draft)));
+  }
+  return { events, vitals };
+}
+
+export const damageOp: Operation<DamageArgs> = {
+  args: z.strictObject({
+    op: z.literal('damage'),
+    amount: formulaSchema,
+    target: z.enum(['chosen', 'party', 'allEnemies']).optional(),
+    ignoresShield: z.boolean().optional(),
+  }),
+  validate(state, args, ctx) {
+    return targetsOf(state, args, ctx).length > 0 ? undefined : 'Damage needs a living target.';
   },
+  resolve: (draft, args, ctx, registry) => land(draft, args, ctx, registry),
   preview(state, args, ctx, registry) {
-    const hit = compute(state, args, ctx, registry);
-    return hit ? [{ op: 'damage', ...hit } satisfies Preview] : [];
+    return targetsOf(state, args, ctx).flatMap((target) => {
+      const hit = compute(state, args, ctx, registry, target);
+      return hit ? [{ op: 'damage', ...hit } satisfies Preview] : [];
+    });
   },
   describe(args, show) {
     const amount = show(args.amount, 'damage');
-    const who = args.target === 'party' ? ' to the party' : '';
+    const who = args.target === 'party' ? ' to the party' : args.target === 'allEnemies' ? ' to all enemies' : '';
     return `Deal ${amount} damage${who}${args.ignoresShield ? ', ignoring Shield' : ''}`;
   },
 };

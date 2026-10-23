@@ -11,7 +11,11 @@ import {
   cannotRest,
   chooseBloom,
   chooseEvent,
+  chooseExpeditionCard,
   chooseExpeditionRelic,
+  eligibleOwners,
+  EXPEDITION_STREAMS,
+  runCardText,
   closeOutcome,
   describeChoice,
   eventHere,
@@ -75,7 +79,7 @@ describe('the expedition', () => {
 
   it('a won fight clears the tile and carries HP and gauges into the next fight', () => {
     const fighting = go(on({ kind: 'entrance' }, HOUND, HOUND), '1,0').at(-1)!;
-    const after = chooseExpeditionRelic(finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION), null);
+    const after = chooseExpeditionRelic(finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION, registry), null);
     expect([after.phase, after.hp, after.gauges, after.board.tiles['1,0']]).toEqual(['map', 150, [40, 40, 40, 40], { kind: 'path' }]);
     const next = expeditionFight(go(after, '2,0').at(-1)!, registry);
     expect([next.partyHp, next.gauges]).toEqual([150, [40, 40, 40, 40]]);
@@ -83,15 +87,15 @@ describe('the expedition', () => {
 
   it('an elite offers three relics; the Boss ends the run in victory; a loss ends it in defeat', () => {
     const elite = go(on({ kind: 'entrance' }, { kind: 'elite', content: 'encounter.thorn-wall' }), '1,0').at(-1)!;
-    const reward = finishExpeditionFight(elite, ended(elite, 'victory', 120), M3_EXPEDITION);
+    const reward = finishExpeditionFight(elite, ended(elite, 'victory', 120), M3_EXPEDITION, registry);
     expect(reward.phase).toBe('reward');
     expect(reward.offered).toHaveLength(3);
     const picked = chooseExpeditionRelic(reward, reward.offered[0]!);
     expect([picked.phase, picked.relics]).toEqual(['map', [reward.offered[0]]]);
 
     const boss = go(on({ kind: 'entrance' }, { kind: 'boss', content: 'encounter.hound-mother' }), '1,0').at(-1)!;
-    expect(finishExpeditionFight(boss, ended(boss, 'victory', 60), M3_EXPEDITION).phase).toBe('won');
-    expect(finishExpeditionFight(boss, ended(boss, 'defeat', 0), M3_EXPEDITION).phase).toBe('lost');
+    expect(finishExpeditionFight(boss, ended(boss, 'victory', 60), M3_EXPEDITION, registry).phase).toBe('won');
+    expect(finishExpeditionFight(boss, ended(boss, 'defeat', 0), M3_EXPEDITION, registry).phase).toBe('lost');
   });
 
   it('on an unpaid Symptom the party must take its card or turn back; it cannot walk on past', () => {
@@ -99,7 +103,7 @@ describe('the expedition', () => {
     expect([toll.phase, canMove(toll), move(toll, '2,0', M3_EXPEDITION, registry)]).toEqual(['tile', false, undefined]);
     expect(turnBack(toll)!.board.at).toBe('0,0');
     const paid = takeSymptom(toll);
-    expect([paid.phase, paid.board.tiles['1,0']!.paid, paid.deck]).toEqual(['map', true, ['symptom.grafted-hand']]);
+    expect([paid.phase, paid.board.tiles['1,0']!.paid, paid.deck]).toEqual(['map', true, [{ card: 'symptom.grafted-hand' }]]);
     expect(go(paid, '2,0').at(-1)!.board.at).toBe('2,0');
   });
 
@@ -117,7 +121,7 @@ describe('the expedition', () => {
 describe('the Bloom clock on a run', () => {
   it('ticks on a won fight, an Event and a Camp rest; walking, Shops and Symptoms leave it', () => {
     const fighting = go(on({ kind: 'entrance' }, HOUND, { kind: 'shop' }, SURVEY, CAMP), '1,0').at(-1)!;
-    const won = chooseExpeditionRelic(finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION), null);
+    const won = chooseExpeditionRelic(finishExpeditionFight(fighting, ended(fighting, 'victory', 150), M3_EXPEDITION, registry), null);
     expect(won.clock).toBe(1);
     const shop = leaveTile(go(won, '2,0').at(-1)!);
     expect(shop.clock).toBe(1);
@@ -141,7 +145,7 @@ describe('the Bloom clock on a run', () => {
 
 describe('Obols and the Victory panel', () => {
   const ELITE = { kind: 'elite', content: 'encounter.thorn-wall' } as const;
-  const win = (exp: Expedition) => finishExpeditionFight(exp, ended(exp, 'victory', 150), M3_EXPEDITION);
+  const win = (exp: Expedition) => finishExpeditionFight(exp, ended(exp, 'victory', 150), M3_EXPEDITION, registry);
 
   it('a won fight gives 20 Obols and an elite 45, shown on the Victory panel until it is closed', () => {
     const fight = win(go(on({ kind: 'entrance' }, HOUND), '1,0').at(-1)!);
@@ -240,11 +244,86 @@ describe('Camps', () => {
   });
 });
 
+describe('card rewards', () => {
+  const ELITE = { kind: 'elite', content: 'encounter.thorn-wall' } as const;
+  const POOL = M3_EXPEDITION.cards.pool;
+  /** A won normal fight for this party, on a run seeded as given. */
+  const won = (seed: number, party = PARTY, tiles: Tile[] = [{ kind: 'entrance' }, HOUND]) => {
+    const exp = { ...startExpedition(seed, party, M3_EXPEDITION, registry.motifs), board: createBoard(row(...tiles), '0,0') };
+    const fight = go(exp, '1,0').at(-1)!;
+    return finishExpeditionFight(fight, ended(fight, 'victory', 100), M3_EXPEDITION, registry);
+  };
+
+  it('a normal fight offers three different cards, each going to a member who may own it', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const offer = won(seed).offeredCards;
+      expect(offer).toHaveLength(3);
+      expect(new Set(offer.map((c) => c.card)).size).toBe(3);
+      for (const { card, owner } of offer) {
+        expect(POOL).toContain(card);
+        expect(eligibleOwners(card, PARTY, registry)).toContain(owner);
+      }
+    }
+  });
+
+  it('elites give relics only, the Boss ends the run, and a Bloom node fight offers cards like any fight', () => {
+    expect(won(1, PARTY, [{ kind: 'entrance' }, ELITE]).offeredCards).toEqual([]);
+    const boss = won(1, PARTY, [{ kind: 'entrance' }, { kind: 'boss', content: 'encounter.hound' }]);
+    expect([boss.phase, boss.offeredCards]).toEqual(['won', []]);
+    const node = enter({ ...on({ kind: 'entrance' }, { kind: 'bloom', content: 'encounter.hound', card: 'symptom.pollen-lung' }), clock: 12 });
+    const fight = chooseBloom(node, 'fight', registry);
+    expect(finishExpeditionFight(fight, ended(fight, 'victory', 150), M3_EXPEDITION, registry).offeredCards).toHaveLength(3);
+  });
+
+  it("the pool follows the party's Domains: Unbound's card always, any other only with a member of its Domain", () => {
+    const party = ['maelia', 'agathe'];
+    const seen = new Map<string, Set<string>>();
+    for (let seed = 1; seed <= 80; seed++) {
+      for (const { card, owner } of won(seed, party).offeredCards) seen.set(card, (seen.get(card) ?? new Set()).add(owner!));
+    }
+    expect([...seen.keys()].sort()).toEqual([
+      'agathe.hymnal-procession', 'agathe.thurible-swing', 'flesh.grafting-knife', 'maelia.nursing-bud', 'maelia.pollen-drift',
+      'rapture.chalk-circle', 'unbound.pocket-watch',
+    ]);
+    expect(seen.get('flesh.grafting-knife')).toEqual(new Set(['maelia']));
+    expect(seen.get('rapture.chalk-circle')).toEqual(new Set(['agathe']));
+    // Unbound slots into any team, so its card may go to either.
+    expect(seen.get('unbound.pocket-watch')).toEqual(new Set(['maelia', 'agathe']));
+    expect(eligibleOwners('spirit.quiet-prayer', party, registry)).toEqual([]);
+    expect(eligibleOwners('symptom.pollen-lung', party, registry)).toEqual([]);
+  });
+
+  it('a taken card joins the deck and is dealt into the next fight, played by its owner; skipping takes nothing', () => {
+    const reward = won(3, PARTY, [{ kind: 'entrance' }, HOUND, HOUND]);
+    const card = reward.offeredCards[1]!;
+    const took = chooseExpeditionCard(reward, 1);
+    expect([took.phase, took.deck, took.offeredCards, took.spoils]).toEqual(['map', [card], [], undefined]);
+    const setup = expeditionFight(go(took, '2,0').at(-1)!, registry);
+    const piles = startCombat(setup, registry).state.piles;
+    expect([...piles.draw, ...piles.hand].filter((c) => c.card === card.card).map((c) => c.owner)).toEqual([`m${PARTY.indexOf(card.owner!)}`]);
+    expect(chooseExpeditionCard(reward, null).deck).toEqual([]);
+    expect(() => chooseExpeditionCard(reward, 3)).toThrow();
+  });
+
+  it("the offer replays exactly from the run's seed", () => {
+    expect(won(5).offeredCards).toEqual(won(5).offeredCards);
+    const offers = new Set(Array.from({ length: 10 }, (_, seed) => JSON.stringify(won(seed + 1).offeredCards)));
+    expect(offers.size).toBeGreaterThan(5);
+  });
+
+  it("an offered card shows its numbers with its owner's stats, and what depends on the fight as written", () => {
+    expect(runCardText({ card: 'flesh.grafting-knife', owner: 'maelia' }, registry)).toBe('Deal 7 damage. Apply 3 Bleed.');
+    expect(runCardText({ card: 'unbound.pocket-watch', owner: 'agathe' }, registry)).toBe('Draw 2 cards.');
+    expect(runCardText({ card: 'rapture.chalk-circle', owner: 'agathe' }, registry)).toBe('Gain 1 Tentacle. Gain 8 Shield.');
+    expect(runCardText({ card: 'anthe.long-vigil', owner: 'anthe' }, registry)).toBe('Ritual. Deal 10 + 3 × Essence damage to all enemies.');
+  });
+});
+
 describe("Symptoms and the run's deck", () => {
   it('a taken Symptom is dealt into every later fight, played by the front member', () => {
     const paid = takeSymptom(enter(on({ kind: 'entrance' }, SYMPTOM, HOUND)));
     const fight = expeditionFight(go(paid, '2,0').at(-1)!, registry);
-    expect(fight.deck).toEqual(['symptom.grafted-hand']);
+    expect(fight.deck).toEqual([{ card: 'symptom.grafted-hand' }]);
     const cards = startCombat(fight, registry).state.piles;
     const dealt = [...cards.draw, ...cards.hand].filter((c) => c.card === 'symptom.grafted-hand');
     expect(dealt.map((c) => c.owner)).toEqual(['m0']);
@@ -281,7 +360,7 @@ describe('Events', () => {
     expect(registry.cards[card]!.owner).toBeUndefined();
     expect(lines(censer)).toEqual([['Every party member gains 20 ultimate charge.', `Take the Symptom ${registry.cards[card]!.name}.`], ['Nothing happens.']]);
     const breathed = choose(censer, 0);
-    expect([breathed.gauges, breathed.deck, breathed.outcome]).toEqual([[20, 70, 100, 100], [card], { event: 'event.censer', charge: 20, card, ticks: 1 }]);
+    expect([breathed.gauges, breathed.deck, breathed.outcome]).toEqual([[20, 70, 100, 100], [{ card }], { event: 'event.censer', charge: 20, card, ticks: 1 }]);
     const snuffed = choose(censer, 1);
     expect([snuffed.gauges, snuffed.deck, snuffed.clock, snuffed.board.tiles['1,0']!.kind]).toEqual([[0, 50, 90, 100], [], 1, 'path']);
   });
@@ -339,7 +418,7 @@ describe('Bloom nodes', () => {
 
   it('sits on a path tile within 3, ahead of the party where it can, with a fight and a Symptom', () => {
     for (let seed = 1; seed <= 30; seed++) {
-      const near = go({ ...fruiting({ bloomDue: 10 }), rng: createStreams(seed, ['fights', 'rewards', 'bloom', 'shops', 'events']) }, '2,0').at(-1)!;
+      const near = go({ ...fruiting({ bloomDue: 10 }), rng: createStreams(seed, EXPEDITION_STREAMS) }, '2,0').at(-1)!;
       const sown = go({ ...near, bloomDue: 1 }, '5,0').at(-1)!;
       const [node] = nodes(sown);
       const q = Number(node!.split(',')[0]);
@@ -359,14 +438,14 @@ describe('Bloom nodes', () => {
     expect([node.phase, canMove(node), move(node, '2,0', M3_EXPEDITION, registry)]).toEqual(['tile', false, undefined]);
     const fight = chooseBloom(node, 'fight', registry);
     expect([fight.phase, expeditionFight(fight, registry).enemies]).toEqual(['fight', ['enemy.bloom-rib-hound']]);
-    const won = finishExpeditionFight(fight, ended(fight, 'victory', 150), M3_EXPEDITION);
+    const won = finishExpeditionFight(fight, ended(fight, 'victory', 150), M3_EXPEDITION, registry);
     expect([won.phase, won.obols, won.clock, won.board.tiles['1,0']]).toEqual(['reward', 30, 12, { kind: 'path' }]);
   });
 
   it('the gamble loses or heals 10% of current HP (healing only up to full), 50/50', () => {
     const results = new Set<number>();
     for (let seed = 1; seed <= 20; seed++) {
-      const node = enter({ ...on({ kind: 'entrance' }, NODE), clock: 12, hp: 150, rng: createStreams(seed, ['fights', 'rewards', 'bloom', 'shops', 'events']) });
+      const node = enter({ ...on({ kind: 'entrance' }, NODE), clock: 12, hp: 150, rng: createStreams(seed, EXPEDITION_STREAMS) });
       const gambled = chooseBloom(node, 'gamble', registry);
       results.add(gambled.outcome!.hp!);
       expect(gambled.hp).toBe(150 + gambled.outcome!.hp!);
@@ -379,7 +458,7 @@ describe('Bloom nodes', () => {
 
   it('taking the Symptom adds its card to the deck, with no tick', () => {
     const took = chooseBloom(enter({ ...on({ kind: 'entrance' }, NODE), clock: 12 }), 'symptom', registry);
-    expect([took.deck, took.outcome, took.clock, took.board.tiles['1,0']]).toEqual([['symptom.pollen-lung'], { card: 'symptom.pollen-lung' }, 12, { kind: 'path' }]);
+    expect([took.deck, took.outcome, took.clock, took.board.tiles['1,0']]).toEqual([[{ card: 'symptom.pollen-lung' }], { card: 'symptom.pollen-lung' }, 12, { kind: 'path' }]);
   });
 });
 
@@ -452,13 +531,14 @@ describe('a whole Labyrinth run', () => {
       } else if (exp.phase === 'fight') {
         const content = tile.content;
         const combat = fightOut(exp);
-        exp = finishExpeditionFight(exp, combat, M3_EXPEDITION);
+        exp = finishExpeditionFight(exp, combat, M3_EXPEDITION, registry);
         note(`${here} ${tile.kind} ${content}: ${combat.outcome} on turn ${combat.turn}`);
       } else if (exp.phase === 'reward') {
         const relic = exp.offered[0] ?? null;
+        const card = exp.offeredCards[0];
         const obols = exp.spoils?.obols;
-        exp = chooseExpeditionRelic(exp, relic);
-        note(`  +${obols} Obols${relic ? `, took ${relic}` : ''}`);
+        exp = card ? chooseExpeditionCard(exp, 0) : chooseExpeditionRelic(exp, relic);
+        note(`  +${obols} Obols${relic ? `, took ${relic}` : ''}${card ? `, took ${card.card} for ${card.owner}` : ''}`);
       } else if (exp.phase === 'outcome') {
         note(`  ${JSON.stringify(exp.outcome)}`);
         exp = closeOutcome(exp);
@@ -500,7 +580,7 @@ describe('a whole Labyrinth run', () => {
     }
     log.push(`run ${exp.phase}: HP ${exp.hp}, clock ${exp.clock}, ${exp.obols} Obols`);
     log.push(`  relics ${exp.relics.join(', ') || 'none'}`);
-    log.push(`  deck ${exp.deck.join(', ') || 'empty'}`);
+    log.push(`  deck ${exp.deck.map((c) => (c.owner ? `${c.card} (${c.owner})` : c.card)).join(', ') || 'empty'}`);
     return log;
   }
 

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { registry } from '../content/registry.ts';
-import type { CombatState } from '../engine/index.ts';
+import type { CombatState, RunCard } from '../engine/index.ts';
 import { BLOOM_NODES, BLOOM_STAGES, bossDirection, reached, stageOf, ticksToNext } from '../game/bloom.ts';
 import {
   buyRelic,
@@ -11,6 +11,7 @@ import {
   cannotRest,
   chooseBloom,
   chooseEvent,
+  chooseExpeditionCard,
   chooseExpeditionRelic,
   closeOutcome,
   describeChoice,
@@ -19,6 +20,7 @@ import {
   onBloomNode,
   rest,
   restHeal,
+  runCardText,
   symptomText,
   takeSymptom,
   expeditionFight,
@@ -37,6 +39,7 @@ import {
   type Outcome,
   type ShopStock,
 } from '../game/expedition.ts';
+import { CardFace, markNumber } from './CardView.tsx';
 import { Combat } from './Combat.tsx';
 import { RelicChoice } from './Gauntlet.tsx';
 import { RelicBar } from './Hud.tsx';
@@ -89,7 +92,7 @@ export function Labyrinth() {
       }
     });
   };
-  const onFightEnd = useCallback((combat: CombatState) => setExp((e) => finishExpeditionFight(e, combat, DEF)), []);
+  const onFightEnd = useCallback((combat: CombatState) => setExp((e) => finishExpeditionFight(e, combat, DEF, registry)), []);
   const again = () => {
     setSeed(seed + 1);
     setExp(begin(seed + 1));
@@ -111,22 +114,7 @@ export function Labyrinth() {
         <span>Obols</span>
         <strong>{exp.obols}</strong>
       </div>
-      {exp.deck.length > 0 && (
-        <div className="map-deck plaque" aria-label="Symptoms">
-          <div className="map-deck-head">
-            <span>Symptoms</span>
-            <strong>{exp.deck.length}</strong>
-          </div>
-          <ul>
-            {[...new Set(exp.deck)].map((id) => (
-              <li key={id} title={symptomText(exp, id, registry)}>
-                <span>{registry.cards[id]?.name ?? id}</span>
-                <span className="count">×{exp.deck.filter((d) => d === id).length}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {exp.deck.length > 0 && <RunDeck exp={exp} />}
       <div className="map-party plaque">
         <div className="bar-label">
           <span>Party</span>
@@ -140,21 +128,16 @@ export function Labyrinth() {
       </div>
       {exp.phase === 'tile' && !walking && <TilePanel exp={exp} onChange={setExp} />}
       {exp.phase === 'outcome' && exp.outcome && <OutcomePanel outcome={exp.outcome} onClose={() => setExp(closeOutcome(exp))} />}
-      {exp.phase === 'reward' && (
-        <RelicChoice offered={exp.offered} onChoose={(relic) => setExp(chooseExpeditionRelic(exp, relic))}>
-          {exp.spoils && (
-            <p className="spoils">
-              <strong>+{exp.spoils.obols} Obols</strong>
-              {exp.spoils.bonus > 0 && (
-                <span className="muted">
-                  {' '}
-                  including +{exp.spoils.bonus}% from the Bloom at {BLOOM_STAGES.find((s) => s.id === exp.spoils!.stage)?.name}
-                </span>
-              )}
-            </p>
-          )}
-        </RelicChoice>
-      )}
+      {exp.phase === 'reward' &&
+        (exp.offeredCards.length > 0 ? (
+          <CardChoice offered={exp.offeredCards} onChoose={(index) => setExp(chooseExpeditionCard(exp, index))}>
+            <Spoils exp={exp} />
+          </CardChoice>
+        ) : (
+          <RelicChoice offered={exp.offered} onChoose={(relic) => setExp(chooseExpeditionRelic(exp, relic))}>
+            <Spoils exp={exp} />
+          </RelicChoice>
+        ))}
       {(exp.phase === 'won' || exp.phase === 'lost') && (
         <div className="result">
           <h2>{exp.phase === 'won' ? 'The Labyrinth cleared' : 'Defeat'}</h2>
@@ -164,6 +147,78 @@ export function Labyrinth() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** The cards the run has gained, each listed once with its owner (or as a Symptom) and how many the deck holds. */
+function RunDeck({ exp }: { exp: Expedition }) {
+  const key = (c: RunCard) => `${c.card}|${c.owner ?? ''}`;
+  const rows = [...new Map(exp.deck.map((c) => [key(c), c])).values()];
+  return (
+    <div className="map-deck plaque" aria-label="Run deck">
+      <div className="map-deck-head">
+        <span>Run deck</span>
+        <strong>{exp.deck.length}</strong>
+      </div>
+      <ul>
+        {rows.map((c) => (
+          <li key={key(c)} className={c.owner ? undefined : 'symptom'} title={c.owner ? runCardText(c, registry) : symptomText(exp, c.card, registry)}>
+            <span>{registry.cards[c.card]?.name ?? c.card}</span>
+            <span className="owner">{c.owner ? registry.characters[c.owner]?.name : 'Symptom'}</span>
+            <span className="count">×{exp.deck.filter((d) => key(d) === key(c)).length}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** What a won fight gave, on the Victory panel. */
+function Spoils({ exp }: { exp: Expedition }) {
+  if (!exp.spoils) return null;
+  return (
+    <p className="spoils">
+      <strong>+{exp.spoils.obols} Obols</strong>
+      {exp.spoils.bonus > 0 && (
+        <span className="muted">
+          {' '}
+          including +{exp.spoils.bonus}% from the Bloom at {BLOOM_STAGES.find((s) => s.id === exp.spoils!.stage)?.name}
+        </span>
+      )}
+    </p>
+  );
+}
+
+/** A normal fight's card pick: each card shows the member it goes to and her numbers. */
+function CardChoice({ offered, onChoose, children }: { offered: readonly RunCard[]; onChoose: (index: number | null) => void; children?: ReactNode }) {
+  return (
+    <div className="result reward" role="dialog" aria-label="Victory">
+      <h2>Victory</h2>
+      {children}
+      <p className="result-line">Choose a card. It joins the deck for the rest of the run.</p>
+      <div className="card-offers">
+        {offered.map((c, i) => {
+          const def = registry.cards[c.card];
+          const owner = registry.characters[c.owner ?? ''];
+          return (
+            <button key={i} className="card-offer" aria-label={`${def?.name ?? c.card} for ${owner?.name}`} onClick={() => onChoose(i)}>
+              <CardFace
+                id={c.card}
+                def={def}
+                owner={owner}
+                text={runCardText(c, registry, { charge: false, keywords: false, mark: markNumber })}
+                cost={def?.cost}
+                registry={registry}
+                playable
+              />
+            </button>
+          );
+        })}
+      </div>
+      <button className="ghost" onClick={() => onChoose(null)}>
+        Take nothing
+      </button>
     </div>
   );
 }

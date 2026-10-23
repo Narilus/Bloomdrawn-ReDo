@@ -1041,6 +1041,35 @@ kbd {
   background: rgba(18, 12, 16, 0.72);
 }
 
+/* Card offers after a normal fight: the card faces themselves, lifted on hover. */
+.card-offers {
+  display: flex;
+  gap: 32px;
+}
+
+.card-offer {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.card-offer:hover,
+.card-offer:focus-visible {
+  transform: translateY(-10px);
+  outline: none;
+}
+
+.card-offer:hover .card,
+.card-offer:focus-visible .card {
+  box-shadow:
+    0 0 0 3px rgba(242, 196, 196, 0.6),
+    0 18px 32px rgba(0, 0, 0, 0.55);
+}
+
 /* Relic offers after a win: one card per relic, tier-coloured. */
 .relic-offers {
   display: flex;
@@ -1403,20 +1432,29 @@ kbd {
   color: #e8d27a;
 }
 
-/* One row per Symptom, with how many the deck holds. */
+/* One row per card, with its owner and how many the deck holds; Symptoms in their gold. */
 .map-deck ul {
   margin: 6px 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--sans);
   font-size: 16px;
-  color: #e8d27a;
+  color: var(--petal-ivory);
 }
 
 .map-deck li {
   display: flex;
+  gap: 10px;
   padding: 2px 0;
   cursor: help;
+}
+
+.map-deck li.symptom {
+  color: #e8d27a;
+}
+
+.map-deck li .owner {
+  opacity: 0.6;
 }
 
 .map-deck li .count {

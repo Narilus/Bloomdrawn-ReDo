@@ -1,4 +1,4 @@
-import { cardCost, describeCardLive, type CardInstance, type CombatState, type Registry } from '../engine/index.ts';
+import { cardCost, describeCardLive, type CardDef, type CardInstance, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { CARD_H, CARD_W } from './fan.ts';
 
@@ -13,17 +13,49 @@ interface Props {
   highlight?: boolean;
 }
 
-/** A card face. All numbers come from the engine's live description. */
+/** A card in combat. All numbers come from the engine's live description. */
 export function CardView({ card, state, registry, playable, keyHint, highlight }: Props) {
   const def = registry.cards[card.card];
   const member = state.members.find((m) => m.id === card.owner);
-  const owner = member ? registry.characters[member.character] : undefined;
+  // Keywords and the charge show as tags, so the text box holds only the card's effect.
+  const text = describeCardLive(card, state, registry, { charge: false, keywords: false, mark: markNumber });
+  return (
+    <CardFace
+      id={card.card}
+      def={def}
+      owner={member ? registry.characters[member.character] : undefined}
+      text={text}
+      cost={def ? cardCost(state, card, registry) : undefined}
+      registry={registry}
+      playable={playable}
+      keyHint={keyHint}
+      highlight={highlight}
+    />
+  );
+}
+
+interface FaceProps {
+  id: string;
+  def: CardDef | undefined;
+  /** The character who plays it. */
+  owner: CharacterDef | undefined;
+  /** Its effect, with numbers wrapped by `markNumber`, and without keywords or the charge. */
+  text: string;
+  /** The cost to pay now. */
+  cost: number | undefined;
+  registry: Registry;
+  playable: boolean;
+  keyHint?: string | undefined;
+  highlight?: boolean | undefined;
+}
+
+/** A card face, in combat or offered as a reward. The caller works out its text and cost. */
+export function CardFace({ id, def, owner, text, cost, registry, playable, keyHint, highlight }: FaceProps) {
   const portrait = owner ? portraitArt[owner.id] : undefined;
   // The party's own cards (Symptoms) are played by the front member.
-  const symptom = def !== undefined && def.owner === undefined;
-  const domain = symptom ? 'symptom' : (owner?.domain ?? '');
-  // Keywords and the charge show as tags, so the text box holds only the card's effect.
-  const text = describeCardLive(card, state, registry, { charge: false, keywords: false, mark });
+  const symptom = def !== undefined && def.owner === undefined && def.domain === undefined;
+  // A Domain's generic card shows its own Domain, whoever owns it.
+  const domain = symptom ? 'symptom' : (def?.domain ?? owner?.domain ?? '');
   const plain = text.replace(MARK, '$2');
   const length = plain.length > 95 ? ' text-xlong' : plain.length > 55 ? ' text-long' : '';
   const tags = [
@@ -35,8 +67,8 @@ export function CardView({ card, state, registry, playable, keyHint, highlight }
       className={`card domain-${domain}${playable ? '' : ' unplayable'}${highlight ? ' highlight' : ''}${length}`}
       style={{ width: CARD_W, height: CARD_H }}
     >
-      <CostGem printed={def?.cost} now={def ? cardCost(state, card, registry) : undefined} />
-      <div className="card-name">{def?.name ?? card.card}</div>
+      <CostGem printed={def?.cost} now={cost} />
+      <div className="card-name">{def?.name ?? id}</div>
       <div className="card-art">
         {portrait ? <img src={portrait} alt="" draggable={false} /> : <span className="monogram">{owner?.name.charAt(0)}</span>}
       </div>
@@ -78,7 +110,7 @@ function CostGem({ printed, now }: { printed: number | undefined; now: number | 
 
 // Live numbers arrive wrapped as ⟦kind:text⟧ so they can be coloured by kind.
 const MARK = /⟦(\w*):([^⟧]*)⟧/g;
-const mark = (text: string, value?: 'damage' | 'shield') => `⟦${value ?? ''}:${text}⟧`;
+export const markNumber = (text: string, value?: 'damage' | 'shield') => `⟦${value ?? ''}:${text}⟧`;
 
 /** Card text with damage and Shield numbers and status names highlighted. The words carry the meaning; colour only helps. */
 function RulesText({ text, registry }: { text: string; registry: Registry }) {

@@ -23,10 +23,17 @@ const endTurn: Command = { type: 'endTurn' };
 
 describe("the run's own cards", () => {
   it('are dealt in with the personal cards, and the front member plays them', () => {
-    const { state } = startCombat({ seed: 1, party: STARTERS, enemies: ['test.dummy'], deck: ['test.symptom', 'test.symptom'] }, registry);
+    const { state } = startCombat({ seed: 1, party: STARTERS, enemies: ['test.dummy'], deck: [{ card: 'test.symptom' }, { card: 'test.symptom' }] }, registry);
     const all = [...state.piles.draw, ...state.piles.hand];
     expect(all).toHaveLength(22);
     expect(all.filter((c) => c.card === 'test.symptom').map((c) => c.owner)).toEqual(['m0', 'm0']);
+  });
+
+  it('are played by the member who owns them, if they have an owner', () => {
+    const deck = [{ card: 'test.symptom', owner: STARTERS[2]! }];
+    const { state } = startCombat({ seed: 1, party: STARTERS, enemies: ['test.dummy'], deck }, registry);
+    expect([...state.piles.draw, ...state.piles.hand].find((c) => c.card === 'test.symptom')?.owner).toBe('m2');
+    expect(() => startCombat({ seed: 1, party: STARTERS.slice(0, 2), enemies: ['test.dummy'], deck }, registry)).toThrow(/not in the party/);
   });
 
   it('play like any card', () => {

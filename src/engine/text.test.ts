@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { add, stat } from './formula.ts';
 import { damage, draw, gainResource, gainShield } from './ops/index.ts';
-import { describeCard, describeCardLive, slotAt, templateSlots } from './text.ts';
+import { mul, resource } from './formula.ts';
+import { describeCard, describeCardLive, showStats, slotAt, templateSlots } from './text.ts';
 import { fixtureCombat, withCardInHand, withCards } from './testing/fixtures.ts';
 
 const card = {
@@ -19,6 +20,14 @@ describe('card text', () => {
     const [state, instance] = withCardInHand(fixtureCombat(['test.dummy'], ['test.plus3'], registry), card.id);
     // Attack 3, Defense 2, +3 flat damage relic.
     expect(describeCardLive(instance, state, registry)).toBe('Deal 12 damage. Gain 4 Shield. Draw 1 card.');
+  });
+});
+
+describe('card text outside combat', () => {
+  it("shows a character's stats as numbers, and anything that depends on the fight as written", () => {
+    const vigil = { ...card, effects: [damage(add(10, mul(3, resource('essence')))), gainShield(add(2, mul(2, stat('defense'))))] };
+    expect(describeCard(card, registry, showStats({ hp: 50, attack: 4, defense: 1 }))).toBe('Deal 10 damage. Gain 3 Shield. Draw 1 card.');
+    expect(describeCard(vigil, registry, showStats({ hp: 50, attack: 4, defense: 5 }))).toBe('Deal 10 + 3 × Essence damage. Gain 12 Shield.');
   });
 });
 

@@ -54,6 +54,20 @@ export const ripenedWomb = card({
   text: 'Gain {effects.0.amount} Embryo. Create a Seed Pod in your hand. Transcend.',
 });
 
+// Card rewards (docs/notes/m4-run.md), offered after normal fights. Numbers are placeholders.
+
+export const nursingBud = card({
+  id: 'maelia.nursing-bud', name: 'Nursing Bud', owner: 'maelia', reward: true, cost: 1, target: 'none',
+  effects: [gainResource('embryo', 2), chargeUltimate(10)],
+  text: 'Gain {effects.0.amount} Embryo. Charge her ultimate by {effects.1.amount}.',
+});
+
+export const pollenDrift = card({
+  id: 'maelia.pollen-drift', name: 'Pollen Drift', owner: 'maelia', reward: true, cost: 2, target: 'allEnemies',
+  effects: [applyStatus(poison, 3, 'allEnemies'), ifConsume('embryo', 2, [applyStatus(poison, 3, 'allEnemies')])],
+  text: 'Apply {effects.0.stacks} Poison to all enemies. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} more.',
+});
+
 export const maelia = character({
   id: 'maelia', name: 'Maelia', domain: 'flesh',
   stats: { hp: 55, attack: 3, defense: 5 },

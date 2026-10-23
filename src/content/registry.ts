@@ -97,12 +97,22 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
 
   for (const card of Object.values(reg.cards)) {
     const owner = card.owner === undefined ? undefined : reg.characters[card.owner];
-    // The party's own cards (Symptoms) have no owner, and so no personal slot.
-    if (card.owner === undefined) {
-      if (card.slot || card.generated) fail(where('card', card.id), card.id, 'a card without an owner has no personal slot and is not generated');
-    } else if (!owner) fail(where('card', card.id), card.id, `owner "${card.owner}" is not a character`);
-    else if (card.generated && card.slot) fail(where('card', card.id), card.id, 'a generated card has no personal slot');
-    else if (!card.generated && !owner.cards.includes(card.id)) fail(where('card', card.id), card.id, `not listed in ${card.owner}'s cards`);
+    const at = where('card', card.id);
+    // A Domain's generic card is a card reward that goes to a member of its Domain when gained.
+    if (card.domain !== undefined) {
+      if (card.owner !== undefined || card.slot || card.generated) fail(at, card.id, "a Domain's generic card has no owner or personal slot and is not generated");
+      if (!card.reward) fail(at, card.id, "a Domain's generic card must be a card reward");
+      if (!reg.domains[card.domain]) fail(at, card.id, `domain "${card.domain}" is not defined`);
+    } else if (card.owner === undefined) {
+      // The party's own cards (Symptoms) have no owner, and so no personal slot.
+      if (card.slot || card.generated) fail(at, card.id, 'a card without an owner has no personal slot and is not generated');
+      if (card.reward) fail(at, card.id, 'a card reward needs an owner or a Domain');
+    } else if (!owner) fail(at, card.id, `owner "${card.owner}" is not a character`);
+    else if (card.generated && card.slot) fail(at, card.id, 'a generated card has no personal slot');
+    else if (card.reward) {
+      if (card.slot || card.generated) fail(at, card.id, 'a card reward has no personal slot and is not generated');
+      if (owner.cards.includes(card.id)) fail(at, card.id, `a card reward is not one of ${card.owner}'s five cards`);
+    } else if (!card.generated && !owner.cards.includes(card.id)) fail(at, card.id, `not listed in ${card.owner}'s cards`);
     if (card.slot) {
       const [min, max] = COST_BANDS[card.slot];
       if (card.cost < min || card.cost > max) {

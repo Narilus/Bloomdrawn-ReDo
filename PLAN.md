@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
-**Current task:** M4.1 Card rewards
+**Current task:** M4.2 The Boss
 
 ## Milestones
 
@@ -231,6 +231,8 @@ The twelve reward cards as content. After a normal fight the Victory panel offer
 - tests prove the pool never shows a Domain the party lacks, never repeats a card in one offer, and only gives generic cards to eligible owners;
 - elites and the Boss offer no cards;
 - a taken card is in the next fight's draw pile, played by its owner, and the offer replays exactly from the seed.
+
+_Done 24 Oct. Reward cards are content: each character's two beside her kit (`reward: true`), and each Domain's generic card in its Domain file (`domain`). Unbound's Domain is marked `anyTeam`, so its card is always offered and goes to anyone. The run's deck holds cards with owners (`RunCard`); a card without one is a Symptom, played by the front member. Long Vigil needed `damage` to hit every enemy, which lands hit by hit with vitals like a volley. The Victory panel shows the cards as card faces with the owner's stats as numbers (what depends on the fight shows as written), and the map's plaque became "Run deck", listing cards with their owners and Symptoms in gold. Card offers draw from their own stream, so boards, relic offers and Shop stock come out as before. Tests: `src/content/scenarios/rewards.test.ts`, "card rewards" in `src/app/expedition.test.ts`; the golden replay now takes the first card each time._
 
 ### M4.2 The Boss
 HP bars per phase, the phase break (immunity until a Rouse that clears statuses), a phase cycle chosen by the Bloom stage, and no Bloom scaling for bosses. The Hollow Abbess with Rooted and, at Fruiting, Full Bloom as her second phase. The stage gives her a large anchor with Acolytes in side lanes, and blips under her bar. Her sprite through `npm run art`, picked by the owner.

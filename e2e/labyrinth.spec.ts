@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 // The Labyrinth: walk to the start gate's fight, win it against training dummies, and come back to
 // the map with that tile cleared. The Bloom clock starts one tick short of Fruiting, so the Boss
-// marker shows and the win reaches Fruiting; the Victory panel gives Flowering's Obols.
+// marker shows and the win reaches Fruiting; the Victory panel gives Flowering's Obols and a card.
 test('walks into a fight and back to the map', async ({ page }) => {
   test.setTimeout(60_000);
   const errors: string[] = [];
@@ -32,8 +32,13 @@ test('walks into a fight and back to the map', async ({ page }) => {
   }
   const victory = page.getByRole('dialog', { name: 'Victory' });
   await expect(victory).toContainText('+27 Obols');
+  // A normal fight offers three cards, each for the member it would go to; take the first.
+  const offers = victory.locator('.card-offer');
+  await expect(offers).toHaveCount(3);
   await page.screenshot({ path: 'test-results/screenshots/labyrinth-victory.png' });
-  await victory.getByRole('button', { name: 'Continue' }).click();
+  const taken = (await offers.first().locator('.card-name').textContent())!;
+  await offers.first().click();
+  await expect(page.locator('.map-deck')).toContainText(taken);
   await expect(page.locator('.map-obols')).toContainText('27');
   await expect(fight).toHaveAttribute('data-kind', 'path');
   await expect(page.locator('.bloom-clock')).toContainText('Fruiting');

@@ -31,6 +31,19 @@ export const theRiddleAnswered = card({
   text: 'Gain {effects.0.amount} Essence. Every Ritual in your hand costs 1 less. Transcend.',
 });
 
+// Card rewards (docs/notes/m4-run.md), offered after normal fights. Numbers are placeholders.
+
+export const ashOffering = card({
+  id: 'anthe.ash-offering', name: 'Ash Offering', owner: 'anthe', reward: true, cost: 1, target: 'none',
+  effects: [gainResource('essence', 2)],
+});
+
+export const longVigil = card({
+  id: 'anthe.long-vigil', name: 'Long Vigil', owner: 'anthe', reward: true, cost: 6, target: 'allEnemies',
+  keywords: ['ritual'],
+  effects: [damage(add(10, mul(3, resource('essence'))), { target: 'allEnemies' })],
+});
+
 export const anthe = character({
   id: 'anthe', name: 'Anthe', domain: 'spirit',
   stats: { hp: 60, attack: 3, defense: 5 },

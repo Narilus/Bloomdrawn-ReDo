@@ -34,6 +34,12 @@ export type ApplyResult =
   | { ok: true; state: CombatState; events: EngineEvent[]; vitals: Vitals[] }
   | { ok: false; reason: string; state: CombatState };
 
+/** A card the run has gained. `owner` is the character who plays it; without one, the front member does (Symptoms). */
+export interface RunCard {
+  card: string;
+  owner?: string;
+}
+
 export interface CombatSetup {
   seed: number;
   /** Character IDs in slot order; slot 0 is the front. */
@@ -48,8 +54,8 @@ export interface CombatSetup {
   gauges?: number[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
-  /** The run's own cards (Symptoms), dealt in after the personal cards; the front member plays them. */
-  deck?: string[];
+  /** The cards the run has gained, dealt in after the personal cards. */
+  deck?: RunCard[];
 }
 
 /** What combat start resolved, for presentation to play like any command (a Choir Bell volley). */
@@ -84,9 +90,11 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
       return { uid: next('c'), card, owner: `m${slot}` };
     }),
   );
-  for (const card of setup.deck ?? []) {
+  for (const { card, owner } of setup.deck ?? []) {
+    const slot = owner === undefined ? 0 : setup.party.indexOf(owner);
     lookup(registry.cards, card, 'card');
-    deck.push({ uid: next('c'), card, owner: 'm0' });
+    if (slot < 0) throw new Error(`"${card}" belongs to ${owner}, who is not in the party`);
+    deck.push({ uid: next('c'), card, owner: `m${slot}` });
   }
   const enemies = setup.enemies.map((entry, slot) => {
     const id = typeof entry === 'string' ? entry : entry.enemy;

@@ -39,6 +39,8 @@ export const schemas = {
     id,
     name: z.string().min(1),
     owner: id.optional(),
+    domain: id.optional(),
+    reward: z.literal(true).optional(),
     slot: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']).optional(),
     cost: z.int().min(0),
     target: z.enum(['none', 'self', 'party', 'chosenEnemy', 'allEnemies']),
@@ -139,6 +141,7 @@ export const schemas = {
     id,
     name: z.string().min(1),
     resources: z.array(z.strictObject({ id, name: z.string().min(1), start: z.int().min(0).optional() })),
+    anyTeam: z.literal(true).optional(),
     triggers: hooks.triggers,
     counter: z
       .strictObject({

@@ -47,6 +47,24 @@ describe('content registry', () => {
     ]);
   });
 
+  it("card rewards: a character's own sit outside her five cards; a Domain's generic card has a Domain and no owner", () => {
+    const own = card({ id: 'test.own', name: 'X', owner: 'tester', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    const generic = card({ id: 'test.generic', name: 'X', domain: 'flesh', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    expect(errorsFor({ own, generic })).toEqual([]);
+    const slotted = card({ ...own, id: 'test.slotted', slot: 'flavourA', cost: 2 });
+    const owned = card({ id: 'test.owned', name: 'X', domain: 'flesh', owner: 'tester', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    const unrewarded = card({ id: 'test.unrewarded', name: 'X', domain: 'flesh', cost: 1, target: 'none', effects: [gainShield(1)] });
+    const nowhere = card({ id: 'test.nowhere', name: 'X', domain: 'tides', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    const loose = card({ id: 'test.loose', name: 'X', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    expect(errorsFor({ slotted, owned, unrewarded, nowhere, loose })).toEqual([
+      'src/content/cards/broken.ts › test.slotted: a card reward has no personal slot and is not generated',
+      "src/content/cards/broken.ts › test.owned: a Domain's generic card has no owner or personal slot and is not generated",
+      "src/content/cards/broken.ts › test.unrewarded: a Domain's generic card must be a card reward",
+      'src/content/cards/broken.ts › test.nowhere: domain "tides" is not defined',
+      'src/content/cards/broken.ts › test.loose: a card reward needs an owner or a Domain',
+    ]);
+  });
+
   it('a card pointing at a missing status fails with its file and ID', () => {
     const broken = card({
       id: 'test.broken', name: 'X', owner: 'tester', cost: 1, target: 'chosenEnemy',

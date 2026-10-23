@@ -10,6 +10,7 @@ import {
   type EngineEvent,
   type Preview,
   type Registry,
+  type RunCard,
 } from '../../engine/index.ts';
 import { registry as gameRegistry } from '../registry.ts';
 
@@ -20,8 +21,11 @@ export interface ScenarioSpec {
   enemies?: string[];
   seed?: number;
   setup?: {
-    /** Card IDs to hold, in order. They come out of the deck when present; otherwise new copies are made. */
-    hand?: string[];
+    /**
+     * Card IDs to hold, in order. They come out of the deck when present; otherwise new copies are
+     * made. A Domain's generic card names the character who owns it.
+     */
+    hand?: (string | Required<RunCard>)[];
     resources?: Record<string, number>;
     mana?: number;
     /** Ultimate gauges by character ID. */
@@ -103,12 +107,14 @@ function memberOf(state: CombatState, character: string) {
   return member;
 }
 
-function takeOrMake(state: CombatState, pool: CardInstance[], id: string, registry: Registry): CardInstance {
+function takeOrMake(state: CombatState, pool: CardInstance[], entry: string | Required<RunCard>, registry: Registry): CardInstance {
+  const id = typeof entry === 'string' ? entry : entry.card;
   const index = pool.findIndex((c) => c.card === id);
   if (index >= 0) return pool.splice(index, 1)[0] as CardInstance;
   const def = registry.cards[id];
   // The party's own cards (Symptoms) are played by the front member.
-  const owner = def && def.owner === undefined ? state.members[0] : state.members.find((m) => m.character === def?.owner);
+  const character = typeof entry === 'string' ? def?.owner : entry.owner;
+  const owner = character === undefined ? state.members[0] : state.members.find((m) => m.character === character);
   if (!owner) throw new Error(`Scenario: no party member owns ${id}`);
   return { uid: `c${state.nextUid++}`, card: id, owner: owner.id };
 }

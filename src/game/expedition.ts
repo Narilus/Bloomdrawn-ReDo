@@ -5,6 +5,7 @@ import {
   GAUGE_MAX,
   nextInt,
   shareOf,
+  showStats,
   shuffleInPlace,
   type CombatSetup,
   type CombatState,
@@ -14,19 +15,21 @@ import {
   type MotifDef,
   type Registry,
   type RelicDef,
+  type RunCard,
   type Streams,
+  type TextOptions,
 } from '../engine/index.ts';
 import { BLOOM_NODES, bloomNodeDue, bloomTick, reached, spawnBloomNode, stageOf, type BloomStage } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
 import { generateBoard, M3_LABYRINTH, type LabyrinthDef } from './labyrinth.ts';
 
-// A run through the Labyrinth (docs/notes/m3-labyrinth.md): the party walks the board, fights
-// where it stops on a fight, and wins at the Boss. Party HP, ultimate gauges, relics and the run's
-// own deck (Symptoms) carry from fight to fight. Won fights, Events and Camp rests tick the Bloom
+// A run through the Labyrinth (docs/notes/m3-labyrinth.md, m4-run.md): the party walks the board,
+// fights where it stops on a fight, and wins at the Boss. Party HP, ultimate gauges, relics and the
+// run's own deck (card rewards and Symptoms) carry from fight to fight. Won fights, Events and Camp rests tick the Bloom
 // clock (src/game/bloom.ts), which scales the enemies of later fights and, at Fruiting, sows Bloom
 // nodes. Won fights give Obols, spent at Shops. Pure and seeded, like the engine.
 
-export const EXPEDITION_STREAMS = ['fights', 'rewards', 'bloom', 'shops', 'events'] as const;
+export const EXPEDITION_STREAMS = ['fights', 'rewards', 'bloom', 'shops', 'events', 'cards'] as const;
 type ExpeditionStream = (typeof EXPEDITION_STREAMS)[number];
 
 export type RelicTier = NonNullable<RelicDef['tier']>;
@@ -39,6 +42,8 @@ export interface ExpeditionDef {
   relicPool: string[];
   /** How many relics an elite offers to choose from. */
   offer: number;
+  /** Card rewards a normal fight may offer, and how many it offers. */
+  cards: { pool: string[]; offer: number };
   /** Obols for winning a fight, before the Bloom's bonus. */
   obols: { fight: number; elite: number };
   shop: {
@@ -83,8 +88,8 @@ export interface Expedition {
   board: Board;
   /**
    * map: choosing where to walk. tile: stopped on a Shop, Camp, Event, Symptom or Bloom node.
-   * fight: stopped on a fight. reward: the Victory panel after a won fight, with an elite's relic
-   * pick. outcome: what an Event or Bloom node choice did. won and lost end the run.
+   * fight: stopped on a fight. reward: the Victory panel after a won fight, with a normal fight's
+   * card pick or an elite's relic pick. outcome: what an Event or Bloom node choice did. won and lost end the run.
    */
   phase: 'map' | 'tile' | 'fight' | 'reward' | 'outcome' | 'won' | 'lost';
   /** The tile the party stepped from last, for turning back from a Symptom. */
@@ -97,8 +102,10 @@ export interface Expedition {
   clock: number;
   relics: string[];
   offered: string[];
-  /** The run's own cards (Symptoms), dealt into every fight. */
-  deck: string[];
+  /** Cards on offer on the Victory panel, each with the member it would go to. */
+  offeredCards: RunCard[];
+  /** The cards the run has gained (card rewards and Symptoms), dealt into every fight. */
+  deck: RunCard[];
   obols: number;
   /** What the last won fight gave, for the Victory panel: Obols, including the bonus (percent) of the Bloom stage it started at. */
   spoils?: { obols: number; bonus: number; stage: BloomStage };
@@ -121,6 +128,7 @@ export function startExpedition(seed: number, party: string[], def: ExpeditionDe
     clock: 0,
     relics: [],
     offered: [],
+    offeredCards: [],
     deck: [],
     obols: 0,
     shops: {},
@@ -217,9 +225,9 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
 /**
  * Carries a finished fight back: a loss ends the run and the Boss wins it. Any other win gives
  * Obols (more at later Bloom stages), ticks the clock (except a Bloom node's fight) and opens the
- * Victory panel, where an elite also offers relics.
+ * Victory panel, where an elite offers relics and any other fight offers cards.
  */
-export function finishExpeditionFight(exp: Expedition, combat: CombatState, def: ExpeditionDef): Expedition {
+export function finishExpeditionFight(exp: Expedition, combat: CombatState, def: ExpeditionDef, registry: Registry): Expedition {
   if (exp.phase !== 'fight' || combat.phase !== 'ended') throw new Error('The fight is not over.');
   const next = structuredClone(exp);
   delete next.fightSeed;
@@ -241,21 +249,67 @@ export function finishExpeditionFight(exp: Expedition, combat: CombatState, def:
       const pool = def.relicPool.filter((id) => !exp.relics.includes(id));
       shuffleInPlace(pool, next.rng, 'rewards');
       next.offered = pool.slice(0, def.offer);
-    }
+    } else next.offeredCards = rollCards(next, def, registry);
   }
   return next;
+}
+
+/**
+ * Who may own a card: its owner if she is in the party; for a Domain's generic card, the party's
+ * members of that Domain, or every member for a Domain that slots into any team (owner, 24 Oct).
+ */
+export function eligibleOwners(card: string, party: readonly string[], registry: Registry): string[] {
+  const def = registry.cards[card];
+  if (def?.owner !== undefined) return party.includes(def.owner) ? [def.owner] : [];
+  if (def?.domain === undefined) return [];
+  if (registry.domains[def.domain]?.anyTeam) return [...party];
+  return party.filter((id) => registry.characters[id]?.domain === def.domain);
+}
+
+/** A card offer: different cards from the pool that someone in the party may own, each given to a random eligible owner. */
+function rollCards(exp: Expedition, def: ExpeditionDef, registry: Registry): RunCard[] {
+  const pool = def.cards.pool.filter((card) => eligibleOwners(card, exp.party, registry).length > 0);
+  shuffleInPlace(pool, exp.rng, 'cards');
+  return pool.slice(0, def.cards.offer).map((card) => {
+    const owners = eligibleOwners(card, exp.party, registry);
+    return { card, owner: owners[nextInt(exp.rng, 'cards', owners.length)]! };
+  });
 }
 
 /** Closes the Victory panel, taking one offered relic (or none), and returns to the map. */
 export function chooseExpeditionRelic(exp: Expedition, relic: string | null): Expedition {
   if (exp.phase !== 'reward') throw new Error('Nothing is on offer.');
   if (relic !== null && !exp.offered.includes(relic)) throw new Error(`"${relic}" was not offered.`);
-  const next = structuredClone(exp);
+  const next = closeVictory(exp);
   if (relic !== null) next.relics.push(relic);
+  return next;
+}
+
+/** Closes the Victory panel, taking the offered card at this index (or none) into the run's deck, and returns to the map. */
+export function chooseExpeditionCard(exp: Expedition, index: number | null): Expedition {
+  if (exp.phase !== 'reward') throw new Error('Nothing is on offer.');
+  const card = index === null ? undefined : exp.offeredCards[index];
+  if (index !== null && !card) throw new Error(`No card is offered at ${index}.`);
+  const next = closeVictory(exp);
+  if (card) next.deck.push(card);
+  return next;
+}
+
+function closeVictory(exp: Expedition): Expedition {
+  const next = structuredClone(exp);
   next.offered = [];
+  next.offeredCards = [];
   delete next.spoils;
   next.phase = 'map';
   return next;
+}
+
+/** A run card's text with its owner's stats as numbers; what depends on the fight shows as written. */
+export function runCardText(card: RunCard, registry: Registry, options: TextOptions = {}): string {
+  const def = registry.cards[card.card];
+  const stats = registry.characters[card.owner ?? '']?.stats;
+  if (!def) return card.card;
+  return describeCard(def, registry, stats ? showStats(stats, options.mark) : formulaText, options);
 }
 
 /** The party's max HP: its members' HP added up, as combat starts it. */
@@ -354,7 +408,7 @@ export function takeSymptom(exp: Expedition): Expedition {
   const tile = exp.board.tiles[exp.board.at];
   if (exp.phase !== 'tile' || tile?.kind !== 'symptom' || tile.paid || tile.card === undefined) throw new Error('There is no Symptom to take here.');
   const next = structuredClone(exp);
-  next.deck.push(tile.card);
+  next.deck.push({ card: tile.card });
   next.board = resolveTile(next.board);
   next.phase = 'map';
   return next;
@@ -470,7 +524,7 @@ function applyOutcome(exp: Expedition, o: EventOutcome, out: Outcome, def: Exped
       break;
     case 'symptom':
       out.card = exp.board.tiles[exp.board.at]!.card!;
-      exp.deck.push(out.card);
+      exp.deck.push({ card: out.card });
       break;
     case 'tick':
       add('ticks', o.count);
@@ -506,7 +560,7 @@ export function chooseBloom(exp: Expedition, choice: BloomChoice, registry: Regi
     next.outcome = { hp: change };
   } else {
     const card = exp.board.tiles[exp.board.at]!.card!;
-    next.deck.push(card);
+    next.deck.push({ card });
     next.outcome = { card };
   }
   next.board = resolveTile(next.board);
@@ -555,6 +609,24 @@ export const M3_EXPEDITION: ExpeditionDef = {
     'relic.blooming-coin',
   ],
   offer: 3,
+  // M4.1: every card reward, offered three at a time (docs/notes/m4-run.md).
+  cards: {
+    pool: [
+      'maelia.nursing-bud',
+      'maelia.pollen-drift',
+      'agathe.hymnal-procession',
+      'agathe.thurible-swing',
+      'anthe.ash-offering',
+      'anthe.long-vigil',
+      'leonora.ledger-balance',
+      'leonora.writ-of-seizure',
+      'flesh.grafting-knife',
+      'rapture.chalk-circle',
+      'spirit.quiet-prayer',
+      'unbound.pocket-watch',
+    ],
+    offer: 3,
+  },
   obols: { fight: 20, elite: 45 },
   shop: {
     prices: { common: 50, uncommon: 80, rare: 120, cursed: 30 },

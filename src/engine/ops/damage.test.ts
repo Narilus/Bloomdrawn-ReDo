@@ -61,8 +61,38 @@ describe('damage', () => {
     expect(damageOp.validate?.(draft, strike, fromM0('e21'), registry)).toBeUndefined();
   });
 
+  it('can hit every living enemy, each with its own Shield and modifiers, with vitals after each hit', () => {
+    const state = fixtureCombat(['test.dummy', 'test.frail', 'test.dummy']);
+    (state.enemies[0] as { shield: number }).shield = 4;
+    state.enemies[2]?.statuses.push({ status: 'test.exposed', stacks: 1 });
+    const call = damage(add(6, stat('attack')), { target: 'allEnemies' });
+    const { preview, draft, events } = hit(state, call, fromM0());
+    // 6 + 3 Attack = 9; × 1.5 on the exposed one = 13.
+    expect(preview).toEqual([
+      { op: 'damage', target: 'e20', amount: 9, absorbed: 4 },
+      { op: 'damage', target: 'e21', amount: 9, absorbed: 0 },
+      { op: 'damage', target: 'e22', amount: 13, absorbed: 0 },
+    ]);
+    expect(draft.enemies.map((e) => e.hp)).toEqual([40 - 5, 0, 40 - 13]);
+    expect(events.map((e) => `${e.type}:${e.target}`)).toEqual([
+      'damageDealt:e20', 'damageTaken:e20',
+      'damageDealt:e21', 'damageTaken:e21', 'enemyDefeated:e21',
+      'damageDealt:e22', 'damageTaken:e22',
+    ]);
+    const { vitals } = damageOp.resolve(structuredClone(state), call, fromM0(), registry);
+    expect(vitals?.map((v) => v.enemies.map((e) => e.hp))).toEqual([
+      [35, 5, 40], [35, 5, 40],
+      [35, 0, 40], [35, 0, 40], [35, 0, 40],
+      [35, 0, 27], [35, 0, 27],
+    ]);
+    expect(damageOp.validate?.(draft, call, fromM0(), registry)).toBeUndefined();
+    draft.enemies.forEach((e) => (e.hp = 0));
+    expect(damageOp.validate?.(draft, call, fromM0(), registry)).toBeDefined();
+  });
+
   it('describes itself', () => {
     expect(damageOp.describe(strike, formulaText, registry)).toBe('Deal 6 + Attack damage');
     expect(damageOp.describe(damage(5, { target: 'party' }), formulaText, registry)).toBe('Deal 5 damage to the party');
+    expect(damageOp.describe(damage(5, { target: 'allEnemies' }), formulaText, registry)).toBe('Deal 5 damage to all enemies');
   });
 });

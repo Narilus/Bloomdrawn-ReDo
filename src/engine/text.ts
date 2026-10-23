@@ -1,5 +1,5 @@
 import { chargeOf } from './combat.ts';
-import type { CardDef, OpCall, Registry } from './defs.ts';
+import type { CardDef, CharacterDef, OpCall, Registry } from './defs.ts';
 import { evaluate, formulaSchema, formulaText, titleCase, type Formula } from './formula.ts';
 import { pipeline } from './modifiers.ts';
 import type { ShowAmount } from './operation.ts';
@@ -73,6 +73,27 @@ export function showFor(state: CombatState, owner: EntityId, registry: Registry,
   return (f, value) => {
     const text = String(value ? pipeline(value, f, state, ctx, registry) : Math.floor(evaluate(f, state, ctx, registry)));
     return mark ? mark(text, value) : text;
+  };
+}
+
+/**
+ * Numbers for a character outside combat, as a card reward shows them: a formula that reads only
+ * numbers and her stats shows its value; anything that depends on the fight shows as written.
+ */
+export function showStats(stats: CharacterDef['stats'], mark?: TextOptions['mark']): ShowAmount {
+  const value = (f: Formula): number | undefined => {
+    if (typeof f === 'number') return f;
+    if ('stat' in f) return stats[f.stat];
+    const terms = 'add' in f ? f.add : 'mul' in f ? f.mul : undefined;
+    const values = terms?.map(value);
+    if (!values || values.some((v) => v === undefined)) return undefined;
+    return 'add' in f ? values.reduce((a, b) => a! + b!, 0) : values.reduce((a, b) => a! * b!, 1);
+  };
+  return (f, kind) => {
+    const v = value(f);
+    if (v === undefined) return formulaText(f);
+    const text = String(Math.floor(v));
+    return mark ? mark(text, kind) : text;
   };
 }
 

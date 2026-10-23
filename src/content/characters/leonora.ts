@@ -1,5 +1,7 @@
-import { add, changeCost, damage, draw, gainMana, gainShield, manaDebt, manaSpent, stat, transcend } from '../../engine/index.ts';
+import { add, applyStatus, changeCost, damage, draw, gainMana, gainShield, manaDebt, manaSpent, stat, transcend } from '../../engine/index.ts';
 import { card, character } from '../define.ts';
+import { vulnerable } from '../statuses/vulnerable.ts';
+import { weak } from '../statuses/weak.ts';
 
 // Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning.
 
@@ -28,6 +30,19 @@ export const callInTheDebts = card({
   keywords: ['exhaust'], charge: 35,
   effects: [draw(2), gainMana(2), transcend()],
   text: 'Draw {effects.0.count} cards. Gain {effects.1.amount} Mana. Transcend.',
+});
+
+// Card rewards (docs/notes/m4-run.md), offered after normal fights. Numbers are placeholders.
+
+export const ledgerBalance = card({
+  id: 'leonora.ledger-balance', name: 'Ledger Balance', owner: 'leonora', reward: true, cost: 1, target: 'none',
+  effects: [draw(1), changeCost(-1, 'next')],
+});
+
+export const writOfSeizure = card({
+  id: 'leonora.writ-of-seizure', name: 'Writ of Seizure', owner: 'leonora', reward: true, cost: 2, target: 'chosenEnemy',
+  effects: [applyStatus(weak, 2), applyStatus(vulnerable, 2)],
+  text: 'Apply {effects.0.stacks} Weak and {effects.1.stacks} Vulnerable.',
 });
 
 export const leonora = character({
