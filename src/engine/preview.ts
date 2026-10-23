@@ -1,4 +1,5 @@
-import { cardCost, chargeOf, countDown, intentOf, playContext, ultimateEffects, validate, type Command } from './combat.ts';
+import { cardCost, chargeOf, countDown, playContext, ultimateEffects, validate, type Command } from './combat.ts';
+import { intentOf } from './phases.ts';
 import type { OpCall, Registry } from './defs.ts';
 import { evaluate } from './formula.ts';
 import { pipeline } from './modifiers.ts';

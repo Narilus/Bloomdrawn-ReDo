@@ -35,6 +35,8 @@ export const EVENT_TYPES = [
   'cardCreated',
   'cardExhausted',
   'enemyDefeated',
+  /** An enemy's HP bar emptied and its next bar came up (a Boss's phase change). */
+  'barBroken',
   'enemySummoned',
   'deckShuffled',
   // Bookkeeping: a trigger chain hit MAX_CHAIN_DEPTH and its remaining operations were dropped.

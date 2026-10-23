@@ -28,6 +28,8 @@ const modifier = z.strictObject({
   amount: formulaSchema,
 });
 
+const intent = z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) });
+
 const hooks = {
   triggers: z.array(trigger).optional(),
   modifiers: z.array(modifier).optional(),
@@ -72,9 +74,10 @@ export const schemas = {
     id,
     name: z.string().min(1),
     hp: z.int().positive(),
-    intents: z.array(z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) })).optional(),
+    intents: z.array(intent).optional(),
+    phases: z.array(z.strictObject({ name: z.string().min(1), hp: z.int().positive(), rouse: intent, intents: z.array(intent).min(1) })).optional(),
     traits: z.array(z.literal('resistsControl')).optional(),
-    size: z.enum(['small', 'normal', 'large']).optional(),
+    size: z.enum(['small', 'normal', 'large', 'huge']).optional(),
     ...hooks,
   }),
   status: z.strictObject({
@@ -135,6 +138,7 @@ export const schemas = {
     id,
     tier: z.enum(['normal', 'elite', 'boss']),
     enemies: z.array(z.union([id, z.strictObject({ enemy: id, hp: z.int().positive() })])).min(1).max(4),
+    fruiting: id.optional(),
   }),
   domain: z.strictObject({
     kind: z.literal('domain'),

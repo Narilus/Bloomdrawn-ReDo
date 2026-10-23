@@ -225,7 +225,7 @@ export const M3_LABYRINTH: LabyrinthDef = {
   encounters: {
     fight: ['encounter.hound', 'encounter.roots-and-smoke', 'encounter.pods-and-lantern', 'encounter.two-hounds'],
     elite: ['encounter.thorn-wall', 'encounter.hound-mother'],
-    boss: ['encounter.thorn-wall', 'encounter.hound-mother'],
+    boss: ['encounter.hollow-abbess'],
   },
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
   symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],

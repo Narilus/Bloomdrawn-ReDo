@@ -149,6 +149,10 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
   for (const e of Object.values(reg.enemies)) {
     checkHooks('enemy', e.id, e, '');
     e.intents?.forEach((intent, i) => checkCalls('enemy', e.id, intent.effects, `intents[${i}].effects`));
+    e.phases?.forEach((phase, p) => {
+      checkCalls('enemy', e.id, phase.rouse.effects, `phases[${p}].rouse.effects`);
+      phase.intents.forEach((intent, i) => checkCalls('enemy', e.id, intent.effects, `phases[${p}].intents[${i}].effects`));
+    });
   }
   for (const s of Object.values(reg.statuses)) {
     checkHooks('status', s.id, s, '');
@@ -161,6 +165,7 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       const id = typeof entry === 'string' ? entry : entry.enemy;
       if (!reg.enemies[id]) fail(where('encounter', en.id), en.id, `enemy "${id}" does not exist`);
     }
+    if (en.fruiting !== undefined && !reg.encounters[en.fruiting]) fail(where('encounter', en.id), en.id, `fruiting encounter "${en.fruiting}" does not exist`);
   }
 
   return { registry: reg, errors };

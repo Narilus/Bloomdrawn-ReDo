@@ -319,6 +319,27 @@ describe('card rewards', () => {
   });
 });
 
+describe('the Boss', () => {
+  const BOSS = { kind: 'boss', content: 'encounter.hollow-abbess' } as const;
+  const at = (clock: number, tile: Tile = BOSS) => expeditionFight({ ...go(on({ kind: 'entrance' }, tile), '1,0').at(-1)!, clock }, registry);
+
+  it('every board ends in the Hollow Abbess', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const tiles = Object.values(startExpedition(seed, PARTY, M3_EXPEDITION, registry.motifs).board.tiles);
+      expect(tiles.filter((t) => t.kind === 'boss').map((t) => t.content)).toEqual(['encounter.hollow-abbess']);
+    }
+  });
+
+  it('the Bloom never scales her; a fight with her that starts at Fruiting is Full Bloom', () => {
+    expect([0, 3, 6, 9, 11].map((clock) => [at(clock).enemies, at(clock).enemyScale])).toEqual(
+      Array.from({ length: 5 }, () => [['enemy.hollow-abbess'], undefined]),
+    );
+    expect([at(12).enemies, at(12).enemyScale]).toEqual([['enemy.hollow-abbess-full-bloom'], undefined]);
+    // Other fights still scale.
+    expect(at(12, HOUND).enemyScale).toBe(50);
+  });
+});
+
 describe("Symptoms and the run's deck", () => {
   it('a taken Symptom is dealt into every later fight, played by the front member', () => {
     const paid = takeSymptom(enter(on({ kind: 'entrance' }, SYMPTOM, HOUND)));

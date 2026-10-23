@@ -3,6 +3,7 @@ import type { Operation } from '../operation.ts';
 import { applyStatusOp } from './applyStatus.ts';
 import { changeCostOp } from './changeCost.ts';
 import { chargeUltimateOp } from './chargeUltimate.ts';
+import { clearStatusesOp } from './clearStatuses.ts';
 import { damageOp } from './damage.ts';
 import { drawOp } from './draw.ts';
 import { drawFewerOp } from './drawFewer.ts';
@@ -43,6 +44,7 @@ export const library: Readonly<Record<string, Operation>> = {
   transcend: transcendOp,
   createCard: createCardOp,
   summon: summonOp,
+  clearStatuses: clearStatusesOp,
 };
 
 export function getOp(registry: Registry, name: string): Operation | undefined {
@@ -69,3 +71,4 @@ export { reduceStacks } from './reduceStacks.ts';
 export { transcend } from './transcend.ts';
 export { createCard } from './createCard.ts';
 export { summon } from './summon.ts';
+export { clearStatuses } from './clearStatuses.ts';

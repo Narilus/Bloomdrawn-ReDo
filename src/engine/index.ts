@@ -8,5 +8,6 @@ export * from './state.ts';
 export * from './formula.ts';
 export { library } from './ops/index.ts';
 export * from './ops/index.ts';
+export * from './phases.ts';
 export * from './preview.ts';
 export * from './text.ts';

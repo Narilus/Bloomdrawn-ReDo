@@ -209,15 +209,21 @@ function rollShop(exp: Expedition, def: ExpeditionDef, registry: Registry): Shop
   return { relics, mend: { ...def.shop.mend } };
 }
 
-/** The combat setup for the fight the party is standing on, scaled by the Bloom's stage. */
+/**
+ * The combat setup for the fight the party is standing on, scaled by the Bloom's stage. The Bloom
+ * never scales the Boss; a Boss fight that starts at Fruiting is its Fruiting encounter, if it has
+ * one (owner, 24 Oct).
+ */
 export function expeditionFight(exp: Expedition, registry: Registry): CombatSetup {
   const tile = exp.board.tiles[exp.board.at];
-  const encounter = registry.encounters[tile?.content ?? ''];
+  const boss = tile?.kind === 'boss';
+  const authored = registry.encounters[tile?.content ?? ''];
+  const encounter = boss && authored?.fruiting && reached(exp.clock, 'fruiting') ? registry.encounters[authored.fruiting] : authored;
   if (exp.phase !== 'fight' || !encounter) throw new Error('There is no fight here.');
   const setup: CombatSetup = { seed: exp.fightSeed ?? 0, party: exp.party, enemies: encounter.enemies, relics: exp.relics, gauges: exp.gauges };
   if (exp.hp !== null) setup.partyHp = exp.hp;
   if (exp.deck.length > 0) setup.deck = exp.deck;
-  const scale = stageOf(exp.clock).enemyScale;
+  const scale = boss ? 0 : stageOf(exp.clock).enemyScale;
   if (scale > 0) setup.enemyScale = scale;
   return setup;
 }

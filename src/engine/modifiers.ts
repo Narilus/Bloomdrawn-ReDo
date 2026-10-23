@@ -1,6 +1,7 @@
 import type { ModifierDef, Registry } from './defs.ts';
 import { evaluate, type Formula } from './formula.ts';
 import type { OpContext } from './operation.ts';
+import { isImmune } from './phases.ts';
 import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
 
 /**
@@ -27,6 +28,8 @@ export function pipeline(
   if (value === 'damage' && state.enemyScale && state.enemies.some((e) => e.id === ctx.source)) {
     amount = Math.floor((amount * (100 + state.enemyScale)) / 100);
   }
+  // A rousing enemy takes no damage (DESIGN.md "Bosses").
+  if (value === 'damage' && isImmune(state, target)) return 0;
   if (value === 'damage' && target !== undefined) {
     const incoming = modifiersOf(state, registry, target).filter((m) => m.value === value);
     amount = scale(amount, incoming.filter((m) => m.step === 'incomingMul'));

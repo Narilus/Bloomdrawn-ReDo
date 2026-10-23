@@ -1,5 +1,5 @@
 import { Application, Assets, Container, FillGradient, Graphics, Sprite, Texture } from 'pixi.js';
-import { createStreams, nextFloat, PARTY, type CombatState, type EngineEvent } from '../engine/index.ts';
+import { allIntents, createStreams, nextFloat, PARTY, type CombatState, type EngineEvent } from '../engine/index.ts';
 import { Actor } from './Actor.ts';
 import { battleArt } from './art.ts';
 import { downscale, sharpen, type Pixels } from './resample.ts';
@@ -209,6 +209,15 @@ export class Battlefield {
         case 'enemyDefeated':
           this.actor(event.target)?.fall(impact);
           break;
+        case 'barBroken': {
+          // A Boss's bar breaks: she swells, and her new phase's name rises over her.
+          const enemy = state.enemies.find((e) => e.id === event.target);
+          const phase = enemy ? registry.enemies[enemy.enemy]?.phases?.[(enemy.phase ?? 1) - 1] : undefined;
+          const actor = this.actor(event.target);
+          actor?.burst(impact);
+          actor?.popup(phase?.name ?? 'Rises again', COLOURS.ultimate, impact, 48);
+          break;
+        }
         case 'enemySummoned': {
           const enemy = state.enemies.find((e) => e.id === event.target);
           const actor = enemy ? this.addEnemy(enemy, state.enemySlots) : undefined;
@@ -399,6 +408,6 @@ function backdrop(): Container {
 /** Enemies the current ones can summon. */
 function summonable(state: CombatState): string[] {
   return state.enemies.flatMap((e) =>
-    (registry.enemies[e.enemy]?.intents ?? []).flatMap((i) => i.effects).flatMap((c) => (c.op === 'summon' && typeof c.enemy === 'string' ? [c.enemy] : [])),
+    allIntents(registry.enemies[e.enemy]).flatMap((i) => i.effects).flatMap((c) => (c.op === 'summon' && typeof c.enemy === 'string' ? [c.enemy] : [])),
   );
 }

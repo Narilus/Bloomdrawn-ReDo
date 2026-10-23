@@ -1,10 +1,11 @@
-import type { CardDef, EnemyEntry, IntentDef, OpCall, Registry } from './defs.ts';
+import type { CardDef, EnemyEntry, OpCall, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
 import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
 import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution } from './resolve.ts';
+import { allIntents, intentOf, intentsOf, scaledHp } from './phases.ts';
 import { takeStacks } from './statuses.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
@@ -141,13 +142,17 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
 /** A fresh enemy at full HP (or an encounter's HP), raised by the fight's enemy scale, showing its first intent. */
 export function newEnemy(registry: Registry, enemy: string, id: EntityId, slot: number, scale: number, hp?: number): Enemy {
   const def = registry.enemies[enemy];
-  const max = Math.floor(((hp ?? def?.hp ?? 1) * (100 + scale)) / 100);
-  return { id, enemy, slot, hp: max, maxHp: max, shield: 0, statuses: [], ...(def?.intents?.length ? { intent: 0 } : {}) };
+  const max = scaledHp(hp ?? def?.hp ?? 1, scale);
+  return {
+    id, enemy, slot, hp: max, maxHp: max, shield: 0, statuses: [],
+    ...(def?.intents?.length ? { intent: 0 } : {}),
+    ...(def?.phases?.length ? { phase: 0 } : {}),
+  };
 }
 
-/** How many enemies one enemy can summon at most, from the `max` of its summon intents. */
+/** How many enemies one enemy can summon at most, from the `max` of its summon intents in any phase. */
 function summonCapacity(registry: Registry, enemy: string): number {
-  const calls = registry.enemies[enemy]?.intents?.flatMap((i) => i.effects) ?? [];
+  const calls = allIntents(registry.enemies[enemy]).flatMap((i) => i.effects);
   return Math.max(0, ...calls.filter((c) => c.op === 'summon').map((c) => Number(c.max ?? 0)));
 }
 
@@ -371,19 +376,26 @@ export function countDown(rc: Resolution, ended: 'party' | 'enemies'): void {
 /**
  * The enemy does exactly what its intent showed, then reveals its next intent. A control status
  * makes it skip instead: Stun loses that intent, Delay keeps it shown for next turn. A status that
- * ends after an action (Falter) goes once it has acted.
+ * ends after an action (Falter) goes once it has acted. A rousing enemy's action is its Rouse;
+ * once that has acted (or been lost to Stun), it can be hurt again and starts its phase's cycle.
  */
 function actIntent(rc: Resolution, enemy: Enemy): void {
   const intent = intentOf(enemy, rc.registry);
   if (!intent) return;
-  const count = rc.registry.enemies[enemy.enemy]?.intents?.length ?? 1;
+  const rousing = enemy.rousing;
+  const next = () => {
+    if (rousing) {
+      delete enemy.rousing;
+      enemy.intent = 0;
+    } else if (!enemy.rousing) enemy.intent = ((enemy.intent ?? 0) + 1) % Math.max(1, intentsOf(enemy, rc.registry).length);
+  };
   const control = enemy.statuses.find((s) => rc.registry.statuses[s.status]?.skipsAction);
   if (control) {
     const mode = rc.registry.statuses[control.status]?.skipsAction;
     enemy.statuses.splice(enemy.statuses.indexOf(control), 1);
     emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: control.status, via: 'skip' }, ROOT);
     drain(rc);
-    if (mode === 'advance') enemy.intent = ((enemy.intent ?? 0) + 1) % count;
+    if (mode === 'advance') next();
     return;
   }
   enqueue(rc, intent.effects, { source: enemy.id, target: PARTY }, ROOT);
@@ -395,12 +407,7 @@ function actIntent(rc: Resolution, enemy: Enemy): void {
     emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
   }
   drain(rc);
-  enemy.intent = ((enemy.intent ?? 0) + 1) % count;
-}
-
-/** The intent an enemy is showing now. */
-export function intentOf(enemy: Enemy, registry: Registry): IntentDef | undefined {
-  return enemy.intent === undefined ? undefined : registry.enemies[enemy.enemy]?.intents?.[enemy.intent];
+  next();
 }
 
 function beginTurn(rc: Resolution): void {

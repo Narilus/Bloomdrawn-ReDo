@@ -221,7 +221,9 @@ export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
   const shown = vitals?.enemies.find((e) => e.id === id);
   // A summon still to arrive in the sequence playing out has no plate yet.
   if (!live || !home || (vitals && !shown)) return null;
+  // A Boss's bar and rousing come with the vitals too, so the plate follows the hits as they land.
   const enemy = { ...live, ...shown };
+  if (shown && !shown.rousing) delete enemy.rousing;
   // Four across leaves less room: narrower plates.
   const compact = state.enemySlots >= 4;
   const width = compact ? 184 : 240;
@@ -229,6 +231,7 @@ export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
   const loss = hpLoss(previews, id);
   const after = Math.max(0, enemy.hp - loss);
   const intent = enemy.hp > 0 ? intentOf(enemy, registry) : undefined;
+  const bars = def?.phases?.length ?? 0;
   return (
     <div
       className={`enemy-plate plaque${aimed ? ' aimed' : ''}${enemy.hp <= 0 ? ' defeated' : ''}${compact ? ' compact' : ''}`}
@@ -245,11 +248,32 @@ export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
         <div className="bar-fill" style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }} />
         {loss > 0 && <div className="bar-ghost" style={{ left: `${(after / enemy.maxHp) * 100}%`, width: `${((enemy.hp - after) / enemy.maxHp) * 100}%` }} />}
       </div>
+      {bars > 0 && <BarBlips bars={bars} spent={enemy.phase ?? 0} />}
       {loss > 0 && <div className="plate-preview">−{loss}</div>}
       <div className="plate-tags">
+        {enemy.rousing && (
+          <span className="status-badge immune" tabIndex={0} aria-label="Immune. Takes no damage until it has acted.">
+            Immune
+            <Tip title="Immune">
+              <p>A new HP bar: takes no damage until it has acted.</p>
+            </Tip>
+          </span>
+        )}
         {enemy.shield > 0 && <ShieldBadge amount={enemy.shield} />}
         <StatusBadges statuses={enemy.statuses} />
       </div>
+    </div>
+  );
+}
+
+/** A Boss's HP bars still to come: a lit blip for each, gone grey once its bar has come up. */
+function BarBlips({ bars, spent }: { bars: number; spent: number }) {
+  const left = bars - spent;
+  return (
+    <div className="bar-blips" aria-label={left === 0 ? 'Last HP bar' : `${left} more HP ${left === 1 ? 'bar' : 'bars'}`}>
+      {Array.from({ length: bars }, (_, i) => (
+        <span key={i} className={i < left ? 'blip' : 'blip spent'} />
+      ))}
     </div>
   );
 }
@@ -302,6 +326,7 @@ function Intent({ name, previews, skips }: { name: string; previews: Preview[]; 
     }
     if (p.op === 'heal') return [{ icon: 'heal', amount: p.amount, words: `heals an ally ${p.amount}` }];
     if (p.op === 'summon') return [{ icon: 'summon', amount: p.amount, words: `summons ${p.amount}` }];
+    if (p.op === 'clearStatuses') return [{ words: 'clears its statuses' }];
     if (p.op === 'applyStatus') {
       const icon = registry.statuses[p.status ?? '']?.icon;
       return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}` }];

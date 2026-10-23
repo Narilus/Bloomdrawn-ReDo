@@ -58,6 +58,14 @@ Status: **answered by the owner, 24 Oct** (his answers are folded in below; the 
 
 Bloomed art for her is a nice-to-have, after the base sprite.
 
+**As built in M4.2** (`src/engine/phases.ts`, `src/content/enemies/hollow-abbess.ts`; numbers are placeholders):
+- Her Rouses are named Taking Root (Rooted) and Blossoming (Full Bloom); each only clears her statuses. Full Bloom is a second enemy definition sharing her Sermon, fought through the Boss encounter's `fruiting` encounter when the fight starts at Fruiting.
+- Immunity covers damage and HP loss (Poison and Bleed included); statuses still land, and the Rouse clears them. Tentacle volleys pass a rousing enemy by and hit the others; the hit that breaks a bar loses the rest, so it doesn't carry over to the Acolytes either.
+- A bar can also break at the end of your turn (Tentacles, Poison). Her Rouse then acts at once, so you may not see her Immune on your turn.
+- Stun on a rousing enemy that doesn't resist control would lose the Rouse: the new phase starts without clearing statuses. She resists control, so it never happens with her.
+- Her plate shows a red blip for each bar still to come (grey once it is up), and an Immune badge while she rouses. On the battlefield the break is a swell and the new phase's name.
+- Changing the Boss pool shifted the board's later content draws, so some fight tiles on existing seeds hold different encounters.
+
 **Art:** one new sprite through `npm run art`. Brief: a tall abbess in bruise-violet vestments, lower body split into pale roots gripping the floor, a brass crozier wound with blush petals, a hollow where her face should be framed by ivory lilies. Violet, brass, ivory. The Acolytes reuse their sprite.
 
 **Engine needs:** HP bars per phase (a bar break, immunity, a Rouse intent, a phase's own intent cycle, a phase chosen by the Bloom stage at the start of the fight); the bar count on the stage; side lanes for adds around a large anchor.

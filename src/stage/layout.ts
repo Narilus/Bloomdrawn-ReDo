@@ -42,8 +42,9 @@ const ENEMY_LAYOUTS: Readonly<Record<number, readonly Point[]>> = {
 /** An enemy's feet position, given its slot and how many slots the fight lays out. */
 export const enemyHome = (slot: number, slots: number): Point | undefined => ENEMY_LAYOUTS[Math.min(4, Math.max(1, slots))]?.[slot];
 
-/** On-screen height of an enemy body by its size. */
-export const enemyHeight = (size?: 'small' | 'normal' | 'large'): number => (size === 'small' ? 190 : size === 'large' ? 400 : ENEMY_HEIGHT);
+/** On-screen height of an enemy body by its size; a Boss stands huge, as the anchor of its fight. */
+export const enemyHeight = (size?: 'small' | 'normal' | 'large' | 'huge'): number =>
+  size === 'small' ? 190 : size === 'large' ? 400 : size === 'huge' ? 480 : ENEMY_HEIGHT;
 
 /** Party sprites are drawn at this height before their slot scale. */
 export const PARTY_HEIGHT = 400;

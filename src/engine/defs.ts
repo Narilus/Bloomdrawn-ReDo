@@ -122,13 +122,27 @@ export interface IntentDef {
 export interface EnemyDef extends Hooks {
   id: string;
   name: string;
+  /** HP of its first bar. */
   hp: number;
   /** Used in order, then from the start again. An enemy without intents does nothing. */
   intents?: IntentDef[];
+  /**
+   * Later HP bars, in order (a Boss; DESIGN.md "Bosses"). When a bar empties, the next comes up
+   * full, the rest of the hit is lost, and the enemy takes no damage until its Rouse has acted.
+   */
+  phases?: PhaseDef[];
   /** `resistsControl`: elites and bosses turn Stun and Delay into Falter. */
   traits?: 'resistsControl'[];
   /** How large it stands on the field (presentation only). */
-  size?: 'small' | 'normal' | 'large';
+  size?: 'small' | 'normal' | 'large' | 'huge';
+}
+
+/** One later HP bar of an enemy: its HP, the Rouse that begins it, and the intents it cycles through after. */
+export interface PhaseDef {
+  name: string;
+  hp: number;
+  rouse: IntentDef;
+  intents: IntentDef[];
 }
 
 /** A fight: which enemies, in slot order, with optional HP overrides for this encounter. */
@@ -136,6 +150,8 @@ export interface EncounterDef {
   id: string;
   tier: 'normal' | 'elite' | 'boss';
   enemies: EnemyEntry[];
+  /** An encounter fought instead when the fight starts at Fruiting. The run reads it; the engine never does. */
+  fruiting?: string;
 }
 
 export type EnemyEntry = string | { enemy: string; hp: number };

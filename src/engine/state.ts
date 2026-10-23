@@ -45,8 +45,12 @@ export interface Enemy {
   maxHp: number;
   shield: number;
   statuses: StatusStack[];
-  /** Index of the shown intent in its definition's list; absent for an enemy without intents. */
+  /** Index of the shown intent in its current phase's list; absent for an enemy without intents. */
   intent?: number;
+  /** For an enemy with phases: its current bar, 0 for the first. */
+  phase?: number;
+  /** A bar has just broken: it takes no damage, and its next action is the phase's Rouse. */
+  rousing?: true;
 }
 
 export interface Relic {
@@ -112,10 +116,17 @@ export const isAlive = (enemy: Enemy): boolean => enemy.hp > 0;
 /** HP and Shield right after an event, so presentation can move bars as each hit lands. */
 export interface Vitals {
   party: { hp: number; shield: number };
-  enemies: { id: string; hp: number; shield: number }[];
+  /** An enemy with phases also carries its bar, the bar's max HP and whether it is rousing. */
+  enemies: { id: string; hp: number; shield: number; phase?: number; maxHp?: number; rousing?: true }[];
 }
 
 export const vitalsOf = ({ party, enemies }: CombatState): Vitals => ({
   party: { hp: party.hp, shield: party.shield },
-  enemies: enemies.map((e) => ({ id: e.id, hp: e.hp, shield: e.shield })),
+  enemies: enemies.map((e) => ({
+    id: e.id,
+    hp: e.hp,
+    shield: e.shield,
+    ...(e.phase === undefined ? {} : { phase: e.phase, maxHp: e.maxHp }),
+    ...(e.rousing ? { rousing: true as const } : {}),
+  })),
 });

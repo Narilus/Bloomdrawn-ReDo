@@ -4,6 +4,7 @@ import type { EngineEvent } from '../events.ts';
 import { formulaSchema, type Formula } from '../formula.ts';
 import { pipeline } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
+import { fall } from '../phases.ts';
 import { isAlive, PARTY, vitalsOf, type CombatState, type EntityId, type Vitals } from '../state.ts';
 import type { Registry } from '../defs.ts';
 
@@ -62,9 +63,8 @@ function land(draft: CombatState, args: DamageArgs, ctx: OpContext, registry: Re
     const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: hit.target, amount: hit.amount, absorbed: hit.absorbed };
     if (ctx.owner !== undefined) base.owner = ctx.owner;
     const landed: EngineEvent[] = [base, { ...base, type: 'damageTaken' }];
-    if (hit.target !== PARTY && victim.hp <= 0) {
-      landed.push({ type: 'enemyDefeated', source: ctx.source, target: hit.target });
-    }
+    const enemy = draft.enemies.find((e) => e.id === hit.target);
+    if (enemy && enemy.hp <= 0) landed.push(fall(draft, enemy, ctx.source, registry));
     events.push(...landed);
     vitals.push(...landed.map(() => vitalsOf(draft)));
   }

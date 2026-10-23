@@ -608,6 +608,27 @@ body,
 .intent-part small { font-size: 14px; }
 .intent.skipped { color: var(--lavender); }
 .intent.skipped b { text-decoration: line-through; }
+/* A Boss's HP bars still to come: red blips that go grey as each bar comes up. */
+.bar-blips {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.blip {
+  width: 16px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--raw-pink);
+  box-shadow: 0 0 6px rgba(217, 118, 122, 0.7);
+}
+
+.blip.spent {
+  background: #3a2f35;
+  box-shadow: none;
+}
+
+.status-badge.immune { border-color: #e2c27a; color: #e8d27a; }
 .status-badge.status-bleed { border-color: #e86a78; color: #f2a0a8; }
 .status-badge.status-vulnerable { border-color: var(--blush); color: var(--blush); }
 .status-badge.status-weak { border-color: var(--lavender); color: var(--lilac-glow); }
