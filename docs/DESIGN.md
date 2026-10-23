@@ -239,7 +239,7 @@ Enemies are things the Bloom has taken, fought in three tiers, and they visibly 
 | Tier | Shape | Rule |
 | --- | --- | --- |
 | Normal | 1–3 enemies, simple patterns | Modest Obols and a card reward |
-| Elite | One elite or a coordinated group; each tests one thing (heavy Shield, punishing slow setups, swarming) | Better rewards, including a relic; tests, never hard counters to a whole Domain |
+| Elite | One elite or a coordinated group; each tests one thing (heavy Shield, punishing slow setups, swarming) | Better rewards: more Obols and a relic, no card; tests, never hard counters to a whole Domain |
 | Boss | Phases with telegraphed transitions; control resistance | Ends the run; never relies on hidden instant-kills or unexplained immunity |
 
 ### Roles
@@ -261,13 +261,19 @@ Each enemy has base art plus overlays for the later clock stages. A hound at See
 
 Enemies stand on the right of the stage, the party on the left. Independently targetable enemies never overlap their bodies, target areas, HP or intent labels. Bosses take a large anchor, with adds in side lanes.
 
+### Bosses
+
+- **One HP bar per phase.** Blips under the bar count the bars still to come. When a hit empties a bar, the rest of the hit is lost and the next bar comes up full.
+- **The phase change is a breath, shown.** The Boss is immune to damage until its next action, a Rouse that clears its statuses and starts the next phase. Specific pierce or stacking instant-death effects may later get past it.
+- **The Bloom clock doesn't scale bosses.** Fruiting changes them by design instead: a third phase, or a different second phase with its own moveset, possibly with Bloomed art (owner, 24 Oct).
+
 ## Run economy and rewards
 
 Inside a run the player earns Obols, cards, relics and Symptoms. All of them vanish at run end except profile rewards, which are banked.
 
 - **Obols:** run-only currency, earned from first clears of fights, Events and the Boss. It is finite, because cleared tiles never respawn.
 - **Shops:** stock and prices are fixed by the run seed when first revealed, then persist all run. A premium relic may be unaffordable on first visit by design, which is what makes the temptation loop work. No selling and no infinite loops.
-- **Card rewards:** offered from pools for the party's Domains and characters. A generic Domain card must be assigned to an eligible owner, and the preview shows its numbers with that owner's stats.
+- **Card rewards:** offered from pools for the party's Domains and characters. A Domain's generic card shows only if the party has a member of that Domain; Unbound's always shows. A generic card goes to a random eligible owner (Unbound's to any member), and the preview shows its numbers with that owner's stats.
 - **Relics:** run-scoped items with clear triggers, in Common, Uncommon, Rare and Cursed tiers. They create build direction, such as more Mana, hand manipulation or ultimate feeding, more than flat stats.
 - **Symptoms:** cards with both a real benefit and a real cost, taken at Symptom tiles. The drawback must matter in ordinary play; some builds will seek them out.
 - **Curses:** purely harmful run cards, removed only by a named service.
@@ -278,7 +284,7 @@ Inside a run the player earns Obols, cards, relics and Symptoms. All of them van
 | Outcome | Banked to profile |
 | --- | --- |
 | Victory | All profile rewards marked during the run |
-| Defeat or abandon | A reduced, non-zero share, scaled by depth and progress |
+| Defeat or abandon | A reduced share, scaled by depth and progress. A run quit before any progress banks nothing, and no route banks more than playing to win |
 
 Never banked: Obols, run cards, relics, Symptoms, Curses or run HP. Always eligible: pulls, EXP items, ascension materials, weapon materials and profile money.
 

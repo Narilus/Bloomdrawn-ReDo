@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
-**Current task:** M4 draft (`docs/notes/m4-run.md`) waiting for the owner's answers
+**Current task:** M4.1 Card rewards
 
 ## Milestones
 
@@ -222,12 +222,34 @@ _Golden replay done 22 Oct (`src/app/expedition.test.ts`, `src/app/golden/labyri
 
 ## M4 tasks
 
-Content and rules are drafted in `docs/notes/m4-run.md` (waiting for the owner's answers). The split below is the draft's; it is settled with the answers.
+Rules and content are in `docs/notes/m4-run.md` (answered by the owner 24 Oct).
 
 ### M4.1 Card rewards
+The twelve reward cards as content. After a normal fight the Victory panel offers 3 cards from the party's pool (members' own cards, generic cards of the party's Domains, Unbound's always), each generic card with a random eligible owner; take one or skip. A taken card joins the run's deck, played by its owner.
+**Done when:**
+- scenario tests prove each reward card;
+- tests prove the pool never shows a Domain the party lacks, never repeats a card in one offer, and only gives generic cards to eligible owners;
+- elites and the Boss offer no cards;
+- a taken card is in the next fight's draw pile, played by its owner, and the offer replays exactly from the seed.
+
 ### M4.2 The Boss
+HP bars per phase, the phase break (immunity until a Rouse that clears statuses), a phase cycle chosen by the Bloom stage, and no Bloom scaling for bosses. The Hollow Abbess with Rooted and, at Fruiting, Full Bloom as her second phase. The stage gives her a large anchor with Acolytes in side lanes, and blips under her bar. Her sprite through `npm run art`, picked by the owner.
+**Done when:**
+- engine tests prove a bar break loses the rest of the hit, refills the next bar, blocks damage until the Rouse, and the Rouse clears statuses and switches the cycle;
+- scenario tests prove both of her second phases and that the Bloom doesn't scale her;
+- the Boss tile holds her, and the owner has seen her fight.
+
 ### M4.3 Profile and banking
+A profile save with banked pulls and a run count. A win banks 5 pulls (10 at Fruiting); a defeat or abandon banks 1 per elite beaten (3 at most). A result screen lists what was banked and why.
+**Done when:** tests prove each banking case, including that a run quit before any progress banks nothing, and the profile survives a reload.
+
 ### M4.4 Save and resume
+The run saved at map steps, node results and after each combat command, with the previous good save kept. A title screen with Continue, New run (which asks, then abandons a saved run) and the banked pulls. Abandon in a map menu. A save that can't be migrated ends as an abandon and banks its share. Export and import of one save file.
+**Done when:**
+- tests prove a run saved and loaded at any point plays on identically, a failed write keeps the last good save, and an unreadable run banks its share;
+- an e2e test closes the page mid-fight and mid-walk and resumes on the same state;
+- an export imported into an empty browser gives back the same profile and run.
+
 ### M4.5 A full run (owner gate)
 **Done when:** the owner wins, quits and resumes a full run, and a golden replay of a scripted run through a save and a resume is stable.
 

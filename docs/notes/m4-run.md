@@ -1,20 +1,18 @@
-# M4 First winnable run: draft for owner review
+# M4 First winnable run
 
-Status: **draft, 23 Oct**. M4 is a gate: you win a full run, close the game and resume it. This note covers what M4 needs that DESIGN.md leaves open: card rewards, the Boss, banking and save and resume. Every number is a placeholder for you to mark up. Questions are numbered at the end.
+Status: **answered by the owner, 24 Oct** (his answers are folded in below; the choices left to me are marked "my call"). M4 is a gate: the owner wins a full run, closes the game and resumes it. This note covers what M4 needs that DESIGN.md leaves open: card rewards, the Boss, banking and save and resume. Numbers are placeholders for tuning.
 
 ## Card rewards
 
-DESIGN gives normal fights "modest Obols and a card reward", offered from pools for the party's Domains and characters. Cards gained in a run join the run's deck (beside the Symptoms) for the rest of the run.
+- **After a normal fight,** the Victory panel offers 3 cards; take one or skip. Normal fights include Bloom-node fights and the elite-roster fights that Flowering puts on normal tiles, which already pay a normal fight's Obols.
+- **Elites give their relic pick only,** no card (owner).
+- **The pool** is shaped by the party: each member's own reward cards; the generic card of each Domain that has a member in the party; and Unbound's generic card always, since Unbound slots into any team. A Domain with no member never shows (owner).
+- **Generic cards go to a random eligible owner,** rolled from the seed when the offer is made (owner): a Domain's card to one of that Domain's members, Unbound's card to any member. The offer shows the owner and the card's numbers with her stats.
+- One offer never repeats a card; a run can hold several copies of one card. A taken card joins the run's deck for the rest of the run, played by its owner.
+- **No cards in Shops, and no rarities** in M4 (owner).
+- **Card removal is deferred (my call).** The owner offered a once-per-Shop "sell" that removes a card for 45 Obols. DESIGN ties removal to a named service with Curses and says Shops don't sell, and a sell needs a rule for which cards may go (Symptoms stay for the run; would a starter card?). It fits better when Curses arrive.
 
-**Proposal:**
-- **After a normal fight,** the Victory panel offers 3 cards; take one or skip.
-- **After an elite,** the panel offers the relic pick as now, and then 3 cards (Q1).
-- **The pool** is each party member's reward cards plus the generic card of each Domain in the party. One offer never repeats a card; a run can hold several copies of one card.
-- **Generic Domain cards** must be assigned to an eligible owner: a party member of that Domain. The preview shows the card's numbers with that owner's stats. With the starter four there is one member per Domain, so only Unbound's card needs a real choice, if any member may take it (Q3).
-- **Shops** also sell 2 cards, rolled with the rest of the stock, at 45 Obols each (Q4).
-- No card rarities and no card removal in M4 (Q5).
-
-**Draft reward cards** (built from operations that exist; names and numbers are placeholders):
+**Reward cards** (provisionally accepted; watch that they don't erode build identity, which a bigger pool will ease):
 
 | Owner | Card (cost) | Effect |
 |---|---|---|
@@ -26,71 +24,79 @@ DESIGN gives normal fights "modest Obols and a card reward", offered from pools 
 | Anthe | **Long Vigil** (6, Ritual) | Deal 10 + 3 × Essence damage to all enemies. |
 | Leonora | **Ledger Balance** (1) | Draw 1 card. The next card you play costs 1 less. |
 | Leonora | **Writ of Seizure** (2) | Apply 2 Weak and 2 Vulnerable to an enemy. |
-| Flesh (any) | **Grafting Knife** (1) | Deal 4 + Attack damage. Apply 3 Bleed. |
-| Rapture (any) | **Chalk Circle** (1) | Gain 1 Tentacle. Gain 4 + Defense Shield. |
-| Spirit (any) | **Quiet Prayer** (4, Ritual) | Gain 8 + 2 × Essence Shield. |
-| Unbound (any) | **Pocket Watch** (1) | Draw 2 cards. |
+| A Flesh member | **Grafting Knife** (1) | Deal 4 + Attack damage. Apply 3 Bleed. |
+| A Rapture member | **Chalk Circle** (1) | Gain 1 Tentacle. Gain 4 + Defense Shield. |
+| A Spirit member | **Quiet Prayer** (4, Ritual) | Gain 8 + 2 × Essence Shield. |
+| Any member | **Pocket Watch** (1) | Draw 2 cards. |
 
 ## The Boss
 
-DESIGN: phases with telegraphed transitions, control resistance, a large anchor with adds in side lanes, and no hidden instant kills or unexplained immunity. The Boss tile holds the hardest elite until now.
+**The Hollow Abbess.** The Bloom cult's abbess, half taken into a root-tree. Resists control (Falter, like the elites). The concept stands (owner).
 
-**Draft: the Hollow Abbess.** The Bloom cult's abbess, half taken into a root-tree. Resists control (Falter, like the elites). HP 300 (Q6).
+**HP bars, not a mark (owner).** 400 HP as two bars of 200. Under the bar, a red blip for each bar still to come; it goes grey when its bar comes up.
+- When a hit empties a bar, the rest of that hit is lost, the next bar comes up full (200/200), and **the Boss is immune to damage for the rest of the party's turn**. The immunity is shown on her, so it's never unexplained.
+- Her next intent becomes **Rouse**: she clears her statuses and the next phase begins. My call on timing: the immunity lasts until the Rouse resolves, so Poison or Bleed ticking at the start of her turn can't chip the fresh bar either.
+- Later, specific pierce effects or stacking instant-death effects may get past the immunity (owner). Nothing in M4 does.
 
-- **Phase 1, Sermon** (full HP down to half), cycling:
-  - Censer Sermon: the party gains 2 Weak.
-  - Crozier Blow: 16 damage.
-  - Call the Faithful: summons a Censer Acolyte into a side lane (two at most).
-- **Transition.** Her HP bar carries a mark at half. When a hit takes her past it, the hit lands in full, and her next intent becomes **Taking Root** (gain 30 Shield), shown at once, so you see the change a turn ahead.
-- **Phase 2, Rooted**, cycling:
-  - Root Lash: 8 damage, twice.
-  - Grasping Roots: the party gains 2 Vulnerable.
-  - Bloom Burst: 28 damage.
-- **Scaling:** the Boss scales with the Bloom stage like any fight, so winning at Fruiting is the hardest fight and doubles the rewards (Q7).
-- **Art:** one new sprite through `npm run art`. Brief: a tall abbess in bruise-violet vestments, lower body split into pale roots gripping the floor, a brass crozier wound with blush petals, a hollow where her face should be framed by ivory lilies. Violet, brass, ivory. The Acolytes reuse their sprite.
+**Phase 1, Sermon,** cycling:
+- Censer Sermon: the party gains 2 Weak.
+- Crozier Blow: 16 damage.
+- Call the Faithful: summons a Censer Acolyte into a side lane (two at most).
 
-**Engine needs:** phases (an HP threshold that swaps the intent cycle and inserts a transition intent); a phase mark on the HP bar; side lanes for adds around a large anchor.
+**Phase 2, Rooted,** cycling:
+- Root Lash: 8 damage, twice.
+- Grasping Roots: the party gains 2 Vulnerable.
+- Bloom Burst: 28 damage.
+
+**The Bloom doesn't scale bosses (owner).** A raw percentage would force base numbers down and make ordinary runs too easy. Fruiting makes a Boss harder by design instead: a third phase, or a different second phase with its own moveset, possibly with "Bloomed" art ("Matriarch, Fully Bloomed"). Not necessarily for this Boss.
+
+**Draft, my call: the Abbess at Fruiting.** So the idea is built and playable with the first Boss, her second phase at Fruiting is **Full Bloom** instead of Rooted:
+- Root Lash: 8 damage, three times.
+- Pollen Choir: the party gains 2 Weak and 2 Vulnerable.
+- Call the Faithful: summons a Censer Acolyte (two at most).
+- Bloom Burst: 32 damage.
+
+Bloomed art for her is a nice-to-have, after the base sprite.
+
+**Art:** one new sprite through `npm run art`. Brief: a tall abbess in bruise-violet vestments, lower body split into pale roots gripping the floor, a brass crozier wound with blush petals, a hollow where her face should be framed by ivory lilies. Violet, brass, ivory. The Acolytes reuse their sprite.
+
+**Engine needs:** HP bars per phase (a bar break, immunity, a Rouse intent, a phase's own intent cycle, a phase chosen by the Bloom stage at the start of the fight); the bar count on the stage; side lanes for adds around a large anchor.
 
 ## Banking
 
-DESIGN: a victory banks every profile reward marked during the run; a defeat or abandon banks a reduced, non-zero share scaled by depth and progress. Never banked: Obols, run cards, relics, Symptoms, run HP.
+Pulls are the only profile reward until M5's profile systems (provisional).
 
-The profile systems (levels, EXP, materials, gacha) are M5. So in M4 the only profile reward is **pulls**, counted in a profile save and shown on the title screen, with nothing to spend them on until M5.
-
-**Proposal:**
-- **Win:** 5 pulls; 10 if the Boss falls at Fruiting (owner, 20 Oct, provisional).
-- **Defeat or abandon:** 1 pull, plus 1 per elite beaten (3 at most). Depth scaling waits for depth tiers (Q8).
-- **The result screen** lists what was banked and why ("Boss at Fruiting: ×2").
+- **Win:** 5 pulls; 10 if the Boss falls at Fruiting.
+- **Defeat or abandon:** 1 pull per elite beaten, 3 at most, and nothing else. A run quit before any progress banks nothing, so starting and quitting a run is never a way to farm pulls (owner).
+- Later, the owner may drop the cap and instead bank half a win's rewards, rounded up. Either way, no route (an elite rush) should beat playing to win.
+- **The result screen** lists what was banked and why ("Boss at Fruiting: ×2", "2 elites beaten").
 
 ## Save and resume
 
-ARCHITECTURE: the active run is saved at map steps and node results, and after each resolved combat command; each save carries schema and content versions; a failed write never replaces the last good save. The save store and IndexedDB adapter exist since M0.
-
-**Proposal:**
 - **What is saved:** the whole run (board, fog, clock, Obols, Shops, deck, relics, gauges, streams), and during a fight the whole combat state. Closing mid-fight resumes on the same turn with the same hand and intents.
 - **Profile save:** banked pulls and a run count, for now.
 - **Title screen:** Continue (if a run is saved), New run, and the banked pulls. Starting a new run over a saved one asks first, and counts the old run as abandoned (banking its share).
 - **Abandon run:** in a small menu on the map, with a confirm.
-- **An old save the game can't read** (a content change it can't migrate) ends as an abandon and banks its share, with a line saying why (Q9).
-- **Export and import** of the save file as a button on the title screen (Q10).
+- **A save the game can't migrate** ends as an abandon and banks its share, with a line saying why (owner: default to safety, never risk the profile). So a run's banking tally (elites beaten) is kept in the profile as it changes, readable even when the run save isn't.
+- **Export and import (my call: in M4).** ARCHITECTURE already plans the save-file button, it guards the owner's saves through M5's schema changes, and migrations are needed either way. One file holds the profile and the run; an import that fails validation changes nothing.
 
-## Tasks, as I'd split them
+## Tasks
 
-1. **M4.1 Card rewards:** reward cards as content with scenario tests; the card pick on the Victory panel; assigning a generic card; cards in Shops.
-2. **M4.2 The Boss:** phases and transitions in the engine, the Abbess as content with a scenario test, side lanes, her sprite.
+1. **M4.1 Card rewards:** the reward cards as content with scenario tests; the pool and owner rolls; the card pick on the Victory panel.
+2. **M4.2 The Boss:** HP bars, immunity and Rouse in the engine; the Abbess (both second phases) as content with scenario tests; side lanes and the bar blips on the stage; her sprite.
 3. **M4.3 Profile and banking:** the profile save, banking on win, defeat and abandon, the result screen.
 4. **M4.4 Save and resume:** run and combat saves, the title screen, Continue, Abandon, export and import. An e2e test closes the page mid-fight and mid-walk and resumes exactly.
-5. **M4.5 A full run (owner gate):** you win, quit and resume a full run. A golden replay of a scripted run through a save and a resume.
+5. **M4.5 A full run (owner gate):** the owner wins, quits and resumes a full run. A golden replay of a scripted run through a save and a resume.
 
-## Questions
+## Owner's answers (24 Oct)
 
-1. Should elites give a card pick as well as the relic pick?
-2. Are the draft reward cards the right kind of thing? Mark up names, numbers and any you'd swap.
-3. Can any party member take Unbound's generic card, since Unbound slots into any team? Or only Unbound members?
-4. Cards in Shops: 2 at 45 Obols, rolled with the stock on first entry?
-5. No card rarities and no card removal in M4: fine, or do you want a removal service now?
-6. The Hollow Abbess: is the concept and its two phases right? HP 300 and the intent numbers as placeholders?
-7. The Boss scales with the Bloom stage (up to +50% at Fruiting), keeping Fruiting's doubled rewards a real risk?
-8. Defeat or abandon banks 1 pull plus 1 per elite beaten, at most 3?
-9. A save the game can't migrate ends as an abandon and banks its share?
-10. Save export and import in M4, or later?
+1. Elites give relics only, no card.
+2. The reward cards are a provisional yes; watch build identity.
+3. Unbound's card is always in the pool. Generic cards go to a random valid owner, and the pool never shows a Domain the party lacks.
+4. No cards in Shops. A once-per-Shop sell (remove a card, gain 45 Obols) may come now or later.
+5. No rarities in M4; removal as above, now or later.
+6. The concept stands, at 400 HP, as HP bars (see the Boss).
+7. No Bloom scaling for the Boss; Fruiting changes a Boss's phases instead.
+8. Defeat or abandon: 1 pull per elite (cap 3 for now), and no pull for starting and quitting a run.
+9. Yes: an unreadable save ends as an abandon and banks its share.
+10. Export and import now or later, the builder's call.
