@@ -6,6 +6,7 @@ import antheBattle from '../assets/battle/anthe.png';
 import houndBattle from '../assets/battle/bloom-rib-hound.png';
 import whelpBattle from '../assets/battle/bloom-rib-whelp.png';
 import acolyteBattle from '../assets/battle/censer-acolyte.png';
+import hollowAbbessBattle from '../assets/battle/hollow-abbess.png';
 import houndMotherBattle from '../assets/battle/hound-mother.png';
 import surveyorBattle from '../assets/battle/lantern-surveyor.png';
 import leonoraBattle from '../assets/battle/leonora.png';
@@ -24,6 +25,9 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.bloom-rib-hound': houndBattle,
   'enemy.bloom-rib-whelp': whelpBattle,
   'enemy.censer-acolyte': acolyteBattle,
+  // Full Bloom shares her sprite until Bloomed art exists.
+  'enemy.hollow-abbess': hollowAbbessBattle,
+  'enemy.hollow-abbess-full-bloom': hollowAbbessBattle,
   'enemy.hound-mother': houndMotherBattle,
   'enemy.lantern-surveyor': surveyorBattle,
   'enemy.pod-thrower': podThrowerBattle,
