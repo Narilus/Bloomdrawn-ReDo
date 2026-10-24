@@ -51,14 +51,14 @@ describe('The Hollow Abbess, Sermon', () => {
     expect(abbess(play(start, 'test.stun').state).statuses.map((s) => s.status)).toEqual(['status.falter']);
   });
 
-  it('Censer Sermon gives the party 2 Weak, Crozier Blow deals 20, Call the Faithful brings a Novice to each side lane', () => {
+  it('Censer Sermon gives the party 2 Weak, Crozier Blow deals 24, Call the Faithful brings a Novice to each side lane', () => {
     const start = begin('encounter.hollow-abbess');
     expect([intent(start), shown(start)]).toEqual(['Censer Sermon', ['applyStatus status.weak 2']]);
     const one = turns(start, 1);
     expect(one.party.statuses).toEqual([{ status: 'status.weak', stacks: 2 }]);
-    expect([intent(one), shown(one)]).toEqual(['Crozier Blow', ['damage 20']]);
+    expect([intent(one), shown(one)]).toEqual(['Crozier Blow', ['damage 24']]);
     const two = turns(one, 1);
-    expect(two.party.hp).toBe(210 - 20);
+    expect(two.party.hp).toBe(210 - 24);
     expect(intent(two)).toBe('Call the Faithful');
     const three = turns(two, 1);
     expect(three.enemies.filter(isAlive).map((e) => [e.enemy, e.slot])).toEqual([
@@ -82,20 +82,20 @@ describe('The Hollow Abbess, her second bar', () => {
     expect(rooted.party.hp).toBe(210);
   });
 
-  it('Rooted: Root Lash deals 10 twice, Grasping Roots gives 2 Vulnerable, Bloom Burst deals 34', () => {
+  it('Rooted: Root Lash deals 12 twice, Grasping Roots gives 2 Vulnerable, Bloom Burst deals 40', () => {
     const rooted = turns(play(begin('encounter.hollow-abbess'), 'test.break').state, 1);
-    expect([intent(rooted), shown(rooted)]).toEqual(['Root Lash', ['damage 10', 'damage 10']]);
+    expect([intent(rooted), shown(rooted)]).toEqual(['Root Lash', ['damage 12', 'damage 12']]);
     const lashed = turns(rooted, 1);
-    expect(lashed.party.hp).toBe(210 - 20);
+    expect(lashed.party.hp).toBe(210 - 24);
     expect([intent(lashed), shown(lashed)]).toEqual(['Grasping Roots', ['applyStatus status.vulnerable 2']]);
     const gripped = turns(lashed, 1);
     expect(gripped.party.statuses).toEqual([{ status: 'status.vulnerable', stacks: 2 }]);
-    // Bloom Burst is 34; the party's Vulnerable makes it 51.
-    expect([intent(gripped), shown(gripped)]).toEqual(['Bloom Burst', ['damage 51']]);
+    // Bloom Burst is 40; the party's Vulnerable makes it 60.
+    expect([intent(gripped), shown(gripped)]).toEqual(['Bloom Burst', ['damage 60']]);
     expect(intent(turns(gripped, 1))).toBe('Root Lash');
   });
 
-  it('at Fruiting she is Full Bloom: Blossoming, then Root Lash three times, Pollen Choir, Call the Faithful and Bloom Burst 40', () => {
+  it('at Fruiting she is Full Bloom: Blossoming, then Root Lash three times, Pollen Choir, Call the Faithful and Bloom Burst 46', () => {
     const start = begin('encounter.hollow-abbess-full-bloom');
     expect([intent(start), abbess(start).maxHp]).toEqual(['Censer Sermon', 200]);
     const broken = play(start, 'test.break').state;
@@ -109,10 +109,10 @@ describe('The Hollow Abbess, her second bar', () => {
       state = { ...next, party: { ...next.party, statuses: [], hp: 210 } };
     }
     expect(seen).toEqual([
-      ['Root Lash', ['damage 10', 'damage 10', 'damage 10']],
+      ['Root Lash', ['damage 12', 'damage 12', 'damage 12']],
       ['Pollen Choir', ['applyStatus status.weak 2', 'applyStatus status.vulnerable 2']],
       ['Call the Faithful', ['summon 2']],
-      ['Bloom Burst', ['damage 40']],
+      ['Bloom Burst', ['damage 46']],
     ]);
   });
 

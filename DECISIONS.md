@@ -130,6 +130,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card text charges "its owner's ultimate", not "her ultimate", since a card's owner can't be assumed (owner, 24 Oct).
 - The Hollow Abbess was not dangerous (owner won on 194 of 210 HP, 24 Oct): raise her damage a little, and give her adds of her own that are tougher than the Acolytes and get in the way (debuffs, Shield or healing for her). A later Boss might threaten through Poison stacking or summons that apply it.
 - Root-Sworn Novice sprite: 02. All four options are kept in `art/raw/root-sworn-novice/`, since alternate art may be loadable later (owner, 24 Oct).
+- The Hollow Abbess's draft was closer, but the owner still won on full HP thanks to a timely ultimate: another small damage raise, then move on; more balance passes can come later (owner, 24 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).
