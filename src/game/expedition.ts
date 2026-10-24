@@ -46,6 +46,8 @@ export interface ExpeditionDef {
   cards: { pool: string[]; offer: number };
   /** Obols for winning a fight, before the Bloom's bonus. */
   obols: { fight: number; elite: number };
+  /** Pulls banked when a run ends: a win, doubled at Fruiting; otherwise per elite beaten, up to a cap. */
+  banking: { win: number; fruiting: number; perElite: number; elitesMax: number };
   shop: {
     /** A relic's price by its tier. */
     prices: Record<RelicTier, number>;
@@ -107,6 +109,8 @@ export interface Expedition {
   /** The cards the run has gained (card rewards and Symptoms), dealt into every fight. */
   deck: RunCard[];
   obols: number;
+  /** Elite tiles beaten, for banking a lost or abandoned run. */
+  elites: number;
   /** What the last won fight gave, for the Victory panel: Obols, including the bonus (percent) of the Bloom stage it started at. */
   spoils?: { obols: number; bonus: number; stage: BloomStage };
   /** Each Shop's stock by tile key, once entered. */
@@ -131,6 +135,7 @@ export function startExpedition(seed: number, party: string[], def: ExpeditionDe
     offeredCards: [],
     deck: [],
     obols: 0,
+    elites: 0,
     shops: {},
     rng: createStreams(seed, EXPEDITION_STREAMS),
   };
@@ -252,6 +257,7 @@ export function finishExpeditionFight(exp: Expedition, combat: CombatState, def:
     next.phase = 'reward';
     if (kind !== 'bloom') tick(next, def);
     if (kind === 'elite') {
+      next.elites += 1;
       const pool = def.relicPool.filter((id) => !exp.relics.includes(id));
       shuffleInPlace(pool, next.rng, 'rewards');
       next.offered = pool.slice(0, def.offer);
@@ -634,6 +640,8 @@ export const M3_EXPEDITION: ExpeditionDef = {
     offer: 3,
   },
   obols: { fight: 20, elite: 45 },
+  // M4.3 (owner, 24 Oct; provisional until M5's profile systems).
+  banking: { win: 5, fruiting: 2, perElite: 1, elitesMax: 3 },
   shop: {
     prices: { common: 50, uncommon: 80, rare: 120, cursed: 30 },
     mend: { price: 40, percent: 25 },

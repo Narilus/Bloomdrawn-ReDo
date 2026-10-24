@@ -1058,6 +1058,38 @@ kbd {
   opacity: 0.85;
 }
 
+/* What an ended run banked, one line per reason, then the profile's pulls. */
+.banking {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border: 1px solid var(--dark-brass);
+  border-radius: 10px;
+  background: rgba(30, 21, 25, 0.85);
+}
+
+.banking ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  font-size: 20px;
+}
+
+.banked-total {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--antique-gold);
+}
+
+.banked-profile {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
 .result.reward {
   background: rgba(18, 12, 16, 0.72);
 }

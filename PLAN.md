@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
-**Current task:** M4.2 The Boss
+**Current task:** M4.3 Profile and banking
 
 ## Milestones
 
@@ -241,11 +241,13 @@ HP bars per phase, the phase break (immunity until a Rouse that clears statuses)
 - scenario tests prove both of her second phases and that the Bloom doesn't scale her;
 - the Boss tile holds her, and the owner has seen her fight.
 
-_Built 24 Oct, with sprite 01 picked by the owner (03 kept in `art/raw/hollow-abbess/`). The owner won his first try on 194 of 210 HP, so her damage is up about 25%, then about 20% more after his second try, and she calls two Root-Sworn Novices of her own, who shield her (draft in `docs/notes/m4-run.md`, "Her Novices"); Novice sprite 02 picked by the owner (all four kept in `art/raw/root-sworn-novice/`). The owner moved on after the second raise (24 Oct). Engine: `phases` on an enemy, `fall` in every HP-taking operation (damage, which also gained `allEnemies` in M4.1, loseHp and volley), `rousing` with immunity in the damage pipeline and `loseHp`, the Rouse in `actIntent`, `clearStatuses`, and `barBroken` with per-hit vitals that carry the bar. The Bloom never scales the Boss tile's fight, and from Fruiting on the encounter's `fruiting` encounter (Full Bloom) is fought instead. Tests: `src/engine/phases.test.ts`, `src/content/scenarios/boss.test.ts`, "the Boss" in `src/app/expedition.test.ts`; the golden replay now ends against her. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.2")._
+_Built 24 Oct, with sprite 01 picked by the owner (03 kept in `art/raw/hollow-abbess/`). The owner won his first try on 194 of 210 HP, so her damage is up about 25%, then about 20% more after his second try, and she calls two Root-Sworn Novices of her own, who shield her (draft in `docs/notes/m4-run.md`, "Her Novices"); Novice sprite 02 picked by the owner (all four kept in `art/raw/root-sworn-novice/`). Signed off by the owner after the second raise (24 Oct). Engine: `phases` on an enemy, `fall` in every HP-taking operation (damage, which also gained `allEnemies` in M4.1, loseHp and volley), `rousing` with immunity in the damage pipeline and `loseHp`, the Rouse in `actIntent`, `clearStatuses`, and `barBroken` with per-hit vitals that carry the bar. The Bloom never scales the Boss tile's fight, and from Fruiting on the encounter's `fruiting` encounter (Full Bloom) is fought instead. Tests: `src/engine/phases.test.ts`, `src/content/scenarios/boss.test.ts`, "the Boss" in `src/app/expedition.test.ts`; the golden replay now ends against her. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.2")._
 
 ### M4.3 Profile and banking
 A profile save with banked pulls and a run count. A win banks 5 pulls (10 at Fruiting); a defeat or abandon banks 1 per elite beaten (3 at most). A result screen lists what was banked and why.
 **Done when:** tests prove each banking case, including that a run quit before any progress banks nothing, and the profile survives a reload.
+
+_Built 24 Oct; waiting on the owner's play. The run counts elite tiles beaten (`elites`); `runBanking` (`src/game/profile.ts`) gives the pulls and a line per reason, and the numbers live in the expedition's `banking`. When a run is won or lost, the app banks it into the profile in IndexedDB (`src/app/profile.ts`) once, and the result screen lists the reasons, the run's pulls and the pulls banked in all. Abandoning comes with its menu in M4.4; its banking is built and tested. Tests: "banking" in `src/app/expedition.test.ts`, `src/save/profile.test.ts`. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.3")._
 
 ### M4.4 Save and resume
 The run saved at map steps, node results and after each combat command, with the previous good save kept. A title screen with Continue, New run (which asks, then abandons a saved run) and the banked pulls. Abandon in a map menu. A save that can't be migrated ends as an abandon and banks its share. Export and import of one save file.

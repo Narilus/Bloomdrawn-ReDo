@@ -81,6 +81,13 @@ Pulls are the only profile reward until M5's profile systems (provisional).
 - Later, the owner may drop the cap and instead bank half a win's rewards, rounded up. Either way, no route (an elite rush) should beat playing to win.
 - **The result screen** lists what was banked and why ("Boss at Fruiting: ×2", "2 elites beaten").
 
+**As built in M4.3** (`src/game/profile.ts`):
+- Only elite tiles count as elites beaten. An elite's roster that Flowering puts on a normal tile is a normal fight, as it is for Obols.
+- Elites add nothing to a win, so a win (5) always banks more than the most a defeat can (3).
+- The run count counts every run that ends: won, lost or abandoned, even one that banks nothing.
+- The result screen lists each reason ("2 elites beaten: 2 pulls", "4 elites beaten: 3 pulls (3 at most)", "The Boss at Fruiting: ×2"), then "This run: N pulls" and the pulls banked in all. If the profile can't be saved, it says so.
+- There's no title screen yet, so the banked total shows only on the result screen until M4.4.
+
 ## Save and resume
 
 - **What is saved:** the whole run (board, fog, clock, Obols, Shops, deck, relics, gauges, streams), and during a fight the whole combat state. Closing mid-fight resumes on the same turn with the same hand and intents.

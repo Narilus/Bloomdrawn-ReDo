@@ -39,11 +39,13 @@ import {
   type Outcome,
   type ShopStock,
 } from '../game/expedition.ts';
+import { runBanking, type Banked, type Profile } from '../game/profile.ts';
 import { CardFace, markNumber } from './CardView.tsx';
 import { Combat } from './Combat.tsx';
 import { RelicChoice } from './Gauntlet.tsx';
 import { RelicBar } from './Hud.tsx';
 import { LabyrinthMap, listOf } from './LabyrinthMap.tsx';
+import { bankRun } from './profile.ts';
 
 // The M3 run: walk the Labyrinth, fight where you stop, win at the Boss.
 
@@ -92,6 +94,18 @@ export function Labyrinth() {
       }
     });
   };
+  // A run that ends banks its pulls once; the ref keeps a remounted effect from banking it again.
+  const [profile, setProfile] = useState<Profile | 'failed' | null>(null);
+  const banked = useRef<Expedition | null>(null);
+  useEffect(() => {
+    if ((exp.phase !== 'won' && exp.phase !== 'lost') || banked.current === exp) return;
+    banked.current = exp;
+    setProfile(null);
+    bankRun(runBanking(exp, exp.phase, DEF)).then(setProfile, (err: unknown) => {
+      console.error('Banking failed', err);
+      setProfile('failed');
+    });
+  }, [exp]);
   const onFightEnd = useCallback((combat: CombatState) => setExp((e) => finishExpeditionFight(e, combat, DEF, registry)), []);
   const again = () => {
     setSeed(seed + 1);
@@ -142,11 +156,29 @@ export function Labyrinth() {
         <div className="result">
           <h2>{exp.phase === 'won' ? 'The Labyrinth cleared' : 'Defeat'}</h2>
           <p className="result-line">{exp.phase === 'won' ? `The Boss falls with ${exp.hp} HP left.` : 'The Bloom keeps the expedition.'}</p>
+          <Banking banked={runBanking(exp, exp.phase, DEF)} profile={profile} />
           <button className="end-turn" onClick={again}>
             Run again
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** What the ended run banked and why, and the profile's pulls once they are saved. */
+function Banking({ banked, profile }: { banked: Banked; profile: Profile | 'failed' | null }) {
+  return (
+    <div className="banking" aria-label="Banked">
+      <ul>
+        {banked.lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      <p className="banked-total">This run: {banked.pulls === 1 ? '1 pull' : `${banked.pulls} pulls`}</p>
+      <p className="banked-profile">
+        {profile === 'failed' ? 'The profile could not be saved.' : profile ? `Pulls banked in all: ${profile.pulls}` : 'Banking…'}
+      </p>
     </div>
   );
 }

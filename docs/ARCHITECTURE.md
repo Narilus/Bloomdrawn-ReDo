@@ -213,7 +213,9 @@ The same state, content version and commands always produce the same result. Tha
 | Profile | Roster, levels, items, dupes, weapons, banner pity, pull history, settings | After every profile change |
 | Active run | Full run state including map, Shop stock, deck, ultimate gauges, RNG streams | At map steps and node results, and after each resolved combat command |
 
-Each save carries a schema version and content version. Migrations are plain functions from one version to the next. A failed write never replaces the last good save.
+Each save carries a schema version and content version (`src/content/version.ts`). Migrations are plain functions from one version to the next. A failed write never replaces the last good save.
+
+So far the profile holds only banked pulls and a run count (`src/game/profile.ts`, saved as `src/save/profile.ts`). When a run ends, `runBanking` works out what it banks, with a line per reason for the result screen, and the app reads the stored profile, adds to it and writes it back, one bank at a time (`src/app/profile.ts`).
 
 **Storage:** in the browser, saves are plain JSON in IndexedDB through `idb-keyval`, a tiny, well-tested wrapper. The game asks the browser to keep its storage persistent, and keeps the previous good save beside the current one. An export/import save-file button protects players against browser data clearing and lets them move saves between machines. Saves are not encrypted or signed; editing them is the player's business. Desktop builds later write the same JSON to files.
 

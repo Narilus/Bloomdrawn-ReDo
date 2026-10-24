@@ -36,6 +36,7 @@ import {
   type Expedition,
 } from '../game/expedition.ts';
 import { bloomNodeDue } from '../game/bloom.ts';
+import { bank, NEW_PROFILE, runBanking } from '../game/profile.ts';
 import { hexKey } from '../game/hex.ts';
 import { createStreams } from '../engine/index.ts';
 
@@ -337,6 +338,58 @@ describe('the Boss', () => {
     expect([at(12).enemies, at(12).enemyScale]).toEqual([['enemy.hollow-abbess-full-bloom'], undefined]);
     // Other fights still scale.
     expect(at(12, HOUND).enemyScale).toBe(50);
+  });
+});
+
+describe('banking', () => {
+  const ELITE = { kind: 'elite', content: 'encounter.thorn-wall' } as const;
+  const BOSS = { kind: 'boss', content: 'encounter.hollow-abbess' } as const;
+  /** Walks the row fight by fight, winning each and skipping its pick, and ends the last fight as given. */
+  function play(tiles: Tile[], last: 'victory' | 'defeat', clock = 0): Expedition {
+    let exp = { ...on({ kind: 'entrance' }, ...tiles), clock };
+    tiles.forEach((_, i) => {
+      exp = go(exp, `${i + 1},0`).at(-1)!;
+      exp = finishExpeditionFight(exp, ended(exp, i === tiles.length - 1 ? last : 'victory', 150), M3_EXPEDITION, registry);
+      if (exp.phase === 'reward') exp = exp.offeredCards.length > 0 ? chooseExpeditionCard(exp, null) : chooseExpeditionRelic(exp, null);
+    });
+    return exp;
+  }
+  const banked = (exp: Expedition, end: 'won' | 'lost' | 'abandoned' = exp.phase as 'won' | 'lost') => runBanking(exp, end, M3_EXPEDITION);
+
+  it('a win banks 5 pulls, and elites beaten on the way add nothing to it', () => {
+    expect(banked(play([BOSS], 'victory'))).toEqual({ pulls: 5, lines: ['The Boss beaten: 5 pulls'] });
+    const past = play([ELITE, ELITE, BOSS], 'victory');
+    expect([past.phase, past.elites, banked(past).pulls]).toEqual(['won', 2, 5]);
+  });
+
+  it('a win over the Boss at Fruiting banks double', () => {
+    const exp = play([BOSS], 'victory', 12);
+    expect(banked(exp)).toEqual({ pulls: 10, lines: ['The Boss beaten: 5 pulls', 'The Boss at Fruiting: ×2'] });
+    // Fruiting reached by fights on the way counts too: the Boss's own fight never ticks the clock.
+    expect(banked(play([ELITE, BOSS], 'victory', 11)).pulls).toBe(10);
+  });
+
+  it('a defeat banks 1 pull per elite beaten, 3 at most', () => {
+    expect(banked(play([HOUND], 'defeat'))).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
+    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, lines: ['1 elite beaten: 1 pull'] });
+    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, lines: ['2 elites beaten: 2 pulls'] });
+    expect(banked(play([ELITE, ELITE, ELITE, ELITE, HOUND], 'defeat'))).toEqual({ pulls: 3, lines: ['4 elites beaten: 3 pulls (3 at most)'] });
+  });
+
+  it('an abandoned run banks like a defeat, so a run quit before any progress banks nothing', () => {
+    expect(banked(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs), 'abandoned')).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
+    expect(banked(play([HOUND, HOUND], 'victory'), 'abandoned').pulls).toBe(0);
+    expect(banked(play([ELITE, HOUND], 'victory'), 'abandoned').pulls).toBe(1);
+  });
+
+  it("only elite tiles count: an elite's roster on a normal tile (Flowering) is a normal fight", () => {
+    expect(play([{ kind: 'fight', content: 'encounter.thorn-wall' }, HOUND], 'defeat').elites).toBe(0);
+  });
+
+  it('banking adds the pulls to the profile and counts the run', () => {
+    const once = bank(NEW_PROFILE, banked(play([BOSS], 'victory')));
+    expect(once).toEqual({ pulls: 5, runs: 1 });
+    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ pulls: 5, runs: 2 });
   });
 });
 
