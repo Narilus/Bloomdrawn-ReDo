@@ -88,7 +88,7 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
         <RulesText text={text} registry={registry} />
       </div>
       {def?.charge && (
-        <div className="card-charge" title={`Charges her ultimate by ${def.charge}`}>
+        <div className="card-charge" title={`Charges its owner's ultimate by ${def.charge}`}>
           Ult +{def.charge}
         </div>
       )}

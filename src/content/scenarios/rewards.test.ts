@@ -8,7 +8,7 @@ const DUMMY = 'enemy.training-dummy';
 const statusesOf = (state: CombatState) => state.enemies.map((e) => e.statuses.map((s) => `${s.status} ${s.stacks}`));
 
 describe('Maelia', () => {
-  scenario("Nursing Bud gains 2 Embryo, 1 more from Midwife's Hands, and charges her ultimate by 10", {
+  scenario("Nursing Bud gains 2 Embryo, 1 more from Midwife's Hands, and charges its owner's ultimate by 10", {
     setup: { hand: ['maelia.nursing-bud'] },
     play: [{ card: 'maelia.nursing-bud' }],
     expect: { resources: { embryo: 3 }, gauges: { maelia: 10, agathe: 0 }, mana: 5 },

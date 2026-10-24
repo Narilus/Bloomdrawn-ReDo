@@ -59,7 +59,7 @@ export const ripenedWomb = card({
 export const nursingBud = card({
   id: 'maelia.nursing-bud', name: 'Nursing Bud', owner: 'maelia', reward: true, cost: 1, target: 'none',
   effects: [gainResource('embryo', 2), chargeUltimate(10)],
-  text: 'Gain {effects.0.amount} Embryo. Charge her ultimate by {effects.1.amount}.',
+  text: "Gain {effects.0.amount} Embryo. Charge its owner's ultimate by {effects.1.amount}.",
 });
 
 export const pollenDrift = card({

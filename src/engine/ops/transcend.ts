@@ -23,5 +23,5 @@ export const transcendOp: Operation<TranscendArgs> = {
     return { events: [{ type: 'transcended', source: member.id, owner: member.id }] };
   },
   preview: (_state, _args, ctx) => [{ op: 'transcend', ...(ctx.owner ? { target: ctx.owner } : {}) }],
-  describe: () => 'Transcend: her ultimate is upgraded for this combat',
+  describe: () => "Transcend: its owner's ultimate is upgraded for this combat",
 };

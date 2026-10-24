@@ -37,7 +37,7 @@ describe('chargeUltimate', () => {
   });
 
   it('describes itself', () => {
-    expect(chargeUltimateOp.describe(chargeUltimate(10), formulaText, registry)).toBe('Charge her ultimate by 10');
+    expect(chargeUltimateOp.describe(chargeUltimate(10), formulaText, registry)).toBe("Charge its owner's ultimate by 10");
     expect(chargeUltimateOp.describe(chargeUltimate(10, 'party'), formulaText, registry)).toBe("Charge every party member's ultimate by 10");
   });
 });

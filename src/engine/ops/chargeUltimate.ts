@@ -50,5 +50,5 @@ export const chargeUltimateOp: Operation<ChargeUltimateArgs> = {
       ? `Charge every party member's ultimate by ${show(args.amount)}`
       : args.who === 'eventOwner'
         ? `Charge that card's owner's ultimate by ${show(args.amount)}`
-        : `Charge her ultimate by ${show(args.amount)}`,
+        : `Charge its owner's ultimate by ${show(args.amount)}`,
 };

@@ -40,12 +40,12 @@ describe('authored text', () => {
   const reg = withCards(pod);
 
   it('fills slots from the card, shows keywords first and the charge last', () => {
-    expect(describeCard(pod, reg)).toBe('Ritual. Gain 3 Embryo. Deal 6 + Attack damage. Charge her ultimate by 10.');
+    expect(describeCard(pod, reg)).toBe("Ritual. Gain 3 Embryo. Deal 6 + Attack damage. Charge its owner's ultimate by 10.");
   });
 
   it('live text runs damage slots through the pipeline', () => {
     const [state, instance] = withCardInHand(fixtureCombat(['test.dummy'], ['test.plus3'], reg), pod.id);
-    expect(describeCardLive(instance, state, reg)).toBe('Ritual. Gain 3 Embryo. Deal 12 damage. Charge her ultimate by 10.');
+    expect(describeCardLive(instance, state, reg)).toBe("Ritual. Gain 3 Embryo. Deal 12 damage. Charge its owner's ultimate by 10.");
   });
 
   it('finds formulas by path, and nothing else', () => {
