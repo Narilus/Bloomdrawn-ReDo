@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a16c64-595c-71c2-a7a6-e62eed314cf3
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: body and face turned toward the left edge of the image. A young novice of the Bloom cult in an undyed linen habit under a short bruise-violet scapular with brass stitching. Pale roots have grown up from her bare feet and wrap her shins and knees. Both hands hold a brass rosary strung with thorny seed pods. A plain ivory wimple frames her face, and a strip of pale bark is grown across her eyes. One small ivory lily is pinned at her collar. Violet, brass and ivory palette, slight and devout.
+
+Background: fully transparent.
