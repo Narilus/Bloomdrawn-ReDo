@@ -37,6 +37,9 @@ import {
 } from '../game/expedition.ts';
 import { bloomNodeDue } from '../game/bloom.ts';
 import { bank, NEW_PROFILE, runBanking } from '../game/profile.ts';
+import { CONTENT_VERSION } from '../content/version.ts';
+import { decodeSave, encodeSave } from '../save/store.ts';
+import { RUN_SAVE } from './saves.ts';
 import { hexKey } from '../game/hex.ts';
 import { createStreams } from '../engine/index.ts';
 
@@ -554,12 +557,21 @@ describe('a whole Labyrinth run', () => {
     return { type: 'endTurn' };
   }
 
-  function fightOut(exp: Expedition): CombatState {
-    let state = startCombat(expeditionFight(exp, registry), registry).state;
+  /** What happens to the run between decisions: nothing, or a save and a load (`reloaded`). */
+  type Between = (exp: Expedition, combat?: CombatState) => { exp: Expedition; combat?: CombatState };
+  const asIs: Between = (exp, combat) => ({ exp, ...(combat ? { combat } : {}) });
+  /** Writes the run as the game saves it and reads it back. */
+  const reloaded: Between = (exp, combat) => {
+    const text = encodeSave(RUN_SAVE, { id: 'run', seed: 7, exp, ...(combat ? { combat } : {}) }, CONTENT_VERSION);
+    return decodeSave(RUN_SAVE, text, CONTENT_VERSION).data;
+  };
+
+  function fightOut(exp: Expedition, between: Between): CombatState {
+    let state = between(exp, startCombat(expeditionFight(exp, registry), registry).state).combat!;
     for (let step = 0; step < 500 && state.phase !== 'ended'; step++) {
       const result = apply(state, combatPolicy(state), registry);
       if (!result.ok) throw new Error(result.reason);
-      state = result.state;
+      state = between(exp, result.state).combat!;
     }
     return state;
   }
@@ -589,13 +601,14 @@ describe('a whole Labyrinth run', () => {
     return best?.key;
   }
 
-  function play(seed: number): string[] {
+  function play(seed: number, between = asIs): string[] {
     let exp = startExpedition(seed, PARTY, M3_EXPEDITION, registry.motifs);
     const left = new Set<string>();
     const log: string[] = [];
     const note = (line: string) => log.push(`${line} | HP ${exp.hp ?? 'full'}, clock ${exp.clock}, ${exp.obols} Obols`);
     let blooms = 0;
     for (let decision = 0; decision < 400 && exp.phase !== 'won' && exp.phase !== 'lost'; decision++) {
+      exp = between(exp).exp;
       const here = exp.board.at;
       const tile = exp.board.tiles[here]!;
       if (exp.phase === 'map' || (exp.phase === 'tile' && canMove(exp) && left.has(here))) {
@@ -604,7 +617,7 @@ describe('a whole Labyrinth run', () => {
         exp = go(exp, to).at(-1)!;
       } else if (exp.phase === 'fight') {
         const content = tile.content;
-        const combat = fightOut(exp);
+        const combat = fightOut(exp, between);
         exp = finishExpeditionFight(exp, combat, M3_EXPEDITION, registry);
         note(`${here} ${tile.kind} ${content}: ${combat.outcome} on turn ${combat.turn}`);
       } else if (exp.phase === 'reward') {
@@ -664,5 +677,10 @@ describe('a whole Labyrinth run', () => {
 
   it('a scripted run replays exactly', async () => {
     await expect(play(7).join('\n') + '\n').toMatchFileSnapshot('golden/labyrinth.txt');
+  });
+
+  it('saved and loaded before every decision and after every combat command, a run plays on identically', async () => {
+    await expect(play(7, reloaded).join('\n') + '\n').toMatchFileSnapshot('golden/labyrinth.txt');
+    for (const seed of [2, 11]) expect(play(seed, reloaded)).toEqual(play(seed));
   });
 });

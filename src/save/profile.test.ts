@@ -20,4 +20,10 @@ describe('the profile save', () => {
     await expect(saves.importText(profileSave, JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 1, contentVersion: 1, data: { pulls: 3 } }))).rejects.toThrow('failed validation');
     expect(await saves.read(profileSave)).toBeNull();
   });
+
+  it('a v1 profile (M4.3, before the run in progress was kept) reads as v2 with no run in progress', async () => {
+    const adapter = memoryAdapter();
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 1, contentVersion: 1, data: { pulls: 12, runs: 3 } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { pulls: 12, runs: 3 }, savedSchemaVersion: 1 });
+  });
 });

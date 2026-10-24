@@ -24,14 +24,19 @@ interface Props {
   setup: CombatSetup;
   /** Shown beside the turn, e.g. "Fight 2 of 3". */
   label?: string;
+  /** A saved fight to go on with instead of starting `setup`'s. */
+  resume?: CombatState;
+  /** Called with the fight as it stands: once at the start, then after every command that resolves. */
+  onChange?: (state: CombatState) => void;
   /** Called once the fight has ended and its last hits have played out. */
   onEnd: (state: CombatState) => void;
 }
 
 /** One fight: the battlefield, the HUD and the hand. */
-export function Combat({ setup, label, onEnd }: Props) {
+export function Combat({ setup, resume, label, onChange, onEnd }: Props) {
   const { fit, stageHost } = useFrame();
-  const [opening] = useState(() => startCombat(setup, registry));
+  // A resumed fight has no opening events to play: its bars show it as it stands.
+  const [opening] = useState(() => (resume ? { state: resume, before: vitalsOf(resume), events: [], vitals: [] } : startCombat(setup, registry)));
   const [state, setState] = useState(opening.state);
   // The source of truth between renders, so rapid input never applies a command to a stale state.
   const current = useRef(state);
@@ -71,6 +76,7 @@ export function Combat({ setup, label, onEnd }: Props) {
     }
     current.current = result.state;
     setState(result.state);
+    onChange?.(result.state);
     const duration = present(vitalsOf(before), result.events, result.vitals, result.state);
     if (command.type === 'endTurn' && duration > 0 && result.state.phase === 'player') {
       setBusy(true);
@@ -81,7 +87,7 @@ export function Combat({ setup, label, onEnd }: Props) {
     const ultimate = member && registry.characters[member.character]?.ultimate;
     if (ultimate) setBanner({ text: ultimate.name, id: Date.now() });
     return true;
-  }, [present]);
+  }, [present, onChange]);
 
   const onPlay = useCallback(
     (card: EntityId, target?: EntityId) => run(target ? { type: 'playCard', card, target } : { type: 'playCard', card }),
@@ -108,6 +114,13 @@ export function Combat({ setup, label, onEnd }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [endTurn, busy, ultimateFor]);
+
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    onChange?.(opening.state);
+  }, [onChange, opening]);
 
   // The fight is over once its last hits have played out on the field.
   const ended = state.phase === 'ended' && !shown;

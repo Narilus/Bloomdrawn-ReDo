@@ -1,4 +1,4 @@
-import { createStore, get, set } from 'idb-keyval';
+import { createStore, del, get, set } from 'idb-keyval';
 import type { SaveAdapter } from './store.ts';
 
 /** Browser saves: plain JSON text in IndexedDB. */
@@ -7,6 +7,7 @@ export function idbAdapter(dbName = 'bloomdrawn'): SaveAdapter {
   return {
     get: (key) => get<string>(key, store),
     set: (key, value) => set(key, value, store),
+    del: (key) => del(key, store),
   };
 }
 
@@ -31,6 +32,10 @@ export function memoryAdapter(): SaveAdapter & { data: Map<string, string>; fail
     async set(key, value) {
       if (this.failWrites) throw new Error('Simulated write failure');
       data.set(key, value);
+    },
+    async del(key) {
+      if (this.failWrites) throw new Error('Simulated write failure');
+      data.delete(key);
     },
   };
 }

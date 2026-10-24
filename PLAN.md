@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
-**Current task:** M4.3 Profile and banking
+**Current task:** M4.4 Save and resume
 
 ## Milestones
 
@@ -255,6 +255,8 @@ The run saved at map steps, node results and after each combat command, with the
 - tests prove a run saved and loaded at any point plays on identically, a failed write keeps the last good save, and an unreadable run banks its share;
 - an e2e test closes the page mid-fight and mid-walk and resumes on the same state;
 - an export imported into an empty browser gives back the same profile and run.
+
+_Built 24 Oct; waiting on the owner's play, with M4.3. The title screen opens the game (Continue, New run, banked pulls, Export and Import save); the map has a Menu with Title screen and Abandon run. The run is saved at every settled step and after every combat command; the profile (schema v2) tracks the run in progress and its elite tally. `src/app/saves.ts` boots, saves, banks and moves files; `src/save/run.ts` checks a run's outline and `src/game/check.ts` its content IDs. Tests: `src/app/saves.test.ts`, the golden replay saved and loaded before every decision and after every combat command (`src/app/expedition.test.ts`), `e2e/resume.spec.ts` (closing mid-walk and mid-fight, Abandon, export into an empty browser). Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.4")._
 
 ### M4.5 A full run (owner gate)
 **Done when:** the owner wins, quits and resumes a full run, and a golden replay of a scripted run through a save and a resume is stable.

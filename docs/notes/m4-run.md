@@ -97,6 +97,14 @@ Pulls are the only profile reward until M5's profile systems (provisional).
 - **A save the game can't migrate** ends as an abandon and banks its share, with a line saying why (owner: default to safety, never risk the profile). So a run's banking tally (elites beaten) is kept in the profile as it changes, readable even when the run save isn't.
 - **Export and import (my call: in M4).** ARCHITECTURE already plans the save-file button, it guards the owner's saves through M5's schema changes, and migrations are needed either way. One file holds the profile and the run; an import that fails validation changes nothing.
 
+**As built in M4.4** (`src/app/saves.ts`, `src/app/Title.tsx`, `src/save/`):
+- The game opens on the title screen: the banked pulls and run count, Continue (only with a run saved), New run, and Export save and Import save. A new run's board is random; `?seed=N` still fixes it in dev builds.
+- The run is saved at every step it settles on, after every choice, and after every combat command. A walk is saved at its end as soon as it starts, so closing mid-walk resumes where the party was going. A resumed fight shows as it stands; the last command's animation doesn't replay.
+- The map has a Menu (bottom left) with Keep playing, Title screen (the run stays saved) and Abandon run, which shows what it would bank before you confirm. There's no menu during a fight; close the page and Continue instead.
+- The profile records the run in progress by ID, with its elite tally. A run save with another ID was already banked and is dropped. A run in progress that can't be resumed ends as abandoned, banks from the tally and says why on the title screen. That covers a save that won't read, names content the game no longer has, or was written with a different content version (`src/content/version.ts`, raised only when a shipped definition changes meaning).
+- Importing a file replaces both the profile and the run with the file's; one that fails validation changes nothing and says why.
+- Writes go through one queue, in order, and a burst of run saves writes only the newest. A failed write keeps the last good save, and the next save tries again.
+
 ## Tasks
 
 1. **M4.1 Card rewards:** the reward cards as content with scenario tests; the pool and owner rolls; the card pick on the Victory panel.

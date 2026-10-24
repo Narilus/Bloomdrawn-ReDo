@@ -39,13 +39,14 @@ import {
   type Outcome,
   type ShopStock,
 } from '../game/expedition.ts';
-import { runBanking, type Banked, type Profile } from '../game/profile.ts';
+import { runBanking, type Banked, type Profile, type RunEnd } from '../game/profile.ts';
+import type { RunSave } from '../save/run.ts';
 import { CardFace, markNumber } from './CardView.tsx';
 import { Combat } from './Combat.tsx';
 import { RelicChoice } from './Gauntlet.tsx';
 import { RelicBar } from './Hud.tsx';
 import { LabyrinthMap, listOf } from './LabyrinthMap.tsx';
-import { bankRun } from './profile.ts';
+import type { Saves } from './saves.ts';
 
 // The M3 run: walk the Labyrinth, fight where you stop, win at the Boss.
 
@@ -67,23 +68,55 @@ function defFromUrl(): ExpeditionDef {
   if (encounters.length === 0) return M3_EXPEDITION;
   return { ...M3_EXPEDITION, board: { ...M3_EXPEDITION.board, encounters: { fight: encounters, elite: encounters, boss: encounters } } };
 }
-const DEF = defFromUrl();
-const FIRST_SEED = Number(params().get('seed')) || 1;
+export const DEF = defFromUrl();
+const SEED = Number(params().get('seed')) || undefined;
 const FIRST_CLOCK = Number(params().get('clock')) || 0;
 const FIRST_OBOLS = Number(params().get('obols')) || 0;
-const begin = (seed: number): Expedition => ({ ...startExpedition(seed, PARTY, DEF, registry.motifs), clock: FIRST_CLOCK, obols: FIRST_OBOLS });
 
-export function Labyrinth() {
-  const [seed, setSeed] = useState(FIRST_SEED);
-  const [exp, setExp] = useState<Expedition>(() => begin(FIRST_SEED));
+/** A new run on a random board (or `?seed`'s), with its own ID for the profile to track. */
+export function newRun(): RunSave {
+  const seed = SEED ?? Math.floor(Math.random() * 2 ** 31);
+  const exp = { ...startExpedition(seed, PARTY, DEF, registry.motifs), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
+  return { id: crypto.randomUUID(), seed, exp };
+}
+
+interface Props {
+  /** The run as last saved. Read once at mount; remount (change `key`) for another run. */
+  initial: RunSave;
+  saves: Saves;
+  /** After a run has ended: start the next one. */
+  onAgain: () => void;
+  onTitle: () => void;
+}
+
+export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
+  const { id, seed } = initial;
+  const [exp, setExp] = useState<Expedition>(initial.exp);
   const [walking, setWalking] = useState(false);
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+
+  // The run is saved at every step it settles on, with the fight in progress if there is one. A
+  // walk is saved at its end as soon as it starts, so closing the page mid-walk resumes there.
+  const fight = useRef<CombatState | undefined>(initial.combat);
+  const persist = useCallback((save: RunSave) => void saves.save(save).catch((err: unknown) => console.error('Saving the run failed', err)), [saves]);
+  useEffect(() => {
+    if (walking || exp.phase === 'won' || exp.phase === 'lost') return;
+    persist({ id, seed, exp, ...(exp.phase === 'fight' && fight.current ? { combat: fight.current } : {}) });
+  }, [exp, walking, id, seed, persist]);
+  const onFightChange = useCallback(
+    (combat: CombatState) => {
+      fight.current = combat;
+      persist({ id, seed, exp, combat });
+    },
+    [exp, id, seed, persist],
+  );
 
   const pick = (key: string) => {
     if (walking) return;
     const states = move(exp, key, DEF, registry);
     if (!states) return;
+    persist({ id, seed, exp: states.at(-1)! });
     setWalking(true);
     states.forEach((state, i) => {
       const last = i === states.length - 1;
@@ -94,29 +127,55 @@ export function Labyrinth() {
       }
     });
   };
-  // A run that ends banks its pulls once; the ref keeps a remounted effect from banking it again.
+
+  // A run that ends banks its pulls once and its save is dropped; the ref keeps a remounted
+  // effect from banking it again. Abandoning banks from the menu.
+  const [abandoned, setAbandoned] = useState(false);
+  const [menu, setMenu] = useState<'closed' | 'open' | 'abandon'>('closed');
   const [profile, setProfile] = useState<Profile | 'failed' | null>(null);
   const banked = useRef<Expedition | null>(null);
+  const end = useCallback(
+    (ended: Expedition, how: RunEnd) => {
+      if (banked.current === ended) return;
+      banked.current = ended;
+      setProfile(null);
+      saves.end(runBanking(ended, how, DEF)).then(setProfile, (err: unknown) => {
+        console.error('Banking failed', err);
+        setProfile('failed');
+      });
+    },
+    [saves],
+  );
   useEffect(() => {
-    if ((exp.phase !== 'won' && exp.phase !== 'lost') || banked.current === exp) return;
-    banked.current = exp;
-    setProfile(null);
-    bankRun(runBanking(exp, exp.phase, DEF)).then(setProfile, (err: unknown) => {
-      console.error('Banking failed', err);
-      setProfile('failed');
-    });
-  }, [exp]);
-  const onFightEnd = useCallback((combat: CombatState) => setExp((e) => finishExpeditionFight(e, combat, DEF, registry)), []);
-  const again = () => {
-    setSeed(seed + 1);
-    setExp(begin(seed + 1));
+    if (exp.phase === 'won' || exp.phase === 'lost') end(exp, exp.phase);
+  }, [exp, end]);
+  const abandon = () => {
+    setMenu('closed');
+    setAbandoned(true);
+    end(exp, 'abandoned');
   };
+  const onFightEnd = useCallback((combat: CombatState) => {
+    fight.current = undefined;
+    setExp((e) => finishExpeditionFight(e, combat, DEF, registry));
+  }, []);
+  const result: RunEnd | undefined = abandoned ? 'abandoned' : exp.phase === 'won' || exp.phase === 'lost' ? exp.phase : undefined;
 
   const tile = exp.board.tiles[exp.board.at];
   const maxHp = expeditionMaxHp(exp, registry);
   if (exp.phase === 'fight' && !walking) {
+    // Only the fight the run was saved in resumes; any later one starts fresh.
+    const resumed = initial.combat && initial.exp.fightSeed === exp.fightSeed ? initial.combat : undefined;
     const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : tile?.kind === 'bloom' ? 'Bloom node' : 'Labyrinth';
-    return <Combat key={`${seed}:${exp.fightSeed}`} setup={expeditionFight(exp, registry)} label={label} onEnd={onFightEnd} />;
+    return (
+      <Combat
+        key={`${seed}:${exp.fightSeed}`}
+        setup={expeditionFight(exp, registry)}
+        {...(resumed ? { resume: resumed } : {})}
+        label={label}
+        onChange={onFightChange}
+        onEnd={onFightEnd}
+      />
+    );
   }
 
   return (
@@ -152,22 +211,66 @@ export function Labyrinth() {
             <Spoils exp={exp} />
           </RelicChoice>
         ))}
-      {(exp.phase === 'won' || exp.phase === 'lost') && (
+      {!result && exp.phase === 'map' && !walking && (
+        <button className="map-menu plaque" onClick={() => setMenu('open')}>
+          Menu
+        </button>
+      )}
+      {menu === 'open' && !result && (
+        <div className="result reward" role="dialog" aria-label="Menu">
+          <h2 className="panel-title">The run is saved</h2>
+          <p className="result-line">Leave it here and Continue from the title screen whenever you like.</p>
+          <div className="panel-buttons">
+            <button className="end-turn" onClick={() => setMenu('closed')}>
+              Keep playing
+            </button>
+            <button className="end-turn" onClick={onTitle}>
+              Title screen
+            </button>
+            <button className="ghost" onClick={() => setMenu('abandon')}>
+              Abandon run
+            </button>
+          </div>
+        </div>
+      )}
+      {menu === 'abandon' && !result && (
+        <div className="result reward" role="dialog" aria-label="Abandon run">
+          <h2 className="panel-title">Abandon this run?</h2>
+          <p className="result-line">It ends here and banks only its share:</p>
+          <Banking banked={runBanking(exp, 'abandoned', DEF)} profile={undefined} />
+          <div className="panel-buttons">
+            <button className="end-turn" onClick={() => setMenu('closed')}>
+              Keep playing
+            </button>
+            <button className="ghost" onClick={abandon}>
+              Abandon
+            </button>
+          </div>
+        </div>
+      )}
+      {result && (
         <div className="result">
-          <h2>{exp.phase === 'won' ? 'The Labyrinth cleared' : 'Defeat'}</h2>
-          <p className="result-line">{exp.phase === 'won' ? `The Boss falls with ${exp.hp} HP left.` : 'The Bloom keeps the expedition.'}</p>
-          <Banking banked={runBanking(exp, exp.phase, DEF)} profile={profile} />
-          <button className="end-turn" onClick={again}>
-            Run again
-          </button>
+          <h2>{result === 'won' ? 'The Labyrinth cleared' : result === 'lost' ? 'Defeat' : 'Run abandoned'}</h2>
+          <p className="result-line">
+            {result === 'won' ? `The Boss falls with ${exp.hp} HP left.` : result === 'lost' ? 'The Bloom keeps the expedition.' : 'The expedition turns back.'}
+          </p>
+          <Banking banked={runBanking(exp, result, DEF)} profile={profile} />
+          <div className="panel-buttons">
+            <button className="end-turn" onClick={onAgain} disabled={profile === null}>
+              Run again
+            </button>
+            <button className="end-turn" onClick={onTitle} disabled={profile === null}>
+              Title screen
+            </button>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-/** What the ended run banked and why, and the profile's pulls once they are saved. */
-function Banking({ banked, profile }: { banked: Banked; profile: Profile | 'failed' | null }) {
+/** What a run banks and why, and once it has ended, the profile's pulls when they are saved. */
+export function Banking({ banked, profile }: { banked: Banked; profile: Profile | 'failed' | null | undefined }) {
   return (
     <div className="banking" aria-label="Banked">
       <ul>
@@ -176,9 +279,11 @@ function Banking({ banked, profile }: { banked: Banked; profile: Profile | 'fail
         ))}
       </ul>
       <p className="banked-total">This run: {banked.pulls === 1 ? '1 pull' : `${banked.pulls} pulls`}</p>
-      <p className="banked-profile">
-        {profile === 'failed' ? 'The profile could not be saved.' : profile ? `Pulls banked in all: ${profile.pulls}` : 'Banking…'}
-      </p>
+      {profile !== undefined && (
+        <p className="banked-profile">
+          {profile === 'failed' ? 'The profile could not be saved.' : profile ? `Pulls banked in all: ${profile.pulls}` : 'Banking…'}
+        </p>
+      )}
     </div>
   );
 }

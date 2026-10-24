@@ -215,7 +215,10 @@ The same state, content version and commands always produce the same result. Tha
 
 Each save carries a schema version and content version (`src/content/version.ts`). Migrations are plain functions from one version to the next. A failed write never replaces the last good save.
 
-So far the profile holds only banked pulls and a run count (`src/game/profile.ts`, saved as `src/save/profile.ts`). When a run ends, `runBanking` works out what it banks, with a line per reason for the result screen, and the app reads the stored profile, adds to it and writes it back, one bank at a time (`src/app/profile.ts`).
+So far the profile holds banked pulls, a run count and the run in progress's ID and elite tally (`src/game/profile.ts`, saved as `src/save/profile.ts`). The run save (`src/save/run.ts`) holds the expedition and, during a fight, the whole combat state; its schema checks the outline, and `missingContent` (`src/game/check.ts`) checks that every ID it names still exists. `src/app/saves.ts` owns both in the browser:
+- **Boot:** continue the run if its save reads and matches the profile's run in progress; drop a save the profile doesn't track (already banked); otherwise end the run as abandoned, banking from the profile's tally.
+- **Writes:** one queue, in order. Run saves coalesce, so a burst of combat commands writes only the newest. When a run ends, `runBanking` gives what it banks, with a line per reason for the result screen; the profile is banked and the run save removed.
+- **Files:** one backup file holds every save; an import is validated whole before anything is written.
 
 **Storage:** in the browser, saves are plain JSON in IndexedDB through `idb-keyval`, a tiny, well-tested wrapper. The game asks the browser to keep its storage persistent, and keeps the previous good save beside the current one. An export/import save-file button protects players against browser data clearing and lets them move saves between machines. Saves are not encrypted or signed; editing them is the player's business. Desktop builds later write the same JSON to files.
 
