@@ -32,6 +32,8 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.lantern-surveyor': surveyorBattle,
   'enemy.pod-thrower': podThrowerBattle,
   'enemy.root-mat': rootMatBattle,
+  // The Novices wear the Acolytes' sprite until the owner picks their own.
+  'enemy.root-sworn-novice': acolyteBattle,
   'enemy.seedling': seedlingBattle,
   'enemy.thorn-wall-matron': matronBattle,
 };
