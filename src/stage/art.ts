@@ -13,6 +13,7 @@ import leonoraBattle from '../assets/battle/leonora.png';
 import maeliaBattle from '../assets/battle/maelia.png';
 import podThrowerBattle from '../assets/battle/pod-thrower.png';
 import rootMatBattle from '../assets/battle/root-mat.png';
+import rootSwornNoviceBattle from '../assets/battle/root-sworn-novice.png';
 import seedlingBattle from '../assets/battle/seedling.png';
 import matronBattle from '../assets/battle/thorn-wall-matron.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
@@ -32,8 +33,7 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.lantern-surveyor': surveyorBattle,
   'enemy.pod-thrower': podThrowerBattle,
   'enemy.root-mat': rootMatBattle,
-  // The Novices wear the Acolytes' sprite until the owner picks their own.
-  'enemy.root-sworn-novice': acolyteBattle,
+  'enemy.root-sworn-novice': rootSwornNoviceBattle,
   'enemy.seedling': seedlingBattle,
   'enemy.thorn-wall-matron': matronBattle,
 };

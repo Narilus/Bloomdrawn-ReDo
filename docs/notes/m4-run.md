@@ -68,7 +68,7 @@ Bloomed art for her is a nice-to-have, after the base sprite.
 
 **Her Novices.** After his first win (194 of 210 HP left), the owner found her not dangerous and asked for a small damage raise and adds of her own: tougher than the Acolytes, which fell to one Tentacle volley, and in the way, with debuffs or Shield or healing for her. Draft (placeholders): the numbers above are raised about 25%, and the Root-Sworn Novice (80 HP) cycles Kneeling Prayer (12 Shield to every enemy, the Abbess included), Bitter Incense (the party gains 1 Vulnerable) and Thorn Rosary (8 damage).
 
-**Art:** one new sprite through `npm run art`. Brief: a tall abbess in bruise-violet vestments, lower body split into pale roots gripping the floor, a brass crozier wound with blush petals, a hollow where her face should be framed by ivory lilies. Violet, brass, ivory. The Novices wear the Acolytes' sprite until their own is picked (brief: `art/briefs/root-sworn-novice.txt`).
+**Art:** one new sprite through `npm run art`. Brief: a tall abbess in bruise-violet vestments, lower body split into pale roots gripping the floor, a brass crozier wound with blush petals, a hollow where her face should be framed by ivory lilies. Violet, brass, ivory. The Novices have their own sprite (brief: `art/briefs/root-sworn-novice.txt`).
 
 **Engine needs:** HP bars per phase (a bar break, immunity, a Rouse intent, a phase's own intent cycle, a phase chosen by the Bloom stage at the start of the fight); the bar count on the stage; side lanes for adds around a large anchor.
 
