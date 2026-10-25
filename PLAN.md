@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
-**Current task:** M4.4 Save and resume
+**Current task:** M4.5 A full run (owner gate)
 
 ## Milestones
 
@@ -247,7 +247,7 @@ _Built 24 Oct, with sprite 01 picked by the owner (03 kept in `art/raw/hollow-ab
 A profile save with banked pulls and a run count. A win banks 5 pulls (10 at Fruiting); a defeat or abandon banks 1 per elite beaten (3 at most). A result screen lists what was banked and why.
 **Done when:** tests prove each banking case, including that a run quit before any progress banks nothing, and the profile survives a reload.
 
-_Built 24 Oct; waiting on the owner's play. The run counts elite tiles beaten (`elites`); `runBanking` (`src/game/profile.ts`) gives the pulls and a line per reason, and the numbers live in the expedition's `banking`. When a run is won or lost, the app banks it into the profile in IndexedDB (`src/app/profile.ts`) once, and the result screen lists the reasons, the run's pulls and the pulls banked in all. Abandoning comes with its menu in M4.4; its banking is built and tested. Tests: "banking" in `src/app/expedition.test.ts`, `src/save/profile.test.ts`. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.3")._
+_Built 24 Oct; signed off by the owner with M4.4 (25 Oct). The run counts elite tiles beaten (`elites`); `runBanking` (`src/game/profile.ts`) gives the pulls and a line per reason, and the numbers live in the expedition's `banking`. When a run is won or lost, the app banks it into the profile in IndexedDB (`src/app/profile.ts`) once, and the result screen lists the reasons, the run's pulls and the pulls banked in all. Abandoning comes with its menu in M4.4; its banking is built and tested. Tests: "banking" in `src/app/expedition.test.ts`, `src/save/profile.test.ts`. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.3")._
 
 ### M4.4 Save and resume
 The run saved at map steps, node results and after each combat command, with the previous good save kept. A title screen with Continue, New run (which asks, then abandons a saved run) and the banked pulls. Abandon in a map menu. A save that can't be migrated ends as an abandon and banks its share. Export and import of one save file.
@@ -256,10 +256,12 @@ The run saved at map steps, node results and after each combat command, with the
 - an e2e test closes the page mid-fight and mid-walk and resumes on the same state;
 - an export imported into an empty browser gives back the same profile and run.
 
-_Built 24 Oct; waiting on the owner's play, with M4.3. The title screen opens the game (Continue, New run, banked pulls, Export and Import save); the map has a Menu with Title screen and Abandon run. The run is saved at every settled step and after every combat command; the profile (schema v2) tracks the run in progress and its elite tally. `src/app/saves.ts` boots, saves, banks and moves files; `src/save/run.ts` checks a run's outline and `src/game/check.ts` its content IDs. Tests: `src/app/saves.test.ts`, the golden replay saved and loaded before every decision and after every combat command (`src/app/expedition.test.ts`), `e2e/resume.spec.ts` (closing mid-walk and mid-fight, Abandon, export into an empty browser). Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.4")._
+_Built 24 Oct; signed off by the owner with M4.3 (25 Oct). The title screen opens the game (Continue, New run, banked pulls, Export and Import save); the map has a Menu with Title screen and Abandon run. The run is saved at every settled step and after every combat command; the profile (schema v2) tracks the run in progress and its elite tally. `src/app/saves.ts` boots, saves, banks and moves files; `src/save/run.ts` checks a run's outline and `src/game/check.ts` its content IDs. Tests: `src/app/saves.test.ts`, the golden replay saved and loaded before every decision and after every combat command (`src/app/expedition.test.ts`), `e2e/resume.spec.ts` (closing mid-walk and mid-fight, Abandon, export into an empty browser). Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.4")._
 
 ### M4.5 A full run (owner gate)
 **Done when:** the owner wins, quits and resumes a full run, and a golden replay of a scripted run through a save and a resume is stable.
+
+_The golden replay through saves is in since M4.4: "the golden replay" in `src/app/expedition.test.ts` saves and loads the run before every decision and after every combat command, and still matches `golden/labyrinth.txt`. Waiting on the owner's full run._
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
