@@ -132,6 +132,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Root-Sworn Novice sprite: 02. All four options are kept in `art/raw/root-sworn-novice/`, since alternate art may be loadable later (owner, 24 Oct).
 - The Hollow Abbess's draft was closer, but the owner still won on full HP thanks to a timely ultimate: another small damage raise, then move on; more balance passes can come later (owner, 24 Oct).
 - M4.3 and M4.4 signed off: banking, the result screen, the title screen, save and resume, Abandon, and export and import as built; all his test steps passed (owner, 25 Oct).
+- M4 signed off: a full run won, quit and resumed. A repeated Promissory Note once gained only 4 Mana and 2 debt in his play but doubled in a later run; he'll watch for an edge case (owner, 25 Oct).
 
 ## Open
 - Gear at launch or later (recommendation: later).

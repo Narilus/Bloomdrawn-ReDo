@@ -1,7 +1,7 @@
 # PLAN
 
-**Current milestone:** M4 First winnable run (M3 signed off 23 Oct)
-**Current task:** M4.5 A full run (owner gate)
+**Current milestone:** M5 Collection (M4 signed off 25 Oct)
+**Current task:** drafting M5's rules and questions for the owner
 
 ## Milestones
 
@@ -224,7 +224,7 @@ _Golden replay done 22 Oct (`src/app/expedition.test.ts`, `src/app/golden/labyri
 
 Rules and content are in `docs/notes/m4-run.md` (answered by the owner 24 Oct).
 
-### M4.1 Card rewards
+### M4.1 Card rewards ✅
 The twelve reward cards as content. After a normal fight the Victory panel offers 3 cards from the party's pool (members' own cards, generic cards of the party's Domains, Unbound's always), each generic card with a random eligible owner; take one or skip. A taken card joins the run's deck, played by its owner.
 **Done when:**
 - scenario tests prove each reward card;
@@ -234,7 +234,7 @@ The twelve reward cards as content. After a normal fight the Victory panel offer
 
 _Done 24 Oct. Reward cards are content: each character's two beside her kit (`reward: true`), and each Domain's generic card in its Domain file (`domain`). Unbound's Domain is marked `anyTeam`, so its card is always offered and goes to anyone. The run's deck holds cards with owners (`RunCard`); a card without one is a Symptom, played by the front member. Long Vigil needed `damage` to hit every enemy, which lands hit by hit with vitals like a volley. The Victory panel shows the cards as card faces with the owner's stats as numbers (what depends on the fight shows as written), and the map's plaque became "Run deck", listing cards with their owners and Symptoms in gold. Card offers draw from their own stream, so boards, relic offers and Shop stock come out as before. Tests: `src/content/scenarios/rewards.test.ts`, "card rewards" in `src/app/expedition.test.ts`; the golden replay now takes the first card each time._
 
-### M4.2 The Boss
+### M4.2 The Boss ✅
 HP bars per phase, the phase break (immunity until a Rouse that clears statuses), a phase cycle chosen by the Bloom stage, and no Bloom scaling for bosses. The Hollow Abbess with Rooted and, at Fruiting, Full Bloom as her second phase. The stage gives her a large anchor with her Novices in side lanes, and blips under her bar. Her sprite through `npm run art`, picked by the owner.
 **Done when:**
 - engine tests prove a bar break loses the rest of the hit, refills the next bar, blocks damage until the Rouse, and the Rouse clears statuses and switches the cycle;
@@ -243,13 +243,13 @@ HP bars per phase, the phase break (immunity until a Rouse that clears statuses)
 
 _Built 24 Oct, with sprite 01 picked by the owner (03 kept in `art/raw/hollow-abbess/`). The owner won his first try on 194 of 210 HP, so her damage is up about 25%, then about 20% more after his second try, and she calls two Root-Sworn Novices of her own, who shield her (draft in `docs/notes/m4-run.md`, "Her Novices"); Novice sprite 02 picked by the owner (all four kept in `art/raw/root-sworn-novice/`). Signed off by the owner after the second raise (24 Oct). Engine: `phases` on an enemy, `fall` in every HP-taking operation (damage, which also gained `allEnemies` in M4.1, loseHp and volley), `rousing` with immunity in the damage pipeline and `loseHp`, the Rouse in `actIntent`, `clearStatuses`, and `barBroken` with per-hit vitals that carry the bar. The Bloom never scales the Boss tile's fight, and from Fruiting on the encounter's `fruiting` encounter (Full Bloom) is fought instead. Tests: `src/engine/phases.test.ts`, `src/content/scenarios/boss.test.ts`, "the Boss" in `src/app/expedition.test.ts`; the golden replay now ends against her. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.2")._
 
-### M4.3 Profile and banking
+### M4.3 Profile and banking ✅
 A profile save with banked pulls and a run count. A win banks 5 pulls (10 at Fruiting); a defeat or abandon banks 1 per elite beaten (3 at most). A result screen lists what was banked and why.
 **Done when:** tests prove each banking case, including that a run quit before any progress banks nothing, and the profile survives a reload.
 
 _Built 24 Oct; signed off by the owner with M4.4 (25 Oct). The run counts elite tiles beaten (`elites`); `runBanking` (`src/game/profile.ts`) gives the pulls and a line per reason, and the numbers live in the expedition's `banking`. When a run is won or lost, the app banks it into the profile in IndexedDB (`src/app/profile.ts`) once, and the result screen lists the reasons, the run's pulls and the pulls banked in all. Abandoning comes with its menu in M4.4; its banking is built and tested. Tests: "banking" in `src/app/expedition.test.ts`, `src/save/profile.test.ts`. Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.3")._
 
-### M4.4 Save and resume
+### M4.4 Save and resume ✅
 The run saved at map steps, node results and after each combat command, with the previous good save kept. A title screen with Continue, New run (which asks, then abandons a saved run) and the banked pulls. Abandon in a map menu. A save that can't be migrated ends as an abandon and banks its share. Export and import of one save file.
 **Done when:**
 - tests prove a run saved and loaded at any point plays on identically, a failed write keeps the last good save, and an unreadable run banks its share;
@@ -258,10 +258,10 @@ The run saved at map steps, node results and after each combat command, with the
 
 _Built 24 Oct; signed off by the owner with M4.3 (25 Oct). The title screen opens the game (Continue, New run, banked pulls, Export and Import save); the map has a Menu with Title screen and Abandon run. The run is saved at every settled step and after every combat command; the profile (schema v2) tracks the run in progress and its elite tally. `src/app/saves.ts` boots, saves, banks and moves files; `src/save/run.ts` checks a run's outline and `src/game/check.ts` its content IDs. Tests: `src/app/saves.test.ts`, the golden replay saved and loaded before every decision and after every combat command (`src/app/expedition.test.ts`), `e2e/resume.spec.ts` (closing mid-walk and mid-fight, Abandon, export into an empty browser). Choices made without the owner are in `docs/notes/m4-run.md` ("As built in M4.4")._
 
-### M4.5 A full run (owner gate)
+### M4.5 A full run (owner gate) ✅
 **Done when:** the owner wins, quits and resumes a full run, and a golden replay of a scripted run through a save and a resume is stable.
 
-_The golden replay through saves is in since M4.4: "the golden replay" in `src/app/expedition.test.ts` saves and loads the run before every decision and after every combat command, and still matches `golden/labyrinth.txt`. Waiting on the owner's full run._
+_The golden replay through saves is in since M4.4: "the golden replay" in `src/app/expedition.test.ts` saves and loads the run before every decision and after every combat command, and still matches `golden/labyrinth.txt`. Signed off by the owner after a full run, quit and resumed (25 Oct). In an earlier run he saw Promissory Note after Bud Cutting gain only 4 Mana and 2 debt; it doubles in every test and in his later run, so it is being watched for an edge case (scenario in `src/content/scenarios/kits.test.ts`)._
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
