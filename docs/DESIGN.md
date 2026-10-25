@@ -141,7 +141,7 @@ The roster is mostly adult women. Characters are designed to be desirable to col
 
 ## Launch roster
 
-Launch ships eight characters, two per Domain. The starter four (one per Domain) are owned from the first session, so the tutorial teaches every engine. The other four enter the standard banner when banners unlock. Names marked (w) are working names.
+Launch ships eight characters, two per Domain. The starter four (one per Domain) are owned from the first session, so the tutorial teaches every engine. The other four enter the standard banner when banners unlock. The starters never enter a banner; their dupes are bought in the Profile Shop (owner, 25 Oct). Names marked (w) are working names.
 
 | Character | Domain | Slot | Role | Bloom |
 | --- | --- | --- | --- | --- |
@@ -307,6 +307,9 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 
 Materials drop from ordinary runs, scaled by depth. **Trials** are optional boss challenges that let the player target a specific material. No material has a single mandatory source.
 
+- **Trials are the main source of ascension materials.** Each Domain has Trials in difficulty tiers, and a higher tier pays more. A Trial is a fight straight against a boss, with no map; a defeat pays nothing. Tier 1 is no real challenge, but not impossible, for a team at its level (owner, 25 Oct).
+- **A won run gives a random material on the side,** generally one, with the Boss victory. It isn't doubled at Fruiting and isn't given on defeat (owner, 25 Oct).
+
 ### Depth tiers
 
 The player chooses a run depth, and each depth names a recommended power band. Enemy stats and rewards scale with depth. Out-statting an earlier depth is intended progression: today's hard tier becomes tomorrow's comfortable one, and the next tier opens. Encounters are tuned against power bands, so the band table is a core balance artefact.
@@ -315,6 +318,8 @@ The player chooses a run depth, and each depth names a recommended power band. E
 
 A persistent shop spending profile money and dupe-overflow currency on targeted dupes, weapons, EXP and materials. It never sells pulls, and no currency converts into pulls.
 
+Every pull also gives a little of that currency, and a lost 50/50 gives more. It buys specific characters' dupes, the starters' included, so they never need to be in a banner (owner, 25 Oct).
+
 ## Gacha
 
 Pulls are earned only, spent one-for-one on banners with fully visible odds, pity and history. Pity guarantees at least three SSRs per 90 pulls, one of them the featured character.
@@ -322,7 +327,7 @@ Pulls are earned only, spent one-for-one on banners with fully visible odds, pit
 ### Banners
 
 - **Standard:** a permanent pool of all generally released characters and non-limited weapons.
-- **Featured:** a rotating rate-up on one character. Featured pity and guarantee carry over when the banner rotates; they never expire.
+- **Featured:** a rate-up on one character. Nothing rotates: a menu lets the player pick which Featured banner to pull on, freely (owner, 25 Oct). Featured pity and guarantee carry over between Featured banners; they never expire.
 - **Weapon-focused:** only once weapon rates and guarantees are approved.
 
 ### Rates and pity
@@ -517,7 +522,7 @@ These are deliberately undecided; each is settled before the milestone that need
 - [ ] The power-band table: recommended power and enemy scaling per depth tier.
 - [ ] Reward economy: pulls, EXP and materials earned per run, depth and milestone.
 - [ ] Final names for Anthe and Hester; Shiori's place (post-launch, or Spirit with a mythic source).
-- [ ] Final names for Obols, pulls, profile money and item tiers.
+- [ ] Final names for Obols, pulls, profile money and item tiers. Working names: Purified Blooms (pulls), Ducats (money), Faint, Clear and Vivid Memories (EXP), Pollen (the shop currency from pulls and overflow), and Flesh Sac, Rapture Tendril, Spirit Shard and Unbound Badge (ascension materials).
 - [ ] Content warning list and intensity settings for release.
 - [ ] Decided: PixiJS for the battlefield, with React and Motion; the M0 spike checks feel only.
 - [ ] Desktop wrapper (Tauri or Electron) and release platforms.

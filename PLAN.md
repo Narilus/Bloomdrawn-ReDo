@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5 draft (`docs/notes/m5-collection.md`), waiting on the owner's answers
+**Current task:** M5.2 banner kits draft for the owner (`docs/notes/banner-kits.md`); M5.1 next
 
 ## Milestones
 
@@ -262,6 +262,44 @@ _Built 24 Oct; signed off by the owner with M4.3 (25 Oct). The title screen open
 **Done when:** the owner wins, quits and resumes a full run, and a golden replay of a scripted run through a save and a resume is stable.
 
 _The golden replay through saves is in since M4.4: "the golden replay" in `src/app/expedition.test.ts` saves and loads the run before every decision and after every combat command, and still matches `golden/labyrinth.txt`. Signed off by the owner after a full run, quit and resumed (25 Oct). In an earlier run he saw Promissory Note after Bud Cutting gain only 4 Mana and 2 debt; it doubles in every test and in his later run, so it is being watched for an edge case (scenario in `src/content/scenarios/kits.test.ts`)._
+
+## M5 tasks
+
+Rules and names are in `docs/notes/m5-collection.md` (answered by the owner 25 Oct).
+
+### M5.1 Roster and party select
+The profile owns characters: every profile owns the starter four, and an older profile save migrates to own them. A Roster screen and a character page (stats and kit) from the title screen. Party select before New run: any four owned characters, in order. The working names on screen (Purified Blooms for pulls).
+**Done when:**
+- a test proves a run starts with the chosen party and order, and its card offers follow that party;
+- an M4 profile save loads, owning the starters, with its Blooms and run count;
+- party select rejects a party with an unowned character, a repeat, or not four;
+- e2e picks a party and starts a run.
+
+### M5.2 The banner four
+Virelle, Isadora, Kibane and Hester: kits, reward cards and C1–C5 dupe effects drafted in `docs/notes/banner-kits.md` and approved by the owner, then as content. Sprites and portraits through `npm run art`; the owner picks.
+**Done when:** every card, passive, ultimate, Transcend and reward card has a scenario test, and the owner has picked the art.
+
+### M5.3 The gacha
+The Standard banner (the banner four), on its own seeded stream in the profile: SSR 3%, SR 15%, R 82%, hard pity at 30, a ten-pull with at least one SR. Before weapons, an SR gives ascension materials and an R gives Memories and Ducats. Every pull is audited, gives Pollen, and spends one Purified Bloom. A new profile starts with 10. The banner screen: Pull 1 and Pull 10, the odds, the pity counter, the pool and the recent history.
+**Done when:**
+- tests over many seeded pulls prove the rates within tolerance, an SSR by pull 30 every time, and an SR in every ten-pull;
+- each audit entry records the banner, pity before and after, the result, its dupe handling and the Blooms before and after;
+- pulling never changes a run's streams, and a pull without a Bloom is rejected;
+- e2e pulls once and ten times and sees the history.
+
+### M5.4 Dupes
+C1–C5 for the banner four, applied in combat from the profile's dupe levels. Overflow past C5 converts to Pollen.
+**Done when:** each dupe level has a scenario test, and a sixth copy banks Pollen instead.
+
+### M5.5 Levels, Memories and ascension
+Ducats and Faint, Clear and Vivid Memories. Level up on the character page spends Memories plus Ducats and refunds excess as smaller Memories; levels 10, 20 and 30 need an ascension (that Domain's material plus Ducats) to pass. Memories and Ducats bank at run end like the Blooms (doubled at Fruiting; per elite, 3 at most, on defeat); a won run's Boss gives one random material, never doubled.
+**Done when:**
+- tests prove the stats per level (level 1 is today's stats, so the golden replay is unchanged), the refunds, the ascension gates and the banking rules;
+- a levelled character's card previews equal results in a scenario;
+- the result screen lists Memories, Ducats and the material with the Blooms.
+
+### M5.6 Collection (owner playtest)
+**Done when:** the owner pulls, builds up a character and takes a party of his choosing through a run, and signs off.
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
