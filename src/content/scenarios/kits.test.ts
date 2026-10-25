@@ -126,6 +126,13 @@ describe('Leonora', () => {
     check: ({ plays }) => expect(plays[0]?.after.mana).toBe(6 - 2 + 4),
   });
 
+  scenario('Promissory Note after Bud Cutting gains its Mana and takes its debt twice', {
+    setup: { hand: ['maelia.bud-cutting', 'leonora.promissory-note'] },
+    play: [{ card: 'maelia.bud-cutting' }, { card: 'leonora.promissory-note' }, { endTurn: true }],
+    expect: { mana: 6 - 2 - 2 },
+    check: ({ plays }) => expect(plays[1]?.after.mana).toBe(6 - 3 - 2 + 4 + 4),
+  });
+
   scenario('Requisition: draw 2, and the next card costs 2 less', {
     setup: { hand: ['leonora.requisition', 'leonora.strike'] },
     play: [{ card: 'leonora.requisition' }, { card: 'leonora.strike', target: 0 }],
