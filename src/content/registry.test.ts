@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyStatus, damage, gainShield, ifConsume } from '../engine/index.ts';
 import { card, character, domain, status } from './define.ts';
 import { registry, validateContent } from './registry.ts';
+import { STARTERS } from './roster.ts';
 
 // A valid character needs one card in each of the five slots.
 const strike = card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'strike', cost: 1, target: 'chosenEnemy', effects: [damage(6)] });
@@ -20,6 +21,10 @@ describe('content registry', () => {
     expect(Object.keys(registry.characters).sort()).toEqual(['agathe', 'anthe', 'leonora', 'maelia']);
     expect(registry.enemies['enemy.training-dummy']).toBeDefined();
     expect(Object.keys(registry.domains).sort()).toEqual(['flesh', 'rapture', 'spirit', 'unbound']);
+  });
+
+  it('the starters are four characters, one per Domain', () => {
+    expect(STARTERS.map((id) => registry.characters[id]?.domain).sort()).toEqual(['flesh', 'rapture', 'spirit', 'unbound']);
   });
 
   it('reports a character whose Domain has no module', () => {

@@ -47,7 +47,7 @@ export const thuribleSwing = card({
 });
 
 export const agathe = character({
-  id: 'agathe', name: 'Agathe', domain: 'rapture',
+  id: 'agathe', name: 'Agathe', title: 'the Choir-Mother', domain: 'rapture',
   stats: { hp: 50, attack: 4, defense: 4 },
   cards: [strike, defense, theChoirAnswers, callTheChoir, censerRite],
   passive: {

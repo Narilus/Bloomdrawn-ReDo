@@ -1716,3 +1716,267 @@ kbd {
   text-align: center;
   color: var(--flesh-pink);
 }
+
+/* Party select and the roster (M5.1): the party's four places, then every owned character as a tile. */
+.roster-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 28px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(122, 79, 160, 0.18), transparent 60%),
+    var(--charcoal-plum);
+}
+
+.roster-screen .end-turn {
+  position: static;
+}
+
+.roster-screen h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 56px;
+  color: var(--blush);
+}
+
+.party-slots {
+  display: flex;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.party-slot {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  width: 220px;
+  height: 128px;
+  padding: 12px;
+  border: 2px solid var(--antique-gold);
+  border-radius: 12px;
+  background: rgba(46, 30, 42, 0.8);
+  font-family: var(--serif);
+}
+
+.party-slot.empty {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.party-slot.domain-flesh { border-color: var(--flesh); }
+.party-slot.domain-rapture { border-color: var(--rapture); }
+.party-slot.domain-spirit { border-color: var(--spirit); }
+.party-slot.domain-unbound { border-color: var(--unbound); }
+
+.party-slot-place {
+  font-family: var(--sans);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.party-slot strong {
+  font-size: 30px;
+}
+
+.party-slot-empty {
+  font-size: 22px;
+  opacity: 0.7;
+}
+
+.party-slot-moves {
+  display: flex;
+  gap: 10px;
+}
+
+.party-slot-moves .ghost {
+  padding: 2px 12px;
+  font-size: 16px;
+}
+
+.party-slot-moves .ghost:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.roster-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  max-width: 1500px;
+}
+
+.roster-tile {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 200px;
+  padding: 10px 10px 14px;
+  border: 2px solid var(--mauve-shadow);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--dusk-plum), var(--aubergine));
+  color: var(--petal-ivory);
+  font-family: var(--serif);
+  cursor: pointer;
+}
+
+.roster-tile.domain-flesh { border-color: var(--flesh); }
+.roster-tile.domain-rapture { border-color: var(--rapture); }
+.roster-tile.domain-spirit { border-color: var(--spirit); }
+.roster-tile.domain-unbound { border-color: var(--unbound); }
+
+.roster-tile.chosen {
+  box-shadow: 0 0 0 4px var(--antique-gold);
+}
+
+.roster-art {
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+}
+
+.roster-art img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.roster-art .monogram {
+  font-size: 96px;
+  opacity: 0.5;
+}
+
+.roster-tile strong {
+  font-size: 28px;
+}
+
+.roster-tile span {
+  font-family: var(--sans);
+  font-size: 15px;
+  opacity: 0.75;
+}
+
+.roster-place {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--antique-gold);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.roster-hint {
+  margin: 0;
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+/* A character's page: her art on the left, her stats and kit on the right. */
+.character-page {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  gap: 40px;
+  padding: 48px 64px;
+  background: var(--charcoal-plum);
+}
+
+.character-art {
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+}
+
+.character-art img {
+  max-width: 100%;
+  max-height: 980px;
+}
+
+.character-info {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.character-info h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 56px;
+  color: var(--blush);
+}
+
+.character-info h3 {
+  margin: 8px 0 0;
+  font-family: var(--serif);
+  font-size: 28px;
+}
+
+.character-info h3 small {
+  margin-left: 8px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.character-info section p,
+.character-domain {
+  margin: 4px 0 0;
+  font-size: 20px;
+}
+
+.character-transcended em {
+  color: var(--antique-gold);
+}
+
+.character-stats {
+  display: flex;
+  gap: 10px 28px;
+  margin: 0;
+  font-size: 22px;
+}
+
+.character-stats dt {
+  opacity: 0.7;
+}
+
+.character-stats dd {
+  margin: 0 0 0 -18px;
+  font-weight: 800;
+}
+
+.character-cards {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0 0 10px;
+}
+
+/* Smaller than in the hand, so the kit and the reward cards fit on the page. */
+.character-cards .card {
+  zoom: 0.78;
+}
+
+.character-back {
+  position: absolute;
+  top: 48px;
+  right: 64px;
+}

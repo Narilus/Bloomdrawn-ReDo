@@ -270,6 +270,16 @@ describe('card rewards', () => {
     }
   });
 
+  it('a run fields the party chosen, front first: its fights and its card offers follow it (party select, M5.1)', () => {
+    const party = ['leonora', 'anthe', 'maelia', 'agathe'];
+    const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
+    const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
+    expect(combat.members.map((m) => m.character)).toEqual(party);
+    for (let seed = 1; seed <= 20; seed++) {
+      for (const { card, owner } of won(seed, party).offeredCards) expect(eligibleOwners(card, party, registry)).toContain(owner);
+    }
+  });
+
   it('elites give relics only, the Boss ends the run, and a Bloom node fight offers cards like any fight', () => {
     expect(won(1, PARTY, [{ kind: 'entrance' }, ELITE]).offeredCards).toEqual([]);
     const boss = won(1, PARTY, [{ kind: 'entrance' }, { kind: 'boss', content: 'encounter.hound' }]);
@@ -360,23 +370,23 @@ describe('banking', () => {
   const banked = (exp: Expedition, end: 'won' | 'lost' | 'abandoned' = exp.phase as 'won' | 'lost') => runBanking(exp, end, M3_EXPEDITION);
 
   it('a win banks 5 pulls, and elites beaten on the way add nothing to it', () => {
-    expect(banked(play([BOSS], 'victory'))).toEqual({ pulls: 5, lines: ['The Boss beaten: 5 pulls'] });
+    expect(banked(play([BOSS], 'victory'))).toEqual({ pulls: 5, lines: ['The Boss beaten: 5 Purified Blooms'] });
     const past = play([ELITE, ELITE, BOSS], 'victory');
     expect([past.phase, past.elites, banked(past).pulls]).toEqual(['won', 2, 5]);
   });
 
   it('a win over the Boss at Fruiting banks double', () => {
     const exp = play([BOSS], 'victory', 12);
-    expect(banked(exp)).toEqual({ pulls: 10, lines: ['The Boss beaten: 5 pulls', 'The Boss at Fruiting: ×2'] });
+    expect(banked(exp)).toEqual({ pulls: 10, lines: ['The Boss beaten: 5 Purified Blooms', 'The Boss at Fruiting: ×2'] });
     // Fruiting reached by fights on the way counts too: the Boss's own fight never ticks the clock.
     expect(banked(play([ELITE, BOSS], 'victory', 11)).pulls).toBe(10);
   });
 
   it('a defeat banks 1 pull per elite beaten, 3 at most', () => {
     expect(banked(play([HOUND], 'defeat'))).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
-    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, lines: ['1 elite beaten: 1 pull'] });
-    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, lines: ['2 elites beaten: 2 pulls'] });
-    expect(banked(play([ELITE, ELITE, ELITE, ELITE, HOUND], 'defeat'))).toEqual({ pulls: 3, lines: ['4 elites beaten: 3 pulls (3 at most)'] });
+    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, lines: ['1 elite beaten: 1 Purified Bloom'] });
+    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, lines: ['2 elites beaten: 2 Purified Blooms'] });
+    expect(banked(play([ELITE, ELITE, ELITE, ELITE, HOUND], 'defeat'))).toEqual({ pulls: 3, lines: ['4 elites beaten: 3 Purified Blooms (3 at most)'] });
   });
 
   it('an abandoned run banks like a defeat, so a run quit before any progress banks nothing', () => {
@@ -391,8 +401,8 @@ describe('banking', () => {
 
   it('banking adds the pulls to the profile and counts the run', () => {
     const once = bank(NEW_PROFILE, banked(play([BOSS], 'victory')));
-    expect(once).toEqual({ pulls: 5, runs: 1 });
-    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ pulls: 5, runs: 2 });
+    expect(once).toEqual({ pulls: 5, runs: 1, owned: [] });
+    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ pulls: 5, runs: 2, owned: [] });
   });
 });
 

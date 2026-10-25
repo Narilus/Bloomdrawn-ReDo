@@ -95,11 +95,11 @@ export function createSaves(adapter: SaveAdapter) {
         return { profile: after, run: null, ended: { reason, banked } };
       }),
 
-    /** Starts a run: the profile records it as in progress, then its first save is written. */
+    /** Starts a run: the profile records it as in progress, and its party for next time, then its first save is written. */
     start: (save: RunSave) =>
       enqueue(async () => {
         const profile = await readProfile();
-        await store.write(profileSave, { ...profile, run: { id: save.id, elites: save.exp.elites } });
+        await store.write(profileSave, { ...profile, party: [...save.exp.party], run: { id: save.id, elites: save.exp.elites } });
         await store.write(RUN_SAVE, save);
       }),
 
@@ -111,6 +111,9 @@ export function createSaves(adapter: SaveAdapter) {
     },
 
     end,
+
+    /** The profile as saved, after any writes in flight. */
+    profile: () => enqueue(readProfile),
 
     /** Both saves in one file. */
     exportFile: () => enqueue(() => store.exportBackup([...kinds])),

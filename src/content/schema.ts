@@ -56,6 +56,7 @@ export const schemas = {
     kind: z.literal('character'),
     id,
     name: z.string().min(1),
+    title: z.string().min(1).optional(),
     domain: z.enum(['flesh', 'rapture', 'spirit', 'unbound']),
     stats: z.strictObject({ hp: z.int().positive(), attack: z.int().min(0), defense: z.int().min(0) }),
     cards: z.array(id),

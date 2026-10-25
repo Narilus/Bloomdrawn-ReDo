@@ -105,6 +105,8 @@ export interface UltimateDef {
 export interface CharacterDef {
   id: string;
   name: string;
+  /** Her epithet, shown with her name outside combat ("Maelia, Midwife of the Bloom"). */
+  title?: string;
   domain: string;
   stats: { hp: number; attack: number; defense: number };
   cards: string[];

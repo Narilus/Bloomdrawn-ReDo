@@ -1,13 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-test('app boots into the title screen, and New run opens the Labyrinth', async ({ page }) => {
+test('app boots into the title screen, and New run opens party select, then the Labyrinth', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/');
-  await expect(page.locator('.title-pulls')).toContainText('Banked pulls 0');
+  await expect(page.locator('.title-pulls')).toContainText('Purified Blooms 0');
   await expect(page.getByRole('button', { name: 'Continue' })).toHaveCount(0);
   await page.screenshot({ path: 'test-results/screenshots/title.png' });
   await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Start run' }).click();
   await expect(page.locator('.labyrinth-map [data-kind="entrance"]')).toBeVisible();
   await page.screenshot({ path: 'test-results/screenshots/labyrinth.png' });
   expect(errors).toEqual([]);

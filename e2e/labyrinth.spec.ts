@@ -9,6 +9,7 @@ test('walks into a fight and back to the map', async ({ page }) => {
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/?encounters=encounter.training&clock=11');
   await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Start run' }).click();
   await expect(page.locator('.bloom-clock')).toContainText('Flowering');
   await expect(page.locator('[data-boss-marker]')).toBeVisible();
   // The start gate is drawn "E o F X": its fight is two steps east of the entrance on every board.

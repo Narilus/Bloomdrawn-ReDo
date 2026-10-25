@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5.1 Roster and party select (banner kits reviewed 25 Oct)
+**Current task:** M5.2 The banner four (M5.1 done 25 Oct, for the owner to try)
 
 ## Milestones
 
@@ -267,13 +267,15 @@ _The golden replay through saves is in since M4.4: "the golden replay" in `src/a
 
 Rules and names are in `docs/notes/m5-collection.md` (answered by the owner 25 Oct).
 
-### M5.1 Roster and party select
+### M5.1 Roster and party select ✅
 The profile owns characters: every profile owns the starter four, and an older profile save migrates to own them. A Roster screen and a character page (stats and kit) from the title screen. Party select before New run: any four owned characters, in order. The working names on screen (Purified Blooms for pulls).
 **Done when:**
 - a test proves a run starts with the chosen party and order, and its card offers follow that party;
 - an M4 profile save loads, owning the starters, with its Blooms and run count;
 - party select rejects a party with an unowned character, a repeat, or not four;
 - e2e picks a party and starts a run.
+
+_Done 25 Oct. The profile (save v3) lists the characters gained; every profile owns the starters (`src/content/roster.ts`) without listing them, so older saves need no content to migrate. It also keeps the party the last run started with, which party select offers next. The title screen shows Purified Blooms and has a Roster: a tile per owned character opens her page (title, Domain, stats, passive, ultimate and its Transcended form, her five cards and reward cards, numbers from her stats; characters now have a `title`). New run (after the abandon confirm, if a run is saved) and Run again open party select: click a character to add or remove her, the arrows move her, and Start run needs four different owned characters. Tests: `src/game/profile.test.ts`, "a run fields the party chosen" in `src/app/expedition.test.ts`, the v2 migration in `src/save/profile.test.ts`, `e2e/party.spec.ts`. With only the starters owned, party select can only reorder them until M5.3._
 
 ### M5.2 The banner four
 Virelle, Isadora, Kibane and Hester as content: kits and reward cards from `docs/notes/banner-kits.md` (reviewed by the owner 25 Oct), with the engine pieces it lists. A lab script in `tools/lab/` measures damage per turn for Flesh, Rapture and Spirit pairs, so Spirit's numbers can be set against Rapture's snowball. Sprites and portraits through `npm run art`; the owner picks.

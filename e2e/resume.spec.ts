@@ -21,6 +21,7 @@ test('closing the page mid-walk and mid-fight resumes on the same state', async 
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/?encounters=encounter.training');
   await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Start run' }).click();
 
   // Mid-walk: the start gate's fight is two steps away; close before the party gets there.
   await page.locator('[data-tile="2,0"]').click();
@@ -53,6 +54,7 @@ test('closing the page mid-walk and mid-fight resumes on the same state', async 
 test('Abandon in the map menu banks the run and the title screen then has nothing to continue', async ({ page }) => {
   await page.goto('/?encounters=encounter.training');
   await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Start run' }).click();
   await page.getByRole('button', { name: 'Menu' }).click();
   await page.getByRole('button', { name: 'Abandon run' }).click();
   await expect(page.getByRole('dialog', { name: 'Abandon run' })).toContainText('No elites beaten: nothing banked');
@@ -68,6 +70,7 @@ test('an exported save imported into an empty browser continues the same run', a
   test.setTimeout(60_000);
   await page.goto('/?encounters=encounter.training');
   await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Start run' }).click();
   await page.locator('[data-tile="2,0"]').click();
   await expect(page.locator('.mana strong')).toBeVisible();
   await page.keyboard.press('1');

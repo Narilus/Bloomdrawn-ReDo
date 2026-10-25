@@ -39,7 +39,7 @@ import {
   type Outcome,
   type ShopStock,
 } from '../game/expedition.ts';
-import { runBanking, type Banked, type Profile, type RunEnd } from '../game/profile.ts';
+import { BLOOM, plural, runBanking, type Banked, type Profile, type RunEnd } from '../game/profile.ts';
 import type { RunSave } from '../save/run.ts';
 import { CardFace, markNumber } from './CardView.tsx';
 import { Combat } from './Combat.tsx';
@@ -50,7 +50,6 @@ import type { Saves } from './saves.ts';
 
 // The M3 run: walk the Labyrinth, fight where you stop, win at the Boss.
 
-const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
 /** Seconds per tile as the party token walks its route. */
 const STEP = 0.22;
 /** A beat on arriving at a fight before the battlefield takes over. */
@@ -73,10 +72,10 @@ const SEED = Number(params().get('seed')) || undefined;
 const FIRST_CLOCK = Number(params().get('clock')) || 0;
 const FIRST_OBOLS = Number(params().get('obols')) || 0;
 
-/** A new run on a random board (or `?seed`'s), with its own ID for the profile to track. */
-export function newRun(): RunSave {
+/** A new run for this party, front first, on a random board (or `?seed`'s), with its own ID for the profile to track. */
+export function newRun(party: readonly string[]): RunSave {
   const seed = SEED ?? Math.floor(Math.random() * 2 ** 31);
-  const exp = { ...startExpedition(seed, PARTY, DEF, registry.motifs), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
+  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
   return { id: crypto.randomUUID(), seed, exp };
 }
 
@@ -128,7 +127,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
     });
   };
 
-  // A run that ends banks its pulls once and its save is dropped; the ref keeps a remounted
+  // A run that ends banks its Blooms once and its save is dropped; the ref keeps a remounted
   // effect from banking it again. Abandoning banks from the menu.
   const [abandoned, setAbandoned] = useState(false);
   const [menu, setMenu] = useState<'closed' | 'open' | 'abandon'>('closed');
@@ -269,7 +268,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
   );
 }
 
-/** What a run banks and why, and once it has ended, the profile's pulls when they are saved. */
+/** What a run banks and why, and once it has ended, the profile's Purified Blooms when they are saved. */
 export function Banking({ banked, profile }: { banked: Banked; profile: Profile | 'failed' | null | undefined }) {
   return (
     <div className="banking" aria-label="Banked">
@@ -278,10 +277,10 @@ export function Banking({ banked, profile }: { banked: Banked; profile: Profile 
           <li key={line}>{line}</li>
         ))}
       </ul>
-      <p className="banked-total">This run: {banked.pulls === 1 ? '1 pull' : `${banked.pulls} pulls`}</p>
+      <p className="banked-total">This run: {plural(banked.pulls, BLOOM)}</p>
       {profile !== undefined && (
         <p className="banked-profile">
-          {profile === 'failed' ? 'The profile could not be saved.' : profile ? `Pulls banked in all: ${profile.pulls}` : 'Banking…'}
+          {profile === 'failed' ? 'The profile could not be saved.' : profile ? `${BLOOM}s banked in all: ${profile.pulls}` : 'Banking…'}
         </p>
       )}
     </div>

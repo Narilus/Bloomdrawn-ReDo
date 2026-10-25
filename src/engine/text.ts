@@ -113,3 +113,14 @@ export function describeKit(state: CombatState, member: EntityId, registry: Regi
   const ultimate = upgraded ? renderTemplate(upgraded.text, upgraded, show) : def?.ultimate ? renderTemplate(def.ultimate.text, def.ultimate, show) : undefined;
   return { passive, ultimate };
 }
+
+/** A character's passive and ultimate text outside combat, with the numbers her stats fix. */
+export function describeCharacter(def: CharacterDef) {
+  const show = showStats(def.stats);
+  const { passive, ultimate } = def;
+  return {
+    passive: passive?.text ? renderTemplate(passive.text, passive, show) : undefined,
+    ultimate: ultimate ? renderTemplate(ultimate.text, ultimate, show) : undefined,
+    transcended: ultimate?.transcended ? renderTemplate(ultimate.transcended.text, ultimate.transcended, show) : undefined,
+  };
+}
