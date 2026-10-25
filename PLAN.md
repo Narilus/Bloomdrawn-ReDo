@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5.2 banner kits draft for the owner (`docs/notes/banner-kits.md`); M5.1 next
+**Current task:** M5.1 Roster and party select (banner kits reviewed 25 Oct)
 
 ## Milestones
 
@@ -276,8 +276,11 @@ The profile owns characters: every profile owns the starter four, and an older p
 - e2e picks a party and starts a run.
 
 ### M5.2 The banner four
-Virelle, Isadora, Kibane and Hester: kits, reward cards and C1–C5 dupe effects drafted in `docs/notes/banner-kits.md` and approved by the owner, then as content. Sprites and portraits through `npm run art`; the owner picks.
-**Done when:** every card, passive, ultimate, Transcend and reward card has a scenario test, and the owner has picked the art.
+Virelle, Isadora, Kibane and Hester as content: kits and reward cards from `docs/notes/banner-kits.md` (reviewed by the owner 25 Oct), with the engine pieces it lists. A lab script in `tools/lab/` measures damage per turn for Flesh, Rapture and Spirit pairs, so Spirit's numbers can be set against Rapture's snowball. Sprites and portraits through `npm run art`; the owner picks.
+**Done when:**
+- every card, passive, ultimate, Transcend and reward card has a scenario test;
+- the owner has seen the damage curves and agreed Spirit's numbers;
+- the owner has picked the art.
 
 ### M5.3 The gacha
 The Standard banner (the banner four), on its own seeded stream in the profile: SSR 3%, SR 15%, R 82%, hard pity at 30, a ten-pull with at least one SR. Before weapons, an SR gives ascension materials and an R gives Memories and Ducats. Every pull is audited, gives Pollen, and spends one Purified Bloom. A new profile starts with 10. The banner screen: Pull 1 and Pull 10, the odds, the pity counter, the pool and the recent history.

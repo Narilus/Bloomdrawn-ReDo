@@ -89,6 +89,12 @@ Every character belongs to one of four Domains, and each Domain is its own comba
 | Spirit | Original | Essence | Generate Essence | Ritual cards: expensive, Retain, 1 cheaper each turn held, scale hard with Essence | Essence and time held |
 | Unbound | Chaos | None | — | Buffs, debuffs, Mana and draw economy, control and cost changes | The engines of the Domains it supports |
 
+### How each Domain feels
+
+- **Rapture snowballs.** Volleys start weak, but the count keeps growing across turns until it is overwhelming.
+- **Flesh has two tracks:** set up and burst (build and spend), with damage over time filling the gaps and wearing enemies down every turn. Damage over time can snowball too, but slower than Tentacles.
+- **Spirit trades hand space for a delayed payoff.** Fire a Ritual early at full cost when racing the enemy, or hold it and play other cards while it gets cheaper. Card for card, Spirit out-damages the other Domains by a decent margin once Essence scales; otherwise juggling 5-cost cards, with some turns dealing no damage, isn't worth it (owner, 25 Oct).
+
 ### Rules per Domain
 
 - **Flesh.** A spender never consumes Embryo unless its bonus effect actually resolves. Bleed and Poison are Flesh's damage over time. Support characters add Embryo generation, card duplication and ultimate charge.
@@ -162,9 +168,9 @@ Kits are direction, not final numbers. Each look is written as a brief an artist
 - **Agathe.** *Kit:* Tentacle builders; starts each combat with a Tentacle; ultimate summons a burst of Tentacles. *Look:* 50s; heavy violet robes, gold-embroidered stole, censer on a chain, chalk-stained hem; flesh-pink tentacles rise from a chalk circle at her feet and coil around her raised arm. Bruise violet, green-gold, candle-wax ivory.
 - **Anthe.** *Kit:* gains Essence for each Ritual held at end of turn; reduces Ritual costs; ultimate converts held turns into Essence. *Look:* 30s; Greek sphinx source; broad and regal; tawny lion ears and tail; folded feathered wings whose flowered tips are bound in gold thread; linen chiton, gold-leaf collar, a votive candle in hand. Ash, gold leaf, smoke lavender.
 - **Leonora.** *Kit:* Mana now for Mana debt later, draw, next-card cost reduction; ultimate refunds the turn's Mana. *Look:* 30s; long travelling coat with a dozen pockets; brass balance scale at her hip; leather ledger with a red wax seal. Oxblood and brass.
-- **Virelle.** *Kit:* applies Bleed; spenders consume Embryo to detonate Bleed stacks; ultimate is a flurry that adds Bleed per hit. *Look:* 20s; lean duelist's stance; one arm blossomed from shoulder to wrist with pink thorn-spurs at the elbow; fitted bodice laced with surgical thread. Rose, raw pink, arterial red.
+- **Virelle.** *Kit:* applies Bleed; spenders consume Embryo to detonate Bleed stacks; ultimate is a flurry against every enemy that adds Bleed per hit. *Look:* 20s; lean duelist's stance; one arm blossomed from shoulder to wrist with pink thorn-spurs at the elbow; fitted bodice laced with surgical thread. Rose, raw pink, arterial red.
 - **Isadora.** *Kit:* raises damage per Tentacle; spenders trigger mid-turn volleys; ultimate makes the turn's volleys hit twice. *Look:* 20s; caught mid-dance, head thrown back; torn devotional veil, bare feet, ankle bells; four tentacles from her back arcing like ribbons, petal-tipped. Ivory, violet, green-gold.
-- **Kibane.** *Kit:* holds expensive Rituals that grow huge with Essence. Her exception: her ultimate consumes all Essence for one massive hit. *Look:* 20s; pure kyubi, keeping the Bloom out by strength of spirit; fox ears and nine tails; foxfire wisps; red-and-white shrine-dancer outfit and a clawed gauntlet. No petals.
+- **Kibane.** *Kit:* holds expensive Rituals that grow huge with Essence. Her exception: her ultimate consumes all Essence for one massive hit on every enemy. *Look:* 20s; pure kyubi, keeping the Bloom out by strength of spirit; fox ears and nine tails; foxfire wisps; red-and-white shrine-dancer outfit and a clawed gauntlet. No petals.
 - **Hester.** *Kit:* applies Vulnerable and Weak, Delays intents; ultimate snares every enemy, skipping their next action. *Look:* 30s; wide-brimmed hat; weighted net over one shoulder; iron hooks and bone whistles on her belt. Moss, leather brown, iron.
 
 Roster spread: ages 20s to 50s; Greek, Japanese and original sources; all four Bloom relationships. Gloomdrawn's Kibane art is a usable base without its dragon horns. Gloomdrawn's Thalassa and Nerissa are retired as designs because they are sea-coded.
