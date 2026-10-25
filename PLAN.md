@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** drafting M5's rules and questions for the owner
+**Current task:** M5 draft (`docs/notes/m5-collection.md`), waiting on the owner's answers
 
 ## Milestones
 
