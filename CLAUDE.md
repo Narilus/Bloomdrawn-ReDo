@@ -37,7 +37,7 @@ Only the owner can sign off feel. When something feels-related is ready, give hi
 - Image prompts are the prompt stem from DESIGN.md plus the brief. **Domain names never appear in prompts.**
 - **Banned words:** shimmer, fractal, echo, refraction, mirror, liminal, cosmic, ethereal, impossible geometry, pressure, "wrongness", otherworldly.
 - Never in images: starfields, underwater scenes, crystal sparkle, neon, glitch effects, text.
-- Images come from `codex exec` (owner's ChatGPT login) through `npm run art` (`tools/art/`): `gen` writes options and their prompts to `art/raw/<character>/`, `cut` removes the background into `art/cut/` (not committed; rebuild it from raw), `sheet` lays cuts out at in-game height, and `pick` stores the owner's choice in `src/assets/battle/` at the standard 1024px height. Briefs live in `art/briefs/`. The owner picks.
+- Images come from `codex exec` (owner's ChatGPT login) through `npm run art` (`tools/art/`): `gen` writes options and their prompts to `art/raw/<character>/`, `cut` removes the background into `art/cut/` (not committed; rebuild it from raw), `sheet` lays cuts out at in-game height (into `art/cut/<character>-sheet.png`), and `pick` stores the owner's choice in `src/assets/battle/` at the standard 1024px height. Briefs live in `art/briefs/`. The owner picks.
 
 ## Working style
 - Small commits that each leave the game building and playable. Push when green.
@@ -62,4 +62,5 @@ Only the owner can sign off feel. When something feels-related is ready, give hi
 - Don't let the GPU shrink sprite art: bilinear aliases and mipmaps blur. `Battlefield.fitTo` resamples each sprite to its exact on-screen size (area average plus a light unsharp mask) and redoes it on resize.
 - To check that a test catches a broken rule, copy the file aside and restore the copy. `git checkout -- <file>` restores the last commit and throws away uncommitted work.
 - React StrictMode mounts effects twice in dev, and an async cleanup can finish after the remount. Cleanups that clear shared refs must check the ref still holds their own object (`StageView.tsx`), or the live canvas stops resizing. Browser checks that load each size fresh miss this; resize live (`e2e/resize.spec.ts`).
+- Art sheets for the owner go in `art/cut/`, never a session scratchpad or `/tmp`: he opens them from the repo, and scratch folders vanish.
 - An operation that changes several HP or Shield values before returning its events must return `vitals` for each event (`volley.ts`). Otherwise every event carries the final HP, so bars jump ahead of the hits, and a win partway through drops the remaining events, deaths included.

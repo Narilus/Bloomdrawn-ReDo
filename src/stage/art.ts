@@ -3,6 +3,8 @@
 // get a silhouette. Keyed by character ID, or by enemy ID for enemies (who otherwise get a dummy).
 import agatheBattle from '../assets/battle/agathe.png';
 import antheBattle from '../assets/battle/anthe.png';
+import hesterBattle from '../assets/battle/hester.png';
+import isadoraBattle from '../assets/battle/isadora.png';
 import houndBattle from '../assets/battle/bloom-rib-hound.png';
 import whelpBattle from '../assets/battle/bloom-rib-whelp.png';
 import acolyteBattle from '../assets/battle/censer-acolyte.png';
@@ -16,6 +18,7 @@ import rootMatBattle from '../assets/battle/root-mat.png';
 import rootSwornNoviceBattle from '../assets/battle/root-sworn-novice.png';
 import seedlingBattle from '../assets/battle/seedling.png';
 import matronBattle from '../assets/battle/thorn-wall-matron.png';
+import virelleBattle from '../assets/battle/virelle.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -23,6 +26,9 @@ export const battleArt: Readonly<Record<string, string>> = {
   maelia: maeliaBattle,
   anthe: antheBattle,
   leonora: leonoraBattle,
+  virelle: virelleBattle,
+  isadora: isadoraBattle,
+  hester: hesterBattle,
   'enemy.bloom-rib-hound': houndBattle,
   'enemy.bloom-rib-whelp': whelpBattle,
   'enemy.censer-acolyte': acolyteBattle,

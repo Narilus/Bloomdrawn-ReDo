@@ -17,7 +17,7 @@ const USAGE = `Usage:
   npm run art -- cut <raw.png...>
       Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
-      The cut sprites side by side at in-game height on the stage colour
+      The cut sprites side by side at in-game height on the stage colour (out: art/cut/<character>-sheet.png)
   npm run art -- pick <raw.png>
       The owner's pick, cut and stored at the standard height -> src/assets/battle/<character>.png`;
 
