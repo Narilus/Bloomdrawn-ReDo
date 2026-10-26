@@ -96,6 +96,22 @@ A rough count with the drafted numbers agrees. By turn 6 a Rapture pair might ho
 
 **Plan (my call):** once the four are content, a lab script (`tools/lab/`) plays seeded fights against a large dummy with a simple player, for a Flesh, a Rapture and a Spirit pair, each with Leonora and Hester. Spirit is played two ways, firing Rituals at once and holding them until cheap. It reports damage per turn over turns 1–10 and damage per card played. I bring you the curves and proposed numbers before you play them. Levers if Spirit trails: more damage per Essence on Rituals, Kibane's ultimate keeping some Essence at C0, or more Essence for held Rituals. It's a measuring tool, not a test.
 
+**Lab results (26 Oct, `npm run lab`, 200 seeds, ultimates fired when charged).** Mean damage dealt; the full per-turn tables come from the command. The player is simple and the dummy never attacks, so read the shape, not the exact numbers.
+
+| Party | Turns 1–4 | Turns 1–6 | Turns 1–10 | Turn 10 alone | Per card |
+|---|---:|---:|---:|---:|---:|
+| Flesh (Maelia, Virelle) | 75 | 133 | 329 | 60 | 8 |
+| Rapture (Agathe, Isadora) | 308 | 720 | 2,307 | 516 | 62 |
+| Spirit, fire at once (Anthe, Kibane) | 143 | 337 | 1,018 | 172 | 28 |
+| Spirit, hold until cost 2 | 139 | 323 | 1,008 | 198 | 27 |
+| Spirit with Rituals ×2 per Essence and 2 Essence per held Ritual (fire) | 356 | 864 | 2,225 | 330 | 61 |
+| the same, held | 349 | 848 | 2,237 | 397 | 59 |
+
+- Spirit trails Rapture by more than half. Each lever alone is not enough: Rituals ×1.6 per Essence gives 1,310, 2 Essence per held Ritual 1,478, and Kyubi's Judgement giving back half 1,063.
+- Holding and firing come out about even, so both stay real choices.
+- Flesh trails both by far. Its Embryo piles up unspent (about 12 by turn 6), because little spends it.
+- **Proposed for Spirit (for the owner):** Ritual damage per Essence doubled (Votive Candle 8 + 6 × Essence, Long Vigil 10 + 6 ×, Foxfire Rite 4 + 10 ×, Foxfire Wisp 6 ×), and Vigil and Foxfire give 2 Essence per held Ritual. Spirit then leads through turn 6 and Rapture overtakes after, as a snowball should.
+
 ## How the Domains should feel (owner)
 
 - **Rapture snowballs.** Volleys start weak, but the count keeps growing across turns until it is overwhelming.
