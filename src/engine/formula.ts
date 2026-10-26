@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { Keyword, Registry } from './defs.ts';
+import type { CardSlot, Keyword, Registry } from './defs.ts';
 import type { OpContext } from './operation.ts';
-import { PARTY, type CombatState } from './state.ts';
+import { PARTY, type CardInstance, type CombatState } from './state.ts';
 
 /** A typed amount expression. JSON data, never strings or eval. */
 export type Formula =
@@ -20,6 +20,7 @@ export type Formula =
   /** Stacks of a status on the chosen target. */
   | { targetStacks: string }
   | { manaSpent: true }
+  | { playedThisTurn: CardSlot }
   | { turn: true }
   | { consumed: true }
   /** A share of the party's current or max HP, so costs scale with a levelled team (owner, 19 Oct). */
@@ -39,6 +40,8 @@ export const heldTurns = (keyword: Keyword): Formula => ({ heldTurns: keyword })
 export const stacks = (status: { id: string } | string): Formula => ({ stacks: typeof status === 'string' ? status : status.id });
 export const targetStacks = (status: { id: string }): Formula => ({ targetStacks: status.id });
 export const manaSpent = (): Formula => ({ manaSpent: true });
+/** Cards of a kit slot played this turn before the one resolving: `playedThisTurn('strike')`. */
+export const playedThisTurn = (slot: CardSlot): Formula => ({ playedThisTurn: slot });
 export const turn = (): Formula => ({ turn: true });
 /** The amount the enclosing ifConsume just spent. */
 export const consumed = (): Formula => ({ consumed: true });
@@ -54,11 +57,12 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
     z.strictObject({ add: z.array(formulaSchema).min(1) }),
     z.strictObject({ mul: z.array(formulaSchema).min(1) }),
     z.strictObject({ handSize: z.literal(true) }),
-    z.strictObject({ handCount: z.enum(['retain', 'ritual', 'exhaust']) }),
-    z.strictObject({ heldTurns: z.enum(['retain', 'ritual', 'exhaust']) }),
+    z.strictObject({ handCount: z.enum(['retain', 'ritual', 'exhaust', 'fleeting']) }),
+    z.strictObject({ heldTurns: z.enum(['retain', 'ritual', 'exhaust', 'fleeting']) }),
     z.strictObject({ stacks: z.string().min(1) }),
     z.strictObject({ targetStacks: z.string().min(1) }),
     z.strictObject({ manaSpent: z.literal(true) }),
+    z.strictObject({ playedThisTurn: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']) }),
     z.strictObject({ turn: z.literal(true) }),
     z.strictObject({ consumed: z.literal(true) }),
     z.strictObject({ percent: z.number().positive(), of: z.enum(['hp', 'maxHp']) }),
@@ -86,6 +90,7 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   }
   if ('targetStacks' in f) return state.enemies.find((e) => e.id === ctx.target)?.statuses.find((s) => s.status === f.targetStacks)?.stacks ?? 0;
   if ('manaSpent' in f) return state.manaSpent;
+  if ('playedThisTurn' in f) return (state.playedThisTurn ?? []).filter((id) => registry.cards[id]?.slot === f.playedThisTurn).length;
   if ('turn' in f) return state.turn;
   if ('percent' in f) return shareOf(f, state.party);
   return ctx.consumed ?? 0;
@@ -93,11 +98,14 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
 
 /** Cards in hand with a keyword. Ritual implies Retain. */
 export function withKeyword(state: CombatState, registry: Registry, keyword: Keyword) {
-  return state.piles.hand.filter((c) => hasKeyword(registry.cards[c.card]?.keywords, keyword));
+  return state.piles.hand.filter((c) => hasKeyword(cardKeywords(c, registry), keyword));
 }
 
 export const hasKeyword = (keywords: readonly Keyword[] | undefined, keyword: Keyword): boolean =>
   !!keywords?.includes(keyword) || (keyword === 'retain' && !!keywords?.includes('ritual'));
+
+/** A card's keywords: its card's, plus any a created copy was given. */
+export const cardKeywords = (card: CardInstance, registry: Registry): Keyword[] => [...(registry.cards[card.card]?.keywords ?? []), ...(card.keywords ?? [])];
 
 export const titleCase = (id: string): string => id.charAt(0).toUpperCase() + id.slice(1);
 
@@ -114,6 +122,7 @@ export function formulaText(f: Formula): string {
   if ('stacks' in f) return titleCase(f.stacks.replace(/^status\./, ''));
   if ('targetStacks' in f) return `its ${titleCase(f.targetStacks.replace(/^status\./, ''))}`;
   if ('manaSpent' in f) return 'the Mana spent this turn';
+  if ('playedThisTurn' in f) return `${f.playedThisTurn === 'strike' ? 'Strikes' : f.playedThisTurn === 'defense' ? 'Defenses' : `${titleCase(f.playedThisTurn)} cards`} played this turn`;
   if ('turn' in f) return 'the turn number';
   if ('percent' in f) return `${f.percent}% of the party's ${f.of === 'hp' ? 'current' : 'max'} HP`;
   return 'the amount consumed';

@@ -100,7 +100,7 @@ Each operation is one file that exports:
 | Damage and defence | damage, loseHp, gainShield, heal |
 | Statuses | applyStatus, removeStatus, reduceStacks, detonate (trigger a status's stacks at once) |
 | Resources | gainResource, consumeResource, gainMana, manaDebt |
-| Cards | draw, discard, exhaust, createCard, changeCost, repeatNext (the next card resolves twice), retain, duplicate |
+| Cards | draw, discard, exhaust, createCard (a copy can carry its own cost and extra keywords, such as Fleeting: to the Graveyard when played or at end of turn), changeCost, repeatNext (the next card resolves twice), retain, duplicate |
 | Ultimates | chargeUltimate, transcend (once per combat; swaps in `ultimate.transcended`) |
 | Domain engines | volley (hits that take the lowest-HP enemy, overflow carrying on; a `volleys` modifier fires it again, each pass choosing targets afresh) |
 | Enemies | delay, stun, changeIntent |
@@ -174,7 +174,7 @@ mul(resource('tentacles'), resource('potency')) // Tentacles × damage per hit
 mul(add(12, stat('attack')), add(1, mul(0.5, resource('essence'))))
 ```
 
-Formulas can read owner stats, party stats, Domain resources, status stacks (the source's, or the chosen target's with `targetStacks`), cards in hand (and those with a keyword, and their turns held), Mana spent this turn, turn number, a percentage of the party's current or max HP (`percentOf`, for costs that scale), and the amount just consumed. Anything outside that list is a compile error.
+Formulas can read owner stats, party stats, Domain resources, status stacks (the source's, or the chosen target's with `targetStacks`), cards in hand (and those with a keyword, and their turns held), Mana spent this turn, cards of a kit slot played earlier this turn (`playedThisTurn('strike')`), turn number, a percentage of the party's current or max HP (`percentOf`, for costs that scale), and the amount just consumed. Anything outside that list is a compile error.
 
 ## Everything else is a composition
 

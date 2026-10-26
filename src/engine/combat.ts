@@ -1,6 +1,6 @@
 import type { CardDef, EnemyEntry, OpCall, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
-import { hasKeyword } from './formula.ts';
+import { cardKeywords, hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
@@ -169,7 +169,7 @@ function startingResources(domains: string[], registry: Registry): Record<string
 export function cardCost(state: CombatState, card: CardInstance, registry: Registry): number {
   const def = registry.cards[card.card];
   if (!def) return 0;
-  return Math.max(0, def.cost + (card.costDelta ?? 0) + state.next.costDelta);
+  return Math.max(0, (card.cost ?? def.cost) + (card.costDelta ?? 0) + state.next.costDelta);
 }
 
 /**
@@ -254,7 +254,9 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
   if (command.target !== undefined) played.target = command.target;
   emit(rc, played, ROOT);
   drain(rc);
-  if (hasKeyword(def.keywords, 'exhaust')) {
+  s.playedThisTurn = [...(s.playedThisTurn ?? []), card.card];
+  const keywords = cardKeywords(card, rc.registry);
+  if (hasKeyword(keywords, 'exhaust') || hasKeyword(keywords, 'fleeting')) {
     s.piles.graveyard.push(card);
     emit(rc, { type: 'cardExhausted', source: card.owner, owner: card.owner, card: card.uid }, ROOT);
     drain(rc);
@@ -293,8 +295,14 @@ function leaveHand(card: CardInstance): void {
 function endTurn(rc: Resolution): void {
   const s = rc.state;
   const kept: CardInstance[] = [];
+  const fleeting: CardInstance[] = [];
   for (const card of s.piles.hand) {
-    if (hasKeyword(rc.registry.cards[card.card]?.keywords, 'retain')) {
+    const keywords = cardKeywords(card, rc.registry);
+    if (hasKeyword(keywords, 'fleeting')) {
+      leaveHand(card);
+      s.piles.graveyard.push(card);
+      fleeting.push(card);
+    } else if (hasKeyword(keywords, 'retain')) {
       card.held = (card.held ?? 0) + 1;
       kept.push(card);
     } else {
@@ -304,6 +312,7 @@ function endTurn(rc: Resolution): void {
   }
   s.piles.hand = kept;
   s.next = { costDelta: 0, repeat: 0 };
+  for (const card of fleeting) emit(rc, { type: 'cardExhausted', source: card.owner, owner: card.owner, card: card.uid }, ROOT);
   for (const lifecycle of ['cleanup', 'turnEnd'] as const) {
     emit(rc, { type: lifecycle }, ROOT);
     drain(rc);
@@ -427,6 +436,7 @@ function beginTurn(rc: Resolution): void {
   s.manaDebt = 0;
   s.manaSpent = 0;
   s.usedThisTurn = [];
+  s.playedThisTurn = [];
   const fewer = s.drawFewer ?? 0;
   delete s.drawFewer;
   emit(rc, { type: 'turnStart' }, ROOT);

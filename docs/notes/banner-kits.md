@@ -135,6 +135,21 @@ A rough count with the drafted numbers agrees. By turn 6 a Rapture pair might ho
 
 With every change, Flesh reaches about 40% of Rapture against one enemy and about two-thirds against three. Embryo left unspent at turn 6 falls from 11.5 to 6.3.
 
+**Combo Virelle (owner, 27 Oct), on top of the above; Maelia's Defense heal is now 4%.** Variant `virelle-combo`: her Strike deals 10% more for each Strike played earlier this turn (any member's; modelled in the Strike's formula), and consumes 1 Embryo to apply 6 Bleed and create a copy of itself that costs 0 and has Fleeting (to the Graveyard when played or at end of turn). The copy carries the same rider, so a turn can chain Strikes until the Embryo runs out. Each copy also charges her ultimate by 10, as any Strike does.
+
+| Flesh | T1–4 | T1–6 | T1–10 | Turn 10 alone | Three dummies, T1–10 | Embryo at turn 6 |
+|---|---:|---:|---:|---:|---:|---:|
+| Owner's changes | 133 | 268 | 699 | 131 | 1,150 | 9.6 |
+| The same with combo Virelle | 432 | 847 | 1,752 | 247 | 2,550 | 3.3 |
+| The same, with the flavour cards spending too | 395 | 757 | 1,512 | 210 | 2,440 | 2.1 |
+| Rapture | 308 | 720 | 2,307 | 516 | 2,307 | |
+| Spirit (fire) | 356 | 864 | 2,225 | 330 | 3,416 | |
+
+- Combo Virelle makes Flesh the fastest starter: it leads every Domain over turns 1–4 and matches them to turn 6. From turn 5 it levels off at about 200–250 a turn, because the chain is limited by Embryo, while Rapture keeps climbing.
+- Against three dummies it beats Rapture over ten turns: Bleed and Thousand Cuts hit every enemy, and the chained Strikes fill her gauge fast (ultimates 485, against 136).
+- The flavour cards spending Embryo now costs damage, because they take Embryo the chain would use. The combo is the better Embryo outlet.
+- The lab player always continues the chain while a copy is its best damage card, so it never saves Embryo for Open the Wound. A player who does is trading chain damage for the detonation.
+
 ## How the Domains should feel (owner)
 
 - **Rapture snowballs.** Volleys start weak, but the count keeps growing across turns until it is overwhelming.

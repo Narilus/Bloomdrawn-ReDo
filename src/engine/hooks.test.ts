@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { apply, type Command } from './combat.ts';
+import { apply, cardCost, type Command } from './combat.ts';
 import type { CardDef, Registry, RelicDef, StatusDef, TriggerDef } from './defs.ts';
-import { formulaText, mul, resource, targetStacks } from './formula.ts';
+import { add, formulaText, mul, playedThisTurn, resource, targetStacks } from './formula.ts';
 import { applyStatus } from './ops/applyStatus.ts';
+import { createCard, createCardOp } from './ops/createCard.ts';
 import { damage } from './ops/damage.ts';
 import { loseHp } from './ops/loseHp.ts';
 import { repeat, repeatOp } from './ops/repeat.ts';
@@ -39,6 +40,8 @@ const cards: CardDef[] = [
   card('test.twice', [applyStatus(twice, 1, 'self')], { target: 'none' }),
   card('test.cuts', [repeat(3, [damage(4, { target: 'allEnemies' }), applyStatus(mark, 1, 'allEnemies')])], { target: 'none' }),
   card('test.open', [loseHp(mul(2, targetStacks(mark)), { target: 'chosen' })]),
+  // A Strike that grows with the Strikes played before it, and leaves a free Fleeting copy of itself.
+  card('test.combo', [damage(add(4, playedThisTurn('strike'))), createCard({ id: 'test.combo' }, { cost: 0, keywords: ['fleeting'] })], { cost: 1, slot: 'strike' }),
 ];
 
 const registry: Registry = {
@@ -160,5 +163,41 @@ describe('extra volley passes for the turn', () => {
     const ended = run(volleyed.state, { type: 'endTurn' });
     expect(ended.state.party.statuses).toEqual([]);
     expect(ended.events.some((e) => e.type === 'statusRemoved' && e.status === 'test.twice')).toBe(true);
+  });
+});
+
+describe('Fleeting copies and Strikes played this turn', () => {
+  it('a copy costs 0, counts the Strikes before it, and goes to the Graveyard when played', () => {
+    const state = begin(['test.dummy']);
+    const first = play(state, 'test.combo', state.enemies[0]!.id);
+    expect(first.state.enemies[0]!.hp).toBe(40 - 4);
+    const copy = first.state.piles.hand.find((c) => c.card === 'test.combo');
+    expect(copy).toMatchObject({ cost: 0, keywords: ['fleeting'] });
+    expect(cardCost(first.state, copy!, registry)).toBe(0);
+    const second = run(first.state, { type: 'playCard', card: copy!.uid, target: state.enemies[0]!.id });
+    expect(second.state.enemies[0]!.hp).toBe(40 - 4 - 5);
+    expect(second.state.mana).toBe(first.state.mana);
+    expect(second.state.piles.graveyard.map((c) => c.uid)).toEqual([copy!.uid]);
+    expect(second.state.piles.discard.some((c) => c.uid === copy!.uid)).toBe(false);
+    expect(second.events.some((e) => e.type === 'cardExhausted' && e.card === copy!.uid)).toBe(true);
+  });
+
+  it('an unplayed copy goes to the Graveyard at end of turn, and the count starts again next turn', () => {
+    const state = begin(['test.dummy']);
+    const first = play(state, 'test.combo', state.enemies[0]!.id);
+    const copy = first.state.piles.hand.find((c) => c.card === 'test.combo')!;
+    const ended = run(first.state, { type: 'endTurn' });
+    expect(ended.state.piles.graveyard.map((c) => c.uid)).toEqual([copy.uid]);
+    expect([...ended.state.piles.hand, ...ended.state.piles.draw, ...ended.state.piles.discard].some((c) => c.uid === copy.uid)).toBe(false);
+    expect(ended.state.playedThisTurn).toEqual([]);
+    const hp = ended.state.enemies[0]!.hp;
+    expect(play(ended.state, 'test.combo', state.enemies[0]!.id).state.enemies[0]!.hp).toBe(hp - 4);
+  });
+
+  it('describes itself', () => {
+    expect(createCardOp.describe(createCard({ id: 'test.combo' }, { cost: 0, keywords: ['fleeting'] }), formulaText, registry)).toBe(
+      'Create a test.combo (costing 0, Fleeting) in your hand',
+    );
+    expect(formulaText(playedThisTurn('strike'))).toBe('Strikes played this turn');
   });
 });

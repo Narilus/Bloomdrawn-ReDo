@@ -1,4 +1,5 @@
 import type { Streams } from './rng.ts';
+import type { Keyword } from './defs.ts';
 
 // Core rule numbers from docs/DESIGN.md ("Combat").
 export const BASE_MANA = 6;
@@ -67,6 +68,10 @@ export interface CardInstance {
   costDelta?: number;
   /** Cleanups this card has been held through. Cleared when it leaves the hand. */
   held?: number;
+  /** A created copy's own cost, in place of the printed one, for as long as the copy lasts. */
+  cost?: number;
+  /** Keywords a created copy has on top of its card's. */
+  keywords?: Keyword[];
 }
 
 export interface Piles {
@@ -89,6 +94,8 @@ export interface CombatState {
   manaSpent: number;
   /** Keys of once-per-turn triggers that have fired this turn. */
   usedThisTurn: string[];
+  /** IDs of the cards played this turn, in order. Absent means none (saves from before it). */
+  playedThisTurn?: string[];
   /** Effects waiting for the next card played this turn. Cleared at cleanup. */
   next: { costDelta: number; repeat: number };
   /** Cards fewer to draw at the start of next turn. Absent means 0. */

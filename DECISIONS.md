@@ -144,6 +144,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Kibane's art (owner, 27 Oct): 04 is picked, with the white pearl above her claw removed. 06 and 07 are rejected: their style differs and their proportions drift toward chibi.
 - Flesh (owner, 27 Oct): close the gap from several angles: much larger Bleed and Poison stacks (8–10 where cards now apply 2), and more Embryo consumption. Strike and Defense can change more by character; for example, Virelle's Strike consumes an Embryo to apply 6 Bleed, Maelia's Strike consumes an Embryo to apply 4 Poison, and Maelia's Defense consumes an Embryo to heal the party for about 2% of max HP. The lab measures this first.
 
+- Flesh, continued (owner, 27 Oct): Maelia's Defense heals 4% of max HP, a weak top-up and not a full heal. Virelle becomes a combo Bleed-stacker, to test: her passive also makes her Strike deal 10% more for each Strike played this turn; her Strike consumes 1 Embryo to apply 6 Bleed and create a copy of itself that costs 0, with Fleeting (it goes to the Graveyard instead of being discarded, and at end of turn). The choice is whether to unload all Embryo or keep some for other spenders.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

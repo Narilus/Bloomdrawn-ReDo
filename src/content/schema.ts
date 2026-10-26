@@ -18,7 +18,7 @@ const trigger = z.strictObject({
       direct: z.literal(true).optional(),
       fromCard: z.literal(true).optional(),
       slots: z.array(z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB'])).optional(),
-      keyword: z.enum(['retain', 'ritual', 'exhaust']).optional(),
+      keyword: z.enum(['retain', 'ritual', 'exhaust', 'fleeting']).optional(),
     })
     .optional(),
   once: z.literal('turn').optional(),
@@ -51,7 +51,7 @@ export const schemas = {
     slot: z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']).optional(),
     cost: z.int().min(0),
     target: z.enum(['none', 'self', 'party', 'chosenEnemy', 'allEnemies']),
-    keywords: z.array(z.enum(['retain', 'ritual', 'exhaust'])).optional(),
+    keywords: z.array(z.enum(['retain', 'ritual', 'exhaust', 'fleeting'])).optional(),
     generated: z.boolean().optional(),
     text: z.string().min(1).optional(),
     charge: z.int().positive().optional(),

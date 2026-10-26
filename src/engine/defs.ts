@@ -57,7 +57,8 @@ export interface Hooks {
 export type CardTarget = 'none' | 'self' | 'party' | 'chosenEnemy' | 'allEnemies';
 export type CardSlot = 'strike' | 'defense' | 'transcend' | 'flavourA' | 'flavourB';
 /** Retain: stays in hand at cleanup. Ritual: a Spirit card that Retains. Exhaust: goes to the Graveyard when played. */
-export type Keyword = 'retain' | 'ritual' | 'exhaust';
+/** `fleeting`: goes to the Graveyard when played and when it leaves the hand at end of turn. */
+export type Keyword = 'retain' | 'ritual' | 'exhaust' | 'fleeting';
 
 export interface CardDef {
   id: string;
