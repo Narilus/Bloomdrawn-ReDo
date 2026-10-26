@@ -22,6 +22,8 @@ export const drawOp: Operation<DrawArgs> = {
   ],
   describe(args, show) {
     const count = show(args.count);
-    return `Draw ${count} card${count === '1' ? '' : 's'}`;
+    // A shown number may come marked up for the card face, so a plain count decides the plural.
+    const one = typeof args.count === 'number' ? args.count === 1 : count === '1';
+    return `Draw ${count} card${one ? '' : 's'}`;
   },
 };

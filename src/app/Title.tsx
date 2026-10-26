@@ -18,8 +18,12 @@ type Screen =
   | { kind: 'roster'; profile: Profile }
   | { kind: 'run'; save: RunSave };
 
+/** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
+const OWN_ALL = import.meta.env.DEV && new URLSearchParams(window.location.search).get('owned') === 'all';
+
 /** The characters a profile can field, leaving out any the game no longer has. */
-const ownedBy = (profile: Profile) => ownedCharacters(profile, STARTERS).filter((id) => registry.characters[id]);
+const ownedBy = (profile: Profile) =>
+  ownedCharacters(OWN_ALL ? { ...profile, owned: Object.keys(registry.characters) } : profile, STARTERS).filter((id) => registry.characters[id]);
 
 export function Game() {
   const saves = browserSaves();

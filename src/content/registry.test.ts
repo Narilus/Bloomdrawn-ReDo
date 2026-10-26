@@ -17,8 +17,8 @@ const errorsFor = (extra: Record<string, unknown>) =>
 
 describe('content registry', () => {
   it('the shipped content validates', () => {
-    // Virelle's and Kibane's M0 placeholders left with the five-card check; their kits come in M5.
-    expect(Object.keys(registry.characters).sort()).toEqual(['agathe', 'anthe', 'leonora', 'maelia']);
+    // The starter four and the banner four (M5.2).
+    expect(Object.keys(registry.characters).sort()).toEqual(['agathe', 'anthe', 'hester', 'isadora', 'kibane', 'leonora', 'maelia', 'virelle']);
     expect(registry.enemies['enemy.training-dummy']).toBeDefined();
     expect(Object.keys(registry.domains).sort()).toEqual(['flesh', 'rapture', 'spirit', 'unbound']);
   });

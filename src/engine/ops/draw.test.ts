@@ -36,5 +36,7 @@ describe('draw', () => {
   it('describes itself', () => {
     expect(drawOp.describe(draw(1), formulaText, registry)).toBe('Draw 1 card');
     expect(drawOp.describe(draw(2), formulaText, registry)).toBe('Draw 2 cards');
+    // A card face marks its live numbers up; the plural still follows the count.
+    expect(drawOp.describe(draw(1), (f) => `<b>${formulaText(f)}</b>`, registry)).toBe('Draw <b>1</b> card');
   });
 });

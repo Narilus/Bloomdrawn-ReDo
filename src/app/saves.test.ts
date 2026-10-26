@@ -86,10 +86,10 @@ describe('saves', () => {
     const missing = setup();
     const save = run();
     await missing.saves.start(save);
-    const text = encodeSave(RUN_SAVE, save, CONTENT_VERSION).replace('"party":["agathe"', '"party":["virelle"');
+    const text = encodeSave(RUN_SAVE, save, CONTENT_VERSION).replace('"party":["agathe"', '"party":["no-such-character"');
     missing.adapter.data.set('run:current', text);
     missing.adapter.data.delete('run:previous');
-    expect((await missing.saves.boot(M3_EXPEDITION)).ended?.reason).toBe('the game no longer has characters virelle');
+    expect((await missing.saves.boot(M3_EXPEDITION)).ended?.reason).toBe('the game no longer has characters no-such-character');
 
     const changed = setup();
     await changed.saves.start(save);
