@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a177ef-c17c-7e02-82b0-22395fcb71c3
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing right: body and face turned toward the right edge of the image. A young woman in her 20s, a fox shrine dancer in a wide fighting stance. Tall orange fox ears and nine full orange-and-white fox tails fanned behind her; a red-and-white shrine-dancer outfit with a white kimono top, red ribbons and a pleated red skirt; a clawed black iron gauntlet on her left hand; a braided auburn plait; three small pale-blue foxfire flames floating around her. No horns, no scales, no flowers. Red, white and orange palette, fierce defiant expression.
+
+Background: fully transparent.

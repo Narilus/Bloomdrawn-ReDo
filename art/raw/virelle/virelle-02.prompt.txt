@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a177ec-68c3-7a60-9fbe-8a4aa251b17d
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing right: body and face turned toward the right edge of the image. A lean woman in her 20s, a duelist, in a low fencing stance with a slim curved surgical blade in her right hand. Her left arm has grown into pale pink blossoms from shoulder to wrist, with sharp pink thorn-spurs jutting from the elbow; a fitted oxblood bodice laced shut with surgical thread; tall black boots, short dark hair. Rose, raw pink and arterial red palette, focused narrow-eyed expression.
+
+Background: fully transparent.
