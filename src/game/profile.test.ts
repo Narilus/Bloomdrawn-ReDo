@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { defaultParty, NEW_PROFILE, ownedCharacters, partyProblem } from './profile.ts';
+import { NEW_PROFILE, ownedCharacters, partyProblem, placeInTeam, quickTeam, removeFromTeam, renameTeam, teamsOf } from './profile.ts';
 
-// Party select (docs/notes/m5-collection.md): any four owned characters, in order.
+// Party select (docs/notes/m5-collection.md; owner, 26 Oct): any four owned characters, in order, kept in team presets.
 
 const STARTERS = ['a', 'b', 'c', 'd'];
 
@@ -24,9 +24,40 @@ describe('the roster and party select', () => {
     expect(partyProblem(['a', 'b', 'c', 'e'], STARTERS)).toBe("The party has a character you don't own.");
   });
 
-  it('party select offers the last party if it still works, else the first four owned', () => {
-    expect(defaultParty(NEW_PROFILE, STARTERS)).toEqual(STARTERS);
-    expect(defaultParty({ ...NEW_PROFILE, party: ['d', 'c', 'b', 'a'] }, STARTERS)).toEqual(['d', 'c', 'b', 'a']);
-    expect(defaultParty({ ...NEW_PROFILE, party: ['e', 'c', 'b', 'a'] }, STARTERS)).toEqual(STARTERS);
+  it('a place left empty is not a party', () => {
+    expect(partyProblem(['a', null, 'c', 'd'], STARTERS)).toBe('A party is 4 characters.');
+  });
+
+  it('a profile that never saved presets has five, with the first four owned in Team 1', () => {
+    expect(teamsOf(NEW_PROFILE, [...STARTERS, 'e'])).toEqual([
+      { name: 'Team 1', members: STARTERS },
+      { name: 'Team 2', members: [null, null, null, null] },
+      { name: 'Team 3', members: [null, null, null, null] },
+      { name: 'Team 4', members: [null, null, null, null] },
+      { name: 'Team 5', members: [null, null, null, null] },
+    ]);
+    expect(teamsOf(NEW_PROFILE, ['a', 'b'])[0]!.members).toEqual(['a', 'b', null, null]);
+    const saved = [{ name: 'Bleeders', members: ['d', null, 'a', null] }];
+    expect(teamsOf({ ...NEW_PROFILE, teams: saved }, STARTERS)).toEqual(saved);
+  });
+
+  it('a character picked for a place goes in; one already in the team swaps places with whoever is there', () => {
+    expect(placeInTeam(['a', 'b', null, null], 2, 'e')).toEqual(['a', 'b', 'e', null]);
+    expect(placeInTeam(['a', 'b', 'c', 'd'], 0, 'e')).toEqual(['e', 'b', 'c', 'd']);
+    expect(placeInTeam(['a', 'b', 'c', 'd'], 0, 'b')).toEqual(['b', 'a', 'c', 'd']);
+    expect(placeInTeam(['a', 'b', null, 'd'], 2, 'a')).toEqual([null, 'b', 'a', 'd']);
+    expect(placeInTeam(['a', 'b', 'c', 'd'], 1, 'b')).toEqual(['a', 'b', 'c', 'd']);
+    expect(removeFromTeam(['a', 'b', 'c', 'd'], 1)).toEqual(['a', null, 'c', 'd']);
+  });
+
+  it('quick select fills the places front first in the order clicked', () => {
+    expect(quickTeam(['c', 'a', 'd', 'b'])).toEqual(['c', 'a', 'd', 'b']);
+    expect(quickTeam(['c'])).toEqual(['c', null, null, null]);
+  });
+
+  it('a team name is trimmed and cut to length; a blank one goes back to the default', () => {
+    expect(renameTeam('  Bleeders ', 0)).toBe('Bleeders');
+    expect(renameTeam('x'.repeat(30), 0)).toBe('x'.repeat(24));
+    expect(renameTeam('   ', 2)).toBe('Team 3');
   });
 });

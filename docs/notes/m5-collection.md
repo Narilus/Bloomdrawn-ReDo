@@ -20,7 +20,7 @@ Code keeps its plain names (`pulls`, `money`); only the screens use these.
 
 - The profile owns characters. Every profile owns the starter four, the current one included. Every character you own can be in a party.
 - **Before a run, you choose any four** owned characters and their order (front first). No Domain rules: pure parties will likely synergise better, but you can mix and match (owner). The card reward pool already follows the party.
-- Screens: a **Roster** (owned characters and their level, ascension and dupes), a **character page** (stats, kit, level up, ascend), the **Banner**, and **party select** before New run. Each is reached from the title screen.
+- Screens: a **Roster** (owned characters and their level, ascension and dupes), a **character page** (stats, kit, level up, ascend), the **Banner**, and **party select** before New run (team presets; owner, 26 Oct, DECISIONS.md). Each is reached from the title screen.
 
 ## The gacha
 

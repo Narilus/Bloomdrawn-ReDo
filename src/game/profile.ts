@@ -10,8 +10,10 @@ export interface Profile {
   runs: number;
   /** Characters gained, in the order they came. Every profile also owns the starters, which aren't listed. */
   owned: string[];
-  /** The party the last run started with, front first, offered again by party select. */
-  party?: string[];
+  /** Saved team presets, each a party front first. A profile that has never saved one has the defaults (`teamsOf`). */
+  teams?: Team[];
+  /** The preset party select opens on: the one the player last chose. */
+  team?: number;
   /**
    * The run in progress: its ID and its banking tally, kept here as it changes so a run whose own
    * save can't be read can still bank its share (owner, 24 Oct).
@@ -27,21 +29,62 @@ export interface ActiveRun {
 export const NEW_PROFILE: Profile = { pulls: 0, runs: 0, owned: [] };
 
 export const PARTY_SIZE = 4;
+/** Presets every profile has (owner, 26 Oct: 5 to start; more bought with Ducats later). */
+export const TEAM_PRESETS = 5;
+export const TEAM_NAME_LENGTH = 24;
+
+/** A team preset: a name the player can change and the party's places, front first; null is an empty place. */
+export interface Team {
+  name: string;
+  members: (string | null)[];
+}
 
 /** The characters a profile can field: the starters, then those it has gained. */
 export const ownedCharacters = (profile: Profile, starters: readonly string[]): string[] => [...new Set([...starters, ...profile.owned])];
 
 /** Why a party can't start a run, or undefined if it can: four different characters, all owned (owner, 25 Oct: any four). */
-export function partyProblem(party: readonly string[], owned: readonly string[]): string | undefined {
-  if (party.length !== PARTY_SIZE) return `A party is ${PARTY_SIZE} characters.`;
+export function partyProblem(party: readonly (string | null)[], owned: readonly string[]): string | undefined {
+  if (party.length !== PARTY_SIZE || party.includes(null)) return `A party is ${PARTY_SIZE} characters.`;
   if (new Set(party).size !== party.length) return 'A character can be in the party only once.';
-  if (party.some((id) => !owned.includes(id))) return 'The party has a character you don\'t own.';
+  if (party.some((id) => !owned.includes(id!))) return "The party has a character you don't own.";
   return undefined;
 }
 
-/** The party party select starts with: the last run's if it still works, else the first four owned. */
-export function defaultParty(profile: Profile, owned: readonly string[]): string[] {
-  return profile.party && !partyProblem(profile.party, owned) ? [...profile.party] : owned.slice(0, PARTY_SIZE);
+export const teamName = (index: number) => `Team ${index + 1}`;
+export const emptyTeam = (index: number): Team => ({ name: teamName(index), members: Array<null>(PARTY_SIZE).fill(null) });
+
+/** A profile's presets: those it saved, else the defaults, with the first four owned in Team 1. */
+export function teamsOf(profile: Profile, owned: readonly string[]): Team[] {
+  if (profile.teams) return profile.teams.map((t) => ({ name: t.name, members: [...t.members] }));
+  const teams = Array.from({ length: TEAM_PRESETS }, (_, i) => emptyTeam(i));
+  teams[0]!.members = Array.from({ length: PARTY_SIZE }, (_, i) => owned[i] ?? null);
+  return teams;
+}
+
+/**
+ * Puts a character in a place. If she is already in another place the two swap, so the one there
+ * moves to hers (owner, 26 Oct).
+ */
+export function placeInTeam(members: readonly (string | null)[], place: number, id: string): (string | null)[] {
+  const next = [...members];
+  const from = next.indexOf(id);
+  if (from >= 0) next[from] = next[place] ?? null;
+  next[place] = id;
+  return next;
+}
+
+export function removeFromTeam(members: readonly (string | null)[], place: number): (string | null)[] {
+  return members.map((m, i) => (i === place ? null : m));
+}
+
+/** Quick select: the characters in the order they were clicked fill the places front first. */
+export const quickTeam = (picked: readonly string[]): (string | null)[] =>
+  Array.from({ length: PARTY_SIZE }, (_, i) => picked[i] ?? null);
+
+/** A new name, trimmed and cut to length; a blank one goes back to the default. */
+export function renameTeam(name: string, index: number): string {
+  const trimmed = name.trim().slice(0, TEAM_NAME_LENGTH);
+  return trimmed || teamName(index);
 }
 
 export type RunEnd = 'won' | 'lost' | 'abandoned';

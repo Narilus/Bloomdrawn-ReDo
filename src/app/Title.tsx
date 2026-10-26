@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
-import { BLOOM, defaultParty, ownedCharacters, runBanking, type Profile } from '../game/profile.ts';
+import { BLOOM, ownedCharacters, runBanking, teamsOf, type Profile } from '../game/profile.ts';
 import type { RunSave } from '../save/run.ts';
 import { Banking, DEF, Labyrinth, newRun } from './Labyrinth.tsx';
 import { PartySelect, Roster } from './Roster.tsx';
@@ -42,7 +42,7 @@ export function Game() {
     setScreen({ kind: 'loading' });
     void load();
   };
-  // Party select reads the profile afresh, so it offers the party the last run started with.
+  // Party select reads the profile afresh, so it opens on the presets as last saved.
   const chooseParty = () => {
     setScreen({ kind: 'loading' });
     void saves.profile().then((profile) => setScreen({ kind: 'party', profile }));
@@ -54,7 +54,16 @@ export function Game() {
   }
   if (screen.kind === 'party') {
     const owned = ownedBy(screen.profile);
-    return <PartySelect owned={owned} initial={defaultParty(screen.profile, owned)} onStart={(party) => void startNew(party)} onBack={toTitle} />;
+    return (
+      <PartySelect
+        owned={owned}
+        teams={teamsOf(screen.profile, owned)}
+        team={screen.profile.team ?? 0}
+        onChange={(teams, team) => void saves.teams(teams, team)}
+        onStart={(party) => void startNew(party)}
+        onBack={toTitle}
+      />
+    );
   }
   if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} onBack={toTitle} />;
   return (

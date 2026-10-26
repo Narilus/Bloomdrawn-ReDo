@@ -2,7 +2,7 @@ import { registry } from '../content/registry.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { missingContent } from '../game/check.ts';
 import type { ExpeditionDef } from '../game/expedition.ts';
-import { bank, lossBanking, NEW_PROFILE, type Banked, type Profile } from '../game/profile.ts';
+import { bank, lossBanking, NEW_PROFILE, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
 import { runSave, type RunSave } from '../save/run.ts';
@@ -95,11 +95,11 @@ export function createSaves(adapter: SaveAdapter) {
         return { profile: after, run: null, ended: { reason, banked } };
       }),
 
-    /** Starts a run: the profile records it as in progress, and its party for next time, then its first save is written. */
+    /** Starts a run: the profile records it as in progress, then its first save is written. */
     start: (save: RunSave) =>
       enqueue(async () => {
         const profile = await readProfile();
-        await store.write(profileSave, { ...profile, party: [...save.exp.party], run: { id: save.id, elites: save.exp.elites } });
+        await store.write(profileSave, { ...profile, run: { id: save.id, elites: save.exp.elites } });
         await store.write(RUN_SAVE, save);
       }),
 
@@ -111,6 +111,12 @@ export function createSaves(adapter: SaveAdapter) {
     },
 
     end,
+
+    /** Keeps the team presets and the one chosen, as party select changes them. */
+    teams: (teams: Team[], team: number) =>
+      enqueue(async () => {
+        await store.write(profileSave, { ...(await readProfile()), teams, team });
+      }),
 
     /** The profile as saved, after any writes in flight. */
     profile: () => enqueue(readProfile),

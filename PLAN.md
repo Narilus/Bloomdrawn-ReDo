@@ -277,6 +277,8 @@ The profile owns characters: every profile owns the starter four, and an older p
 
 _Done 25 Oct. The profile (save v3) lists the characters gained; every profile owns the starters (`src/content/roster.ts`) without listing them, so older saves need no content to migrate. It also keeps the party the last run started with, which party select offers next. The title screen shows Purified Blooms and has a Roster: a tile per owned character opens her page (title, Domain, stats, passive, ultimate and its Transcended form, her five cards and reward cards, numbers from her stats; characters now have a `title`). New run (after the abandon confirm, if a run is saved) and Run again open party select: click a character to add or remove her, the arrows move her, and Start run needs four different owned characters. Tests: `src/game/profile.test.ts`, "a run fields the party chosen" in `src/app/expedition.test.ts`, the v2 migration in `src/save/profile.test.ts`, `e2e/party.spec.ts`. With only the starters owned, party select can only reorder them until M5.3._
 
+_Reworked 26 Oct after the owner's review. Party select is now two panes: five team presets on the left (renamable; save v4 keeps them and the one chosen, and a v3 save's last party becomes Team 1), and the chosen team's four places on the right. A place opens the character list: a character goes in, or swaps places with where she was; Remove empties it. Quick select fills the four in click order. Every character's art stands at one height (roster, places, character page), so wide art (Anthe) is no longer shrunk; wider art is cut at the sides. Tests: the preset rules in `src/game/profile.test.ts`, the v3 migration in `src/save/profile.test.ts`, the presets in `src/app/saves.test.ts`, `e2e/party.spec.ts` (including Anthe's art height against Maelia's)._
+
 ### M5.2 The banner four
 Virelle, Isadora, Kibane and Hester as content: kits and reward cards from `docs/notes/banner-kits.md` (reviewed by the owner 25 Oct), with the engine pieces it lists. A lab script in `tools/lab/` measures damage per turn for Flesh, Rapture and Spirit pairs, so Spirit's numbers can be set against Rapture's snowball. Sprites and portraits through `npm run art`; the owner picks.
 **Done when:**
@@ -297,11 +299,12 @@ C1–C5 for the banner four, applied in combat from the profile's dupe levels. O
 **Done when:** each dupe level has a scenario test, and a sixth copy banks Pollen instead.
 
 ### M5.5 Levels, Memories and ascension
-Ducats and Faint, Clear and Vivid Memories. Level up on the character page spends Memories plus Ducats and refunds excess as smaller Memories; levels 10, 20 and 30 need an ascension (that Domain's material plus Ducats) to pass. Memories and Ducats bank at run end like the Blooms (doubled at Fruiting; per elite, 3 at most, on defeat); a won run's Boss gives one random material, never doubled.
+Ducats and Faint, Clear and Vivid Memories. Level up on the character page spends Memories plus Ducats and refunds excess as smaller Memories; levels 10, 20 and 30 need an ascension (that Domain's material plus Ducats) to pass. Memories and Ducats bank at run end like the Blooms (doubled at Fruiting; per elite, 3 at most, on defeat); a won run's Boss gives one random material, never doubled. More team presets bought with Ducats, at a low cost that slowly rises (owner, 26 Oct; the costs are his to set).
 **Done when:**
 - tests prove the stats per level (level 1 is today's stats, so the golden replay is unchanged), the refunds, the ascension gates and the banking rules;
 - a levelled character's card previews equal results in a scenario;
-- the result screen lists Memories, Ducats and the material with the Blooms.
+- the result screen lists Memories, Ducats and the material with the Blooms;
+- a sixth preset can be bought with Ducats, and the next costs more.
 
 ### M5.6 Collection (owner playtest)
 **Done when:** the owner pulls, builds up a character and takes a party of his choosing through a run, and signs off.
