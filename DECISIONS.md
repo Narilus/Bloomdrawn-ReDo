@@ -141,6 +141,9 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Spirit's numbers (owner, 27 Oct, from the M5.2 lab curves): Ritual damage per Essence doubles (Votive Candle 8 + 6 × Essence, Long Vigil 10 + 6 ×, Foxfire Rite 4 + 10 ×, Foxfire Wisp 6 ×), and Vigil and Foxfire each gain 2 Essence per Ritual held at end of turn. Flesh, which trails both, is looked at next.
 - Banner art (owner, 27 Oct): Virelle 01, Isadora 02 and Hester 01 are picked; Hester 01's flowers caught in her net fit her. Virelle 03 and Isadora 01 (the better pose) are kept as possible skins. All three Kibane options are rejected: two have bad hands and the third has no wow factor. Her art should be better quality and somewhat less generic shrine-maiden imagery.
 
+- Kibane's art (owner, 27 Oct): 04 is picked, with the white pearl above her claw removed. 06 and 07 are rejected: their style differs and their proportions drift toward chibi.
+- Flesh (owner, 27 Oct): close the gap from several angles: much larger Bleed and Poison stacks (8–10 where cards now apply 2), and more Embryo consumption. Strike and Defense can change more by character; for example, Virelle's Strike consumes an Embryo to apply 6 Bleed, Maelia's Strike consumes an Embryo to apply 4 Poison, and Maelia's Defense consumes an Embryo to heal the party for about 2% of max HP. The lab measures this first.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

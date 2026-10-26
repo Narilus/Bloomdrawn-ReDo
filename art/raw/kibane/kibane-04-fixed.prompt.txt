@@ -1,0 +1,10 @@
+Background: transparent
+Codex thread: 01a179a2-0203-7942-98ae-8540c64bca18
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing right: body and face turned toward the right edge of the image. A lean, athletic young woman in her 20s with fox features, in a low, wide fighting stance with her weight forward. Tall orange fox ears with white inner fur; nine full fox tails, orange with white tips, fanned in a wide arc behind her; a long auburn braid bound with red-and-white twisted cord and wooden prayer beads. A weathered, battle-torn shrine-dancer outfit: a white kimono top with frayed, patched sleeves tied back with red cord; a short red pleated skirt with a torn hem and gold-leaf fox patterns; a thick twisted straw-rope belt hung with folded white paper streamers and one brass bell. A white fox mask with red markings sits tilted on the side of her head. Her left forearm and hand are a clawed black iron gauntlet with gold-leaf trim, held forward with four long hooked claws and a thumb spread open. Her right hand is closed around the red-wrapped grip of a slim curved sword held low behind her. Scuffed iron shin guards over red leg wrappings; bare fox-pawed feet. On her right calf, a short, charred, burned-off stump of a flesh-coloured vine, bound over with a paper talisman. Three small pale-gold foxfire flames float around the gauntlet. No horns, no scales, no flowers. Red, white and orange with ash-grey and gold-leaf accents; fierce, narrow-eyed, defiant expression.
+
+Background: fully transparent.
+
+Edited by hand from kibane-04.png (27 Oct): the white pearl above the gauntlet claw was erased, at the owner's request.

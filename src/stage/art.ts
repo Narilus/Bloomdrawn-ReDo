@@ -5,6 +5,7 @@ import agatheBattle from '../assets/battle/agathe.png';
 import antheBattle from '../assets/battle/anthe.png';
 import hesterBattle from '../assets/battle/hester.png';
 import isadoraBattle from '../assets/battle/isadora.png';
+import kibaneBattle from '../assets/battle/kibane.png';
 import houndBattle from '../assets/battle/bloom-rib-hound.png';
 import whelpBattle from '../assets/battle/bloom-rib-whelp.png';
 import acolyteBattle from '../assets/battle/censer-acolyte.png';
@@ -29,6 +30,7 @@ export const battleArt: Readonly<Record<string, string>> = {
   virelle: virelleBattle,
   isadora: isadoraBattle,
   hester: hesterBattle,
+  kibane: kibaneBattle,
   'enemy.bloom-rib-hound': houndBattle,
   'enemy.bloom-rib-whelp': whelpBattle,
   'enemy.censer-acolyte': acolyteBattle,
