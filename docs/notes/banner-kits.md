@@ -120,6 +120,21 @@ A rough count with the drafted numbers agrees. By turn 6 a Rapture pair might ho
 - Against three dummies Flesh rises to 526 (its Poison hits all), Spirit to about 3,500, and Rapture stays at about 2,260.
 - The lab counts damage only. Maelia's healing and Shield don't show, so Flesh should trail by some margin. The owner sets how much.
 
+**The owner's Flesh direction in the lab (27 Oct, 200 seeds).** Variants: `flesh-strikes` (Virelle's Strike consumes 1 Embryo to apply 6 Bleed, Maelia's Strike 1 for 4 Poison, Maelia's Defense 1 to heal 2% of max HP), `poison-4` and `bleed-3` (Swollen Pod's 2 Poison becomes 8, Suture Cut's 3 Bleed becomes 9, and so on), and `flesh-spenders` (Suture Cut and Swollen Pod consume 2 Embryo to apply their Bleed or Poison again).
+
+| Flesh, turns 1–10 | One dummy | Three dummies |
+|---|---:|---:|
+| As now | 329 | 531 |
+| Strike and Defense riders | 480 | |
+| Poison ×4, Bleed ×3 | 536 | |
+| Both | 699 | 1,150 |
+| Both, and the flavour cards spend Embryo | 864 | 1,553 |
+| The same, with Open the Wound at 3 × Bleed | 908 | 1,598 |
+| Rapture, for comparison | 2,307 | 2,307 |
+| Spirit (fire), for comparison | 2,225 | 3,416 |
+
+With every change, Flesh reaches about 40% of Rapture against one enemy and about two-thirds against three. Embryo left unspent at turn 6 falls from 11.5 to 6.3.
+
 ## How the Domains should feel (owner)
 
 - **Rapture snowballs.** Volleys start weak, but the count keeps growing across turns until it is overwhelming.

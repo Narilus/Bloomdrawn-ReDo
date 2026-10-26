@@ -206,6 +206,24 @@ const VARIANTS: Record<string, (r: Registry) => Registry> = {
         ? c
         : { ...c, effects: mapCalls(c.effects, (call) => (call.op === 'applyStatus' ? { ...call, stacks: { add: [2, { resource: 'embryo' }] } } : call)) },
     ),
+  // The owner's Strike and Defense riders for Flesh (27 Oct): each consumes 1 Embryo. Virelle's Strike
+  // applies 6 Bleed, Maelia's Strike 4 Poison, and Maelia's Defense heals the party 2% of max HP.
+  'flesh-strikes': (r) => {
+    const riders: Record<string, CardDef['effects'][number]> = {
+      'virelle.strike': { op: 'ifConsume', resource: 'embryo', amount: 1, branch: [{ op: 'applyStatus', status: 'status.bleed', stacks: 6, target: 'chosen' }] },
+      'maelia.strike': { op: 'ifConsume', resource: 'embryo', amount: 1, branch: [{ op: 'applyStatus', status: 'status.poison', stacks: 4, target: 'chosen' }] },
+      'maelia.defense': { op: 'ifConsume', resource: 'embryo', amount: 1, branch: [{ op: 'heal', amount: { percent: 2, of: 'maxHp' } }] },
+    };
+    return mapCards(r, (c) => (riders[c.id] ? { ...c, effects: [...c.effects, riders[c.id]!] } : c));
+  },
+  // Flesh's flavour cards spend too: Suture Cut and Swollen Pod consume 2 Embryo to apply their Bleed or Poison again.
+  // Put it before poison-<x> and bleed-<x> so they scale the bonus as well.
+  'flesh-spenders': (r) =>
+    mapCards(r, (c) => {
+      if (c.id !== 'virelle.suture-cut' && c.id !== 'maelia.swollen-pod') return c;
+      const again = c.effects.filter((call) => call.op === 'applyStatus');
+      return { ...c, effects: [...c.effects, { op: 'ifConsume', resource: 'embryo', amount: 2, branch: again }] };
+    }),
   // Bleed never loses stacks (Virelle's C5, at C0).
   'bleed-stays': (r) => {
     const bleed = r.statuses['status.bleed'];
