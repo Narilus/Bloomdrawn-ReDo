@@ -112,6 +112,14 @@ A rough count with the drafted numbers agrees. By turn 6 a Rapture pair might ho
 - Flesh trails both by far. Its Embryo piles up unspent (about 12 by turn 6), because little spends it.
 - **Agreed for Spirit (owner, 27 Oct), now in the content:** Ritual damage per Essence doubled (Votive Candle 8 + 6 × Essence, Long Vigil 10 + 6 ×, Foxfire Rite 4 + 10 ×, Foxfire Wisp 6 ×), and Vigil and Foxfire give 2 Essence per held Ritual. Spirit then leads through turn 6 and Rapture overtakes after, as a snowball should.
 
+**Flesh against the others (27 Oct, `npm run lab`, 100 seeds, Spirit as agreed).** Flesh deals 327 over turns 1–10; Rapture and Spirit deal about 2,250.
+
+- Where Flesh's damage comes from, per fight: Strikes about 160, Thousand Cuts 47, Open the Wound 40, Poison ticks 39, Bleed ticks 24, Suture Cut 15. Rapture's end-of-turn volley alone deals about 1,470.
+- Numbers alone can't close it. Each lever is a lab variant: Poison ×2 gives 359, Bleed ×2 378, Bleed never decaying 364, Open the Wound at 3 × Bleed 327. Tripling every Poison and Bleed, with Bleed never decaying and Open the Wound consuming all Embryo for Bleed × Embryo, gives 690. Swollen Pod applying 2 + Embryo Poison gives 504.
+- Why: the pair has one damage spender (Open the Wound, 2 Embryo). Maelia's spenders buy charge, healing and Shield. About 12 Embryo sits unspent by turn 6. Only Swollen Pod, Suture Cut and Thorn-Spur Bloom apply damage over time, a few stacks each, so Poison is about 6 stacks by turn 10, while Rapture has about 13 Tentacles at 6 a hit by turn 6.
+- Against three dummies Flesh rises to 526 (its Poison hits all), Spirit to about 3,500, and Rapture stays at about 2,260.
+- The lab counts damage only. Maelia's healing and Shield don't show, so Flesh should trail by some margin. The owner sets how much.
+
 ## How the Domains should feel (owner)
 
 - **Rapture snowballs.** Volleys start weak, but the count keeps growing across turns until it is overwhelming.

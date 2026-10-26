@@ -1,8 +1,8 @@
 // Damage curves (docs/notes/banner-kits.md, "Spirit against Rapture"): seeded fights against the
 // practice dummy, played by one simple player, for a Flesh, a Rapture and a Spirit pair, each with
 // Leonora and Hester. Spirit is played two ways: Rituals fired when affordable, or held until cheap.
-// A measuring tool, not a test. Run `npm run lab -- [--seeds 200] [--turns 10] [--variant a,b]`.
-// Variants try Spirit's levers from the note on a copy of the registry; the game's content is unchanged.
+// A measuring tool, not a test. Run `npm run lab -- [--seeds 200] [--turns 10] [--enemies 1] [--variant a,b]`.
+// Variants try Spirit's and Flesh's levers on a copy of the registry; the game's content is unchanged.
 import { parseArgs } from 'node:util';
 import {
   apply,
@@ -22,11 +22,18 @@ import {
 import { loadRegistry } from './registry.ts';
 
 const { values } = parseArgs({
-  options: { seeds: { type: 'string', default: '200' }, turns: { type: 'string', default: '10' }, variant: { type: 'string', default: '' } },
+  options: {
+    seeds: { type: 'string', default: '200' },
+    turns: { type: 'string', default: '10' },
+    enemies: { type: 'string', default: '1' },
+    variant: { type: 'string', default: '' },
+  },
 });
 const SEEDS = Number(values.seeds);
 const TURNS = Number(values.turns);
 const DUMMY = 'enemy.practice-dummy';
+/** How many dummies stand in each fight: cards that hit every enemy are worth more against several. */
+const ENEMIES = Number(values.enemies);
 /** The hold policy plays a Ritual only once it costs this or less. */
 const HOLD_AT = 2;
 
@@ -85,7 +92,7 @@ interface Fight {
 }
 
 function fight(seed: number, setup: Setup, registry: Registry): Fight {
-  let state = startCombat({ seed, party: setup.party, enemies: [DUMMY] }, registry).state;
+  let state = startCombat({ seed, party: setup.party, enemies: Array<string>(ENEMIES).fill(DUMMY) }, registry).state;
   const perTurn = Array<number>(TURNS).fill(0);
   const ultimate = Array<number>(TURNS).fill(0);
   let cards = 0;
@@ -123,7 +130,8 @@ function report(registry: Registry, ultimates: boolean) {
     const r6 = (key: string) => mean(fights.map((f) => f.turn6[key] ?? 0)).toFixed(1);
     notes.push(`${pair.name}: at the start of turn 6, Tentacles ${r6('tentacles')} × ${r6('potency')} per hit, Essence ${r6('essence')}, Embryo ${r6('embryo')}.`);
   }
-  console.log(`\n### ${ultimates ? 'With ultimates (fired when charged)' : 'Cards only (no ultimates)'}: mean damage per turn over ${SEEDS} seeds\n`);
+  const against = ENEMIES === 1 ? 'one dummy' : `${ENEMIES} dummies`;
+  console.log(`\n### ${ultimates ? 'With ultimates (fired when charged)' : 'Cards only (no ultimates)'}: mean damage per turn over ${SEEDS} seeds, against ${against}\n`);
   console.log(`| ${header.join(' | ')} |`);
   console.log(`|${header.map((_, i) => (i === 0 ? '---' : '---:')).join('|')}|`);
   for (const row of rows) console.log(`| ${row.join(' | ')} |`);
@@ -143,6 +151,33 @@ function scaleEssence(f: Formula, by: number): Formula {
 }
 const mapAmounts = (calls: CardDef['effects'], fn: (f: Formula) => Formula): CardDef['effects'] =>
   calls.map((c) => ({ ...c, ...(c.amount !== undefined ? { amount: fn(c.amount as Formula) } : {}), ...(Array.isArray(c.branch) ? { branch: mapAmounts(c.branch as CardDef['effects'], fn) } : {}) }));
+
+/** Every call in a list, its branches included, through `fn`. */
+const mapCalls = (calls: CardDef['effects'], fn: (c: CardDef['effects'][number]) => CardDef['effects'][number]): CardDef['effects'] =>
+  calls.map((c) => fn(Array.isArray(c.branch) ? { ...c, branch: mapCalls(c.branch as CardDef['effects'], fn) } : c));
+const mapCards = (r: Registry, fn: (c: CardDef) => CardDef): Registry => ({ ...r, cards: Object.fromEntries(Object.entries(r.cards).map(([id, c]) => [id, fn(c)])) });
+const scaleNumber = (f: Formula, by: number): Formula => (typeof f === 'number' ? Math.round(f * by) : f);
+
+/** Every card applies more of a status: `poison-1.5` scales each Poison applied, as `bleed-1.5` does Bleed. */
+const statusScale = (status: string, by: number) => (r: Registry): Registry =>
+  mapCards(r, (c) => ({ ...c, effects: mapCalls(c.effects, (call) => (call.op === 'applyStatus' && call.status === status ? { ...call, stacks: scaleNumber(call.stacks as Formula, by) } : call)) }));
+
+/** Open the Wound's detonation: `wound-3` loses 3 × Bleed; `wound-all` consumes all Embryo and loses Bleed × Embryo consumed. */
+const wound = (detonation: 'all' | number) => (r: Registry): Registry =>
+  mapCards(r, (c) =>
+    c.id !== 'virelle.open-the-wound'
+      ? c
+      : {
+          ...c,
+          effects: c.effects.map((call) => {
+            if (call.op !== 'ifConsume') return call;
+            const bleed = { targetStacks: 'status.bleed' } as Formula;
+            return detonation === 'all'
+              ? { ...call, amount: { resource: 'embryo' }, branch: [{ op: 'loseHp', amount: { mul: [bleed, { consumed: true }] }, target: 'chosen' }] }
+              : { ...call, branch: [{ op: 'loseHp', amount: { mul: [detonation, bleed] }, target: 'chosen' }] };
+          }),
+        },
+  );
 
 /** Rituals deal more per Essence: every k × Essence on a Ritual card becomes `by` × k (`ritual-1.6`). */
 const ritualScale = (by: number) => (r: Registry): Registry => ({
@@ -164,6 +199,20 @@ const VARIANTS: Record<string, (r: Registry) => Registry> = {
       }),
     ),
   }),
+  // A structural try for Flesh: Embryo feeds Poison. Swollen Pod applies 2 + Embryo Poison, without consuming it.
+  'pod-embryo': (r) =>
+    mapCards(r, (c) =>
+      c.id !== 'maelia.swollen-pod'
+        ? c
+        : { ...c, effects: mapCalls(c.effects, (call) => (call.op === 'applyStatus' ? { ...call, stacks: { add: [2, { resource: 'embryo' }] } } : call)) },
+    ),
+  // Bleed never loses stacks (Virelle's C5, at C0).
+  'bleed-stays': (r) => {
+    const bleed = r.statuses['status.bleed'];
+    if (!bleed?.triggers) return r;
+    const triggers = bleed.triggers.map((t) => ({ ...t, do: t.do.filter((call) => call.op !== 'reduceStacks') }));
+    return { ...r, statuses: { ...r.statuses, 'status.bleed': { ...bleed, triggers } } };
+  },
   // Kyubi's Judgement gives back half the Essence it consumed (her C5 draft, at C0).
   'keep-half': (r) => {
     const kibane = r.characters['kibane'];
@@ -179,11 +228,17 @@ const VARIANTS: Record<string, (r: Registry) => Registry> = {
 let registry = await loadRegistry();
 const variants = values.variant ? values.variant.split(',') : [];
 for (const name of variants) {
-  const ritual = /^ritual-([\d.]+)$/.exec(name);
-  const tweak = ritual ? ritualScale(Number(ritual[1])) : VARIANTS[name];
-  if (!tweak) throw new Error(`Unknown variant "${name}". Variants: ritual-<multiplier>, ${Object.keys(VARIANTS).join(', ')}`);
+  const [, lever, x] = /^(ritual|poison|bleed|wound)-([\d.]+|all)$/.exec(name) ?? [];
+  const by = Number(x);
+  const tweak =
+    lever === 'ritual' ? ritualScale(by)
+    : lever === 'poison' ? statusScale('status.poison', by)
+    : lever === 'bleed' ? statusScale('status.bleed', by)
+    : lever === 'wound' ? wound(x === 'all' ? 'all' : by)
+    : VARIANTS[name];
+  if (!tweak) throw new Error(`Unknown variant "${name}". Variants: ritual-<x>, poison-<x>, bleed-<x>, wound-<k>, wound-all, ${Object.keys(VARIANTS).join(', ')}`);
   registry = tweak(registry);
 }
-if (variants.length) console.log(`Variants: ${variants.join(', ')} (Spirit's levers, on a copy of the content)`);
+if (variants.length) console.log(`Variants: ${variants.join(', ')} (on a copy of the content)`);
 report(registry, true);
 report(registry, false);
