@@ -1,8 +1,8 @@
 import { add, chargeUltimate, consumed, createCard, damage, draw, gainResource, gainShield, gte, handCount, ifConsume, mul, resource, stat, transcend, when } from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 
-// Banner kit reviewed by the owner (docs/notes/banner-kits.md). Numbers are placeholders for tuning,
-// and Spirit's are to be checked against Rapture's snowball before he plays them.
+// Banner kit reviewed by the owner (docs/notes/banner-kits.md). Numbers are placeholders for tuning;
+// Ritual damage per Essence and Foxfire's Essence were doubled from the lab curves (owner, 27 Oct).
 
 export const strike = card({
   id: 'kibane.strike', name: 'Strike', owner: 'kibane', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
@@ -17,7 +17,7 @@ export const defense = card({
 export const foxfireRite = card({
   id: 'kibane.foxfire-rite', name: 'Foxfire Rite', owner: 'kibane', slot: 'flavourA', cost: 5, target: 'chosenEnemy',
   keywords: ['ritual'],
-  effects: [damage(add(4, mul(5, resource('essence'))))],
+  effects: [damage(add(4, mul(10, resource('essence'))))],
 });
 
 export const shrineBell = card({
@@ -29,7 +29,7 @@ export const shrineBell = card({
 export const foxfireWisp = card({
   id: 'kibane.foxfire-wisp', name: 'Foxfire Wisp', owner: 'kibane', generated: true, cost: 3, target: 'chosenEnemy',
   keywords: ['ritual', 'exhaust'],
-  effects: [damage(mul(3, resource('essence')))],
+  effects: [damage(mul(6, resource('essence')))],
 });
 
 export const theNinthTail = card({
@@ -61,9 +61,9 @@ export const kibane = character({
   cards: [strike, defense, theNinthTail, foxfireRite, shrineBell],
   passive: {
     name: 'Foxfire', scope: 'combat',
-    text: 'At end of turn, gain 1 Essence for each Ritual in hand. When you play a Ritual, charge her ultimate by {triggers.1.do.0.amount}.',
+    text: 'At end of turn, gain 2 Essence for each Ritual in hand. When you play a Ritual, charge her ultimate by {triggers.1.do.0.amount}.',
     triggers: [
-      { on: 'turnEnd', do: [gainResource('essence', handCount('ritual'))] },
+      { on: 'turnEnd', do: [gainResource('essence', mul(2, handCount('ritual')))] },
       { on: 'cardPlayed', filter: { keyword: 'ritual', source: 'party' }, do: [chargeUltimate(10)] },
     ],
   },

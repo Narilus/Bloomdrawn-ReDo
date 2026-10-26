@@ -57,19 +57,19 @@ Agathe builds the Tentacle count; Isadora raises the damage per hit and spends i
 
 | | Cost | Text |
 |---|---|---|
-| **Passive: Foxfire** (combat) | — | At end of turn, gain 1 Essence for each Ritual in hand. When you play a Ritual, charge Kibane's ultimate by 10. |
-| **A: Foxfire Rite** (Ritual) | 5 | Deal 4 + 5 × Essence damage. |
+| **Passive: Foxfire** (combat) | — | At end of turn, gain 2 Essence for each Ritual in hand. When you play a Ritual, charge Kibane's ultimate by 10. |
+| **A: Foxfire Rite** (Ritual) | 5 | Deal 4 + 10 × Essence damage. |
 | **B: Shrine Bell** | 2 | Gain 2 Essence. If you hold a Ritual, gain 1 more. |
 | **Transcend: The Ninth Tail** | 4 | Gain 3 Essence. Create a Foxfire Wisp in your hand. Transcend. |
-| Generated: **Foxfire Wisp** (Ritual) | 3 | Deal 3 × Essence damage. Exhausts. Lasts the combat. |
+| Generated: **Foxfire Wisp** (Ritual) | 3 | Deal 6 × Essence damage. Exhausts. Lasts the combat. |
 | **Ultimate: Kyubi's Judgement** | — | Consume all Essence. Deal 10 + 8 × Essence consumed damage to all enemies. |
 | Transcended | — | As above, 12 × Essence consumed. |
 | Reward: **Fox Lantern** | 1 | Gain 1 Essence. Draw 1 card. |
 | Reward: **Gauntlet Rake** | 2 | Deal 5 + Attack damage. Gain 1 Essence. |
 
-Her ultimate is Spirit's one exception: it spends the shared Essence, Anthe's included, so firing it is a real choice in a Spirit party. Foxfire Rite scales harder than Votive Candle but starts weaker. Her passive pays her for holding, so she grows her own nukes and rewards the delay; with Anthe beside her, each held Ritual gives 2 Essence a turn (owner). Her ultimate hits every enemy, as Virelle's does (owner).
+Her ultimate is Spirit's one exception: it spends the shared Essence, Anthe's included, so firing it is a real choice in a Spirit party. Foxfire Rite scales harder than Votive Candle but starts weaker. Her passive pays her for holding, so she grows her own nukes and rewards the delay; with Anthe beside her, each held Ritual gives 4 Essence a turn (owner; doubled from 2 after the lab, 27 Oct). Her ultimate hits every enemy, as Virelle's does (owner).
 
-**Dupes:** C1, Foxfire charges 15. C3, Foxfire Rite deals 4 + 6 × Essence. C4, Kyubi's Judgement deals +2 per Essence consumed. C5, after Kyubi's Judgement, gain back half the Essence consumed (rounded down).
+**Dupes:** C1, Foxfire charges 15. C3, Foxfire Rite deals more per Essence (drafted as 4 + 6 × against the old 5 ×; its number is set again in M5.4). C4, Kyubi's Judgement deals +2 per Essence consumed. C5, after Kyubi's Judgement, gain back half the Essence consumed (rounded down).
 
 ## Hester, the Snare-Warden (w): Unbound, debuff and control
 
@@ -110,7 +110,7 @@ A rough count with the drafted numbers agrees. By turn 6 a Rapture pair might ho
 - Spirit trails Rapture by more than half. Each lever alone is not enough: Rituals ×1.6 per Essence gives 1,310, 2 Essence per held Ritual 1,478, and Kyubi's Judgement giving back half 1,063.
 - Holding and firing come out about even, so both stay real choices.
 - Flesh trails both by far. Its Embryo piles up unspent (about 12 by turn 6), because little spends it.
-- **Proposed for Spirit (for the owner):** Ritual damage per Essence doubled (Votive Candle 8 + 6 × Essence, Long Vigil 10 + 6 ×, Foxfire Rite 4 + 10 ×, Foxfire Wisp 6 ×), and Vigil and Foxfire give 2 Essence per held Ritual. Spirit then leads through turn 6 and Rapture overtakes after, as a snowball should.
+- **Agreed for Spirit (owner, 27 Oct), now in the content:** Ritual damage per Essence doubled (Votive Candle 8 + 6 × Essence, Long Vigil 10 + 6 ×, Foxfire Rite 4 + 10 ×, Foxfire Wisp 6 ×), and Vigil and Foxfire give 2 Essence per held Ritual. Spirit then leads through turn 6 and Rapture overtakes after, as a snowball should.
 
 ## How the Domains should feel (owner)
 

@@ -1,7 +1,8 @@
 import { add, changeCost, damage, draw, gainResource, gainShield, handCount, heldTurns, mul, resource, stat, transcend } from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 
-// Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning.
+// Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning; Ritual damage
+// per Essence and Vigil's Essence were doubled from the lab curves (owner, 27 Oct).
 
 export const strike = card({
   id: 'anthe.strike', name: 'Strike', owner: 'anthe', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
@@ -16,7 +17,7 @@ export const defense = card({
 export const votiveCandle = card({
   id: 'anthe.votive-candle', name: 'Votive Candle', owner: 'anthe', slot: 'flavourA', cost: 5, target: 'chosenEnemy',
   keywords: ['ritual'],
-  effects: [damage(add(8, mul(3, resource('essence'))))],
+  effects: [damage(add(8, mul(6, resource('essence'))))],
 });
 
 export const gildedThread = card({
@@ -41,7 +42,7 @@ export const ashOffering = card({
 export const longVigil = card({
   id: 'anthe.long-vigil', name: 'Long Vigil', owner: 'anthe', reward: true, cost: 6, target: 'allEnemies',
   keywords: ['ritual'],
-  effects: [damage(add(10, mul(3, resource('essence'))), { target: 'allEnemies' })],
+  effects: [damage(add(10, mul(6, resource('essence'))), { target: 'allEnemies' })],
 });
 
 export const anthe = character({
@@ -50,8 +51,8 @@ export const anthe = character({
   cards: [strike, defense, theRiddleAnswered, votiveCandle, gildedThread],
   passive: {
     name: 'Vigil', scope: 'combat',
-    text: 'At end of turn, gain 1 Essence for each Ritual in hand.',
-    triggers: [{ on: 'turnEnd', do: [gainResource('essence', handCount('ritual'))] }],
+    text: 'At end of turn, gain 2 Essence for each Ritual in hand.',
+    triggers: [{ on: 'turnEnd', do: [gainResource('essence', mul(2, handCount('ritual')))] }],
   },
   ultimate: {
     name: 'Hours Kept',

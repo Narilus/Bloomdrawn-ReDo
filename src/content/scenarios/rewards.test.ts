@@ -58,12 +58,12 @@ describe('Anthe', () => {
     expect: { resources: { essence: 2 }, mana: 5 },
   });
 
-  scenario('Long Vigil is a Ritual that deals 10 + 3 × Essence to every enemy', {
+  scenario('Long Vigil is a Ritual that deals 10 + 6 × Essence to every enemy', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['anthe.long-vigil'], resources: { essence: 2 } },
     play: [{ card: 'anthe.long-vigil' }],
-    expect: { enemyHp: [60 - 16, 60 - 16], mana: 0 },
-    check: ({ plays }) => expect(plays[0]!.preview.map((p) => [p.target, p.amount])).toEqual([['e20', 16], ['e21', 16]]),
+    expect: { enemyHp: [60 - 22, 60 - 22], mana: 0 },
+    check: ({ plays }) => expect(plays[0]!.preview.map((p) => [p.target, p.amount])).toEqual([['e20', 22], ['e21', 22]]),
   });
 });
 

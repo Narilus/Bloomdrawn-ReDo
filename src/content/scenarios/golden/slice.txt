@@ -75,7 +75,7 @@ handDrawn
 > endTurn
   cleanup
   turnEnd
-  resourceGained src=m2 essence amt=1
+  resourceGained src=m2 essence amt=2
   volleyFired src=m0
   damageDealt src=m0 tgt=e20 amt=3
   damageTaken src=m0 tgt=e20 amt=3
@@ -102,8 +102,8 @@ handDrawn
   handDrawn
 > playCard anthe.votive-candle
   cardPlayed src=m2 tgt=e20 card=c13
-  damageDealt src=m2 tgt=e20 amt=11 abs=10
-  damageTaken src=m2 tgt=e20 amt=11 abs=10
+  damageDealt src=m2 tgt=e20 amt=20 abs=10
+  damageTaken src=m2 tgt=e20 amt=20 abs=10
 > playCard leonora.strike
   cardPlayed src=m3 tgt=e20 card=c15
   damageDealt src=m3 tgt=e20 amt=11
@@ -226,4 +226,4 @@ handDrawn
   damageDealt src=m3 tgt=e20 amt=11
   combatEnd victory
 
-final: {"turn":5,"outcome":"victory","party":{"hp":199,"maxHp":210,"shield":0,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":6,"embryo":2,"essence":1},"gauges":[55,90,0,35]}
+final: {"turn":5,"outcome":"victory","party":{"hp":199,"maxHp":210,"shield":0,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":6,"embryo":2,"essence":2},"gauges":[55,90,0,35]}

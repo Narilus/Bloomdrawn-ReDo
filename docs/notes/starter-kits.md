@@ -49,8 +49,8 @@ Both Flavour cards are the ARCHITECTURE.md worked examples. The M2 Transcended u
 
 | | Cost | Text |
 |---|---|---|
-| **Passive: Vigil** (combat) | — | At end of turn, gain 1 Essence for each Ritual in hand. |
-| **A: Votive Candle** (Ritual) | 5 | Deal 8 + 3 × Essence damage. |
+| **Passive: Vigil** (combat) | — | At end of turn, gain 2 Essence for each Ritual in hand (was 1; doubled after the M5.2 lab, 27 Oct). |
+| **A: Votive Candle** (Ritual) | 5 | Deal 8 + 6 × Essence damage (was 3 ×; doubled after the M5.2 lab, 27 Oct). |
 | **B: Gilded Thread** | 2 | Every Ritual in your hand costs 1 less. Gain 1 Essence. Draw 1 card. |
 | **Ultimate: Hours Kept** | — | Gain 1 Essence for every turn your held Rituals have been held, in total. |
 

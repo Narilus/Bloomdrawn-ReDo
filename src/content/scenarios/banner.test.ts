@@ -227,11 +227,11 @@ describe('Isadora', () => {
 });
 
 describe('Kibane', () => {
-  scenario('Foxfire Rite deals 4 + 5 × Essence, and a Ritual played charges Kibane by 10', {
+  scenario('Foxfire Rite deals 4 + 10 × Essence, and a Ritual played charges Kibane by 10', {
     party: BANNER,
     setup: { hand: ['kibane.foxfire-rite'], resources: { essence: 4 } },
     play: [{ card: 'kibane.foxfire-rite', target: 0 }],
-    expect: { enemyHp: [60 - 24], gauges: { kibane: 10 }, mana: 1 },
+    expect: { enemyHp: [60 - 44], gauges: { kibane: 10 }, mana: 1 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 
@@ -242,12 +242,12 @@ describe('Kibane', () => {
     expect: { gauges: { kibane: 10, anthe: 0 } },
   });
 
-  scenario('Foxfire: 1 Essence per Ritual held at end of turn; with Anthe, 2', {
+  scenario('Foxfire: 2 Essence per Ritual held at end of turn; with Anthe, 4', {
     party: ['kibane', 'anthe', 'hester', 'virelle'],
     enemies: [BIG],
     setup: { hand: ['kibane.foxfire-rite', 'anthe.votive-candle'] },
     play: [{ endTurn: true }],
-    expect: { resources: { essence: 4 } },
+    expect: { resources: { essence: 8 } },
   });
 
   scenario('Shrine Bell: 2 Essence, 3 while holding a Ritual', {
@@ -264,11 +264,11 @@ describe('Kibane', () => {
     expect: { resources: { essence: 2 } },
   });
 
-  scenario('The Ninth Tail: 3 Essence, a Foxfire Wisp in hand, and Transcend; the Wisp deals 3 × Essence and exhausts', {
+  scenario('The Ninth Tail: 3 Essence, a Foxfire Wisp in hand, and Transcend; the Wisp deals 6 × Essence and exhausts', {
     party: BANNER,
     setup: { hand: ['kibane.the-ninth-tail'], mana: 7 },
     play: [{ card: 'kibane.the-ninth-tail' }, { card: 'kibane.foxfire-wisp', target: 0 }],
-    expect: { enemyHp: [60 - 9], resources: { essence: 3 }, gauges: { kibane: 35 + 10 }, mana: 0 },
+    expect: { enemyHp: [60 - 18], resources: { essence: 3 }, gauges: { kibane: 35 + 10 }, mana: 0 },
     check: ({ state, plays }) => {
       expect(plays[0]?.after.piles.hand.map((c) => c.card)).toEqual(['kibane.foxfire-wisp']);
       expect(transcended(state, 'kibane')).toBe(true);

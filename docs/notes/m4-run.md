@@ -21,7 +21,7 @@ Status: **answered by the owner, 24 Oct** (his answers are folded in below; the 
 | Agathe | **Hymnal Procession** (2) | Gain 3 Tentacles. |
 | Agathe | **Thurible Swing** (1) | Deal 4 + Attack damage. If you have 4 or more Tentacles, trigger a volley. |
 | Anthe | **Ash Offering** (1) | Gain 2 Essence. |
-| Anthe | **Long Vigil** (6, Ritual) | Deal 10 + 3 × Essence damage to all enemies. |
+| Anthe | **Long Vigil** (6, Ritual) | Deal 10 + 6 × Essence damage to all enemies (was 3 ×; doubled after the M5.2 lab, 27 Oct). |
 | Leonora | **Ledger Balance** (1) | Draw 1 card. The next card you play costs 1 less. |
 | Leonora | **Writ of Seizure** (2) | Apply 2 Weak and 2 Vulnerable to an enemy. |
 | A Flesh member | **Grafting Knife** (1) | Deal 4 + Attack damage. Apply 3 Bleed. |

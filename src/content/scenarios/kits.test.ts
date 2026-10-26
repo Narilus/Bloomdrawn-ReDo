@@ -84,16 +84,16 @@ describe('Agathe', () => {
 });
 
 describe('Anthe', () => {
-  scenario('Votive Candle deals 8 + 3 × Essence', {
+  scenario('Votive Candle deals 8 + 6 × Essence', {
     setup: { hand: ['anthe.votive-candle'], resources: { essence: 4 } },
     play: [{ card: 'anthe.votive-candle', target: 0 }],
-    expect: { enemyHp: [60 - 20], mana: 1 },
+    expect: { enemyHp: [60 - 32], mana: 1 },
   });
 
-  scenario('Vigil: each Ritual held at end of turn gains 1 Essence, and the Ritual gets 1 cheaper', {
+  scenario('Vigil: each Ritual held at end of turn gains 2 Essence, and the Ritual gets 1 cheaper', {
     setup: { hand: ['anthe.votive-candle'] },
     play: [{ endTurn: true }],
-    expect: { resources: { essence: 1 } },
+    expect: { resources: { essence: 2 } },
     check: ({ state }) => {
       const votive = state.piles.hand.find((c) => c.card === 'anthe.votive-candle');
       expect(votive && cardCost(state, votive, registry)).toBe(4);
@@ -113,8 +113,8 @@ describe('Anthe', () => {
   scenario('Hours Kept: 1 Essence per turn the held Rituals have been held', {
     setup: { hand: ['anthe.votive-candle'], gauges: { anthe: 100 } },
     play: [{ endTurn: true }, { endTurn: true }, { ultimate: 'anthe' }],
-    // Vigil gave 1 each turn; Votive has been held 2 turns.
-    expect: { resources: { essence: 2 + 2 }, gauges: { anthe: 0 } },
+    // Vigil gave 2 each turn; Votive has been held 2 turns.
+    expect: { resources: { essence: 4 + 2 }, gauges: { anthe: 0 } },
   });
 });
 
@@ -178,8 +178,8 @@ describe('Transcend', () => {
   scenario('The Riddle Answered: 2 Essence, held Rituals cheaper; Transcended Hours Kept doubles', {
     setup: { hand: ['anthe.votive-candle', 'anthe.the-riddle-answered'], gauges: { anthe: 100 } },
     play: [{ card: 'anthe.the-riddle-answered' }, { endTurn: true }, { ultimate: 'anthe' }],
-    // The card 2, Vigil 1, then Votive held 1 turn × 2. Votive: 5, −1 from the card, −1 at cleanup.
-    expect: { resources: { essence: 1 + 2 + 2 } },
+    // The card 2, Vigil 2, then Votive held 1 turn × 2. Votive: 5, −1 from the card, −1 at cleanup.
+    expect: { resources: { essence: 2 + 2 + 2 } },
     check: ({ state }) => {
       const votive = state.piles.hand.find((c) => c.card === 'anthe.votive-candle');
       expect(votive && cardCost(state, votive, registry)).toBe(3);
