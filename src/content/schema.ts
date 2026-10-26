@@ -11,22 +11,27 @@ const trigger = z.strictObject({
   on: z.enum(EVENT_TYPES),
   filter: z
     .strictObject({
-      source: z.enum(['self', 'other']).optional(),
+      source: z.enum(['self', 'other', 'party']).optional(),
       target: z.literal('self').optional(),
       resource: z.string().optional(),
+      status: id.optional(),
       direct: z.literal(true).optional(),
+      fromCard: z.literal(true).optional(),
       slots: z.array(z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB'])).optional(),
+      keyword: z.enum(['retain', 'ritual', 'exhaust']).optional(),
     })
     .optional(),
   once: z.literal('turn').optional(),
   do: z.array(opCall).min(1),
 });
 
-const modifier = z.strictObject({
-  value: z.enum(['damage', 'shield']),
-  step: z.enum(['flat', 'outgoingMul', 'incomingMul']),
-  amount: formulaSchema,
-});
+const modifier = z
+  .strictObject({
+    value: z.enum(['damage', 'shield', 'volleys']),
+    step: z.enum(['flat', 'outgoingMul', 'incomingMul']),
+    amount: formulaSchema,
+  })
+  .refine((m) => m.value !== 'volleys' || m.step === 'flat', 'Extra volleys are flat.');
 
 const intent = z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) });
 
@@ -91,6 +96,7 @@ export const schemas = {
     resistedAs: id.optional(),
     endsAfterAction: z.boolean().optional(),
     lasts: z.enum(['ownTurns', 'opposingTurns']).optional(),
+    endsWithTurn: z.literal(true).optional(),
     ...hooks,
   }),
   relic: z.strictObject({

@@ -12,14 +12,20 @@ export interface OpCall {
 }
 
 export interface TriggerFilter {
-  /** Relation of the event's source to the trigger's holder. */
-  source?: 'self' | 'other';
+  /** Relation of the event's source to the trigger's holder. `party`: any party member, or the party. */
+  source?: 'self' | 'other' | 'party';
   target?: 'self';
   resource?: string;
+  /** For status events: only this status. */
+  status?: string;
   /** Raised by a card or ultimate itself, not by another trigger. */
   direct?: true;
+  /** Raised while a card was resolving (a volley a card triggered), not by an ultimate or a trigger. */
+  fromCard?: true;
   /** For `cardPlayed`: only cards in these personal slots. */
   slots?: CardSlot[];
+  /** For `cardPlayed`: only cards with this keyword. */
+  keyword?: Keyword;
 }
 
 export interface TriggerDef {
@@ -36,7 +42,8 @@ export interface TriggerDef {
  * multiplies on the target side (damage only).
  */
 export interface ModifierDef {
-  value: 'damage' | 'shield';
+  /** `volleys`: extra passes for every volley (flat only), each choosing its targets afresh. */
+  value: 'damage' | 'shield' | 'volleys';
   step: 'flat' | 'outgoingMul' | 'incomingMul';
   amount: Formula;
 }
@@ -221,6 +228,8 @@ export interface StatusDef extends Hooks {
    * the stacks landed in.
    */
   lasts?: 'ownTurns' | 'opposingTurns';
+  /** Gone when the party's turn ends, after its end-of-turn effects and damage over time ("this turn"). */
+  endsWithTurn?: true;
   /** A HUD icon key, and the badge tooltip's plain-language rule. */
   icon?: string;
   help?: string;

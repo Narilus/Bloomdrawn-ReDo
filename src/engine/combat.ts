@@ -227,7 +227,7 @@ function validateCalls(state: CombatState, calls: readonly OpCall[], ctx: OpCont
 }
 
 export function playContext(card: CardInstance, target: EntityId | undefined): OpContext {
-  const ctx: OpContext = { source: card.owner, owner: card.owner };
+  const ctx: OpContext = { source: card.owner, owner: card.owner, card: card.uid };
   if (target !== undefined) ctx.target = target;
   return ctx;
 }
@@ -249,7 +249,7 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
   const ctx = playContext(card, command.target);
   for (let i = 0; i < repeats; i++) enqueue(rc, def.effects, ctx, ROOT);
   enqueue(rc, chargeOf(def), ctx, ROOT);
-  const played: EngineEvent = { type: 'cardPlayed', source: card.owner, owner: card.owner, card: card.uid };
+  const played: EngineEvent = { type: 'cardPlayed', source: card.owner, owner: card.owner, card: card.uid, def: card.card };
   if (def.slot) played.slot = def.slot;
   if (command.target !== undefined) played.target = command.target;
   emit(rc, played, ROOT);
@@ -348,7 +348,7 @@ function tick(rc: Resolution, bearer: EntityId): void {
 /**
  * A side's turn has ended: every turn-count status that matters on that side's turns loses a
  * stack (Weak on that side, Vulnerable on the other), except stacks that landed this turn. Then
- * nothing is fresh or pending any more.
+ * nothing is fresh or pending any more. At the end of the party's turn, "this turn" statuses go.
  */
 export function countDown(rc: Resolution, ended: 'party' | 'enemies'): void {
   const s = rc.state;
@@ -358,6 +358,11 @@ export function countDown(rc: Resolution, ended: 'party' | 'enemies'): void {
   ];
   for (const bearer of bearers) {
     for (const stack of [...bearer.statuses]) {
+      if (ended === 'party' && rc.registry.statuses[stack.status]?.endsWithTurn) {
+        bearer.statuses.splice(bearer.statuses.indexOf(stack), 1);
+        emit(rc, { type: 'statusRemoved', target: bearer.id, status: stack.status }, ROOT);
+        continue;
+      }
       const lasts = rc.registry.statuses[stack.status]?.lasts;
       if (!lasts || (lasts === 'ownTurns') !== (bearer.side === ended)) continue;
       if (stack.stacks - (stack.fresh ?? 0) <= 0) continue;
@@ -394,6 +399,7 @@ function actIntent(rc: Resolution, enemy: Enemy): void {
     const mode = rc.registry.statuses[control.status]?.skipsAction;
     enemy.statuses.splice(enemy.statuses.indexOf(control), 1);
     emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: control.status, via: 'skip' }, ROOT);
+    emit(rc, { type: 'controlled', source: enemy.id, target: enemy.id, status: control.status }, ROOT);
     drain(rc);
     if (mode === 'advance') next();
     return;
@@ -405,6 +411,7 @@ function actIntent(rc: Resolution, enemy: Enemy): void {
   for (const s of enemy.statuses.filter((x) => rc.registry.statuses[x.status]?.endsAfterAction)) {
     enemy.statuses.splice(enemy.statuses.indexOf(s), 1);
     emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
+    emit(rc, { type: 'controlled', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
   }
   drain(rc);
   next();

@@ -21,9 +21,12 @@ import { hasIcon, Icon } from './icons.tsx';
 
 const statusName = (id: string) => id.replace(/^status\./, '').replace(/^./, (c) => c.toUpperCase());
 
+/** Previews with the branches that would resolve (a repeat's passes, a consume that can pay) laid out in order. */
+const flatten = (previews: Preview[]): Preview[] => previews.flatMap((p) => [p, ...(p.resolves === false ? [] : flatten(p.branch ?? []))]);
+
 /** Damage a list of previews would deal to one target, after Shield. */
 const hpLoss = (previews: Preview[], target: EntityId) =>
-  previews
+  flatten(previews)
     .filter((p) => (p.op === 'damage' || p.op === 'volley' || p.op === 'loseHp') && p.target === target)
     .reduce((n, p) => n + (p.amount ?? 0) - (p.absorbed ?? 0), 0);
 

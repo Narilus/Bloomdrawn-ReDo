@@ -21,6 +21,10 @@ export const EVENT_TYPES = [
   'cardPlayed',
   'ultimateFired',
   'transcended',
+  // A volley began, before its hits (a card's, an ultimate's or the end-of-turn attack).
+  'volleyFired',
+  // An enemy's action was skipped (Stun, Delay) or weakened (Falter) by a control status.
+  'controlled',
   // Outcomes
   'damageDealt',
   'damageTaken',
@@ -53,8 +57,10 @@ export interface EngineEvent {
   amount?: number;
   /** Damage absorbed by Shield; HP lost is amount − absorbed. */
   absorbed?: number;
-  /** Card instance UID. */
+  /** Card instance UID: the card played, or the card resolving when the event was raised. */
   card?: EntityId;
+  /** For `cardPlayed`: the card's definition ID. */
+  def?: string;
   resource?: string;
   status?: string;
   outcome?: 'victory' | 'defeat';

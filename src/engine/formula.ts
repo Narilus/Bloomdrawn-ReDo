@@ -17,6 +17,8 @@ export type Formula =
   | { heldTurns: Keyword }
   /** Stacks of a status on the source (the bearer, for a status's own triggers). */
   | { stacks: string }
+  /** Stacks of a status on the chosen target. */
+  | { targetStacks: string }
   | { manaSpent: true }
   | { turn: true }
   | { consumed: true }
@@ -35,6 +37,7 @@ export const handSize = (): Formula => ({ handSize: true });
 export const handCount = (keyword: Keyword): Formula => ({ handCount: keyword });
 export const heldTurns = (keyword: Keyword): Formula => ({ heldTurns: keyword });
 export const stacks = (status: { id: string } | string): Formula => ({ stacks: typeof status === 'string' ? status : status.id });
+export const targetStacks = (status: { id: string }): Formula => ({ targetStacks: status.id });
 export const manaSpent = (): Formula => ({ manaSpent: true });
 export const turn = (): Formula => ({ turn: true });
 /** The amount the enclosing ifConsume just spent. */
@@ -54,6 +57,7 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
     z.strictObject({ handCount: z.enum(['retain', 'ritual', 'exhaust']) }),
     z.strictObject({ heldTurns: z.enum(['retain', 'ritual', 'exhaust']) }),
     z.strictObject({ stacks: z.string().min(1) }),
+    z.strictObject({ targetStacks: z.string().min(1) }),
     z.strictObject({ manaSpent: z.literal(true) }),
     z.strictObject({ turn: z.literal(true) }),
     z.strictObject({ consumed: z.literal(true) }),
@@ -61,7 +65,7 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
   ]),
 );
 
-/** Reads owner stats, pooled resources, the hand, status stacks, Mana spent, the turn, party HP and the amount just consumed. */
+/** Reads owner stats, pooled resources, the hand, status stacks (the source's or the target's), Mana spent, the turn, party HP and the amount just consumed. */
 export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registry: Registry): number {
   if (typeof f === 'number') return f;
   if ('stat' in f) {
@@ -80,6 +84,7 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
     const statuses = party ? state.party.statuses : state.enemies.find((e) => e.id === ctx.source)?.statuses;
     return statuses?.find((s) => s.status === f.stacks)?.stacks ?? 0;
   }
+  if ('targetStacks' in f) return state.enemies.find((e) => e.id === ctx.target)?.statuses.find((s) => s.status === f.targetStacks)?.stacks ?? 0;
   if ('manaSpent' in f) return state.manaSpent;
   if ('turn' in f) return state.turn;
   if ('percent' in f) return shareOf(f, state.party);
@@ -107,6 +112,7 @@ export function formulaText(f: Formula): string {
   if ('handCount' in f) return `${titleCase(f.handCount)}s in hand`;
   if ('heldTurns' in f) return `turns your ${titleCase(f.heldTurns)}s have been held`;
   if ('stacks' in f) return titleCase(f.stacks.replace(/^status\./, ''));
+  if ('targetStacks' in f) return `its ${titleCase(f.targetStacks.replace(/^status\./, ''))}`;
   if ('manaSpent' in f) return 'the Mana spent this turn';
   if ('turn' in f) return 'the turn number';
   if ('percent' in f) return `${f.percent}% of the party's ${f.of === 'hp' ? 'current' : 'max'} HP`;

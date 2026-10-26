@@ -15,6 +15,8 @@ export interface OpContext {
   event?: EngineEvent;
   /** Inside an ifConsume branch: the amount just spent. */
   consumed?: number;
+  /** The card being played, if a card is resolving (not a trigger or an ultimate). */
+  card?: EntityId;
 }
 
 export interface OpResult {

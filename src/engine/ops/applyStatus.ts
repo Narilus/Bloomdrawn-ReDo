@@ -12,9 +12,10 @@ export interface ApplyStatusArgs extends OpCall {
   stacks: Formula;
   /**
    * `chosen`: the command's target (the party, for an enemy's intent). `self`: the source's side.
-   * `allEnemies`: every living enemy. Statuses on any party member land on the whole party.
+   * `allEnemies`: every living enemy. `eventTarget`: whoever the triggering event happened to (a
+   * passive's reaction). Statuses on any party member land on the whole party.
    */
-  target?: 'chosen' | 'self' | 'allEnemies';
+  target?: 'chosen' | 'self' | 'allEnemies' | 'eventTarget';
 }
 
 export const applyStatus = (
@@ -24,7 +25,10 @@ export const applyStatus = (
 ): ApplyStatusArgs => ({ op: 'applyStatus', status: status.id, stacks, target });
 
 function bearers(state: CombatState, args: ApplyStatusArgs, ctx: OpContext, registry: Registry): Bearer[] {
-  const ids = args.target === 'allEnemies' ? state.enemies.filter(isAlive).map((e) => e.id) : [args.target === 'self' ? ctx.source : ctx.target];
+  const ids =
+    args.target === 'allEnemies'
+      ? state.enemies.filter(isAlive).map((e) => e.id)
+      : [args.target === 'self' ? ctx.source : args.target === 'eventTarget' ? ctx.event?.target : ctx.target];
   return ids.flatMap((id) => bearerOf(state, id, registry) ?? []);
 }
 
@@ -33,7 +37,7 @@ export const applyStatusOp: Operation<ApplyStatusArgs> = {
     op: z.literal('applyStatus'),
     status: z.string().min(1),
     stacks: formulaSchema,
-    target: z.enum(['chosen', 'self', 'allEnemies']).optional(),
+    target: z.enum(['chosen', 'self', 'allEnemies', 'eventTarget']).optional(),
   }),
   validate: (state, args, ctx, registry) => (bearers(state, args, ctx, registry).length > 0 ? undefined : 'No one can bear this status.'),
   resolve(draft, args, ctx, registry) {

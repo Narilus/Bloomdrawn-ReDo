@@ -37,6 +37,12 @@ export function pipeline(
   return Math.max(0, amount);
 }
 
+/** How many times each volley fires: once, plus any `volleys` modifiers on the source's side (Dance of Bells). */
+export function volleyPasses(state: CombatState, ctx: OpContext, registry: Registry): number {
+  const extra = modifiersOf(state, registry, ctx.source).filter((m) => m.value === 'volleys');
+  return 1 + Math.max(0, Math.floor(extra.reduce((n, m) => n + evaluate(m.amount, state, ctx, registry), 0)));
+}
+
 /**
  * Modifiers that belong to an entity's side. A party member: her passive, the party's statuses and
  * every relic. The whole party: every member's passive, its statuses and every relic. An enemy: its

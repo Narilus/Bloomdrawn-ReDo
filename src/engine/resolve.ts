@@ -1,5 +1,6 @@
 import type { OpCall, Registry, TriggerDef } from './defs.ts';
 import type { EngineEvent } from './events.ts';
+import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { getOp } from './ops/index.ts';
 import { isAlive, MAX_CHAIN_DEPTH, PARTY, vitalsOf, type CombatState, type EntityId, type Vitals } from './state.ts';
@@ -131,7 +132,7 @@ function matchingTriggers(state: CombatState, registry: Registry, event: EngineE
       ? [source, ...holders.filter((h) => h !== source)]
       : holders;
   return [...ordered.flatMap((holder) => triggersOf(state, registry, holder)), ...domainTriggers(state, registry)].filter(
-    ({ holder, trigger }) => trigger.on === event.type && filterMatches(trigger, event, holder, origin),
+    ({ holder, trigger }) => trigger.on === event.type && filterMatches(state, registry, trigger, event, holder, origin),
   );
 }
 
@@ -166,13 +167,17 @@ function triggersOf(state: CombatState, registry: Registry, holder: EntityId): H
   );
 }
 
-function filterMatches(trigger: TriggerDef, event: EngineEvent, holder: EntityId, origin: Origin): boolean {
+function filterMatches(state: CombatState, registry: Registry, trigger: TriggerDef, event: EngineEvent, holder: EntityId, origin: Origin): boolean {
   const f = trigger.filter;
   if (!f) return true;
   if (f.direct && origin.depth > 0) return false;
+  if (f.fromCard && event.card === undefined) return false;
   if (f.slots && (event.slot === undefined || !f.slots.includes(event.slot))) return false;
+  if (f.keyword && !hasKeyword(registry.cards[event.def ?? '']?.keywords, f.keyword)) return false;
   if (f.source === 'self' && event.source !== holder) return false;
   if (f.source === 'other' && event.source === holder) return false;
+  if (f.source === 'party' && event.source !== PARTY && !state.members.some((m) => m.id === event.source)) return false;
+  if (f.status !== undefined && event.status !== f.status) return false;
   if (f.target === 'self' && event.target !== holder) return false;
   if (f.resource !== undefined && event.resource !== f.resource) return false;
   return true;

@@ -167,6 +167,7 @@ describe('vitals', () => {
     if (!result.ok) throw new Error(result.reason);
     const hits = result.events.flatMap((e, i) => (e.type === 'cardPlayed' ? [] : [[e.type, e.target, result.vitals[i]!.enemies.map((v) => v.hp)]]));
     expect(hits).toEqual([
+      ['volleyFired', undefined, [5, 5]],
       ['damageDealt', 'e20', [0, 5]],
       ['damageTaken', 'e20', [0, 5]],
       ['enemyDefeated', 'e20', [0, 5]],

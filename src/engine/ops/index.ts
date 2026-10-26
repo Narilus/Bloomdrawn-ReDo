@@ -18,6 +18,7 @@ import { reduceStacksOp } from './reduceStacks.ts';
 import { transcendOp } from './transcend.ts';
 import { createCardOp } from './createCard.ts';
 import { summonOp } from './summon.ts';
+import { repeatOp } from './repeat.ts';
 import { repeatNextOp } from './repeatNext.ts';
 import { volleyOp } from './volley.ts';
 import { whenOp } from './when.ts';
@@ -37,6 +38,7 @@ export const library: Readonly<Record<string, Operation>> = {
   chargeUltimate: chargeUltimateOp,
   volley: volleyOp,
   changeCost: changeCostOp,
+  repeat: repeatOp,
   repeatNext: repeatNextOp,
   heal: healOp,
   when: whenOp,
@@ -63,6 +65,7 @@ export { chargeUltimate } from './chargeUltimate.ts';
 export { gainMana } from './gainMana.ts';
 export { loseHp } from './loseHp.ts';
 export { manaDebt } from './manaDebt.ts';
+export { repeat } from './repeat.ts';
 export { repeatNext } from './repeatNext.ts';
 export { volley } from './volley.ts';
 export { heal } from './heal.ts';

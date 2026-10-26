@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { OpCall, Registry } from '../defs.ts';
 import type { EngineEvent } from '../events.ts';
 import { evaluate, formulaSchema, type Formula } from '../formula.ts';
-import { pipeline } from '../modifiers.ts';
+import { pipeline, volleyPasses } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
 import { fall } from '../phases.ts';
 import { isAlive, vitalsOf, type CombatState, type Enemy, type Vitals } from '../state.ts';
@@ -13,7 +13,10 @@ export interface VolleyArgs extends OpCall {
   damage: Formula;
 }
 
-/** `hits` hits of `damage` each. Every hit takes the lowest-HP enemy, and excess carries to the next. */
+/**
+ * `hits` hits of `damage` each. Every hit takes the lowest-HP enemy, and excess carries to the next.
+ * With extra passes (Dance of Bells), the volley fires again, each pass choosing from the HP the last left.
+ */
 export const volley = (hits: Formula, damage: Formula): VolleyArgs => ({ op: 'volley', hits, damage });
 
 /** Lowest HP first; ties go to the earlier slot. A rousing enemy can't be hurt, so hits pass it by. */
@@ -29,7 +32,14 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
     vitals.push(...landed.map(() => vitalsOf(draft)));
   };
   const hits = Math.max(0, Math.floor(evaluate(args.hits, draft, ctx, registry)));
-  for (let i = 0; i < hits; i++) {
+  // A volley with no hits, or nothing to hit, does nothing at all.
+  if (hits === 0 || !lowest(draft)) return { events, vitals };
+  const fired: EngineEvent = { type: 'volleyFired', source: ctx.source };
+  if (ctx.owner !== undefined) fired.owner = ctx.owner;
+  if (ctx.card !== undefined) fired.card = ctx.card;
+  push(fired);
+  const passes = volleyPasses(draft, ctx, registry);
+  for (let i = 0; i < hits * passes; i++) {
     let target = lowest(draft);
     if (!target) break;
     let remaining = pipeline('damage', args.damage, draft, ctx, registry, target.id);

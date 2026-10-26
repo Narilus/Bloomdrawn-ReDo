@@ -32,6 +32,7 @@ handDrawn
   cleanup
   turnEnd
   resourceGained src=m2 essence amt=0
+  volleyFired src=m0
   damageDealt src=m0 tgt=e20 amt=3
   damageTaken src=m0 tgt=e20 amt=3
   statusTick tgt=e20
@@ -75,6 +76,7 @@ handDrawn
   cleanup
   turnEnd
   resourceGained src=m2 essence amt=1
+  volleyFired src=m0
   damageDealt src=m0 tgt=e20 amt=3
   damageTaken src=m0 tgt=e20 amt=3
   damageDealt src=m0 tgt=e20 amt=3
@@ -133,6 +135,7 @@ handDrawn
 > playCard agathe.censer-rite
   cardPlayed src=m0 card=c4
   resourceGained src=m0 potency amt=2
+  volleyFired src=m0 card=c4
   damageDealt src=m0 tgt=e20 amt=5
   damageTaken src=m0 tgt=e20 amt=5
   damageDealt src=m0 tgt=e20 amt=5
@@ -145,6 +148,7 @@ handDrawn
   cleanup
   turnEnd
   resourceGained src=m2 essence amt=0
+  volleyFired src=m0
   damageDealt src=m0 tgt=e20 amt=5
   damageTaken src=m0 tgt=e20 amt=5
   damageDealt src=m0 tgt=e20 amt=5
@@ -189,6 +193,7 @@ handDrawn
   cleanup
   turnEnd
   resourceGained src=m2 essence amt=0
+  volleyFired src=m0
   damageDealt src=m0 tgt=e20 amt=6
   damageTaken src=m0 tgt=e20 amt=6
   damageDealt src=m0 tgt=e20 amt=6
