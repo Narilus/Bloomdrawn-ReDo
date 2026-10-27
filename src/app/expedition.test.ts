@@ -404,9 +404,10 @@ describe('banking', () => {
   });
 
   it('banking adds the pulls to the profile and counts the run', () => {
+    // A new profile starts with 10.
     const once = bank(NEW_PROFILE, banked(play([BOSS], 'victory')));
-    expect(once).toEqual({ pulls: 5, runs: 1, owned: [] });
-    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ pulls: 5, runs: 2, owned: [] });
+    expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [] });
+    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ pulls: 10 + 5, runs: 2, owned: [] });
   });
 });
 

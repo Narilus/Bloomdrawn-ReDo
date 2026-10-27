@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { registry } from '../content/registry.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { startCombat } from '../engine/index.ts';
+import { STANDARD_BANNER } from '../content/banners.ts';
 import { M3_EXPEDITION, startExpedition } from '../game/expedition.ts';
 import { lossBanking } from '../game/profile.ts';
 import { memoryAdapter } from '../save/adapters.ts';
@@ -13,6 +14,7 @@ import { createSaves, RUN_SAVE } from './saves.ts';
 // Save and resume (docs/notes/m4-run.md): the profile and the run in storage. Here because the
 // run save checks its content against the real registry.
 
+// A new profile starts with 10 Purified Blooms (owner, 25 Oct), so banked pulls read 10 + what was banked.
 const PARTY = ['agathe', 'maelia', 'anthe', 'leonora'];
 const run = (id = 'run-1', seed = 4): RunSave => ({ id, seed, exp: startExpedition(seed, PARTY, M3_EXPEDITION, registry.motifs) });
 function setup() {
@@ -23,7 +25,7 @@ const profileOf = async (store: ReturnType<typeof setup>['store']) => (await sto
 
 describe('saves', () => {
   it('a fresh browser has a new profile and no run to continue', async () => {
-    expect(await setup().saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 0, runs: 0, owned: [] }, run: null });
+    expect(await setup().saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10, runs: 0, owned: [] }, run: null });
   });
 
   it('a started run is continued exactly as last saved, fight included', async () => {
@@ -51,18 +53,34 @@ describe('saves', () => {
     const { saves, store } = setup();
     const teams = [{ name: 'Bleeders', members: ['leonora', 'anthe', 'maelia', 'agathe'] }, { name: 'Team 2', members: ['anthe', null, null, null] }];
     await saves.teams(teams, 1);
-    expect(await saves.profile()).toEqual({ pulls: 0, runs: 0, owned: [], teams, team: 1 });
+    expect(await saves.profile()).toEqual({ pulls: 10, runs: 0, owned: [], teams, team: 1 });
     await saves.start(run());
     await saves.end({ pulls: 2, lines: [] });
-    expect(await profileOf(store)).toEqual({ pulls: 2, runs: 1, owned: [], teams, team: 1 });
+    expect(await profileOf(store)).toEqual({ pulls: 10 + 2, runs: 1, owned: [], teams, team: 1 });
+  });
+
+  it('pulling mid-run keeps the profile it leaves, and the run, its save and its tally stay as they were', async () => {
+    const { saves, store } = setup();
+    const save = run();
+    await saves.start(save);
+    await saves.save({ ...save, exp: { ...save.exp, elites: 1 } });
+    const before = await store.read(RUN_SAVE);
+    const result = await saves.pull(STANDARD_BANNER, 10, 7);
+    if (!result.ok) throw new Error(result.reason);
+    expect(await profileOf(store)).toEqual(result.profile);
+    expect(result.profile).toMatchObject({ pulls: 0, run: { id: 'run-1', elites: 1 } });
+    expect(await store.read(RUN_SAVE)).toEqual(before);
+    // With no Blooms left, a pull is refused and nothing is written.
+    expect(await saves.pull(STANDARD_BANNER, 1, 7)).toMatchObject({ ok: false });
+    expect(await profileOf(store)).toEqual(result.profile);
   });
 
   it('a run that ends banks into the profile and leaves nothing to continue', async () => {
     const { saves, store } = setup();
     await saves.start(run());
-    expect(await saves.end({ pulls: 5, lines: [] })).toEqual({ pulls: 5, runs: 1, owned: [] });
+    expect(await saves.end({ pulls: 5, lines: [] })).toEqual({ pulls: 10 + 5, runs: 1, owned: [] });
     expect(await store.read(RUN_SAVE)).toBeNull();
-    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 5, runs: 1, owned: [] }, run: null });
+    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 5, runs: 1, owned: [] }, run: null });
   });
 
   it("an unreadable run ends as abandoned and banks its share from the profile's tally, once", async () => {
@@ -74,12 +92,12 @@ describe('saves', () => {
     adapter.data.set('run:previous', 'not json');
     const boot = await saves.boot(M3_EXPEDITION);
     expect(boot).toEqual({
-      profile: { pulls: 2, runs: 1, owned: [] },
+      profile: { pulls: 10 + 2, runs: 1, owned: [] },
       run: null,
       ended: { reason: 'The save is not valid JSON.', banked: lossBanking(2, M3_EXPEDITION) },
     });
     expect(adapter.data.has('run:current')).toBe(false);
-    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 2, runs: 1, owned: [] }, run: null });
+    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 2, runs: 1, owned: [] }, run: null });
   });
 
   it('a run naming content the game no longer has, or saved with other content, ends as abandoned', async () => {
@@ -100,7 +118,7 @@ describe('saves', () => {
   it('a run save the profile no longer tracks was already banked, and is dropped without banking again', async () => {
     const { saves, store } = setup();
     await store.write(RUN_SAVE, run());
-    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 0, runs: 0, owned: [] }, run: null });
+    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10, runs: 0, owned: [] }, run: null });
     expect(await store.read(RUN_SAVE)).toBeNull();
   });
 
@@ -128,7 +146,7 @@ describe('saves', () => {
 
     const to = setup();
     await to.saves.importFile(file);
-    expect(await to.saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 3, runs: 1, owned: [], run: { id: 'run-2', elites: 0 } }, run: save });
+    expect(await to.saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 3, runs: 1, owned: [], run: { id: 'run-2', elites: 0 } }, run: save });
   });
 
   it('a file that fails validation changes nothing', async () => {

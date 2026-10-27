@@ -1,8 +1,9 @@
 import { reached } from './bloom.ts';
 import type { Expedition, ExpeditionDef } from './expedition.ts';
+import type { Gacha } from './gacha.ts';
 
 // The player's profile, kept across runs (docs/notes/m4-run.md, "Banking"; m5-collection.md): banked
-// pulls (Purified Blooms on screen), a run count and the characters gained. Pure, like the run.
+// pulls (Purified Blooms on screen), a run count, the characters gained, items and the gacha. Pure, like the run.
 
 export interface Profile {
   pulls: number;
@@ -10,6 +11,12 @@ export interface Profile {
   runs: number;
   /** Characters gained, in the order they came. Every profile also owns the starters, which aren't listed. */
   owned: string[];
+  /** Dupe levels (C1–C5) by character; a character gained once has none. */
+  dupes?: Record<string, number>;
+  /** Items banked, by ID: Pollen, Ducats (`money`), Memories and ascension materials. Absent is none. */
+  items?: Record<string, number>;
+  /** The gacha's stream, pity and audit history, from the first pull. */
+  gacha?: Gacha;
   /** Saved team presets, each a party front first. A profile that has never saved one has the defaults (`teamsOf`). */
   teams?: Team[];
   /** The preset party select opens on: the one the player last chose. */
@@ -26,7 +33,8 @@ export interface ActiveRun {
   elites: number;
 }
 
-export const NEW_PROFILE: Profile = { pulls: 0, runs: 0, owned: [] };
+/** A new profile starts with 10 Purified Blooms (owner, 25 Oct). */
+export const NEW_PROFILE: Profile = { pulls: 10, runs: 0, owned: [] };
 
 export const PARTY_SIZE = 4;
 /** Presets every profile has (owner, 26 Oct: 5 to start; more bought with Ducats later). */

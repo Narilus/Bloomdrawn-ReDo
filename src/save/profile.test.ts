@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import type { BannerDef } from '../engine/index.ts';
+import { pull } from '../game/gacha.ts';
 import { bank, NEW_PROFILE } from '../game/profile.ts';
 import { memoryAdapter } from './adapters.ts';
 import { profileSave } from './profile.ts';
 import { createSaveStore } from './store.ts';
+
+const BANNER: BannerDef = { id: 'banner.test', name: 'Test', pity: 'test', ssr: ['virelle', 'kibane'], sr: { one: ['material.flesh'], amount: 1 }, r: { money: 100 } };
 
 describe('the profile save', () => {
   it('survives a reload: a new store on the same storage reads back what was banked', async () => {
@@ -10,7 +14,8 @@ describe('the profile save', () => {
     const before = createSaveStore(adapter, 1);
     await before.write(profileSave, bank(bank(NEW_PROFILE, { pulls: 5, lines: [] }), { pulls: 2, lines: [] }));
     const after = createSaveStore(adapter, 1);
-    expect(await after.read(profileSave)).toMatchObject({ data: { pulls: 7, runs: 2 }, source: 'current' });
+    // A new profile starts with 10 (owner, 25 Oct).
+    expect(await after.read(profileSave)).toMatchObject({ data: { pulls: 10 + 7, runs: 2 }, source: 'current' });
   });
 
   it('never writes or reads a malformed profile', async () => {
@@ -46,6 +51,32 @@ describe('the profile save', () => {
     ] });
     adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 3, contentVersion: 1, data: { pulls: 1, runs: 0, owned: [] } }));
     expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual({ pulls: 1, runs: 0, owned: [] });
+  });
+
+  it('a v4 profile (M5.2) reads unchanged, with no dupes, items or pulls made', async () => {
+    const adapter = memoryAdapter();
+    const data = { pulls: 31, runs: 6, owned: [], team: 0, teams: [{ name: 'Mine', members: ['leonora', 'anthe', 'maelia', 'agathe'] }] };
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 4, contentVersion: 1, data }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data, savedSchemaVersion: 4 });
+  });
+
+  it('keeps the gacha: its stream, pity, history, dupes and items read back as pulled', async () => {
+    const result = pull({ ...NEW_PROFILE, pulls: 40, owned: ['virelle'], dupes: { virelle: 2 } }, BANNER, 10, 3);
+    if (!result.ok) throw new Error(result.reason);
+    const adapter = memoryAdapter();
+    await createSaveStore(adapter, 1).write(profileSave, result.profile);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(result.profile);
+  });
+
+  it('never writes a malformed pull history or negative items', async () => {
+    const saves = createSaveStore(memoryAdapter(), 1);
+    const result = pull({ ...NEW_PROFILE }, BANNER, 1, 3);
+    if (!result.ok) throw new Error(result.reason);
+    const { gacha } = result.profile;
+    await expect(saves.write(profileSave, { ...result.profile, items: { pollen: -1 } })).rejects.toThrow();
+    await expect(saves.write(profileSave, { ...result.profile, dupes: { virelle: 0 } })).rejects.toThrow();
+    await expect(saves.write(profileSave, { ...result.profile, gacha: { ...gacha!, history: [{ ...gacha!.history[0]!, rarity: 'ur' as 'r' }] } })).rejects.toThrow();
+    await expect(saves.write(profileSave, { ...result.profile, gacha: { ...gacha!, history: [{ ...gacha!.history[0]!, pityAfter: -1 }] } })).rejects.toThrow();
   });
 
   it('never writes presets with the wrong number of places, a blank name, or a chosen team that is not one of them', async () => {

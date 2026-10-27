@@ -214,6 +214,23 @@ export type EventOutcome =
   /** Extra Bloom clock ticks, on top of the Event's own. */
   | { do: 'tick'; count: number };
 
+/**
+ * A gacha banner (docs/DESIGN.md, "Gacha"). The profile's gacha pulls on it (src/game/gacha.ts); the
+ * engine never reads it.
+ */
+export interface BannerDef {
+  id: string;
+  name: string;
+  /** Banners in one family share a pity counter (DESIGN.md: Featured and Standard track separately). */
+  pity: string;
+  /** The SSR characters, each as likely. */
+  ssr: string[];
+  /** An SR gives `amount` of one item drawn from `one` (ascension materials until weapons). */
+  sr: { one: string[]; amount: number };
+  /** What an R gives, by item (Memories and Ducats until weapons). */
+  r: Record<string, number>;
+}
+
 export interface StatusDef extends Hooks {
   id: string;
   stacking: 'add' | 'refresh' | 'highest';

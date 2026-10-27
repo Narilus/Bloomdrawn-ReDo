@@ -2,6 +2,8 @@ import { registry } from '../content/registry.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { missingContent } from '../game/check.ts';
 import type { ExpeditionDef } from '../game/expedition.ts';
+import type { BannerDef } from '../engine/index.ts';
+import { pull } from '../game/gacha.ts';
 import { bank, lossBanking, NEW_PROFILE, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
@@ -116,6 +118,17 @@ export function createSaves(adapter: SaveAdapter) {
     teams: (teams: Team[], team: number) =>
       enqueue(async () => {
         await store.write(profileSave, { ...(await readProfile()), teams, team });
+      }),
+
+    /**
+     * Pulls on a banner and keeps the profile it leaves; a refused pull writes nothing. The run in
+     * progress and its save are never touched (DESIGN.md: gacha randomness never touches a run's).
+     */
+    pull: (banner: BannerDef, count: 1 | 10, seed: number) =>
+      enqueue(async () => {
+        const result = pull(await readProfile(), banner, count, seed);
+        if (result.ok) await store.write(profileSave, result.profile);
+        return result;
       }),
 
     /** The profile as saved, after any writes in flight. */
