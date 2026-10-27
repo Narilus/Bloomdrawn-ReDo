@@ -17,14 +17,14 @@ Status: **answered by the owner, 24 Oct** (his answers are folded in below; the 
 | Owner | Card (cost) | Effect |
 |---|---|---|
 | Maelia | **Nursing Bud** (1) | Gain 2 Embryo. Charge Maelia's ultimate by 10. |
-| Maelia | **Pollen Drift** (2) | Apply 3 Poison to all enemies. Consume 2 Embryo: apply 3 more. |
+| Maelia | **Pollen Drift** (2) | Apply 12 Poison to all enemies. Consume 2 Embryo: apply 12 more (was 3 and 3; Flesh's Poison ×4, 27 Oct). |
 | Agathe | **Hymnal Procession** (2) | Gain 3 Tentacles. |
 | Agathe | **Thurible Swing** (1) | Deal 4 + Attack damage. If you have 4 or more Tentacles, trigger a volley. |
 | Anthe | **Ash Offering** (1) | Gain 2 Essence. |
 | Anthe | **Long Vigil** (6, Ritual) | Deal 10 + 6 × Essence damage to all enemies (was 3 ×; doubled after the M5.2 lab, 27 Oct). |
 | Leonora | **Ledger Balance** (1) | Draw 1 card. The next card you play costs 1 less. |
 | Leonora | **Writ of Seizure** (2) | Apply 2 Weak and 2 Vulnerable to an enemy. |
-| A Flesh member | **Grafting Knife** (1) | Deal 4 + Attack damage. Apply 3 Bleed. |
+| A Flesh member | **Grafting Knife** (1) | Deal 4 + Attack damage. Apply 9 Bleed (was 3; Flesh's Bleed ×3, 27 Oct). |
 | A Rapture member | **Chalk Circle** (1) | Gain 1 Tentacle. Gain 4 + Defense Shield. |
 | A Spirit member | **Quiet Prayer** (4, Ritual) | Gain 8 + 2 × Essence Shield. |
 | Any member | **Pocket Watch** (1) | Draw 2 cards. |

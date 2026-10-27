@@ -1,15 +1,15 @@
 2,0 fight encounter.two-hounds: victory on turn 3 | HP 186, clock 1, 20 Obols
   +20 Obols, took leonora.ledger-balance for leonora | HP 186, clock 1, 20 Obols
-5,0 elite encounter.hound-mother: victory on turn 9 | HP 139, clock 2, 65 Obols
-  +45 Obols, took relic.choir-bell | HP 139, clock 2, 65 Obols
-4,1 event.kneeling-gardener: choice 1 | HP 170, clock 3, 65 Obols
-  {"event":"event.kneeling-gardener","ticks":1,"hp":31} | HP 170, clock 3, 65 Obols
-9,-2 symptom: took symptom.pollen-lung | HP 170, clock 3, 65 Obols
-11,-3 shop: bought relic.blooming-coin | HP 170, clock 3, 35 Obols
-10,1 fight encounter.roots-and-smoke: victory on turn 3 | HP 164, clock 4, 57 Obols
-  +22 Obols, took unbound.pocket-watch for leonora | HP 164, clock 4, 57 Obols
-14,2 event.seed-vault: choice 1 | HP 164, clock 5, 17 Obols
-  {"event":"event.seed-vault","ticks":1,"obols":-40,"relic":"relic.midwifes-shears"} | HP 164, clock 5, 17 Obols
+5,0 elite encounter.hound-mother: victory on turn 10 | HP 140, clock 2, 65 Obols
+  +45 Obols, took relic.choir-bell | HP 140, clock 2, 65 Obols
+4,1 event.kneeling-gardener: choice 1 | HP 171, clock 3, 65 Obols
+  {"event":"event.kneeling-gardener","ticks":1,"hp":31} | HP 171, clock 3, 65 Obols
+9,-2 symptom: took symptom.pollen-lung | HP 171, clock 3, 65 Obols
+11,-3 shop: bought relic.blooming-coin | HP 171, clock 3, 35 Obols
+10,1 fight encounter.roots-and-smoke: victory on turn 2 | HP 165, clock 4, 57 Obols
+  +22 Obols, took unbound.pocket-watch for leonora | HP 165, clock 4, 57 Obols
+14,2 event.seed-vault: choice 1 | HP 165, clock 5, 17 Obols
+  {"event":"event.seed-vault","ticks":1,"obols":-40,"relic":"relic.midwifes-shears"} | HP 165, clock 5, 17 Obols
 14,3 camp: rested | HP 210, clock 6, 17 Obols
 12,5 fight encounter.pods-and-lantern: victory on turn 4 | HP 192, clock 7, 41 Obols
   +24 Obols, took anthe.long-vigil for anthe | HP 192, clock 7, 41 Obols
@@ -26,9 +26,9 @@
   {"event":"event.survey-pack","ticks":1,"obols":30} | HP 182, clock 12, 86 Obols
 8,8 camp: rested | HP 210, clock 13, 86 Obols
 8,6 bloom node: fight | HP 210, clock 13, 86 Obols
-8,6 bloom encounter.pods-and-lantern: victory on turn 5 | HP 188, clock 13, 116 Obols
-  +30 Obols, took agathe.hymnal-procession for agathe | HP 188, clock 13, 116 Obols
-14,4 boss encounter.hollow-abbess: victory on turn 9 | HP 102, clock 13, 116 Obols
-run won: HP 102, clock 13, 116 Obols
+8,6 bloom encounter.pods-and-lantern: victory on turn 5 | HP 191, clock 13, 116 Obols
+  +30 Obols, took agathe.hymnal-procession for agathe | HP 191, clock 13, 116 Obols
+14,4 boss encounter.hollow-abbess: victory on turn 8 | HP 117, clock 13, 116 Obols
+run won: HP 117, clock 13, 116 Obols
   relics relic.choir-bell, relic.blooming-coin, relic.midwifes-shears, relic.vigil-wax, relic.brass-thimble
   deck leonora.ledger-balance (leonora), symptom.pollen-lung, unbound.pocket-watch (leonora), anthe.long-vigil (anthe), maelia.pollen-drift (maelia), symptom.pollen-lung, leonora.writ-of-seizure (leonora), agathe.hymnal-procession (agathe)

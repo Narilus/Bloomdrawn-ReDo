@@ -14,19 +14,19 @@ describe('Maelia', () => {
     expect: { resources: { embryo: 3 }, gauges: { maelia: 10, agathe: 0 }, mana: 5 },
   });
 
-  scenario('Pollen Drift Poisons every enemy by 3, without Embryo to consume', {
+  scenario('Pollen Drift Poisons every enemy by 12, without Embryo to consume', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['maelia.pollen-drift'] },
     play: [{ card: 'maelia.pollen-drift' }],
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 3'], ['status.poison 3']]),
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 12'], ['status.poison 12']]),
   });
 
-  scenario('Pollen Drift consumes 2 Embryo to Poison every enemy by 3 more', {
+  scenario('Pollen Drift consumes 2 Embryo to Poison every enemy by 12 more', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['maelia.pollen-drift'], resources: { embryo: 3 } },
     play: [{ card: 'maelia.pollen-drift' }],
     expect: { resources: { embryo: 1 } },
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 6'], ['status.poison 6']]),
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 24'], ['status.poison 24']]),
   });
 });
 
@@ -84,12 +84,12 @@ describe('Leonora', () => {
 });
 
 describe("the Domains' generic cards, played by the member they went to", () => {
-  scenario("Grafting Knife deals 4 + its owner's Attack and applies 3 Bleed", {
+  scenario("Grafting Knife deals 4 + its owner's Attack and applies 9 Bleed", {
     setup: { hand: [{ card: 'flesh.grafting-knife', owner: 'agathe' }] },
     play: [{ card: 'flesh.grafting-knife', target: 0 }],
     // Agathe's Attack is 4, so 8 (Maelia's 3 would make 7).
     expect: { enemyHp: [60 - 8] },
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.bleed 3']]),
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.bleed 9']]),
   });
 
   scenario("Chalk Circle gains 1 Tentacle and 4 + its owner's Defense Shield", {

@@ -9,14 +9,28 @@ import { runScenario, scenario, STARTER_PARTY } from '../testing/scenario.ts';
 const DUMMY = 'enemy.training-dummy';
 
 describe('Maelia', () => {
+  scenario('Strike consumes 1 Embryo to apply 4 Poison', {
+    setup: { hand: ['maelia.strike'], resources: { embryo: 2 } },
+    play: [{ card: 'maelia.strike', target: 0 }],
+    expect: { enemyHp: [60 - 9], resources: { embryo: 1 }, mana: 5 },
+    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 4 }]),
+  });
+
+  scenario('Strike without Embryo deals its damage and Poisons nothing', {
+    setup: { hand: ['maelia.strike'] },
+    play: [{ card: 'maelia.strike', target: 0 }],
+    expect: { enemyHp: [60 - 9], resources: { embryo: 0 } },
+    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([]),
+  });
+
   scenario("Swollen Pod gains 3 Embryo, 1 more from Midwife's Hands, and Poisons every enemy", {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['maelia.swollen-pod'] },
     play: [{ card: 'maelia.swollen-pod' }],
     expect: { resources: { embryo: 4 }, mana: 4 },
     check: ({ state }) => expect(state.enemies.map((e) => e.statuses)).toEqual([
-      [{ status: 'status.poison', stacks: 2 }],
-      [{ status: 'status.poison', stacks: 2 }],
+      [{ status: 'status.poison', stacks: 8 }],
+      [{ status: 'status.poison', stacks: 8 }],
     ]),
   });
 
@@ -36,7 +50,7 @@ describe('Maelia', () => {
     setup: { hand: ['maelia.bud-cutting', 'maelia.swollen-pod'], resources: { embryo: 1 } },
     play: [{ card: 'maelia.bud-cutting' }, { card: 'maelia.swollen-pod' }],
     expect: { resources: { embryo: 1 + 4 + 3 }, gauges: { maelia: 0, agathe: 0, anthe: 0, leonora: 0 } },
-    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 4 }]),
+    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 16 }]),
   });
 
   scenario('Birthing Bloom consumes all Embryo: heal 3 and Shield 4 per Embryo, preview equal to result', {

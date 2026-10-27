@@ -40,13 +40,64 @@ describe('Strikes and Defenses', () => {
 });
 
 describe('Virelle', () => {
-  scenario('Suture Cut deals 3 + Attack and applies 3 Bleed; Opened Vein gains 1 Embryo', {
+  scenario('Strike chains while Embryo lasts: each costs 1 Embryo for 6 Bleed and a free Fleeting copy, 10% more per Strike before it', {
+    party: BANNER,
+    setup: { hand: ['virelle.strike'], resources: { embryo: 2 } },
+    play: [
+      { card: 'virelle.strike', target: 0 },
+      { card: 'virelle.strike', target: 0 },
+      { card: 'virelle.strike', target: 0 },
+      { card: 'virelle.strike', target: 0 },
+    ],
+    // 12, then 12 × 1.1, × 1.2 and × 1.3, rounded down. Opened Vein gives back the first Embryo, so three
+    // copies come; the last one finds no Embryo and makes none. Only the first Strike costs Mana, and every
+    // one charges her ultimate.
+    expect: { enemyHp: [60 - 12 - 13 - 14 - 15], resources: { embryo: 0 }, mana: 5, gauges: { virelle: 40 } },
+    check: ({ state, plays }) => {
+      expect(marks(state)).toEqual([[['bleed', 18]]]);
+      expect(state.piles.hand).toEqual([]);
+      expect(state.piles.graveyard.map((c) => c.card)).toEqual(['virelle.strike', 'virelle.strike', 'virelle.strike']);
+      expect(state.piles.discard.map((c) => c.card)).toEqual(['virelle.strike']);
+      plays.forEach(previewMatchesResult);
+    },
+  });
+
+  scenario("Strike counts any member's Strikes played before it this turn", {
+    party: BANNER,
+    setup: { hand: ['hester.strike', 'kibane.strike', 'virelle.strike'] },
+    play: [{ card: 'hester.strike', target: 0 }, { card: 'kibane.strike', target: 0 }, { card: 'virelle.strike', target: 0 }],
+    expect: { enemyHp: [60 - 10 - 11 - 14] },
+  });
+
+  scenario('Strike without Embryo deals its damage and makes no copy', {
+    party: BANNER,
+    setup: { hand: ['virelle.strike'] },
+    play: [{ card: 'virelle.strike', target: 0 }],
+    expect: { enemyHp: [60 - 12], resources: { embryo: 0 }, mana: 5 },
+    check: ({ state }) => {
+      expect(marks(state)).toEqual([[]]);
+      expect(state.piles.hand).toEqual([]);
+    },
+  });
+
+  scenario('An unplayed Strike copy goes to the Graveyard at the end of the turn', {
+    party: BANNER,
+    enemies: [BIG],
+    setup: { hand: ['virelle.strike'], resources: { embryo: 1 } },
+    play: [{ card: 'virelle.strike', target: 0 }, { endTurn: true }],
+    check: ({ state }) => {
+      expect(state.piles.graveyard.map((c) => c.card)).toEqual(['virelle.strike']);
+      expect(state.piles.hand.filter((c) => c.cost === 0)).toEqual([]);
+    },
+  });
+
+  scenario('Suture Cut deals 3 + Attack and applies 9 Bleed; Opened Vein gains 1 Embryo', {
     party: BANNER,
     setup: { hand: ['virelle.suture-cut'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }],
     expect: { enemyHp: [60 - 9], resources: { embryo: 1 }, mana: 4 },
     check: ({ state, plays }) => {
-      expect(marks(state)).toEqual([[['bleed', 3]]]);
+      expect(marks(state)).toEqual([[['bleed', 9]]]);
       previewMatchesResult(plays[0] as ScenarioPlay);
     },
   });
@@ -57,7 +108,7 @@ describe('Virelle', () => {
     setup: { hand: ['virelle.suture-cut', 'virelle.bloodletting'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.bloodletting', target: 0 }],
     expect: { resources: { embryo: 1 } },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 7]]]),
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 9 + 12]]]),
   });
 
   scenario("Opened Vein counts any member's Bleed, Grafting Knife's too", {
@@ -71,10 +122,10 @@ describe('Virelle', () => {
     party: BANNER,
     setup: { hand: ['virelle.suture-cut', 'virelle.open-the-wound'], resources: { embryo: 2 } },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.open-the-wound', target: 0 }],
-    // Suture Cut 9, Open the Wound 10, then 2 × 3 Bleed.
-    expect: { enemyHp: [60 - 9 - 10 - 6], resources: { embryo: 2 + 1 - 2 }, mana: 2 },
+    // Suture Cut 9, Open the Wound 10, then 2 × 9 Bleed.
+    expect: { enemyHp: [60 - 9 - 10 - 18], resources: { embryo: 2 + 1 - 2 }, mana: 2 },
     check: ({ state, plays }) => {
-      expect(marks(state)).toEqual([[['bleed', 3]]]);
+      expect(marks(state)).toEqual([[['bleed', 9]]]);
       previewMatchesResult(plays[1] as ScenarioPlay);
     },
   });
@@ -86,14 +137,14 @@ describe('Virelle', () => {
     expect: { enemyHp: [60 - 10], resources: { embryo: 1 } },
   });
 
-  scenario('Thorn-Spur Bloom: 3 Bleed on every enemy, 2 Embryo and 1 from Opened Vein, and Transcend', {
+  scenario('Thorn-Spur Bloom: 9 Bleed on every enemy, 2 Embryo and 1 from Opened Vein, and Transcend', {
     party: BANNER,
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['virelle.thorn-spur-bloom'] },
     play: [{ card: 'virelle.thorn-spur-bloom' }],
     expect: { resources: { embryo: 3 }, gauges: { virelle: 35 }, mana: 3 },
     check: ({ state }) => {
-      expect(marks(state)).toEqual([[['bleed', 3]], [['bleed', 3]]]);
+      expect(marks(state)).toEqual([[['bleed', 9]], [['bleed', 9]]]);
       expect(transcended(state, 'virelle')).toBe(true);
       expect(state.piles.graveyard.map((c) => c.card)).toEqual(['virelle.thorn-spur-bloom']);
     },
@@ -118,15 +169,15 @@ describe('Virelle', () => {
     setup: { hand: ['virelle.thorn-spur-bloom'], gauges: { virelle: 65 } },
     play: [{ card: 'virelle.thorn-spur-bloom' }, { ultimate: 'virelle' }],
     expect: { enemyHp: [9999 - 7 * 9] },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 3 + 7]]]),
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 9 + 7]]]),
   });
 
-  scenario('Bloodletting applies 4 Bleed', {
+  scenario('Bloodletting applies 12 Bleed', {
     party: BANNER,
     setup: { hand: ['virelle.bloodletting'] },
     play: [{ card: 'virelle.bloodletting', target: 0 }],
     expect: { mana: 5, resources: { embryo: 1 } },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 4]]]),
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 12]]]),
   });
 
   scenario('Thorn Spur deals 3 + Attack twice', {

@@ -19,10 +19,12 @@ import { card, character } from '../define.ts';
 import { poison } from '../statuses/poison.ts';
 
 // Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning.
+// Flesh tuning (owner, 27 Oct): her Strike spends Embryo on Poison, and Poison stacks are four times their first numbers.
 
 export const strike = card({
   id: 'maelia.strike', name: 'Strike', owner: 'maelia', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(add(6, stat('attack'))), ifConsume('embryo', 1, [applyStatus(poison, 4)])],
+  text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} Poison.',
 });
 
 export const defense = card({
@@ -32,7 +34,7 @@ export const defense = card({
 
 export const swollenPod = card({
   id: 'maelia.swollen-pod', name: 'Swollen Pod', owner: 'maelia', slot: 'flavourA', cost: 2, target: 'allEnemies',
-  effects: [gainResource('embryo', 3), applyStatus(poison, 2, 'allEnemies')],
+  effects: [gainResource('embryo', 3), applyStatus(poison, 8, 'allEnemies')],
   text: 'Gain {effects.0.amount} Embryo. Apply {effects.1.stacks} Poison to all enemies.',
 });
 
@@ -64,7 +66,7 @@ export const nursingBud = card({
 
 export const pollenDrift = card({
   id: 'maelia.pollen-drift', name: 'Pollen Drift', owner: 'maelia', reward: true, cost: 2, target: 'allEnemies',
-  effects: [applyStatus(poison, 3, 'allEnemies'), ifConsume('embryo', 2, [applyStatus(poison, 3, 'allEnemies')])],
+  effects: [applyStatus(poison, 12, 'allEnemies'), ifConsume('embryo', 2, [applyStatus(poison, 12, 'allEnemies')])],
   text: 'Apply {effects.0.stacks} Poison to all enemies. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} more.',
 });
 

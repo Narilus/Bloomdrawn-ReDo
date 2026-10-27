@@ -15,5 +15,5 @@ export const flesh = domain({
 // The Domain's generic card reward (docs/notes/m4-run.md): any Flesh member may own it. Numbers are placeholders.
 export const graftingKnife = card({
   id: 'flesh.grafting-knife', name: 'Grafting Knife', domain: 'flesh', reward: true, cost: 1, target: 'chosenEnemy',
-  effects: [damage(add(4, stat('attack'))), applyStatus(bleed, 3)],
+  effects: [damage(add(4, stat('attack'))), applyStatus(bleed, 9)],
 });

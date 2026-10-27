@@ -1,12 +1,34 @@
-import { add, applyStatus, damage, gainResource, gainShield, ifConsume, loseHp, mul, repeat, stat, targetStacks, transcend } from '../../engine/index.ts';
+import {
+  add,
+  applyStatus,
+  createCard,
+  damage,
+  gainResource,
+  gainShield,
+  ifConsume,
+  loseHp,
+  mul,
+  playedThisTurn,
+  repeat,
+  stat,
+  targetStacks,
+  transcend,
+} from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 import { bleed } from '../statuses/bleed.ts';
 
 // Banner kit reviewed by the owner (docs/notes/banner-kits.md). Numbers are placeholders for tuning.
+// Flesh tuning (owner, 27 Oct): Bleed stacks on her cards and Grafting Knife are three times their first numbers.
 
+// Combo Bleed (owner, 27 Oct): each Strike played before it this turn, anyone's, adds 10%, and each Embryo
+// spent leaves a free Fleeting copy to play next. Copies charge her ultimate like any Strike.
 export const strike = card({
   id: 'virelle.strike', name: 'Strike', owner: 'virelle', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [
+    damage(mul(add(6, stat('attack')), add(1, mul(0.1, playedThisTurn('strike'))))),
+    ifConsume('embryo', 1, [applyStatus(bleed, 6), createCard({ id: 'virelle.strike' }, { cost: 0, keywords: ['fleeting'] })]),
+  ],
+  text: 'Deal {effects.0.amount.mul.0} damage, +10% per Strike played this turn. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} Bleed and add a free Fleeting copy to your hand.',
 });
 
 export const defense = card({
@@ -16,7 +38,7 @@ export const defense = card({
 
 export const sutureCut = card({
   id: 'virelle.suture-cut', name: 'Suture Cut', owner: 'virelle', slot: 'flavourA', cost: 2, target: 'chosenEnemy',
-  effects: [damage(add(3, stat('attack'))), applyStatus(bleed, 3)],
+  effects: [damage(add(3, stat('attack'))), applyStatus(bleed, 9)],
   text: 'Deal {effects.0.amount} damage. Apply {effects.1.stacks} Bleed.',
 });
 
@@ -30,7 +52,7 @@ export const openTheWound = card({
 export const thornSpurBloom = card({
   id: 'virelle.thorn-spur-bloom', name: 'Thorn-Spur Bloom', owner: 'virelle', slot: 'transcend', cost: 3, target: 'allEnemies',
   keywords: ['exhaust'], charge: 35,
-  effects: [applyStatus(bleed, 3, 'allEnemies'), gainResource('embryo', 2), transcend()],
+  effects: [applyStatus(bleed, 9, 'allEnemies'), gainResource('embryo', 2), transcend()],
   text: 'Apply {effects.0.stacks} Bleed to all enemies. Gain {effects.1.amount} Embryo. Transcend.',
 });
 
@@ -38,7 +60,7 @@ export const thornSpurBloom = card({
 
 export const bloodletting = card({
   id: 'virelle.bloodletting', name: 'Bloodletting', owner: 'virelle', reward: true, cost: 1, target: 'chosenEnemy',
-  effects: [applyStatus(bleed, 4)],
+  effects: [applyStatus(bleed, 12)],
 });
 
 export const thornSpur = card({

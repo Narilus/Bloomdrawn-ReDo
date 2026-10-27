@@ -14,7 +14,7 @@ handDrawn
 > playCard maelia.swollen-pod
   cardPlayed src=m1 card=c8
   resourceGained src=m1 embryo amt=3
-  statusApplied src=m1 tgt=e20 status.poison amt=2
+  statusApplied src=m1 tgt=e20 status.poison amt=8
   resourceGained src=m1 embryo amt=1
 > playCard maelia.bud-cutting
   cardPlayed src=m1 card=c9
@@ -36,8 +36,8 @@ handDrawn
   damageDealt src=m0 tgt=e20 amt=3
   damageTaken src=m0 tgt=e20 amt=3
   statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=2
-  damageTaken src=e20 tgt=e20 status.poison amt=2
+  damageDealt src=e20 tgt=e20 status.poison amt=8
+  damageTaken src=e20 tgt=e20 status.poison amt=8
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   damageDealt src=e20 tgt=party amt=12 abs=12
@@ -86,8 +86,8 @@ handDrawn
   damageDealt src=m0 tgt=e20 amt=3
   damageTaken src=m0 tgt=e20 amt=3
   statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=2
-  damageTaken src=e20 tgt=e20 status.poison amt=2
+  damageDealt src=e20 tgt=e20 status.poison amt=8
+  damageTaken src=e20 tgt=e20 status.poison amt=8
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   shieldGained src=e20 tgt=e20 amt=10
@@ -158,8 +158,8 @@ handDrawn
   damageDealt src=m0 tgt=e20 amt=5
   damageTaken src=m0 tgt=e20 amt=5
   statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=2
-  damageTaken src=e20 tgt=e20 status.poison amt=2
+  damageDealt src=e20 tgt=e20 status.poison amt=8
+  damageTaken src=e20 tgt=e20 status.poison amt=8
   enemyPhaseStart
   enemyActed src=e20 tgt=party
   damageDealt src=e20 tgt=party amt=18 abs=10
@@ -200,30 +200,7 @@ handDrawn
   damageTaken src=m0 tgt=e20 amt=6
   damageDealt src=m0 tgt=e20 amt=6
   damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=2
-  damageTaken src=e20 tgt=e20 status.poison amt=2
-  enemyPhaseStart
-  enemyActed src=e20 tgt=party
-  damageDealt src=e20 tgt=party amt=12 abs=9
-  damageTaken src=e20 tgt=party amt=12 abs=9
-  statusTick tgt=party
-  turnStart
-  cardDrawn card=c15
-  cardDrawn card=c6
-  cardDrawn card=c9
-  cardDrawn card=c13
-  cardDrawn card=c18
-  handDrawn
-> playCard leonora.strike
-  cardPlayed src=m3 tgt=e20 card=c15
-  damageDealt src=m3 tgt=e20 amt=11
+  damageDealt src=m0 tgt=e20 amt=3
   combatEnd victory
 
-final: {"turn":5,"outcome":"victory","party":{"hp":199,"maxHp":210,"shield":0,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":6,"embryo":2,"essence":2},"gauges":[55,90,0,35]}
+final: {"turn":4,"outcome":"victory","party":{"hp":202,"maxHp":210,"shield":9,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":6,"embryo":2,"essence":2},"gauges":[55,90,0,35]}

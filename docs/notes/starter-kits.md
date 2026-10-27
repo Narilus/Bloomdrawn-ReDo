@@ -26,7 +26,8 @@ Party HP 210.
 | | Cost | Text |
 |---|---|---|
 | **Passive: Midwife's Hands** (combat) | — | The first time each turn a card gains Embryo, gain 1 more. |
-| **A: Swollen Pod** | 2 | Gain 3 Embryo. Apply 2 Poison to all enemies. |
+| **Strike** | 1 | Deal 6 + Attack damage. Consume 1 Embryo: apply 4 Poison (owner, 27 Oct). |
+| **A: Swollen Pod** | 2 | Gain 3 Embryo. Apply 8 Poison to all enemies (was 2; Flesh's Poison ×4, owner, 27 Oct). |
 | **B: Bud Cutting** (spender) | 3 | The next card you play this turn resolves twice. Consume 2 Embryo: charge every party member's ultimate by 10. |
 
 The repeated card charges its owner's ultimate once, not twice.

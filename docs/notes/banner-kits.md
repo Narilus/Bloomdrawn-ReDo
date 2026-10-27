@@ -24,15 +24,16 @@ All four together have 200 HP (the starters have 210).
 | | Cost | Text |
 |---|---|---|
 | **Passive: Opened Vein** (combat) | — | The first time each turn you apply Bleed, gain 1 Embryo. |
-| **A: Suture Cut** | 2 | Deal 3 + Attack damage. Apply 3 Bleed. |
+| **Strike** | 1 | Deal 6 + Attack damage, +10% per Strike played this turn. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand (owner, 27 Oct). |
+| **A: Suture Cut** | 2 | Deal 3 + Attack damage. Apply 9 Bleed. |
 | **B: Open the Wound** (spender) | 2 | Deal 4 + Attack damage. Consume 2 Embryo: the enemy loses HP equal to twice its Bleed. |
-| **Transcend: Thorn-Spur Bloom** | 3 | Apply 3 Bleed to all enemies. Gain 2 Embryo. Transcend. |
+| **Transcend: Thorn-Spur Bloom** | 3 | Apply 9 Bleed to all enemies. Gain 2 Embryo. Transcend. |
 | **Ultimate: Thousand Cuts** | — | Deal 3 + Attack damage to all enemies 5 times. Each hit applies 1 Bleed. |
 | Transcended | — | As above, 7 times. |
-| Reward: **Bloodletting** | 1 | Apply 4 Bleed. |
+| Reward: **Bloodletting** | 1 | Apply 12 Bleed. |
 | Reward: **Thorn Spur** | 1 | Deal 3 + Attack damage twice. |
 
-Her Bleed feeds her Embryo, and the Embryo spent detonates it, so she runs her own loop and grows with Maelia. The detonation leaves the Bleed in place (owner). Her ultimate hits every enemy, for some wow factor, since ultimates fire rarely (owner).
+Bleed stacks on her cards were tripled and her Strike became a combo in the Flesh tuning (owner, 27 Oct; below). Her Bleed feeds her Embryo, and the Embryo spent detonates it, so she runs her own loop and grows with Maelia. The detonation leaves the Bleed in place (owner). Her ultimate hits every enemy, for some wow factor, since ultimates fire rarely (owner).
 
 **Dupes:** C1, Opened Vein gains 2 Embryo. C3, Open the Wound's detonation is three times its Bleed. C4, Thousand Cuts hits 2 more times. C5, Bleed on enemies no longer loses a stack when it ticks, whoever applied it (owner).
 
@@ -149,6 +150,8 @@ With every change, Flesh reaches about 40% of Rapture against one enemy and abou
 - Against three dummies it beats Rapture over ten turns: Bleed and Thousand Cuts hit every enemy, and the chained Strikes fill her gauge fast (ultimates 485, against 136).
 - The flavour cards spending Embryo now costs damage, because they take Embryo the chain would use. The combo is the better Embryo outlet.
 - The lab player always continues the chain while a copy is its best damage card, so it never saves Embryo for Open the Wound. A player who does is trading chain damage for the detonation.
+
+**In the game (owner, 27 Oct).** Combo Virelle, Maelia's Strike rider, Poison ×4 and Bleed ×3 are now the content, and the `flesh-strikes` and `virelle-combo` variants are gone. Maelia's Defense heal was dropped: an Embryo for a small heal, lost just by playing a Defense, is a poor trade. So are the flavour-card spenders. With the Embryo the Defense no longer takes, `npm run lab` gives Flesh 435 over turns 1–4, 1,779 over ten turns and 2,587 against three dummies. Any member's earlier Strikes count for the +10%, and copies charge her ultimate (owner).
 
 ## How the Domains should feel (owner)
 

@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5.2 The banner four (M5.1 signed off 26 Oct): new Kibane art for the owner, then Flesh's numbers
+**Current task:** M5.2 The banner four (M5.1 signed off 26 Oct): Flesh's new numbers are in; the owner plays them
 
 ## Milestones
 
@@ -286,7 +286,7 @@ Virelle, Isadora, Kibane and Hester as content: kits and reward cards from `docs
 - the owner has seen the damage curves and agreed Spirit's numbers;
 - the owner has picked the art.
 
-_In progress 26 Oct. The engine pieces are in (`repeat`, `targetStacks`, `volleyFired` and `controlled` events, filters by status, keyword, card and party, a `volleys` modifier and statuses that end with the turn; `src/engine/hooks.test.ts`). The four kits are content (`src/content/characters/`), with a scenario for every card, passive, ultimate, Transcend and reward card (`src/content/scenarios/banner.test.ts`). Dev builds take `?owned=all` to field them before the gacha. `npm run lab` measures the damage curves (`tools/lab/`); the results are in the kits note. 27 Oct: the owner agreed the Spirit proposal (Ritual damage per Essence and Essence per held Ritual doubled), and it is in. He picked Virelle 01, Isadora 02 and Hester 01, now in the game; all three Kibane options were rejected, so her brief was rewritten and new options are with him. Flesh trails both other Domains in the lab; it is next (owner)._
+_In progress 26 Oct. The engine pieces are in (`repeat`, `targetStacks`, `volleyFired` and `controlled` events, filters by status, keyword, card and party, a `volleys` modifier and statuses that end with the turn; `src/engine/hooks.test.ts`). The four kits are content (`src/content/characters/`), with a scenario for every card, passive, ultimate, Transcend and reward card (`src/content/scenarios/banner.test.ts`). Dev builds take `?owned=all` to field them before the gacha. `npm run lab` measures the damage curves (`tools/lab/`); the results are in the kits note. 27 Oct: the owner agreed the Spirit proposal (Ritual damage per Essence and Essence per held Ritual doubled), and it is in. He picked Virelle 01, Isadora 02 and Hester 01, now in the game, and Kibane 04 from a rewritten brief. Flesh trailed both other Domains in the lab; his tuning is in (combo Virelle, Maelia's Strike rider, Poison ×4, Bleed ×3, with Fleeting copies in the engine), and Flesh now leads over turns 1–4 and reaches about three-quarters of Rapture over ten._
 
 ### M5.3 The gacha
 The Standard banner (the banner four), on its own seeded stream in the profile: SSR 3%, SR 15%, R 82%, hard pity at 30, a ten-pull with at least one SR. Before weapons, an SR gives ascension materials and an R gives Memories and Ducats. Every pull is audited, gives Pollen, and spends one Purified Bloom. A new profile starts with 10. The banner screen: Pull 1 and Pull 10, the odds, the pity counter, the pool and the recent history.

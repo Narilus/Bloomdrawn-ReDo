@@ -326,7 +326,7 @@ describe('card rewards', () => {
   });
 
   it("an offered card shows its numbers with its owner's stats, and what depends on the fight as written", () => {
-    expect(runCardText({ card: 'flesh.grafting-knife', owner: 'maelia' }, registry)).toBe('Deal 7 damage. Apply 3 Bleed.');
+    expect(runCardText({ card: 'flesh.grafting-knife', owner: 'maelia' }, registry)).toBe('Deal 7 damage. Apply 9 Bleed.');
     expect(runCardText({ card: 'unbound.pocket-watch', owner: 'agathe' }, registry)).toBe('Draw 2 cards.');
     expect(runCardText({ card: 'rapture.chalk-circle', owner: 'agathe' }, registry)).toBe('Gain 1 Tentacle. Gain 8 Shield.');
     expect(runCardText({ card: 'anthe.long-vigil', owner: 'anthe' }, registry)).toBe('Ritual. Deal 10 + 6 × Essence damage to all enemies.');
