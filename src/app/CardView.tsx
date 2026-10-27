@@ -1,4 +1,4 @@
-import { cardCost, describeCardLive, type CardDef, type CardInstance, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
+import { cardCost, cardKeywords, describeCardLive, type CardDef, type CardInstance, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { CARD_H, CARD_W } from './fan.ts';
 
@@ -15,7 +15,9 @@ interface Props {
 
 /** A card in combat. All numbers come from the engine's live description. */
 export function CardView({ card, state, registry, playable, keyHint, highlight }: Props) {
-  const def = registry.cards[card.card];
+  const printed = registry.cards[card.card];
+  // A created copy can carry its own cost and keywords (a Fleeting Strike costing 0).
+  const def = printed && { ...printed, cost: card.cost ?? printed.cost, keywords: [...new Set(cardKeywords(card, registry))] };
   const member = state.members.find((m) => m.id === card.owner);
   // Keywords and the charge show as tags, so the text box holds only the card's effect.
   const text = describeCardLive(card, state, registry, { charge: false, keywords: false, mark: markNumber });

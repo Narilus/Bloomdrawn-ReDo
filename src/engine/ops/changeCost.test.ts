@@ -31,6 +31,15 @@ describe('changeCost', () => {
     expect(cardCost(state, ritualIn(), registry)).toBe(1);
   });
 
+  it("a created copy's own cost and keywords are what it changes", () => {
+    const { state, p } = hand();
+    const copy = state.piles.hand.find((c) => c.uid === p.uid)!;
+    Object.assign(copy, { cost: 0, keywords: ['ritual'] });
+    changeCostOp.resolve(state, changeCost(-1, 'hand', 'ritual'), ctx, registry);
+    changeCostOp.resolve(state, changeCost(1, 'hand', 'ritual'), ctx, registry);
+    expect(cardCost(state, copy, registry)).toBe(1);
+  });
+
   it('a next-card discount applies to the next card played, then is gone', () => {
     const { state, r, p } = hand();
     changeCostOp.resolve(state, changeCost(-2, 'next'), ctx, registry);

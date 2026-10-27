@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Keyword, OpCall } from '../defs.ts';
-import { evaluate, formulaSchema, hasKeyword, titleCase, type Formula } from '../formula.ts';
+import { cardKeywords, evaluate, formulaSchema, hasKeyword, titleCase, type Formula } from '../formula.ts';
 import type { Operation } from '../operation.ts';
 
 export interface ChangeCostArgs extends OpCall {
@@ -34,9 +34,9 @@ export const changeCostOp: Operation<ChangeCostArgs> = {
     }
     for (const card of draft.piles.hand) {
       const def = registry.cards[card.card];
-      if (!def || (args.keyword && !hasKeyword(def.keywords, args.keyword))) continue;
-      // Costs bottom out at 0; a discount past 0 is not banked against later increases.
-      card.costDelta = Math.max(-def.cost, (card.costDelta ?? 0) + amount);
+      if (!def || (args.keyword && !hasKeyword(cardKeywords(card, registry), args.keyword))) continue;
+      // Costs bottom out at 0; a discount past 0 is not banked against later increases. A copy has its own cost and keywords.
+      card.costDelta = Math.max(-(card.cost ?? def.cost), (card.costDelta ?? 0) + amount);
     }
     return { events: [] };
   },
