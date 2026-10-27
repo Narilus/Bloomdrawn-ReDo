@@ -3,19 +3,21 @@ import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
 import { BLOOM, ownedCharacters, runBanking, teamsOf, type Profile } from '../game/profile.ts';
 import type { RunSave } from '../save/run.ts';
+import { Banner } from './Banner.tsx';
 import { Banking, DEF, Labyrinth, newRun } from './Labyrinth.tsx';
 import { PartySelect, Roster } from './Roster.tsx';
 import { browserSaves, type Boot } from './saves.ts';
 
 // The title screen (docs/notes/m4-run.md, "Save and resume"; m5-collection.md): Continue a saved run,
-// choose a party for a new one, see the roster and the banked Purified Blooms, and move saves
-// between browsers with a file.
+// choose a party for a new one, see the roster and the banked Purified Blooms, pull on the banner,
+// and move saves between browsers with a file.
 
 type Screen =
   | { kind: 'loading' }
   | { kind: 'title'; boot: Boot }
   | { kind: 'party'; profile: Profile }
   | { kind: 'roster'; profile: Profile }
+  | { kind: 'banner'; profile: Profile }
   | { kind: 'run'; save: RunSave };
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
@@ -70,6 +72,10 @@ export function Game() {
     );
   }
   if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} onBack={toTitle} />;
+  if (screen.kind === 'banner') {
+    // The seed only starts the gacha's stream on a profile's first pull; after that the profile carries it.
+    return <Banner profile={screen.profile} onPull={(banner, count) => saves.pull(banner, count, Math.floor(Math.random() * 2 ** 31))} onBack={toTitle} />;
+  }
   return (
     <Title
       boot={screen.boot}
@@ -79,6 +85,7 @@ export function Game() {
         chooseParty();
       }}
       onRoster={() => setScreen({ kind: 'roster', profile: screen.boot.profile })}
+      onBanner={() => setScreen({ kind: 'banner', profile: screen.boot.profile })}
       onExport={async () => {
         const text = await saves.exportFile();
         const link = document.createElement('a');
@@ -101,12 +108,13 @@ interface TitleProps {
   /** Goes on to party select for a new run, abandoning the saved one (given) first. */
   onNew: (saved: RunSave | null) => Promise<void>;
   onRoster: () => void;
+  onBanner: () => void;
   onExport: () => Promise<void>;
   /** Throws if the file is refused. */
   onImport: (text: string) => Promise<void>;
 }
 
-function Title({ boot, onContinue, onNew, onRoster, onExport, onImport }: TitleProps) {
+function Title({ boot, onContinue, onNew, onRoster, onBanner, onExport, onImport }: TitleProps) {
   const { profile, run, ended } = boot;
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -158,6 +166,9 @@ function Title({ boot, onContinue, onNew, onRoster, onExport, onImport }: TitleP
           </button>
           <button className="end-turn" onClick={onRoster}>
             Roster
+          </button>
+          <button className="end-turn" onClick={onBanner}>
+            Banner
           </button>
         </div>
       )}

@@ -2135,3 +2135,218 @@ kbd {
   top: 48px;
   right: 64px;
 }
+
+/* The banner (M5.3): the pool, odds, pity and pull buttons on the left; the last results and the history on the right. */
+.banner-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1040px 1fr;
+  gap: 48px;
+  padding: 56px 72px;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(201, 164, 90, 0.14), transparent 60%),
+    var(--charcoal-plum);
+  color: var(--petal-ivory);
+}
+
+.banner-main {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+}
+
+.banner-screen h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 56px;
+  color: var(--blush);
+}
+
+.banner-blooms {
+  margin: -8px 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  font-family: var(--serif);
+  font-size: 26px;
+}
+
+.banner-blooms strong {
+  font-size: 38px;
+  color: var(--antique-gold);
+}
+
+.banner-blooms span {
+  font-family: var(--sans);
+  font-size: 18px;
+  opacity: 0.75;
+}
+
+.banner-pool {
+  display: flex;
+  gap: 16px;
+}
+
+.banner-pool-tile {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 232px;
+  padding: 8px 8px 12px;
+  border: 2px solid var(--mauve-shadow);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--dusk-plum), var(--aubergine));
+  font-family: var(--serif);
+}
+
+.banner-pool-tile.domain-flesh { border-color: var(--flesh); }
+.banner-pool-tile.domain-rapture { border-color: var(--rapture); }
+.banner-pool-tile.domain-spirit { border-color: var(--spirit); }
+.banner-pool-tile.domain-unbound { border-color: var(--unbound); }
+
+.banner-pool-art {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 170px;
+  overflow: hidden;
+}
+
+.banner-pool-art img {
+  flex: none;
+  height: 100%;
+  width: auto;
+}
+
+.banner-pool-tile strong {
+  font-size: 26px;
+}
+
+.banner-pool-tile span {
+  font-family: var(--sans);
+  font-size: 15px;
+  opacity: 0.75;
+}
+
+.banner-odds {
+  border-collapse: collapse;
+  font-size: 20px;
+}
+
+.banner-odds th,
+.banner-odds td {
+  padding: 6px 14px 6px 0;
+  text-align: left;
+}
+
+.banner-odds th {
+  width: 70px;
+  font-family: var(--serif);
+  font-size: 24px;
+}
+
+.banner-odds td:nth-child(2) {
+  width: 80px;
+  color: var(--antique-gold);
+  font-weight: 700;
+}
+
+.banner-rules {
+  margin: 0;
+  padding: 0 0 0 22px;
+  display: grid;
+  gap: 6px;
+  font-size: 20px;
+}
+
+.banner-pity strong {
+  color: var(--antique-gold);
+  font-size: 26px;
+}
+
+.banner-screen .end-turn {
+  position: static;
+}
+
+.banner-screen .end-turn small {
+  display: block;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.banner-side {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.banner-side h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 32px;
+}
+
+.banner-results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.banner-result {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--mauve-shadow);
+  border-radius: 10px;
+  background: var(--aubergine);
+  font-size: 17px;
+}
+
+.banner-result em,
+.banner-history em {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.rarity-ssr em { color: var(--antique-gold); }
+.rarity-sr em { color: var(--lilac-glow); }
+.rarity-r em { color: var(--parchment); opacity: 0.7; }
+
+.banner-result.rarity-ssr {
+  border-color: var(--antique-gold);
+  box-shadow: 0 0 18px rgba(184, 149, 90, 0.45);
+}
+
+.banner-result.rarity-sr {
+  border-color: var(--lavender);
+}
+
+.banner-history {
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.banner-history th,
+.banner-history td {
+  padding: 3px 12px 3px 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.banner-history th {
+  font-family: var(--sans);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.banner-empty {
+  margin: 0;
+  opacity: 0.7;
+}

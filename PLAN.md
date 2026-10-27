@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5.3 The gacha (the owner moved on from M5.2 on 27 Oct, and tests its enemy tuning alongside)
+**Current task:** M5.3 The gacha: built; the owner tries the banner (and M5.2's enemy tuning alongside)
 
 ## Milestones
 
@@ -295,6 +295,8 @@ The Standard banner (the banner four), on its own seeded stream in the profile: 
 - each audit entry records the banner, pity before and after, the result, its dupe handling and the Blooms before and after;
 - pulling never changes a run's streams, and a pull without a Bloom is rejected;
 - e2e pulls once and ten times and sees the history.
+
+_Built 27 Oct. `src/game/gacha.ts` pulls on the Standard banner (`src/content/banners.ts`) from the profile's own stream, seeded on its first pull; profile save v5 adds dupes, items and the gacha (stream, pity per family, every pull's audit record). Placeholders, my call: an SR gives 1 of a random Domain's material, an R 1 Faint Memory and 100 Ducats; every pull 1 Pollen, a copy past C5 40 more. An SSR's dupe level is counted now (C1–C5) for the audit; M5.4 makes it do something. The banner screen is on the title screen. Tests: `src/game/gacha.test.ts` (rates over 100,000 pulls, pity, ten-pulls, the audit, refusals, dupes), the v5 save in `src/save/profile.test.ts`, pulling mid-run in `src/app/saves.test.ts`, `e2e/banner.spec.ts`._
 
 ### M5.4 Dupes
 C1–C5 for the banner four, applied in combat from the profile's dupe levels. Overflow past C5 converts to Pollen.

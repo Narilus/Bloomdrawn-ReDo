@@ -32,6 +32,12 @@ DESIGN.md fixes the rules: SSR 3%, SR 15%, R 82%; hard pity at pull 30; no soft 
 - **Purified Blooms to start:** a new profile starts with 10; the current profile keeps the ones it has banked (owner).
 - **The banner screen:** Pull 1 and Pull 10, the odds table, the pity counter ("SSR guaranteed within N pulls"), the pool, and the recent history with each pull's pity before and after.
 
+**As built in M5.3 (27 Oct; placeholders, my call):**
+- An SR gives 1 ascension material of a random Domain; an R gives 1 Faint Memory and 100 Ducats.
+- A ten-pull's SR is its tenth pull, upgraded from R only if the nine before were all R. Hard pity counts from the last SSR, per banner family; the screen shows "SSR guaranteed within N pulls".
+- The audit keeps every pull in the profile: banner, rarity, what it gave (Pollen included), the character and dupe handling for an SSR, any guarantee, and pity and Blooms before and after. The screen shows the newest 20.
+- The gacha stream is seeded from the browser on a profile's first pull and lives in the profile after that.
+
 ## Dupes and Pollen
 
 - A duplicate SSR adds a dupe level, C1 to C5: the passive, then stats, a Flavour card, the ultimate, and a capstone (DESIGN.md). C0 is complete; a dupe only deepens what is there. Dupe effects are drafted per character with the kits, for the owner's approval.

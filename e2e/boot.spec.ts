@@ -4,7 +4,8 @@ test('app boots into the title screen, and New run opens party select, then the 
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/');
-  await expect(page.locator('.title-pulls')).toContainText('Purified Blooms 0');
+  // A new profile starts with 10 (owner, 25 Oct).
+  await expect(page.locator('.title-pulls')).toContainText('Purified Blooms 10');
   await expect(page.getByRole('button', { name: 'Continue' })).toHaveCount(0);
   await page.screenshot({ path: 'test-results/screenshots/title.png' });
   await page.getByRole('button', { name: 'New run' }).click();
