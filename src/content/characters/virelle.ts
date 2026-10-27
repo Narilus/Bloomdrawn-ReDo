@@ -28,7 +28,7 @@ export const strike = card({
     damage(mul(add(6, stat('attack')), add(1, mul(0.1, playedThisTurn('strike'))))),
     ifConsume('embryo', 1, [applyStatus(bleed, 6), createCard({ id: 'virelle.strike' }, { cost: 0, keywords: ['fleeting'] })]),
   ],
-  text: 'Deal {effects.0.amount.mul.0} damage, +10% per Strike played this turn. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} Bleed and add a free Fleeting copy to your hand.',
+  text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} Bleed and add a free Fleeting copy to your hand.',
 });
 
 export const defense = card({
@@ -77,7 +77,8 @@ export const virelle = character({
   cards: [strike, defense, thornSpurBloom, sutureCut, openTheWound],
   passive: {
     name: 'Opened Vein', scope: 'combat',
-    text: 'The first time each turn you apply Bleed, gain {triggers.0.do.0.amount} Embryo.',
+    // The 10% lives in her Strike's damage; the passive is where the owner placed it, so it's explained here.
+    text: 'The first time each turn you apply Bleed, gain {triggers.0.do.0.amount} Embryo. Her Strike deals 10% more for each Strike played before it this turn.',
     triggers: [{ on: 'statusApplied', filter: { status: bleed.id, source: 'party' }, once: 'turn', do: [gainResource('embryo', 1)] }],
   },
   // Hits every enemy, for the wow of a rare ultimate (owner, 25 Oct).

@@ -79,11 +79,13 @@ export function showFor(state: CombatState, owner: EntityId, registry: Registry,
 /**
  * Numbers for a character outside combat, as a card reward shows them: a formula that reads only
  * numbers and her stats shows its value; anything that depends on the fight shows as written.
+ * Outside a fight no card has been played this turn, so a count of cards played is 0.
  */
 export function showStats(stats: CharacterDef['stats'], mark?: TextOptions['mark']): ShowAmount {
   const value = (f: Formula): number | undefined => {
     if (typeof f === 'number') return f;
     if ('stat' in f) return stats[f.stat];
+    if ('playedThisTurn' in f) return 0;
     const terms = 'add' in f ? f.add : 'mul' in f ? f.mul : undefined;
     const values = terms?.map(value);
     if (!values || values.some((v) => v === undefined)) return undefined;

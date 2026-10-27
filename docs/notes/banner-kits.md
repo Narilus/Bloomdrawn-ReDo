@@ -23,8 +23,8 @@ All four together have 200 HP (the starters have 210).
 
 | | Cost | Text |
 |---|---|---|
-| **Passive: Opened Vein** (combat) | — | The first time each turn you apply Bleed, gain 1 Embryo. |
-| **Strike** | 1 | Deal 6 + Attack damage, +10% per Strike played this turn. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand (owner, 27 Oct). |
+| **Passive: Opened Vein** (combat) | — | The first time each turn you apply Bleed, gain 1 Embryo. Her Strike deals 10% more for each Strike played before it this turn. |
+| **Strike** | 1 | Deal 6 + Attack damage. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand (owner, 27 Oct). The number on the card grows live with each Strike played; the 10% is explained in her passive (owner). |
 | **A: Suture Cut** | 2 | Deal 3 + Attack damage. Apply 9 Bleed. |
 | **B: Open the Wound** (spender) | 2 | Deal 4 + Attack damage. Consume 2 Embryo: the enemy loses HP equal to twice its Bleed. |
 | **Transcend: Thorn-Spur Bloom** | 3 | Apply 9 Bleed to all enemies. Gain 2 Embryo. Transcend. |

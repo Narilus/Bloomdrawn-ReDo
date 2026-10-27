@@ -1,5 +1,6 @@
 import { describe, expect } from 'vitest';
-import type { CombatState } from '../../engine/index.ts';
+import { describeCardLive, type CombatState } from '../../engine/index.ts';
+import { registry } from '../registry.ts';
 import { scenario, type ScenarioPlay } from '../testing/scenario.ts';
 
 // The banner four (docs/notes/banner-kits.md, reviewed by the owner 25 Oct), one scenario or more
@@ -67,6 +68,18 @@ describe('Virelle', () => {
     setup: { hand: ['hester.strike', 'kibane.strike', 'virelle.strike'] },
     play: [{ card: 'hester.strike', target: 0 }, { card: 'kibane.strike', target: 0 }, { card: 'virelle.strike', target: 0 }],
     expect: { enemyHp: [60 - 10 - 11 - 14] },
+  });
+
+  scenario("Strike's text in hand shows its damage as it grows with each Strike played", {
+    party: BANNER,
+    setup: { hand: ['hester.strike', 'kibane.strike', 'virelle.strike'] },
+    play: [{ card: 'hester.strike', target: 0 }, { card: 'kibane.strike', target: 0 }],
+    check: ({ state }) => {
+      const strike = state.piles.hand.find((c) => c.card === 'virelle.strike')!;
+      expect(describeCardLive(strike, state, registry, { charge: false })).toBe(
+        'Deal 14 damage. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand.',
+      );
+    },
   });
 
   scenario('Strike without Embryo deals its damage and makes no copy', {

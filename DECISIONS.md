@@ -146,6 +146,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Flesh, continued (owner, 27 Oct): Maelia's Defense heals 4% of max HP, a weak top-up and not a full heal. Virelle becomes a combo Bleed-stacker, to test: her passive also makes her Strike deal 10% more for each Strike played this turn; her Strike consumes 1 Embryo to apply 6 Bleed and create a copy of itself that costs 0, with Fleeting (it goes to the Graveyard instead of being discarded, and at end of turn). The choice is whether to unload all Embryo or keep some for other spenders.
 - Flesh in the game (owner, 27 Oct): a played Fleeting copy goes to the Graveyard too. Any member's Strikes count for Virelle's +10%, though it was first meant as hers only, to get the damage rolling. Copies charge her ultimate. Combo Virelle, Maelia's Strike rider (1 Embryo for 4 Poison), Poison ×4 and Bleed ×3 go in. Maelia's Defense heal does not: trading an Embryo for a small heal, and losing one just by playing a Defense, is a poor trade.
+- Card numbers (owner, 27 Oct): a card's damage number updates live as it is buffed, as in Morimens, rather than helper text explaining the bonus. Virelle's Strike shows its current damage, and the 10% per Strike is explained in her passive.
 
 ## Open
 - Gear at launch or later (recommendation: later).

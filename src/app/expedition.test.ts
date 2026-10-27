@@ -330,6 +330,10 @@ describe('card rewards', () => {
     expect(runCardText({ card: 'unbound.pocket-watch', owner: 'agathe' }, registry)).toBe('Draw 2 cards.');
     expect(runCardText({ card: 'rapture.chalk-circle', owner: 'agathe' }, registry)).toBe('Gain 1 Tentacle. Gain 8 Shield.');
     expect(runCardText({ card: 'anthe.long-vigil', owner: 'anthe' }, registry)).toBe('Ritual. Deal 10 + 6 × Essence damage to all enemies.');
+    // No Strike has been played outside a fight, so Virelle's Strike shows its base damage.
+    expect(runCardText({ card: 'virelle.strike', owner: 'virelle' }, registry, { charge: false })).toBe(
+      'Deal 12 damage. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand.',
+    );
   });
 });
 
