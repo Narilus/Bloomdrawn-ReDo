@@ -15,7 +15,9 @@ export interface Profile {
   dupes?: Record<string, number>;
   /** Items banked, by ID: Pollen, Ducats (`money`), Memories and ascension materials. Absent is none. */
   items?: Record<string, number>;
-  /** The gacha's stream, pity and audit history, from the first pull. */
+  /** The character banner's Focus: the pool character an SSR's 50/50 is for (owner, 28 Oct). */
+  focus?: string;
+  /** The gacha's stream, pity, 50/50 losses and audit history, from the first pull. */
   gacha?: Gacha;
   /** Saved team presets, each a party front first. A profile that has never saved one has the defaults (`teamsOf`). */
   teams?: Team[];

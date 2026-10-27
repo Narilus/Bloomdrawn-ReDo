@@ -13,9 +13,13 @@ const pullRecord = z.strictObject({
   character: id.optional(),
   items,
   dupe: z.union([z.literal('new'), z.literal('overflow'), z.int().positive()]).optional(),
+  focus: id.optional(),
+  fiftyFifty: z.enum(['won', 'lost', 'guaranteed']).optional(),
   guarantee: z.enum(['pity', 'tenPull']).optional(),
   pityBefore: count,
   pityAfter: count,
+  lossesBefore: count,
+  lossesAfter: count,
   bloomsBefore: count,
   bloomsAfter: count,
 });
@@ -26,7 +30,8 @@ const profileSchema = z.strictObject({
   owned: z.array(id),
   dupes: z.record(id, z.int().positive()).optional(),
   items: items.optional(),
-  gacha: z.strictObject({ stream: z.int().nonnegative(), pity: z.record(id, count), history: z.array(pullRecord) }).optional(),
+  focus: id.optional(),
+  gacha: z.strictObject({ stream: z.int().nonnegative(), pity: z.record(id, count), losses: z.record(id, count), history: z.array(pullRecord) }).optional(),
   teams: z.array(z.strictObject({ name: z.string().min(1).max(TEAM_NAME_LENGTH), members: z.array(id.nullable()).length(PARTY_SIZE) })).min(1).optional(),
   team: z.int().nonnegative().optional(),
   run: z.strictObject({ id, elites: z.int().nonnegative() }).optional(),
@@ -34,11 +39,11 @@ const profileSchema = z.strictObject({
 
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
- * gained and their dupes, items, the gacha, the team presets and the run in progress's tally.
+ * gained and their dupes, items, the Focus and the gacha, the team presets and the run in progress's tally.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 5,
+  schemaVersion: 6,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -54,6 +59,23 @@ export const profileSave: SaveKind<Profile> = {
     },
     // v5 added dupes, items and the gacha, which a v4 profile has none of.
     4: (data) => data,
+    // v6 replaced the Standard banner with the character banner and its Focus (owner, 28 Oct): pity
+    // counted on the Standard banner carries over, and no 50/50 has been lost. The Standard pulls had
+    // no Focus and no 50/50, so their records gain only a loss count of 0.
+    5: (data) => {
+      const profile = data as { gacha?: { pity: Record<string, number>; history: object[] } };
+      if (!profile.gacha) return data;
+      const { standard, ...pity } = profile.gacha.pity;
+      return {
+        ...profile,
+        gacha: {
+          ...profile.gacha,
+          pity: { ...pity, ...(standard !== undefined && { character: standard }) },
+          losses: {},
+          history: profile.gacha.history.map((r) => ({ ...r, lossesBefore: 0, lossesAfter: 0 })),
+        },
+      };
+    },
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;

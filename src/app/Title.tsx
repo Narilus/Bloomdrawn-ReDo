@@ -74,7 +74,14 @@ export function Game() {
   if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} onBack={toTitle} />;
   if (screen.kind === 'banner') {
     // The seed only starts the gacha's stream on a profile's first pull; after that the profile carries it.
-    return <Banner profile={screen.profile} onPull={(banner, count) => saves.pull(banner, count, Math.floor(Math.random() * 2 ** 31))} onBack={toTitle} />;
+    return (
+      <Banner
+        profile={screen.profile}
+        onPull={(banner, count) => saves.pull(banner, count, Math.floor(Math.random() * 2 ** 31))}
+        onFocus={saves.focus}
+        onBack={toTitle}
+      />
+    );
   }
   return (
     <Title

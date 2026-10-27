@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { registry } from '../content/registry.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { startCombat } from '../engine/index.ts';
-import { STANDARD_BANNER } from '../content/banners.ts';
+import { CHARACTER_BANNER } from '../content/banners.ts';
 import { M3_EXPEDITION, startExpedition } from '../game/expedition.ts';
 import { lossBanking } from '../game/profile.ts';
 import { memoryAdapter } from '../save/adapters.ts';
@@ -65,13 +65,16 @@ describe('saves', () => {
     await saves.start(save);
     await saves.save({ ...save, exp: { ...save.exp, elites: 1 } });
     const before = await store.read(RUN_SAVE);
-    const result = await saves.pull(STANDARD_BANNER, 10, 7);
+    // No Focus yet: refused, and nothing written.
+    expect(await saves.pull(CHARACTER_BANNER, 10, 7)).toEqual({ ok: false, reason: 'Choose a Focus first.' });
+    await saves.focus(CHARACTER_BANNER, 'kibane');
+    const result = await saves.pull(CHARACTER_BANNER, 10, 7);
     if (!result.ok) throw new Error(result.reason);
     expect(await profileOf(store)).toEqual(result.profile);
-    expect(result.profile).toMatchObject({ pulls: 0, run: { id: 'run-1', elites: 1 } });
+    expect(result.profile).toMatchObject({ pulls: 0, focus: 'kibane', run: { id: 'run-1', elites: 1 } });
     expect(await store.read(RUN_SAVE)).toEqual(before);
     // With no Blooms left, a pull is refused and nothing is written.
-    expect(await saves.pull(STANDARD_BANNER, 1, 7)).toMatchObject({ ok: false });
+    expect(await saves.pull(CHARACTER_BANNER, 1, 7)).toMatchObject({ ok: false });
     expect(await profileOf(store)).toEqual(result.profile);
   });
 

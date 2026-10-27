@@ -147,7 +147,7 @@ The roster is mostly adult women. Characters are designed to be desirable to col
 
 ## Launch roster
 
-Launch ships eight characters, two per Domain. The starter four (one per Domain) are owned from the first session, so the tutorial teaches every engine. The other four enter the standard banner when banners unlock. The starters never enter a banner; their dupes are bought in the Profile Shop (owner, 25 Oct). Names marked (w) are working names.
+Launch ships eight characters, two per Domain. The starter four (one per Domain) are owned from the first session, so the tutorial teaches every engine. The other four join the banner pool when banners unlock. The starters never enter a banner; their dupes are bought in the Profile Shop (owner, 25 Oct). Names marked (w) are working names.
 
 | Character | Domain | Slot | Role | Bloom |
 | --- | --- | --- | --- | --- |
@@ -328,13 +328,15 @@ Every pull also gives a little of that currency, and a lost 50/50 gives more. It
 
 ## Gacha
 
-Pulls are earned only, spent one-for-one on banners with fully visible odds, pity and history. Pity guarantees at least three SSRs per 90 pulls, one of them the featured character.
+Pulls are earned only, spent one-for-one on banners with fully visible odds, pity and history. Pity guarantees at least three SSRs per 90 pulls, one of them the player's Focus.
 
 ### Banners
 
-- **Standard:** a permanent pool of all generally released characters and non-limited weapons.
-- **Featured:** a rate-up on one character. Nothing rotates: a menu lets the player pick which Featured banner to pull on, freely (owner, 25 Oct). Featured pity and guarantee carry over between Featured banners; they never expire.
-- **Weapon-focused:** only once weapon rates and guarantees are approved.
+There is no Standard banner to pull on (owner, 28 Oct). With nothing rotating, a Standard banner would offer less than a featured one, and a second currency to prop it up would only add hoarding anxiety.
+
+- **Character banner, with a Focus:** the player picks a Focus from the banner pool and can change it at any time. Each SSR is a 50/50: the Focus, or a random other pool character. Pity and the loss count belong to the profile and survive a change of Focus. The pool only grows: a new character joins it for good and can be focused at once (a release can still be showcased on the banner screen). The starters never enter it.
+- **Weapon banner, later:** on the same Purified Blooms, with its own pity and the same Focus rule for signature weapons, once weapon rates and guarantees are approved.
+- **One currency:** a Purified Bloom is one pull on either banner.
 
 ### Rates and pity
 
@@ -343,9 +345,9 @@ Pulls are earned only, spent one-for-one on banners with fully visible odds, pit
 | SSR / SR / R | 3% / 15% / 82% |
 | Soft pity | None; a flat 3% until the pull-30 guarantee |
 | Hard pity (guaranteed SSR) | Pull 30; the counter resets on every SSR |
-| Featured SSR | 50/50 at each SSR; after two losses the next SSR is guaranteed featured. Worst case: SSRs at pulls 30, 60 and 90, the third being the featured character. The loss count resets when she is obtained |
+| Focus SSR | 50/50 at each SSR; a loss is a random other pool character and gives extra Pollen. After two losses the next SSR is guaranteed the Focus. Worst case: SSRs at pulls 30, 60 and 90, the third being the Focus. The loss count resets when the Focus is obtained, and carries over a change of Focus |
 | Ten-pull | At least one SR or better |
-| Pity families | Featured and Standard track separately |
+| Pity families | The character banner and (later) the weapon banner track separately |
 
 ### Results
 
@@ -357,7 +359,7 @@ Tutorial completion (enough for an early multi-pull), run milestones, boss clear
 
 ### Audit
 
-Every pull records banner, pity and guarantee before and after, the result, dupe handling and the pull count before and after. Recent history is visible in-game. Gacha randomness uses its own seeded stream and never touches run randomness.
+Every pull records banner, Focus, pity and the 50/50 loss count before and after, the result, dupe handling and the pull count before and after. The banner screen warns when the Focus is at C5, since further copies of her become Pollen (owner, 28 Oct). Recent history is visible in-game. Gacha randomness uses its own seeded stream and never touches run randomness.
 
 ## Identity and art direction
 

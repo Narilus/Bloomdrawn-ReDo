@@ -149,6 +149,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card numbers (owner, 27 Oct): a card's damage number updates live as it is buffed, as in Morimens, rather than helper text explaining the bonus. Virelle's Strike shows its current damage, and the 10% per Strike is explained in her passive.
 - Enemy tuning (owner, 27 Oct, after a banner-four run with Virelle, Maelia, Isadora and Agathe that cleared the Boss's first bar on turn 3 and her second the next turn, with 173 HP left): normal enemies get about 50% more HP; elites double HP and about 10% more damage; the Boss has two bars of 500 (1000 in all) and about 10% more damage. Keep the 10% per Strike in Virelle's passive: it has to be explained somewhere, and the aim was only to keep card wording certain. Balancing is long-term; he tests these numbers alongside the next milestone.
 
+- No Standard banner (owner, 28 Oct): one character banner. The player picks a Focus from the banner pool and can change it any time. SSRs are 50/50 Focus or a random other pool character, guaranteed Focus after two losses. Pity and the loss count belong to the profile and survive Focus changes. The pool only grows, and starters never enter it. One currency (Purified Blooms). Weapons get their own banner and pity later, on the same currency. The screen warns when the Focus is already at C5.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

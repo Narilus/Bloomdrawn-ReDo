@@ -215,16 +215,16 @@ export type EventOutcome =
   | { do: 'tick'; count: number };
 
 /**
- * A gacha banner (docs/DESIGN.md, "Gacha"). The profile's gacha pulls on it (src/game/gacha.ts); the
- * engine never reads it.
+ * A gacha banner (docs/DESIGN.md, "Gacha"): the character banner now, a weapon banner later. The
+ * profile's gacha pulls on it (src/game/gacha.ts); the engine never reads it.
  */
 export interface BannerDef {
   id: string;
   name: string;
   /** Banners in one family share a pity counter (DESIGN.md: Featured and Standard track separately). */
   pity: string;
-  /** The SSR characters, each as likely. */
-  ssr: string[];
+  /** The SSR characters. The player's Focus is one of them; the others are what a lost 50/50 gives, each as likely. The pool only grows. */
+  pool: string[];
   /** An SR gives `amount` of one item drawn from `one` (ascension materials until weapons). */
   sr: { one: string[]; amount: number };
   /** What an R gives, by item (Memories and Ducats until weapons). */

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyStatus, damage, gainShield, ifConsume } from '../engine/index.ts';
 import { card, character, domain, status } from './define.ts';
 import { registry, validateContent } from './registry.ts';
-import { STANDARD_BANNER } from './banners.ts';
+import { CHARACTER_BANNER } from './banners.ts';
 import { ITEM_NAMES } from './items.ts';
 import { STARTERS } from './roster.ts';
 
@@ -25,12 +25,12 @@ describe('content registry', () => {
     expect(Object.keys(registry.domains).sort()).toEqual(['flesh', 'rapture', 'spirit', 'unbound']);
   });
 
-  it('the Standard banner pools the banner four, never a starter, and every item it gives has a name', () => {
-    expect([...STANDARD_BANNER.ssr].sort()).toEqual(['hester', 'isadora', 'kibane', 'virelle']);
-    expect(STANDARD_BANNER.ssr.filter((id) => !registry.characters[id] || STARTERS.includes(id))).toEqual([]);
+  it('the character banner pools the banner four, never a starter, and every item it gives has a name', () => {
+    expect([...CHARACTER_BANNER.pool].sort()).toEqual(['hester', 'isadora', 'kibane', 'virelle']);
+    expect(CHARACTER_BANNER.pool.filter((id) => !registry.characters[id] || STARTERS.includes(id))).toEqual([]);
     // One material per Domain.
-    expect(STANDARD_BANNER.sr.one.map((m) => m.replace('material.', '')).sort()).toEqual(Object.keys(registry.domains).sort());
-    expect([...STANDARD_BANNER.sr.one, ...Object.keys(STANDARD_BANNER.r), 'pollen'].filter((item) => !ITEM_NAMES[item])).toEqual([]);
+    expect(CHARACTER_BANNER.sr.one.map((m) => m.replace('material.', '')).sort()).toEqual(Object.keys(registry.domains).sort());
+    expect([...CHARACTER_BANNER.sr.one, ...Object.keys(CHARACTER_BANNER.r), 'pollen'].filter((item) => !ITEM_NAMES[item])).toEqual([]);
   });
 
   it('the starters are four characters, one per Domain', () => {

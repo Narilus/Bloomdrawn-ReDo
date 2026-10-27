@@ -3,7 +3,7 @@ import { CONTENT_VERSION } from '../content/version.ts';
 import { missingContent } from '../game/check.ts';
 import type { ExpeditionDef } from '../game/expedition.ts';
 import type { BannerDef } from '../engine/index.ts';
-import { pull } from '../game/gacha.ts';
+import { chooseFocus, pull } from '../game/gacha.ts';
 import { bank, lossBanking, NEW_PROFILE, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
@@ -129,6 +129,14 @@ export function createSaves(adapter: SaveAdapter) {
         const result = pull(await readProfile(), banner, count, seed);
         if (result.ok) await store.write(profileSave, result.profile);
         return result;
+      }),
+
+    /** Keeps a new Focus for the banner; pity and the 50/50 losses carry over (owner, 28 Oct). */
+    focus: (banner: BannerDef, character: string) =>
+      enqueue(async () => {
+        const profile = chooseFocus(await readProfile(), banner, character);
+        await store.write(profileSave, profile);
+        return profile;
       }),
 
     /** The profile as saved, after any writes in flight. */

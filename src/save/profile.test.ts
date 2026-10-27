@@ -6,7 +6,7 @@ import { memoryAdapter } from './adapters.ts';
 import { profileSave } from './profile.ts';
 import { createSaveStore } from './store.ts';
 
-const BANNER: BannerDef = { id: 'banner.test', name: 'Test', pity: 'test', ssr: ['virelle', 'kibane'], sr: { one: ['material.flesh'], amount: 1 }, r: { money: 100 } };
+const BANNER: BannerDef = { id: 'banner.test', name: 'Test', pity: 'test', pool: ['virelle', 'kibane'], sr: { one: ['material.flesh'], amount: 1 }, r: { money: 100 } };
 
 describe('the profile save', () => {
   it('survives a reload: a new store on the same storage reads back what was banked', async () => {
@@ -60,8 +60,8 @@ describe('the profile save', () => {
     expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data, savedSchemaVersion: 4 });
   });
 
-  it('keeps the gacha: its stream, pity, history, dupes and items read back as pulled', async () => {
-    const result = pull({ ...NEW_PROFILE, pulls: 40, owned: ['virelle'], dupes: { virelle: 2 } }, BANNER, 10, 3);
+  it('keeps the gacha: its Focus, stream, pity, losses, history, dupes and items read back as pulled', async () => {
+    const result = pull({ ...NEW_PROFILE, pulls: 40, owned: ['virelle'], dupes: { virelle: 2 }, focus: 'kibane' }, BANNER, 10, 3);
     if (!result.ok) throw new Error(result.reason);
     const adapter = memoryAdapter();
     await createSaveStore(adapter, 1).write(profileSave, result.profile);
@@ -70,13 +70,26 @@ describe('the profile save', () => {
 
   it('never writes a malformed pull history or negative items', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
-    const result = pull({ ...NEW_PROFILE }, BANNER, 1, 3);
+    const result = pull({ ...NEW_PROFILE, focus: 'virelle' }, BANNER, 1, 3);
     if (!result.ok) throw new Error(result.reason);
     const { gacha } = result.profile;
     await expect(saves.write(profileSave, { ...result.profile, items: { pollen: -1 } })).rejects.toThrow();
     await expect(saves.write(profileSave, { ...result.profile, dupes: { virelle: 0 } })).rejects.toThrow();
     await expect(saves.write(profileSave, { ...result.profile, gacha: { ...gacha!, history: [{ ...gacha!.history[0]!, rarity: 'ur' as 'r' }] } })).rejects.toThrow();
     await expect(saves.write(profileSave, { ...result.profile, gacha: { ...gacha!, history: [{ ...gacha!.history[0]!, pityAfter: -1 }] } })).rejects.toThrow();
+    await expect(saves.write(profileSave, { ...result.profile, gacha: { ...gacha!, losses: { character: -1 } } })).rejects.toThrow();
+    await expect(saves.write(profileSave, { ...result.profile, gacha: { ...gacha!, history: [{ ...gacha!.history[0]!, fiftyFifty: 'maybe' as 'won' }] } })).rejects.toThrow();
+  });
+
+  it('a v5 profile (Standard banner, 27 Oct) carries its pity to the character banner, with no 50/50 lost and its pulls kept', async () => {
+    const adapter = memoryAdapter();
+    const record = { n: 1, banner: 'banner.standard', rarity: 'r', items: { pollen: 1, money: 100 }, pityBefore: 6, pityAfter: 7, bloomsBefore: 3, bloomsAfter: 2 };
+    const data = { pulls: 2, runs: 1, owned: [], items: { pollen: 1, money: 100 }, gacha: { stream: 99, pity: { standard: 7 }, history: [record] } };
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 5, contentVersion: 1, data }));
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual({
+      ...data,
+      gacha: { stream: 99, pity: { character: 7 }, losses: {}, history: [{ ...record, lossesBefore: 0, lossesAfter: 0 }] },
+    });
   });
 
   it('never writes presets with the wrong number of places, a blank name, or a chosen team that is not one of them', async () => {

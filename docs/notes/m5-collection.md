@@ -26,14 +26,14 @@ Code keeps its plain names (`pulls`, `money`); only the screens use these.
 
 DESIGN.md fixes the rules: SSR 3%, SR 15%, R 82%; hard pity at pull 30; no soft pity; a ten-pull gives at least one SR. Odds, pity, the pool and the history are always on screen, and every pull is audited. Gacha randomness has its own seeded stream in the profile.
 
-- **Standard banner only in M5 (owner).** Its pool is the four banner characters.
-- **Featured banners, later:** no rotation and no clock. A menu lets you pick which Featured banner to pull on, freely (owner). Its 50/50 and the two-loss guarantee come with it.
+- **No Standard banner (owner, 28 Oct; replaces "Standard only in M5").** One character banner, whose pool is the four banner characters. The player picks a Focus from it, any time; each SSR is a 50/50 for her, and after two losses the next is her. Pity and losses carry over a change of Focus. A lost 50/50 gives a random other pool character and extra Pollen.
 - **SR and R before weapons exist** (owner): an SR gives ascension materials, and an R gives Memories and Ducats. They become weapons in M6.
 - **Purified Blooms to start:** a new profile starts with 10; the current profile keeps the ones it has banked (owner).
 - **The banner screen:** Pull 1 and Pull 10, the odds table, the pity counter ("SSR guaranteed within N pulls"), the pool, and the recent history with each pull's pity before and after.
 
 **As built in M5.3 (27 Oct; placeholders, my call):**
-- An SR gives 1 ascension material of a random Domain; an R gives 1 Faint Memory and 100 Ducats.
+- An SR gives 1 ascension material of a random Domain; an R gives 1 Faint Memory and 100 Ducats. A lost 50/50 gives 10 Pollen more (28 Oct).
+- Pulling needs a Focus; a profile has none until the player picks one. Pity counted on the Standard banner (27 Oct) carried over to the character banner.
 - A ten-pull's SR is its tenth pull, upgraded from R only if the nine before were all R. Hard pity counts from the last SSR, per banner family; the screen shows "SSR guaranteed within N pulls".
 - The audit keeps every pull in the profile: banner, rarity, what it gave (Pollen included), the character and dupe handling for an SSR, any guarantee, and pity and Blooms before and after. The screen shows the newest 20.
 - The gacha stream is seeded from the browser on a profile's first pull and lives in the profile after that.
@@ -67,7 +67,7 @@ Virelle (Flesh, striker), Isadora (Rapture, spender and scaler), Kibane (Spirit,
 
 1. **M5.1 Roster and party select:** the profile owns characters; choose four before a run; the working names on screen.
 2. **M5.2 The banner four:** kits and dupe effects approved, then as content with scenario tests; their art.
-3. **M5.3 The gacha:** the Standard banner, rates and pity, SR and R as materials, the audit history, the banner screen, Pollen counted.
+3. **M5.3 The gacha:** the character banner and its Focus (28 Oct), rates and pity, SR and R as materials, the audit history, the banner screen, Pollen counted.
 4. **M5.4 Dupes:** C1–C5 for the banner four, and overflow into Pollen.
 5. **M5.5 Levels, Memories and ascension:** Ducats, Memories, level up with refunds, ascension materials, banking them at run end.
 6. **M5.6 Collection (owner playtest):** pull, build up a character, and take a party of your choosing through a run.
