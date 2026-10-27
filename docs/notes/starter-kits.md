@@ -68,7 +68,7 @@ Votive Candle is the starter team's Ritual payoff, so Spirit's held-turn decisio
 
 ## M1 enemy (my discretion; veto freely)
 
-**Bloom-Rib Hound** — attacker, HP 150. Intents cycle in order, each shown with its exact number:
+**Bloom-Rib Hound** — attacker, HP 150 (225 since the owner's tuning on 27 Oct). Intents cycle in order, each shown with its exact number:
 1. **Bite:** deal 12.
 2. **Bristle:** gain 10 Shield, deal 6.
 3. **Maul:** deal 18.

@@ -14,7 +14,7 @@ export const podsAndLantern = encounter({
 
 export const twoHounds = encounter({
   id: 'encounter.two-hounds', tier: 'normal',
-  enemies: [{ enemy: 'enemy.bloom-rib-hound', hp: 70 }, { enemy: 'enemy.bloom-rib-hound', hp: 70 }],
+  enemies: [{ enemy: 'enemy.bloom-rib-hound', hp: 105 }, { enemy: 'enemy.bloom-rib-hound', hp: 105 }],
 });
 
 export const thornWall = encounter({ id: 'encounter.thorn-wall', tier: 'elite', enemies: ['enemy.thorn-wall-matron'] });

@@ -53,16 +53,18 @@ It's once per combat. The portrait shows the Transcended state. Your idea of a s
 
 These are from "Who they are" in DESIGN.md. Each one covers a role, and each needs a sprite through `npm run art` before it looks finished; until then it stands in as a dummy. Intents cycle in order unless noted.
 
+Tuned after the owner's banner-four run (27 Oct): normal enemies have about 50% more HP, and their Seedlings too; elites have double HP and about 10% more damage, and so do the Whelps. The table shows the tuned numbers.
+
 | Enemy | Tier, role | HP | Intents | Art note |
 |---|---|---|---|---|
-| Bloom-Rib Hound | Normal, attacker | 150 → **70** in groups | Bite 12; Bristle 10 Shield + 6; Maul 18 | Done (Hound-02) |
-| Root-Mat | Normal, defender | 60 | Thicken: 14 Shield; Lash 7; Shelter: every enemy gains 6 Shield | A knotted mat of pale roots and bark the size of a cart, blush petals in its gaps, one gnarled root raised like an arm. Bark brown, blush. |
-| Censer Acolyte | Normal, debuffer | 48 | Smoke: party gains 2 Weak; Censer Swing 9; Incense: party gains 2 Vulnerable | A cultist in bruise-violet robes swinging a brass censer on a chain, smoke curling pink, a skin-petal flower sewn over the mouth. Violet, brass. |
-| Pod-Thrower | Normal, summoner | 42 | Lob 7; Sow: summons a Seedling (max 2); Lob 7 | A hunched plant on a root-foot with one long arm ending in a cupped seed pod, ripe pods hanging along its back. Moss green, ivory pods. |
-| Seedling | Summoned | 14 | Nip 4 | A knee-high sprout with a bud for a head and two leaf-hands, raw-pink at the root. |
-| Lantern Surveyor | Normal, buffer | 52 | Tend: heals the lowest-HP ally 10; Signal: every enemy gains 5 Shield; Lantern Swing 8 | A lost expedition surveyor in an oxblood survey coat and pack, brass lantern raised, pale shoots growing from the collar. Oxblood, brass, lamp-gold. |
-| **Thorn-Wall Matron** | Elite, defender (tests burst) | 160 | Wall: 25 Shield; Thorn Lash 14 (Bleed 2); Wall; Crush 22. Resists control. | A towering figure of woven thorn-stems and petal-walls, a woman's face at the crown, blush roses as shields on both arms. Thorn green, blush. |
-| **Hound Mother** | Elite, swarm (tests multi-target) | 140 | Howl: summons 2 Bloom-Rib Whelps (25 HP, Bite 6); Rend 12; Howl. Resists control. | A Bloom-Rib Hound twice the size, ribs fully opened into a cage of petals, whelps' shoots trailing from its flanks. Grey, raw pink. |
+| Bloom-Rib Hound | Normal, attacker | 225 → **105** in groups | Bite 12; Bristle 10 Shield + 6; Maul 18 | Done (Hound-02) |
+| Root-Mat | Normal, defender | 90 | Thicken: 14 Shield; Lash 7; Shelter: every enemy gains 6 Shield | A knotted mat of pale roots and bark the size of a cart, blush petals in its gaps, one gnarled root raised like an arm. Bark brown, blush. |
+| Censer Acolyte | Normal, debuffer | 72 | Smoke: party gains 2 Weak; Censer Swing 9; Incense: party gains 2 Vulnerable | A cultist in bruise-violet robes swinging a brass censer on a chain, smoke curling pink, a skin-petal flower sewn over the mouth. Violet, brass. |
+| Pod-Thrower | Normal, summoner | 63 | Lob 7; Sow: summons a Seedling (max 2); Lob 7 | A hunched plant on a root-foot with one long arm ending in a cupped seed pod, ripe pods hanging along its back. Moss green, ivory pods. |
+| Seedling | Summoned | 21 | Nip 4 | A knee-high sprout with a bud for a head and two leaf-hands, raw-pink at the root. |
+| Lantern Surveyor | Normal, buffer | 78 | Tend: heals the lowest-HP ally 10; Signal: every enemy gains 5 Shield; Lantern Swing 8 | A lost expedition surveyor in an oxblood survey coat and pack, brass lantern raised, pale shoots growing from the collar. Oxblood, brass, lamp-gold. |
+| **Thorn-Wall Matron** | Elite, defender (tests burst) | 320 | Wall: 25 Shield; Thorn Lash 15 (Bleed 2); Wall; Crush 24. Resists control. | A towering figure of woven thorn-stems and petal-walls, a woman's face at the crown, blush roses as shields on both arms. Thorn green, blush. |
+| **Hound Mother** | Elite, swarm (tests multi-target) | 280 | Howl: summons 2 Bloom-Rib Whelps (50 HP, Bite 7); Rend 13; Howl. Resists control. | A Bloom-Rib Hound twice the size, ribs fully opened into a cage of petals, whelps' shoots trailing from its flanks. Grey, raw pink. |
 
 **Encounters** (1–3 enemies, layout per DESIGN.md):
 
@@ -70,7 +72,7 @@ These are from "Who they are" in DESIGN.md. Each one covers a role, and each nee
   - Hound alone
   - Root-Mat + Censer Acolyte
   - Pod-Thrower + Lantern Surveyor
-  - Two Hounds at 70 HP
+  - Two Hounds at 105 HP
 - **Elite:** each elite alone.
 
 **Engine needs:** summoning (a new enemy joins next round, in a free side slot); heal and Shield on allies; intents that apply statuses; control resistance as a trait; a "random without repeat" pattern for later. No new rules beyond the questions below.

@@ -9,6 +9,6 @@ export const rootSwornNovice = enemy({
   intents: [
     { id: 'kneeling-prayer', name: 'Kneeling Prayer', effects: [gainShield(12, 'allies')] },
     { id: 'bitter-incense', name: 'Bitter Incense', effects: [applyStatus(vulnerable, 1)] },
-    { id: 'thorn-rosary', name: 'Thorn Rosary', effects: [damage(8, { target: 'party' })] },
+    { id: 'thorn-rosary', name: 'Thorn Rosary', effects: [damage(9, { target: 'party' })] },
   ],
 });

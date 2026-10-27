@@ -33,28 +33,28 @@ Status: **answered by the owner, 24 Oct** (his answers are folded in below; the 
 
 **The Hollow Abbess.** The Bloom cult's abbess, half taken into a root-tree. Resists control (Falter, like the elites). The concept stands (owner).
 
-**HP bars, not a mark (owner).** 400 HP as two bars of 200. Under the bar, a red blip for each bar still to come; it goes grey when its bar comes up.
+**HP bars, not a mark (owner).** 400 HP as two bars of 200 (two of 500 since 27 Oct). Under the bar, a red blip for each bar still to come; it goes grey when its bar comes up.
 - When a hit empties a bar, the rest of that hit is lost, the next bar comes up full (200/200), and **the Boss is immune to damage for the rest of the party's turn**. The immunity is shown on her, so it's never unexplained.
 - Her next intent becomes **Rouse**: she clears her statuses and the next phase begins. My call on timing: the immunity lasts until the Rouse resolves, so Poison or Bleed ticking at the start of her turn can't chip the fresh bar either.
 - Later, specific pierce effects or stacking instant-death effects may get past the immunity (owner). Nothing in M4 does.
 
 **Phase 1, Sermon,** cycling:
 - Censer Sermon: the party gains 2 Weak.
-- Crozier Blow: 24 damage.
+- Crozier Blow: 26 damage.
 - Call the Faithful: summons a Root-Sworn Novice into each side lane (two at most).
 
 **Phase 2, Rooted,** cycling:
-- Root Lash: 12 damage, twice.
+- Root Lash: 13 damage, twice.
 - Grasping Roots: the party gains 2 Vulnerable.
-- Bloom Burst: 40 damage.
+- Bloom Burst: 44 damage.
 
 **The Bloom doesn't scale bosses (owner).** A raw percentage would force base numbers down and make ordinary runs too easy. Fruiting makes a Boss harder by design instead: a third phase, or a different second phase with its own moveset, possibly with "Bloomed" art ("Matriarch, Fully Bloomed"). Not necessarily for this Boss.
 
 **Draft, my call: the Abbess at Fruiting.** So the idea is built and playable with the first Boss, her second phase at Fruiting is **Full Bloom** instead of Rooted:
-- Root Lash: 12 damage, three times.
+- Root Lash: 13 damage, three times.
 - Pollen Choir: the party gains 2 Weak and 2 Vulnerable.
 - Call the Faithful: as in the Sermon.
-- Bloom Burst: 46 damage.
+- Bloom Burst: 51 damage.
 
 Bloomed art for her is a nice-to-have, after the base sprite.
 
@@ -67,6 +67,8 @@ Bloomed art for her is a nice-to-have, after the base sprite.
 - Changing the Boss pool shifted the board's later content draws, so some fight tiles on existing seeds hold different encounters.
 
 **Her Novices.** After his first win (194 of 210 HP left), the owner found her not dangerous and asked for a small damage raise and adds of her own: tougher than the Acolytes, which fell to one Tentacle volley, and in the way, with debuffs or Shield or healing for her. Draft (placeholders): her numbers above are raised about 25%, then again about 20% after his second win (on full HP, thanks to a timely ultimate), and the Root-Sworn Novice (80 HP) cycles Kneeling Prayer (12 Shield to every enemy, the Abbess included), Bitter Incense (the party gains 1 Vulnerable) and Thorn Rosary (8 damage).
+
+**Tuned after the banner-four run (owner, 27 Oct).** He beat her with Virelle, Maelia, Isadora and Agathe, clearing her first bar on turn 3 and her second the turn after, with 173 HP left after the whole run. Each bar is now 500 (1000 in all), and her damage and the Novices' Thorn Rosary are about 10% higher (the numbers above, and Thorn Rosary 9).
 
 **Art:** one new sprite through `npm run art`. Brief: a tall abbess in bruise-violet vestments, lower body split into pale roots gripping the floor, a brass crozier wound with blush petals, a hollow where her face should be framed by ivory lilies. Violet, brass, ivory. The Novices have their own sprite (brief: `art/briefs/root-sworn-novice.txt`).
 

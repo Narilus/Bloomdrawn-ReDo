@@ -80,7 +80,7 @@ describe('Lantern Surveyor (buffer)', () => {
 });
 
 describe('Thorn-Wall Matron (elite)', () => {
-  it('Wall 25 Shield, then Thorn Lash 14 with 2 Bleed on the party; she resists control', () => {
+  it('Wall 25 Shield, then Thorn Lash 15 with 2 Bleed on the party; she resists control', () => {
     const state = fromEncounter('encounter.thorn-wall');
     const card = { uid: `c${state.nextUid++}`, card: 'test.stun', owner: 'm3' };
     state.piles.hand.push(card);
@@ -89,8 +89,8 @@ describe('Thorn-Wall Matron (elite)', () => {
     const one = run(faltered, endTurn).state;
     expect(one.enemies[0]!.shield).toBe(Math.floor(25 * 0.75));
     const two = run(one, endTurn).state;
-    // Bleed 2 ticks once after the enemy phase: 14 + 2.
-    expect(two.party.hp).toBe(210 - 14 - 2);
+    // Bleed 2 ticks once after the enemy phase: 15 + 2.
+    expect(two.party.hp).toBe(210 - 15 - 2);
     expect(two.party.statuses).toEqual([{ status: 'status.bleed', stacks: 1 }]);
   });
 });
@@ -125,7 +125,7 @@ describe('every encounter', () => {
   });
 
   it('two Hounds take their HP from the encounter', () => {
-    expect(fromEncounter('encounter.two-hounds').enemies.map((e) => [e.hp, e.maxHp])).toEqual([[70, 70], [70, 70]]);
+    expect(fromEncounter('encounter.two-hounds').enemies.map((e) => [e.hp, e.maxHp])).toEqual([[105, 105], [105, 105]]);
     expect(intentOf(fromEncounter('encounter.two-hounds').enemies[1]!, registry)?.name).toBe('Bite');
   });
 });

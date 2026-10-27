@@ -41,6 +41,8 @@ const registry: Registry = {
   enemies: { ...gameRegistry.enemies, [resister.id]: resister, [hexer.id]: hexer },
 };
 const HOUND = 'enemy.bloom-rib-hound';
+// The Hound's HP is tuned often; these tests are about the statuses, not the number.
+const HOUND_HP = gameRegistry.enemies[HOUND]!.hp;
 
 const begin = (enemies = [HOUND]) => startCombat({ seed: 4, party: STARTER_PARTY, enemies }, registry).state;
 function run(state: CombatState, command: Command) {
@@ -64,7 +66,7 @@ describe('Bleed', () => {
     hound(state).shield = 50;
     const after = run(state, endTurn).state;
     // The Tentacle's 3 hits the Shield; Bleed's 4 goes straight to HP.
-    expect(hound(after).hp).toBe(150 - 4);
+    expect(hound(after).hp).toBe(HOUND_HP - 4);
     expect(hound(after).statuses).toEqual([{ status: 'status.bleed', stacks: 3 }]);
   });
 
@@ -99,7 +101,7 @@ describe('Vulnerable and Weak', () => {
     const command: Command = { type: 'playCard', card: strike.uid, target: hound(state).id };
     expect(previewCard(state, command, registry)?.find((p) => p.op === 'damage')?.amount).toBe(16);
     const played = run(state, command).state;
-    expect(hound(played).hp).toBe(150 - 16);
+    expect(hound(played).hp).toBe(HOUND_HP - 16);
     expect(hound(run(played, endTurn).state).statuses).toEqual([]);
   });
 
@@ -108,9 +110,9 @@ describe('Vulnerable and Weak', () => {
     state.party.statuses.push({ status: 'status.weak', stacks: 2 });
     const strike = hold(state, 'leonora.strike');
     const played = run(state, { type: 'playCard', card: strike.uid, target: hound(state).id }).state;
-    expect(hound(played).hp).toBe(150 - 8); // 11 × 0.75, rounded down
+    expect(hound(played).hp).toBe(HOUND_HP - 8); // 11 × 0.75, rounded down
     const after = run(played, endTurn).state;
-    expect(hound(after).hp).toBe(150 - 8 - 2); // the Tentacle's 3 × 0.75
+    expect(hound(after).hp).toBe(HOUND_HP - 8 - 2); // the Tentacle's 3 × 0.75
     expect(after.party.statuses).toEqual([{ status: 'status.weak', stacks: 1 }]);
   });
 
@@ -136,7 +138,7 @@ describe('Vulnerable and Weak', () => {
     const vulnerable = hold(state, 'test.vulnerable');
     const marked = run(state, { type: 'playCard', card: vulnerable.uid, target: hound(state).id }).state;
     const strike = (s: CombatState) => run(s, { type: 'playCard', card: hold(s, 'leonora.strike').uid, target: hound(s).id }).state;
-    expect(150 - hound(strike(marked)).hp).toBe(16);
+    expect(HOUND_HP - hound(strike(marked)).hp).toBe(16);
     // It landed this turn, so this turn's end doesn't count.
     const next = run(marked, endTurn).state;
     expect(hound(next).statuses).toEqual([{ status: 'status.vulnerable', stacks: 1 }]);

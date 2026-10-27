@@ -260,9 +260,9 @@ describe('Isadora', () => {
     enemies: [BIG, 'enemy.bloom-rib-whelp'],
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 3, potency: 10 }, gauges: { isadora: 100 } },
     play: [{ ultimate: 'isadora' }, { card: 'isadora.ecstatic-spin' }],
-    // First volley, pass one: 10, 10 into the 25-HP Whelp, 5 carries on to finish it, 5 to the big dummy;
-    // every later hit goes to the big dummy.
-    expect: { enemyHp: [9999 - (6 * 2 * 10 - 25), 0] },
+    // First volley, pass one: five 10s empty the 50-HP Whelp, the sixth goes to the big dummy; every
+    // later hit goes to the big dummy.
+    expect: { enemyHp: [9999 - (6 * 2 * 10 - 50), 0] },
   });
 
   scenario('Dance of Bells, Transcended, also volleys at once, twice over', {

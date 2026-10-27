@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5.2 The banner four (M5.1 signed off 26 Oct): Flesh's new numbers are in; the owner plays them
+**Current task:** M5.3 The gacha (the owner moved on from M5.2 on 27 Oct, and tests its enemy tuning alongside)
 
 ## Milestones
 
@@ -279,14 +279,14 @@ _Done 25 Oct. The profile (save v3) lists the characters gained; every profile o
 
 _Reworked 26 Oct after the owner's review. Party select is now two panes: five team presets on the left (renamable; save v4 keeps them and the one chosen, and a v3 save's last party becomes Team 1), and the chosen team's four places on the right. A place opens the character list: a character goes in, or swaps places with where she was; Remove empties it. Quick select fills the four in click order. Every character's art stands at one height (roster, places, character page), so wide art (Anthe) is no longer shrunk; wider art is cut at the sides. Tests: the preset rules in `src/game/profile.test.ts`, the v3 migration in `src/save/profile.test.ts`, the presets in `src/app/saves.test.ts`, `e2e/party.spec.ts` (including Anthe's art height against Maelia's)._
 
-### M5.2 The banner four
+### M5.2 The banner four ✅ (the owner moved on 27 Oct)
 Virelle, Isadora, Kibane and Hester as content: kits and reward cards from `docs/notes/banner-kits.md` (reviewed by the owner 25 Oct), with the engine pieces it lists. A lab script in `tools/lab/` measures damage per turn for Flesh, Rapture and Spirit pairs, so Spirit's numbers can be set against Rapture's snowball. Sprites and portraits through `npm run art`; the owner picks.
 **Done when:**
 - every card, passive, ultimate, Transcend and reward card has a scenario test;
 - the owner has seen the damage curves and agreed Spirit's numbers;
 - the owner has picked the art.
 
-_In progress 26 Oct. The engine pieces are in (`repeat`, `targetStacks`, `volleyFired` and `controlled` events, filters by status, keyword, card and party, a `volleys` modifier and statuses that end with the turn; `src/engine/hooks.test.ts`). The four kits are content (`src/content/characters/`), with a scenario for every card, passive, ultimate, Transcend and reward card (`src/content/scenarios/banner.test.ts`). Dev builds take `?owned=all` to field them before the gacha. `npm run lab` measures the damage curves (`tools/lab/`); the results are in the kits note. 27 Oct: the owner agreed the Spirit proposal (Ritual damage per Essence and Essence per held Ritual doubled), and it is in. He picked Virelle 01, Isadora 02 and Hester 01, now in the game, and Kibane 04 from a rewritten brief. Flesh trailed both other Domains in the lab; his tuning is in (combo Virelle, Maelia's Strike rider, Poison ×4, Bleed ×3, with Fleeting copies in the engine), and Flesh now leads over turns 1–4 and reaches about three-quarters of Rapture over ten._
+_In progress 26 Oct. The engine pieces are in (`repeat`, `targetStacks`, `volleyFired` and `controlled` events, filters by status, keyword, card and party, a `volleys` modifier and statuses that end with the turn; `src/engine/hooks.test.ts`). The four kits are content (`src/content/characters/`), with a scenario for every card, passive, ultimate, Transcend and reward card (`src/content/scenarios/banner.test.ts`). Dev builds take `?owned=all` to field them before the gacha. `npm run lab` measures the damage curves (`tools/lab/`); the results are in the kits note. 27 Oct: the owner agreed the Spirit proposal (Ritual damage per Essence and Essence per held Ritual doubled), and it is in. He picked Virelle 01, Isadora 02 and Hester 01, now in the game, and Kibane 04 from a rewritten brief. Flesh trailed both other Domains in the lab; his tuning is in (combo Virelle, Maelia's Strike rider, Poison ×4, Bleed ×3, with Fleeting copies in the engine), and Flesh now leads over turns 1–4 and reaches about three-quarters of Rapture over ten. After his run with Virelle, Maelia, Isadora and Agathe (Boss down in two turns, 173 HP left) enemies were tuned: normal ones about 50% more HP, elites double HP and about 10% more damage, the Boss two bars of 500 and about 10% more damage (`docs/notes/m2-content.md`, `docs/notes/m4-run.md`). He tests these alongside M5.3._
 
 ### M5.3 The gacha
 The Standard banner (the banner four), on its own seeded stream in the profile: SSR 3%, SR 15%, R 82%, hard pity at 30, a ten-pull with at least one SR. Before weapons, an SR gives ascension materials and an R gives Memories and Ducats. Every pull is audited, gives Pollen, and spends one Purified Bloom. A new profile starts with 10. The banner screen: Pull 1 and Pull 10, the odds, the pity counter, the pool and the recent history.
