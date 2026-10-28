@@ -13,7 +13,7 @@ Primary reference: **Morimens** (party deckbuilding, Domains, stats and builds).
 ### Pillars
 
 1. **The party is the deck.** Four characters each bring five cards, a passive and an ultimate. Composition changes the deck, the resource engines and the run plan.
-2. **Ethical collection.** Every pull is earned in play. Odds, pity and history are always visible. No money, no stamina, no walls.
+2. **Ethical collection.** Every pull is earned in play. Odds, pity and history are always at hand. No money, no stamina, no walls.
 3. **RPG growth.** Levels, ascension, dupes and weapons make your team stronger. Hard content becomes comfortable, and deeper content opens.
 4. **Readable tactics.** Card effects, enemy intents and costs are clear before you commit. The horror is in the art, never in hidden rules.
 5. **Runs as temptation.** The map asks what you will pay to linger, to return, or to take a gift from the Bloom.
@@ -25,7 +25,7 @@ Bloomdrawn has no real-money transactions of any kind, and nothing in the game e
 
 - **No purchases.** No paid pulls, premium currency, battle pass, cosmetics, bundles or ads-for-rewards.
 - **Direct pulls.** A reward that says "1 pull" is one pull. There is no gem-to-ticket conversion chain, and no other currency converts into pulls.
-- **Visible odds.** Rates, pity count, guarantee state, pool contents and pull history are always on screen at the banner.
+- **Visible odds.** At the banner, the pity count is always on screen, and rates, guarantee state, pool contents and pull history are one click away (Rules, History, Switch; owner, 29 Oct).
 - **No walls.** No energy, stamina or daily caps. Progression systems create goals and challenges, never gates on play time.
 - **No pressure.** No expiring offers, streak punishments or login chores. A character never becomes permanently unobtainable.
 - **C0 is complete.** A character at zero dupes fully performs her role. Dupes deepen an investment; they never fix a broken kit.
@@ -359,7 +359,7 @@ Tutorial completion (enough for an early multi-pull), run milestones, boss clear
 
 ### Audit
 
-Every pull records banner, Focus, pity and the 50/50 loss count before and after, the result, dupe handling and the pull count before and after. The banner screen warns when the Focus is at C5, since further copies of her become Pollen (owner, 28 Oct). Recent history is visible in-game. Gacha randomness uses its own seeded stream and never touches run randomness.
+Every pull records banner, Focus, pity and the 50/50 loss count before and after, the result, dupe handling and the pull count before and after. The banner screen warns when the Focus is at C5, since further copies become Pollen (owner, 28 Oct). The full history is in-game, behind History. Gacha randomness uses its own seeded stream and never touches run randomness.
 
 ## Identity and art direction
 

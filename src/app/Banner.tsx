@@ -19,15 +19,17 @@ import {
   type PullResult,
 } from '../game/gacha.ts';
 import { BLOOM, plural, type Profile } from '../game/profile.ts';
-import { battleArt } from '../stage/art.ts';
+import { Icon } from './icons.tsx';
+import { Art } from './Roster.tsx';
 
-// The banner screen (docs/notes/m5-collection.md, "The gacha"): the pool, where the player picks a
-// Focus (owner, 28 Oct), Pull 1 and Pull 10, the odds, the pity counter, the 50/50 losses and the
-// recent history. Odds, pity and history are always on screen (DESIGN.md).
+// The banner screen (docs/notes/m5-collection.md, "The gacha"; owner, 29 Oct): the Focus large,
+// the Purified Blooms top right, and along the bottom Back, Rules (the odds and every rule), History
+// (every pull, under the 50/50 status), Switch (the pool, to change the Focus), Pull 1 and Pull 10.
+// The pity counter stays on screen. No gendered words here: the roster may not stay all women.
 
 const RARITY: Record<PullRecord['rarity'], string> = { ssr: 'SSR', sr: 'SR', r: 'R' };
 const FIFTY_FIFTY: Record<NonNullable<PullRecord['fiftyFifty']>, string> = { won: '50/50 won', lost: '50/50 lost', guaranteed: 'Focus guaranteed' };
-const HISTORY_SHOWN = 20;
+const DOMAIN_LABEL: Record<string, string> = { flesh: 'Flesh', rapture: 'Rapture', spirit: 'Spirit', unbound: 'Unbound' };
 
 const itemName = (id: string) => ITEM_NAMES[id] ?? id;
 const itemsText = (items: Record<string, number>) =>
@@ -37,7 +39,7 @@ const itemsText = (items: Record<string, number>) =>
 const percent = (rate: number) => `${Math.round(rate * 1000) / 10}%`;
 const characterName = (id: string) => registry.characters[id]?.name ?? id;
 
-/** What a pull gave, in words: the character and her dupe handling, or the items, Pollen last. */
+/** What a pull gave, in words: the character and the dupe handling, or the items, Pollen last. */
 export function pullText(record: PullRecord): string {
   const { pollen: _pollen, ...rest } = record.items;
   if (record.character) {
@@ -54,6 +56,9 @@ const notesText = (record: PullRecord) =>
     .filter(Boolean)
     .join(', ');
 
+/** Owned or not, and the dupe level. */
+const ownedText = (profile: Profile, id: string) => (profile.owned.includes(id) ? `Owned${profile.dupes?.[id] ? `, C${profile.dupes[id]}` : ''}` : 'Not owned');
+
 interface BannerProps {
   profile: Profile;
   onPull: (banner: BannerDef, count: 1 | typeof TEN_PULL) => Promise<PullResult>;
@@ -62,16 +67,21 @@ interface BannerProps {
   onBack: () => void;
 }
 
+/** Which container is open over the banner. */
+type Open = 'switch' | 'history' | 'rules' | 'results' | null;
+
 export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProps) {
   const banner = CHARACTER_BANNER;
   const [profile, setProfile] = useState(initial);
   const [last, setLast] = useState<PullRecord[]>([]);
+  const [open, setOpen] = useState<Open>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pity = pityOf(profile, banner);
   const losses = lossesOf(profile, banner);
   const focus = profile.focus && banner.pool.includes(profile.focus) ? profile.focus : undefined;
-  const history = (profile.gacha?.history ?? []).slice(-HISTORY_SHOWN).reverse();
+  const def = focus ? registry.characters[focus] : undefined;
+  const history = [...(profile.gacha?.history ?? [])].reverse();
   // Pollen always, then whatever else the profile has banked.
   const banked = Object.keys(ITEM_NAMES).filter((id) => id === 'pollen' || profile.items?.[id]);
 
@@ -89,153 +99,238 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
       if (!result.ok) return setError(result.reason);
       setProfile(result.profile);
       setLast(result.records);
+      setOpen('results');
     });
-  const focusOn = (id: string) => act(async () => setProfile(await onFocus(banner, id)));
+  const focusOn = (id: string) =>
+    act(async () => {
+      if (id !== focus) setProfile(await onFocus(banner, id));
+      setOpen(null);
+    });
+
+  const close = (
+    <div className="panel-buttons">
+      <button className="ghost" onClick={() => setOpen(null)}>
+        Close
+      </button>
+    </div>
+  );
 
   return (
-    <div className="banner-screen">
-      <section className="banner-main">
+    <div className={`banner-screen domain-${def?.domain ?? ''}`}>
+      <header className="banner-header">
         <h2>{banner.name} banner</h2>
         <p className="banner-blooms">
           {BLOOM}s <strong>{profile.pulls}</strong>
-          <span>{banked.map((id) => `${itemName(id)} ${profile.items?.[id] ?? 0}`).join(' · ')}</span>
         </p>
-        <div className="banner-pool" aria-label="Pool">
-          {banner.pool.map((id) => {
-            const def = registry.characters[id];
-            const dupes = profile.dupes?.[id];
-            const owned = profile.owned.includes(id);
-            return (
-              <button
-                key={id}
-                className={`banner-pool-tile domain-${def?.domain ?? ''}${id === focus ? ' focus' : ''}`}
-                aria-label={characterName(id)}
-                aria-pressed={id === focus}
-                disabled={busy}
-                onClick={() => id !== focus && focusOn(id)}
-              >
-                <div className="banner-pool-art">{battleArt[id] && <img src={battleArt[id]} alt="" draggable={false} />}</div>
-                <strong>{characterName(id)}</strong>
-                <span>{owned ? `Owned${dupes ? `, C${dupes}` : ''}` : 'Not owned'}</span>
-                {id === focus && <em className="banner-focus-tag">Focus</em>}
-              </button>
-            );
-          })}
-        </div>
-        <p className="banner-focus" role="status">
-          {!focus ? (
-            <>Choose a Focus above: the character each SSR's 50/50 is for. You can change her at any time.</>
-          ) : losses >= LOSSES_TO_GUARANTEE ? (
-            <>
-              Your next SSR is guaranteed to be <strong>{characterName(focus)}</strong>.
-            </>
-          ) : (
-            <>
-              50/50s lost in a row: <strong>{losses}</strong> of {LOSSES_TO_GUARANTEE}. After {LOSSES_TO_GUARANTEE}, the next SSR is your Focus.
-            </>
-          )}
-        </p>
-        {focus && (profile.dupes?.[focus] ?? 0) >= MAX_DUPES && (
-          <p className="banner-warning" role="alert">
-            {characterName(focus)} is at C{MAX_DUPES}: another copy of her becomes {POLLEN_PER_OVERFLOW} Pollen.
+      </header>
+
+      <section className="banner-stage">
+        {focus && def ? (
+          <>
+            <div className="banner-focus-info">
+              <em className="banner-focus-tag">Focus</em>
+              <h3>{def.name}</h3>
+              {def.title && <p className="banner-focus-title">{def.title}</p>}
+              <p className="banner-focus-owned">
+                {DOMAIN_LABEL[def.domain] ?? def.domain} · {ownedText(profile, focus)}
+              </p>
+              {(profile.dupes?.[focus] ?? 0) >= MAX_DUPES && (
+                <p className="banner-warning" role="alert">
+                  {def.name} is at C{MAX_DUPES}: any further copy becomes {POLLEN_PER_OVERFLOW} Pollen.
+                </p>
+              )}
+            </div>
+            <Art id={focus} className="banner-focus-art" />
+          </>
+        ) : (
+          <p className="banner-no-focus">
+            Choose a Focus with <strong>Switch</strong>: the character each SSR's 50/50 is for.
           </p>
         )}
-        <table className="banner-odds">
-          <tbody>
-            <tr>
-              <th>SSR</th>
-              <td>{percent(RATES.ssr)}</td>
-              <td>
-                {percent(FOCUS_CHANCE)} your Focus, else one of the other {banner.pool.length - 1}, each as likely (+{POLLEN_PER_LOSS} Pollen)
-              </td>
-            </tr>
-            <tr>
-              <th>SR</th>
-              <td>{percent(RATES.sr)}</td>
-              <td>
-                {banner.sr.amount} of {banner.sr.one.map(itemName).join(', ')}, one at random
-              </td>
-            </tr>
-            <tr>
-              <th>R</th>
-              <td>{percent(RATES.r)}</td>
-              <td>{itemsText(banner.r)}</td>
-            </tr>
-          </tbody>
-        </table>
-        <ul className="banner-rules">
-          <li className="banner-pity">
-            SSR guaranteed within <strong>{HARD_PITY - pity}</strong> {HARD_PITY - pity === 1 ? 'pull' : 'pulls'} ({pity} since the last)
-          </li>
-          <li>Every ten-pull has an SR or better. Every pull gives {POLLEN_PER_PULL} Pollen.</li>
-          <li>Pity and 50/50 losses carry over when you change your Focus.</li>
-        </ul>
+      </section>
+
+      <footer className="banner-footer">
         <div className="panel-buttons">
+          <button className="ghost" onClick={onBack}>
+            Back
+          </button>
+          <button className="ghost" onClick={() => setOpen('rules')}>
+            Rules
+          </button>
+          <button className="ghost" onClick={() => setOpen('history')}>
+            History
+          </button>
+        </div>
+        <p className="banner-pity">
+          SSR guaranteed within <strong>{HARD_PITY - pity}</strong> {HARD_PITY - pity === 1 ? 'pull' : 'pulls'}
+        </p>
+        <div className="panel-buttons">
+          <button className={`ghost banner-switch${focus ? '' : ' urgent'}`} disabled={busy} onClick={() => setOpen('switch')}>
+            <Icon name="switch" /> Switch
+          </button>
           <button className="end-turn" disabled={busy || !focus || profile.pulls < 1} onClick={() => pullOn(1)}>
             Pull 1 <small>{plural(1, BLOOM)}</small>
           </button>
           <button className="end-turn" disabled={busy || !focus || profile.pulls < TEN_PULL} onClick={() => pullOn(TEN_PULL)}>
             Pull 10 <small>{plural(TEN_PULL, BLOOM)}</small>
           </button>
-          <button className="ghost" onClick={onBack}>
-            Back
-          </button>
         </div>
         {error && (
-          <p className="title-error" role="alert">
+          <p className="title-error banner-error" role="alert">
             {error}
           </p>
         )}
-      </section>
+      </footer>
 
-      <section className="banner-side">
-        {last.length > 0 && (
-          <div className="banner-results" aria-label="Results">
+      {open === 'switch' && (
+        <div className="team-picker banner-dialog" role="dialog" aria-label="Choose a Focus">
+          <h3>Choose a Focus</h3>
+          <div className="team-picker-grid">
+            {banner.pool.map((id) => {
+              const tile = registry.characters[id];
+              return (
+                <button
+                  key={id}
+                  className={`roster-tile domain-${tile?.domain ?? ''}${id === focus ? ' chosen' : ''}`}
+                  aria-label={characterName(id)}
+                  aria-pressed={id === focus}
+                  disabled={busy}
+                  onClick={() => focusOn(id)}
+                >
+                  <Art id={id} className="roster-art" />
+                  <strong>{characterName(id)}</strong>
+                  <span>{ownedText(profile, id)}</span>
+                  {id === focus && <em className="banner-focus-tag">Focus</em>}
+                </button>
+              );
+            })}
+          </div>
+          <p className="banner-dialog-note">Pity and 50/50 losses carry over when you change your Focus.</p>
+          {close}
+        </div>
+      )}
+
+      {open === 'history' && (
+        <div className="team-picker banner-dialog" role="dialog" aria-label="History">
+          <header className="banner-dialog-header">
+            <h3>History</h3>
+            <p className="banner-focus" role="status">
+              {!focus ? (
+                <>No Focus chosen.</>
+              ) : losses >= LOSSES_TO_GUARANTEE ? (
+                <>
+                  Your next SSR is guaranteed to be <strong>{characterName(focus)}</strong>.
+                </>
+              ) : (
+                <>
+                  50/50s lost in a row: <strong>{losses}</strong> of {LOSSES_TO_GUARANTEE}. After {LOSSES_TO_GUARANTEE}, the next SSR is your Focus.
+                </>
+              )}
+            </p>
+            <p className="banner-banked">Banked: {banked.map((id) => `${itemName(id)} ${profile.items?.[id] ?? 0}`).join(' · ')}</p>
+          </header>
+          <div className="banner-history-scroll">
+            {history.length === 0 ? (
+              <p className="banner-empty">No pulls yet.</p>
+            ) : (
+              <table className="banner-history" aria-label="Pulls">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Result</th>
+                    <th>Focus</th>
+                    <th>Pity</th>
+                    <th>Losses</th>
+                    <th>Blooms</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((r) => (
+                    <tr key={r.n} className={`rarity-${r.rarity}`}>
+                      <td>{r.n}</td>
+                      <td>
+                        <em>{RARITY[r.rarity]}</em> {pullText(r)}
+                        {notesText(r) && <small> ({notesText(r)})</small>}
+                      </td>
+                      <td>{r.focus ? characterName(r.focus) : ''}</td>
+                      <td>
+                        {r.pityBefore} → {r.pityAfter}
+                      </td>
+                      <td>
+                        {r.lossesBefore} → {r.lossesAfter}
+                      </td>
+                      <td>
+                        {r.bloomsBefore} → {r.bloomsAfter}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+          {close}
+        </div>
+      )}
+
+      {open === 'rules' && (
+        <div className="team-picker banner-dialog" role="dialog" aria-label="Rules">
+          <h3>Rules</h3>
+          <div className="banner-rules-body">
+            <table className="banner-odds">
+              <tbody>
+                <tr>
+                  <th>SSR</th>
+                  <td>{percent(RATES.ssr)}</td>
+                  <td>
+                    {percent(FOCUS_CHANCE)} your Focus, else one of the other {banner.pool.length - 1}, each as likely (+{POLLEN_PER_LOSS} Pollen)
+                  </td>
+                </tr>
+                <tr>
+                  <th>SR</th>
+                  <td>{percent(RATES.sr)}</td>
+                  <td>
+                    {banner.sr.amount} of {banner.sr.one.map(itemName).join(', ')}, one at random
+                  </td>
+                </tr>
+                <tr>
+                  <th>R</th>
+                  <td>{percent(RATES.r)}</td>
+                  <td>{itemsText(banner.r)}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ul className="banner-rules">
+              <li>
+                An SSR comes by the {HARD_PITY}th pull after the last one at the latest. Pulls since the last SSR: {pity}.
+              </li>
+              <li>After {LOSSES_TO_GUARANTEE} lost 50/50s in a row, the next SSR is your Focus.</li>
+              <li>Pity and 50/50 losses carry over when you change your Focus.</li>
+              <li>Every ten-pull has an SR or better.</li>
+              <li>
+                A character's copies after the first raise their level from C1 to C{MAX_DUPES}; past C{MAX_DUPES}, each becomes {POLLEN_PER_OVERFLOW} Pollen.
+              </li>
+              <li>Every pull costs one {BLOOM} and gives {POLLEN_PER_PULL} Pollen.</li>
+            </ul>
+          </div>
+          {close}
+        </div>
+      )}
+
+      {open === 'results' && (
+        <div className="result reward banner-dialog" role="dialog" aria-label="Results">
+          <div className={`banner-results${last.length > 1 ? ' ten' : ''}`}>
             {last.map((r) => (
               <div key={r.n} className={`banner-result rarity-${r.rarity}`}>
+                {r.character && <Art id={r.character} className="banner-result-art" />}
                 <em>{RARITY[r.rarity]}</em>
                 <span>{pullText(r)}</span>
+                {r.fiftyFifty && <small>{FIFTY_FIFTY[r.fiftyFifty]}</small>}
               </div>
             ))}
           </div>
-        )}
-        <h3>History</h3>
-        {history.length === 0 ? (
-          <p className="banner-empty">No pulls yet.</p>
-        ) : (
-          <table className="banner-history" aria-label="History">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Result</th>
-                <th>Pity</th>
-                <th>Losses</th>
-                <th>Blooms</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((r) => (
-                <tr key={r.n} className={`rarity-${r.rarity}`}>
-                  <td>{r.n}</td>
-                  <td>
-                    <em>{RARITY[r.rarity]}</em> {pullText(r)}
-                    {notesText(r) && <small> ({notesText(r)})</small>}
-                  </td>
-                  <td>
-                    {r.pityBefore} → {r.pityAfter}
-                  </td>
-                  <td>
-                    {r.lossesBefore} → {r.lossesAfter}
-                  </td>
-                  <td>
-                    {r.bloomsBefore} → {r.bloomsAfter}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+          {close}
+        </div>
+      )}
     </div>
   );
 }

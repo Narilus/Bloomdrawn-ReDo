@@ -24,12 +24,12 @@ Code keeps its plain names (`pulls`, `money`); only the screens use these.
 
 ## The gacha
 
-DESIGN.md fixes the rules: SSR 3%, SR 15%, R 82%; hard pity at pull 30; no soft pity; a ten-pull gives at least one SR. Odds, pity, the pool and the history are always on screen, and every pull is audited. Gacha randomness has its own seeded stream in the profile.
+DESIGN.md fixes the rules: SSR 3%, SR 15%, R 82%; hard pity at pull 30; no soft pity; a ten-pull gives at least one SR. Odds, pity, the pool and the history are always at hand, and every pull is audited. Gacha randomness has its own seeded stream in the profile.
 
-- **No Standard banner (owner, 28 Oct; replaces "Standard only in M5").** One character banner, whose pool is the four banner characters. The player picks a Focus from it, any time; each SSR is a 50/50 for her, and after two losses the next is her. Pity and losses carry over a change of Focus. A lost 50/50 gives a random other pool character and extra Pollen.
+- **No Standard banner (owner, 28 Oct; replaces "Standard only in M5").** One character banner, whose pool is the four banner characters. The player picks a Focus from it, any time; each SSR is a 50/50 for the Focus, and after two losses the next is the Focus. Pity and losses carry over a change of Focus. A lost 50/50 gives a random other pool character and extra Pollen.
 - **SR and R before weapons exist** (owner): an SR gives ascension materials, and an R gives Memories and Ducats. They become weapons in M6.
 - **Purified Blooms to start:** a new profile starts with 10; the current profile keeps the ones it has banked (owner).
-- **The banner screen:** Pull 1 and Pull 10, the odds table, the pity counter ("SSR guaranteed within N pulls"), the pool, and the recent history with each pull's pity before and after.
+- **The banner screen (owner, 29 Oct; replaces the pool grid):** the Focus large, the Purified Blooms top right, and along the bottom Back, Rules (the odds table and every rule), History (every pull, under the 50/50 status), the pity counter ("SSR guaranteed within N pulls"), Switch (a scrollable grid of the pool, to change the Focus), Pull 1 and Pull 10. No gendered words on it.
 
 **As built in M5.3 (27 Oct; placeholders, my call):**
 - An SR gives 1 ascension material of a random Domain; an R gives 1 Faint Memory and 100 Ducats. A lost 50/50 gives 10 Pollen more (28 Oct).

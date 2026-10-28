@@ -111,6 +111,13 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M4 21h16" fill="none" strokeWidth="2" strokeLinecap="round" />
     </>
   ),
+  // Two arrows chasing each other round a circle: switch.
+  switch: (
+    <>
+      <path d="M19.5 9.5A8 8 0 0 0 5.6 6.4M4.5 14.5a8 8 0 0 0 13.9 3.1" fill="none" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M20.5 3.5v6h-6M3.5 20.5v-6h6" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
 };
 
 export const hasIcon = (name: string | undefined): name is string => name !== undefined && name in PATHS;

@@ -19,7 +19,7 @@ const fullName = (id: string) => {
  * A character's battle art at a fixed height, the same for everyone as on the battlefield, so a wide
  * figure (Anthe) stands as tall as the rest. Art wider than its window is cut at the sides, never shrunk.
  */
-function Art({ id, className }: { id: string; className: string }) {
+export function Art({ id, className }: { id: string; className: string }) {
   const art = battleArt[id];
   return (
     <div className={`char-art ${className}`}>

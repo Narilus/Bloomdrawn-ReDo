@@ -151,6 +151,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - No Standard banner (owner, 28 Oct): one character banner. The player picks a Focus from the banner pool and can change it any time. SSRs are 50/50 Focus or a random other pool character, guaranteed Focus after two losses. Pity and the loss count belong to the profile and survive Focus changes. The pool only grows, and starters never enter it. One currency (Purified Blooms). Weapons get their own banner and pity later, on the same currency. The screen warns when the Focus is already at C5.
 
+- Banner screen layout (owner, 29 Oct): show only the Focus, large, instead of a grid of the pool; a Switch button (rotating-arrows icon) at the bottom right opens a scrollable grid of the pool. History is a button that opens past pulls, with the 50/50 (guarantee) status pinned in its header. A Rules button opens the verbose information, rates included. These buttons all sit along the bottom. Purified Blooms move to the top right. No gendered words on the banner screen, in case of male characters later.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

@@ -2136,24 +2136,30 @@ kbd {
   right: 64px;
 }
 
-/* The banner (M5.3): the pool, odds, pity and pull buttons on the left; the last results and the history on the right. */
+/* The banner (M5.3; owner, 29 Oct): the Focus large in the middle, the Blooms top right, every button along the bottom; the pool, history, rules and results open over it. */
 .banner-screen {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: 1040px 1fr;
-  gap: 48px;
-  padding: 56px 72px;
+  grid-template-rows: auto 1fr auto;
+  padding: 48px 72px 44px;
   background:
-    radial-gradient(ellipse at 30% 30%, rgba(201, 164, 90, 0.14), transparent 60%),
+    radial-gradient(ellipse at 62% 45%, var(--banner-glow, rgba(201, 164, 90, 0.16)), transparent 55%),
     var(--charcoal-plum);
   color: var(--petal-ivory);
 }
 
-.banner-main {
-  display: grid;
-  align-content: start;
-  gap: 18px;
+.banner-screen.domain-flesh { --banner-glow: color-mix(in srgb, var(--flesh) 28%, transparent); }
+.banner-screen.domain-rapture { --banner-glow: color-mix(in srgb, var(--rapture) 28%, transparent); }
+.banner-screen.domain-spirit { --banner-glow: color-mix(in srgb, var(--spirit) 28%, transparent); }
+.banner-screen.domain-unbound { --banner-glow: color-mix(in srgb, var(--unbound) 28%, transparent); }
+
+.banner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  position: relative;
+  z-index: 1;
 }
 
 .banner-screen h2 {
@@ -2164,148 +2170,142 @@ kbd {
 }
 
 .banner-blooms {
-  margin: -8px 0 0;
+  margin: 0;
   display: flex;
   align-items: baseline;
-  gap: 18px;
+  gap: 16px;
+  padding: 8px 22px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 12px;
+  background: rgba(30, 21, 25, 0.6);
   font-family: var(--serif);
   font-size: 26px;
 }
 
 .banner-blooms strong {
-  font-size: 38px;
+  font-size: 40px;
   color: var(--antique-gold);
 }
 
-.banner-blooms span {
-  font-family: var(--sans);
-  font-size: 18px;
-  opacity: 0.75;
-}
-
-.banner-pool {
-  display: flex;
-  gap: 16px;
-}
-
-.banner-pool-tile {
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  width: 232px;
-  padding: 8px 8px 12px;
-  border: 2px solid var(--mauve-shadow);
-  border-radius: 14px;
-  background: linear-gradient(180deg, var(--dusk-plum), var(--aubergine));
-  font-family: var(--serif);
-}
-
-.banner-pool-tile.domain-flesh { border-color: var(--flesh); }
-.banner-pool-tile.domain-rapture { border-color: var(--rapture); }
-.banner-pool-tile.domain-spirit { border-color: var(--spirit); }
-.banner-pool-tile.domain-unbound { border-color: var(--unbound); }
-
-.banner-pool-tile {
+/* The Focus: name and standing on the left, the art tall in the middle. */
+.banner-stage {
   position: relative;
-  color: var(--petal-ivory);
-  cursor: pointer;
+  min-height: 0;
 }
 
-.banner-pool-tile.focus {
-  box-shadow: 0 0 0 4px var(--antique-gold), 0 0 24px rgba(184, 149, 90, 0.5);
-  cursor: default;
+.banner-focus-art {
+  position: absolute;
+  left: calc(50% - 550px);
+  bottom: 0;
+  width: 1100px;
+  height: 860px;
+}
+
+.banner-focus-info {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.banner-focus-info h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 88px;
+  line-height: 1;
+  color: var(--petal-ivory);
+  text-shadow: 0 0 24px rgba(18, 12, 16, 0.9);
+}
+
+.banner-focus-title,
+.banner-focus-owned {
+  margin: 0;
+  font-size: 24px;
+}
+
+.banner-focus-title {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--blush);
+}
+
+.banner-focus-owned {
+  opacity: 0.8;
 }
 
 .banner-focus-tag {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  padding: 2px 10px;
+  padding: 2px 12px;
   border-radius: 8px;
   background: var(--antique-gold);
   color: var(--ink);
   font-family: var(--sans);
   font-style: normal;
   font-weight: 800;
+  font-size: 18px;
+}
+
+.roster-tile .banner-focus-tag {
+  position: absolute;
+  top: 8px;
+  left: 10px;
   font-size: 15px;
 }
 
-.banner-focus,
 .banner-warning {
-  margin: 0;
-  font-size: 20px;
-}
-
-.banner-focus strong {
-  color: var(--antique-gold);
-}
-
-.banner-warning {
+  margin: 6px 0 0;
   padding: 8px 14px;
   border: 1px solid var(--raw-pink);
   border-radius: 10px;
+  background: rgba(30, 21, 25, 0.7);
+  font-size: 20px;
   color: var(--blush);
 }
 
-.banner-pool-art {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  width: 100%;
-  height: 170px;
-  overflow: hidden;
-}
-
-.banner-pool-art img {
-  flex: none;
-  height: 100%;
-  width: auto;
-}
-
-.banner-pool-tile strong {
-  font-size: 26px;
-}
-
-.banner-pool-tile span {
-  font-family: var(--sans);
-  font-size: 15px;
-  opacity: 0.75;
-}
-
-.banner-odds {
-  border-collapse: collapse;
-  font-size: 20px;
-}
-
-.banner-odds th,
-.banner-odds td {
-  padding: 6px 14px 6px 0;
-  text-align: left;
-}
-
-.banner-odds th {
-  width: 70px;
+.banner-no-focus {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  text-align: center;
   font-family: var(--serif);
-  font-size: 24px;
+  font-size: 34px;
+  opacity: 0.85;
 }
 
-.banner-odds td:nth-child(2) {
-  width: 80px;
+.banner-no-focus strong {
   color: var(--antique-gold);
-  font-weight: 700;
 }
 
-.banner-rules {
+/* The bottom bar: Back, Rules and History on the left, pity in the middle, Switch and the pulls on the right. */
+.banner-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.banner-pity {
   margin: 0;
-  padding: 0 0 0 22px;
-  display: grid;
-  gap: 6px;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .banner-pity strong {
   color: var(--antique-gold);
-  font-size: 26px;
+  font-size: 28px;
+}
+
+.banner-error {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: 12px;
 }
 
 .banner-screen .end-turn {
@@ -2320,35 +2320,163 @@ kbd {
   opacity: 0.8;
 }
 
-.banner-side {
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  min-width: 0;
-  overflow: hidden;
+.banner-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  background: rgba(30, 21, 25, 0.6);
 }
 
-.banner-side h3 {
+.banner-switch .icon {
+  font-size: 26px;
+  color: var(--antique-gold);
+}
+
+.banner-switch.urgent {
+  box-shadow: 0 0 0 3px var(--antique-gold), 0 0 22px rgba(184, 149, 90, 0.55);
+}
+
+/* The containers over the banner, above its Focus and bottom bar. */
+.banner-dialog {
+  z-index: 5;
+}
+
+.result.banner-dialog {
+  background: rgba(18, 12, 16, 0.88);
+}
+
+.banner-dialog h3 {
   margin: 0;
-  font-family: var(--serif);
-  font-size: 32px;
 }
 
-.banner-results {
+.banner-dialog-note,
+.banner-banked {
+  margin: 0;
+  font-size: 18px;
+  opacity: 0.75;
+}
+
+.banner-dialog-header {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
   gap: 8px;
 }
 
-.banner-result {
-  display: flex;
-  align-items: baseline;
+.banner-focus {
+  margin: 0;
+  font-size: 22px;
+}
+
+.banner-focus strong {
+  color: var(--antique-gold);
+}
+
+.banner-history-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.banner-history {
+  border-collapse: collapse;
+  font-size: 18px;
+}
+
+.banner-history th,
+.banner-history td {
+  padding: 4px 18px 4px 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.banner-history th {
+  position: sticky;
+  top: 0;
+  background: rgb(24, 16, 22);
+  font-family: var(--sans);
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+.banner-empty {
+  margin: 0;
+  font-size: 22px;
+  opacity: 0.7;
+}
+
+.banner-rules-body {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  max-width: 1100px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.banner-odds {
+  border-collapse: collapse;
+  font-size: 22px;
+}
+
+.banner-odds th,
+.banner-odds td {
+  padding: 8px 18px 8px 0;
+  text-align: left;
+}
+
+.banner-odds th {
+  width: 80px;
+  font-family: var(--serif);
+  font-size: 28px;
+}
+
+.banner-odds td:nth-child(2) {
+  width: 90px;
+  color: var(--antique-gold);
+  font-weight: 700;
+}
+
+.banner-rules {
+  margin: 0;
+  padding: 0 0 0 24px;
+  display: grid;
   gap: 10px;
-  padding: 8px 12px;
+  font-size: 22px;
+}
+
+/* The results of a pull: one, or ten in two rows of five. */
+.banner-results {
+  display: grid;
+  grid-template-columns: 300px;
+  gap: 14px;
+}
+
+.banner-results.ten {
+  grid-template-columns: repeat(5, 300px);
+}
+
+.banner-result {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: 4px;
+  padding: 14px 12px;
   border: 1px solid var(--mauve-shadow);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--aubergine);
-  font-size: 17px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.banner-result small {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.banner-result-art {
+  width: 100%;
+  height: 180px;
 }
 
 .banner-result em,
@@ -2357,38 +2485,20 @@ kbd {
   font-weight: 800;
 }
 
+.banner-result em {
+  font-family: var(--serif);
+  font-size: 26px;
+}
+
 .rarity-ssr em { color: var(--antique-gold); }
 .rarity-sr em { color: var(--lilac-glow); }
 .rarity-r em { color: var(--parchment); opacity: 0.7; }
 
 .banner-result.rarity-ssr {
   border-color: var(--antique-gold);
-  box-shadow: 0 0 18px rgba(184, 149, 90, 0.45);
+  box-shadow: 0 0 22px rgba(184, 149, 90, 0.5);
 }
 
 .banner-result.rarity-sr {
   border-color: var(--lavender);
-}
-
-.banner-history {
-  border-collapse: collapse;
-  font-size: 16px;
-}
-
-.banner-history th,
-.banner-history td {
-  padding: 3px 12px 3px 0;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.banner-history th {
-  font-family: var(--sans);
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-.banner-empty {
-  margin: 0;
-  opacity: 0.7;
 }
