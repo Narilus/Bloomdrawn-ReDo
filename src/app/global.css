@@ -2201,29 +2201,6 @@ kbd {
   height: 860px;
 }
 
-/*
- * The Focus breathes: a slow, slight swell pivoting at the feet, the head moving about 7px (owner, 29 Oct:
- * the battlefield's breath was too fast and too big at this size). Its own layer, so it moves smoothly
- * between pixels instead of stepping.
- */
-.banner-focus-art img {
-  transform-origin: 50% 100%;
-  will-change: transform;
-  animation: banner-breath 5s cubic-bezier(0.37, 0, 0.63, 1) infinite;
-}
-
-@keyframes banner-breath {
-  50% {
-    transform: scale(0.998, 1.008);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .banner-focus-art img {
-    animation: none;
-  }
-}
-
 .banner-focus-info {
   position: absolute;
   left: 0;

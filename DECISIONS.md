@@ -153,6 +153,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Banner screen layout (owner, 29 Oct): show only the Focus, large, instead of a grid of the pool; a Switch button (rotating-arrows icon) at the bottom right opens a scrollable grid of the pool. History is a button that opens past pulls, with the 50/50 (guarantee) status pinned in its header. A Rules button opens the verbose information, rates included. These buttons all sit along the bottom. Purified Blooms move to the top right. No gendered words on the banner screen, in case of male characters later.
 
+- No breathing on the banner's Focus for now (owner, 29 Oct): a CSS scale breath looked jerky, and the horizontal pinch made the sprite look off. Living idle art may come much later from our own skeletal or mesh rig (in the spirit of DragonBones or Live2D), well beyond current scope.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
