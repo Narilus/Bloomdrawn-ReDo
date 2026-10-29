@@ -19,6 +19,8 @@ export class Actor {
   /** Every one-off animation still running, so destroy() can stop them before Pixi frees their targets. */
   private readonly running = new Set<AnimationPlaybackControls>();
   private popups = 0;
+  /** Set by destroy(): Pixi frees everything two frames later, so nothing may be destroyed early. */
+  private tornDown = false;
   /** The ground shadow, drawn under everyone and faded with the actor. */
   shadow: Container | undefined;
   /** When a fade-in finishes (performance.now, seconds), so a fall never starts before it. */
@@ -118,7 +120,10 @@ export class Actor {
     const float = this.track(
       animate(label, { alpha: [0, 1, 1, 0], y: [y0 + 10, y0 - 40, y0 - 70, y0 - 90] }, { duration: 1.1, delay, times: [0, 0.15, 0.7, 1] }),
     );
+    // Stopping the float at teardown resolves `finished` too, and Motion still writes this frame's
+    // value afterwards; the label is left for Pixi to free with the stage (StageView), not destroyed here.
     void float.finished.then(() => {
+      if (this.tornDown) return;
       if (!label.destroyed) label.destroy();
       this.popups = Math.max(0, this.popups - 1);
     });
@@ -160,6 +165,7 @@ export class Actor {
   }
 
   destroy(): void {
+    this.tornDown = true;
     this.lungeAnim?.stop();
     this.recoilAnim?.stop();
     for (const a of this.breathAnims) a.stop();
