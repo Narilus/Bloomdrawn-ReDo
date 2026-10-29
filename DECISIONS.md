@@ -155,6 +155,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - No breathing on the banner's Focus for now (owner, 29 Oct): a CSS scale breath looked jerky, and the horizontal pinch made the sprite look off. Living idle art may come much later from our own skeletal or mesh rig (in the spirit of DragonBones or Live2D), well beyond current scope.
 
+- Kibane's C3 (owner, 29 Oct): Foxfire Rite deals 12 × Essence, for now. Dupe text states the new number only, without "instead of" the old one.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

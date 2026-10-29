@@ -94,7 +94,7 @@ export const kibane = character({
   dupes: [
     { text: 'Foxfire charges 15.', passive: foxfire(15) },
     c2(STATS),
-    { text: 'Foxfire Rite deals 12 × Essence instead of 10 ×.', cards: { [foxfireRite.id]: foxfireRiteC3.id } },
+    { text: 'Foxfire Rite deals 12 × Essence.', cards: { [foxfireRite.id]: foxfireRiteC3.id } },
     { text: "Kyubi's Judgement deals +2 per Essence consumed.", ultimate: kyubi(2) },
     { text: "After Kyubi's Judgement, gain back half the Essence consumed, rounded down.", ultimate: kyubi(2, true) },
   ],

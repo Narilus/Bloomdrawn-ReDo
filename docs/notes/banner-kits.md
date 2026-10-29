@@ -70,7 +70,7 @@ Agathe builds the Tentacle count; Isadora raises the damage per hit and spends i
 
 Her ultimate is Spirit's one exception: it spends the shared Essence, Anthe's included, so firing it is a real choice in a Spirit party. Foxfire Rite scales harder than Votive Candle but starts weaker. Her passive pays her for holding, so she grows her own nukes and rewards the delay; with Anthe beside her, each held Ritual gives 4 Essence a turn (owner; doubled from 2 after the lab, 27 Oct). Her ultimate hits every enemy, as Virelle's does (owner).
 
-**Dupes:** C1, Foxfire charges 15. C3, Foxfire Rite deals more per Essence (drafted as 4 + 6 × against the old 5 ×; in M5.4 a placeholder 12 × against today's 10 ×, the same fifth more, for the owner to set). C4, Kyubi's Judgement deals +2 per Essence consumed. C5, after Kyubi's Judgement, gain back half the Essence consumed (rounded down).
+**Dupes:** C1, Foxfire charges 15. C3, Foxfire Rite deals more per Essence (drafted as 4 + 6 × against the old 5 ×; in M5.4 12 × against today's 10 ×, the same fifth more; the owner kept it for now, 29 Oct). C4, Kyubi's Judgement deals +2 per Essence consumed. C5, after Kyubi's Judgement, gain back half the Essence consumed (rounded down).
 
 ## Hester, the Snare-Warden (w): Unbound, debuff and control
 
