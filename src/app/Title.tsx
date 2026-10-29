@@ -22,6 +22,11 @@ type Screen =
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
 const OWN_ALL = import.meta.env.DEV && new URLSearchParams(window.location.search).get('owned') === 'all';
+/** Dev builds only: `?dupes=N` (1 to 5) puts every character with dupe levels at CN, on the roster and in new runs. Nothing is saved. */
+const DEV_DUPES = import.meta.env.DEV ? Math.min(5, Math.max(0, Math.floor(Number(new URLSearchParams(window.location.search).get('dupes')) || 0))) : 0;
+/** The profile's dupe levels, or `?dupes`'s. */
+const dupesOf = (profile: Profile): Profile['dupes'] =>
+  DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes;
 
 /** The characters a profile can field, leaving out any the game no longer has. */
 const ownedBy = (profile: Profile) =>
@@ -66,12 +71,12 @@ export function Game() {
         teams={teamsOf(screen.profile, owned)}
         team={screen.profile.team ?? 0}
         onChange={(teams, team) => void saves.teams(teams, team)}
-        onStart={(party) => void startNew(party, screen.profile.dupes)}
+        onStart={(party) => void startNew(party, dupesOf(screen.profile))}
         onBack={toTitle}
       />
     );
   }
-  if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} dupes={screen.profile.dupes} onBack={toTitle} />;
+  if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} dupes={dupesOf(screen.profile)} onBack={toTitle} />;
   if (screen.kind === 'banner') {
     // The seed only starts the gacha's stream on a profile's first pull; after that the profile carries it.
     return (
