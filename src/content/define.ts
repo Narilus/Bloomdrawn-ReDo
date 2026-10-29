@@ -1,9 +1,21 @@
-import type { CardDef, CharacterDef, DomainDef, EncounterDef, EnemyDef, EventDef, MotifDef, RelicDef, StatusDef } from '../engine/index.ts';
+import type { CardDef, CharacterDef, DomainDef, DupeDef, EncounterDef, EnemyDef, EventDef, MotifDef, RelicDef, StatusDef } from '../engine/index.ts';
 
 // Typed helpers for content files. They return plain JSON-shaped data tagged with `kind`,
 // which is how the registry finds definitions among a module's exports.
 
 export const card = (def: CardDef) => ({ kind: 'card' as const, ...def });
+
+/** A dupe level's version of one of a character's five cards: the card with changes, under its own ID. */
+export const variant = (base: CardDef, level: number, changes: Partial<CardDef>) => {
+  const { kind: _kind, ...def } = base as CardDef & { kind?: string };
+  return card({ ...def, ...changes, id: `${base.id}-c${level}`, variantOf: base.id });
+};
+
+/** C2 is one rule for everyone for now (owner, 25 Oct; docs/notes/banner-kits.md): +10% HP, rounded, and +1 Attack and Defense. */
+export const c2 = (stats: CharacterDef['stats']): DupeDef => ({
+  text: '+10% HP, +1 Attack and +1 Defense.',
+  stats: { hp: Math.round(stats.hp * 1.1), attack: stats.attack + 1, defense: stats.defense + 1 },
+});
 
 /** Takes the card definitions themselves, so a character can't list a card that doesn't exist. */
 export const character = (def: Omit<CharacterDef, 'cards'> & { cards: CardDef[] }) => ({

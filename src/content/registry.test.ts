@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyStatus, damage, gainShield, ifConsume } from '../engine/index.ts';
-import { card, character, domain, status } from './define.ts';
+import { card, character, domain, status, variant } from './define.ts';
 import { registry, validateContent } from './registry.ts';
 import { CHARACTER_BANNER } from './banners.ts';
 import { ITEM_NAMES } from './items.ts';
@@ -77,6 +77,33 @@ describe('content registry', () => {
       "src/content/cards/broken.ts › test.unrewarded: a Domain's generic card must be a card reward",
       'src/content/cards/broken.ts › test.nowhere: domain "tides" is not defined',
       'src/content/cards/broken.ts › test.loose: a card reward needs an owner or a Domain',
+    ]);
+  });
+
+  it("dupe levels: a variant takes one of her cards' place, dealt by her dupe, in the same slot; a dupe swaps only her cards for their variants", () => {
+    // A variant may leave its slot's cost band (Weighted Net costs 1 at C3).
+    const cheap = variant(kit.flavourA, 3, { cost: 1 });
+    const dupes = (cards: Record<string, string>, modifiers = {}) =>
+      character({ ...tester, cards: Object.values(kit), dupes: [{ text: 'C1', cards, passive: { name: 'P', scope: 'combat', text: 'P.', ...modifiers } }] });
+    const ok = validateContent({ './characters/tester.ts': { ...kit, cheap, tester: dupes({ [kit.flavourA.id]: cheap.id }) }, './domains/flesh.ts': { flesh } });
+    expect(ok.errors).toEqual([]);
+    const orphan = variant(kit.flavourB, 3, {});
+    const moved = variant(kit.flavourA, 4, { slot: 'flavourB' });
+    const stranger = card({ ...cheap, id: 'test.stranger', variantOf: 'test.nothing' });
+    const wrong = dupes(
+      { [kit.flavourA.id]: cheap.id, 'test.nothing': cheap.id, [kit.defense.id]: kit.flavourB.id },
+      { modifiers: [{ value: 'stacks', step: 'flat', amount: 1, status: 'status.missing' }] },
+    );
+    expect(validateContent({ './characters/tester.ts': { ...kit, cheap, orphan, moved, stranger, tester: wrong }, './domains/flesh.ts': { flesh } }).errors).toEqual([
+      'src/content/characters/tester.ts › test.flavourb-c3: no dupe level of tester deals it',
+      'src/content/characters/tester.ts › test.flavoura-c4: a variant keeps the slot of "test.flavoura"',
+      'src/content/characters/tester.ts › test.flavoura-c4: no dupe level of tester deals it',
+      `src/content/characters/tester.ts › test.stranger: variantOf "test.nothing" is not one of tester's cards`,
+      'src/content/characters/tester.ts › test.stranger: no dupe level of tester deals it',
+      'src/content/characters/tester.ts › tester: dupes[0].passive.modifiers[0]: unknown status "status.missing"',
+      `src/content/characters/tester.ts › tester: dupes[0].cards: "test.nothing" is not one of tester's cards`,
+      'src/content/characters/tester.ts › tester: dupes[0].cards: "test.flavoura-c3" is not a variant of "test.nothing"',
+      'src/content/characters/tester.ts › tester: dupes[0].cards: "test.flavourb" is not a variant of "test.defense"',
     ]);
   });
 

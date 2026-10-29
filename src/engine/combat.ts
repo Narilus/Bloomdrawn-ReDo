@@ -1,4 +1,5 @@
 import type { CardDef, EnemyEntry, OpCall, Registry } from './defs.ts';
+import { characterOf } from './dupes.ts';
 import type { EngineEvent } from './events.ts';
 import { cardKeywords, hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
@@ -53,6 +54,8 @@ export interface CombatSetup {
   partyHp?: number;
   /** Ultimate gauges carried in from the run, in slot order; default 0. */
   gauges?: number[];
+  /** Dupe levels from the profile, in slot order; default 0 (C0). */
+  dupes?: number[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
   /** The cards the run has gained, dealt in after the personal cards. */
@@ -78,12 +81,14 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     return def;
   };
 
-  const characters = setup.party.map((id) => lookup(registry.characters, id, 'character'));
-  const members = setup.party.map((character, slot) => ({
-    id: `m${slot}`,
-    character,
-    gauge: Math.min(GAUGE_MAX, Math.max(0, setup.gauges?.[slot] ?? 0)),
-  }));
+  const members: Member[] = setup.party.map((character, slot) => {
+    lookup(registry.characters, character, 'character');
+    const member: Member = { id: `m${slot}`, character, gauge: Math.min(GAUGE_MAX, Math.max(0, setup.gauges?.[slot] ?? 0)) };
+    const dupes = Math.floor(setup.dupes?.[slot] ?? 0);
+    if (dupes > 0) member.dupes = dupes;
+    return member;
+  });
+  const characters = members.map((m) => characterOf(m, registry)!);
   const maxHp = characters.reduce((sum, c) => sum + c.stats.hp, 0);
   const deck: CardInstance[] = characters.flatMap((c, slot) =>
     c.cards.map((card) => {
@@ -210,7 +215,7 @@ export function validate(state: CombatState, command: Command, registry: Registr
 
 function validateUltimate(state: CombatState, memberId: EntityId, registry: Registry): string | undefined {
   const member = state.members.find((m) => m.id === memberId);
-  const ultimate = member && registry.characters[member.character]?.ultimate;
+  const ultimate = member && characterOf(member, registry)?.ultimate;
   if (!member || !ultimate) return 'No such ultimate.';
   if (member.gauge < GAUGE_MAX) return 'That ultimate is not charged.';
   return validateCalls(state, ultimateEffects(member, registry), { source: member.id, owner: member.id }, registry);
@@ -268,7 +273,7 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
 /** Empties the gauge and resolves the ultimate. Costs no Mana. */
 function fireUltimate(rc: Resolution, memberId: EntityId): void {
   const member = rc.state.members.find((m) => m.id === memberId);
-  const ultimate = member && rc.registry.characters[member.character]?.ultimate;
+  const ultimate = member && characterOf(member, rc.registry)?.ultimate;
   if (!member || !ultimate) throw new Error(`No ultimate for "${memberId}"`);
   member.gauge = 0;
   enqueue(rc, ultimateEffects(member, rc.registry), { source: member.id, owner: member.id }, ROOT);
@@ -278,7 +283,7 @@ function fireUltimate(rc: Resolution, memberId: EntityId): void {
 
 /** A member's ultimate operations: the Transcended ones once she has Transcended this combat. */
 export function ultimateEffects(member: Member, registry: Registry): OpCall[] {
-  const ultimate = registry.characters[member.character]?.ultimate;
+  const ultimate = characterOf(member, registry)?.ultimate;
   if (!ultimate) return [];
   return member.transcended && ultimate.transcended ? ultimate.transcended.effects : ultimate.effects;
 }

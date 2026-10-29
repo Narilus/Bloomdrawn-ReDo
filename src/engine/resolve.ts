@@ -1,4 +1,5 @@
 import type { OpCall, Registry, TriggerDef } from './defs.ts';
+import { characterOf } from './dupes.ts';
 import type { EngineEvent } from './events.ts';
 import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
@@ -156,7 +157,7 @@ function triggersOf(state: CombatState, registry: Registry, holder: EntityId): H
   const member = state.members.find((m) => m.id === holder);
   const enemy = state.enemies.find((e) => e.id === holder);
   const relic = state.relics.find((r) => r.id === holder);
-  if (member) sets.push([member.character, registry.characters[member.character]?.passive?.triggers]);
+  if (member) sets.push([member.character, characterOf(member, registry)?.passive?.triggers]);
   if (enemy) sets.push([enemy.enemy, registry.enemies[enemy.enemy]?.triggers]);
   if (relic) sets.push([relic.relic, registry.relics[relic.relic]?.triggers]);
   for (const s of holder === PARTY ? state.party.statuses : (enemy?.statuses ?? [])) {

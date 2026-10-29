@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { OpCall } from '../defs.ts';
-import { evaluate, formulaSchema, titleCase, type Formula } from '../formula.ts';
+import { formulaSchema, titleCase, type Formula } from '../formula.ts';
+import { pipeline } from '../modifiers.ts';
 import type { Operation, OpContext } from '../operation.ts';
 import { isAlive, type CombatState } from '../state.ts';
 import { addStacks, bearerOf, landingStatus, type Bearer } from '../statuses.ts';
@@ -41,7 +42,7 @@ export const applyStatusOp: Operation<ApplyStatusArgs> = {
   }),
   validate: (state, args, ctx, registry) => (bearers(state, args, ctx, registry).length > 0 ? undefined : 'No one can bear this status.'),
   resolve(draft, args, ctx, registry) {
-    const stacks = Math.max(0, Math.floor(evaluate(args.stacks, draft, ctx, registry)));
+    const stacks = pipeline('stacks', args.stacks, draft, ctx, registry, undefined, args.status);
     // The enemies' turn plays as one moment: what an enemy applies in it takes hold once it is over
     // (owner, 20 Oct). Everything else, the party's statuses and enemy reactions in your turn, holds at once.
     const pending = draft.phase === 'enemy' && draft.enemies.some((e) => e.id === ctx.source);
@@ -56,11 +57,11 @@ export const applyStatusOp: Operation<ApplyStatusArgs> = {
     };
   },
   preview(state, args, ctx, registry) {
-    const amount = Math.max(0, Math.floor(evaluate(args.stacks, state, ctx, registry)));
+    const amount = pipeline('stacks', args.stacks, state, ctx, registry, undefined, args.status);
     return bearers(state, args, ctx, registry).map((who) => ({ op: 'applyStatus', target: who.id, status: landingStatus(who, args.status, registry), amount }));
   },
   describe(args, show) {
-    const text = `Apply ${show(args.stacks)} ${titleCase(args.status.replace(/^status\./, ''))}`;
+    const text = `Apply ${show(args.stacks, 'stacks', args.status)} ${titleCase(args.status.replace(/^status\./, ''))}`;
     return args.target === 'allEnemies' ? `${text} to all enemies` : text;
   },
 };

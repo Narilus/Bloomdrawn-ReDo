@@ -44,8 +44,8 @@ export interface Preview {
   branch?: Preview[];
 }
 
-/** Renders a formula in card text: as `6 + Attack`, or as the live number for this owner. */
-export type ShowAmount = (f: Formula, value?: 'damage' | 'shield') => string;
+/** Renders a formula in card text: as `6 + Attack`, or as the live number for this owner. `status` names the status whose stacks it is. */
+export type ShowAmount = (f: Formula, value?: 'damage' | 'shield' | 'stacks', status?: string) => string;
 
 /**
  * The only place game behaviour lives. Methods (not function properties) so an operation

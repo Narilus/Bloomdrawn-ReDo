@@ -14,7 +14,7 @@ import {
   targetStacks,
   transcend,
 } from '../../engine/index.ts';
-import { card, character } from '../define.ts';
+import { c2, card, character, variant } from '../define.ts';
 import { bleed } from '../statuses/bleed.ts';
 
 // Banner kit reviewed by the owner (docs/notes/banner-kits.md). Numbers are placeholders for tuning.
@@ -70,25 +70,46 @@ export const thornSpur = card({
 });
 
 const cuts = (times: number) => [repeat(times, [damage(add(3, stat('attack')), { target: 'allEnemies' }), applyStatus(bleed, 1, 'allEnemies')])];
+const cutsText = 'Deal {effects.0.branch.0.amount} damage to all enemies {effects.0.times} times. Each hit applies {effects.0.branch.1.stacks} Bleed.';
+const thousandCuts = (times: number) => ({
+  name: 'Thousand Cuts',
+  text: cutsText,
+  effects: cuts(times),
+  transcended: { text: cutsText, effects: cuts(times + 2) },
+});
+
+// Opened Vein at C0 gives 1 Embryo, at C1 2; at C5 Bleed on enemies also stops losing stacks as it ticks.
+const openedVein = (embryo: number, capstone = false) => ({
+  name: 'Opened Vein', scope: 'combat' as const,
+  // The 10% lives in her Strike's damage; the passive is where the owner placed it, so it's explained here.
+  text:
+    'The first time each turn you apply Bleed, gain {triggers.0.do.0.amount} Embryo. Her Strike deals 10% more for each Strike played before it this turn.' +
+    (capstone ? ' Bleed on enemies no longer loses a stack when it ticks.' : ''),
+  triggers: [{ on: 'statusApplied' as const, filter: { status: bleed.id, source: 'party' as const }, once: 'turn' as const, do: [gainResource('embryo', embryo)] }],
+  // Whoever applied the Bleed (owner, 25 Oct).
+  ...(capstone && { modifiers: [{ value: 'stackLoss' as const, step: 'outgoingMul' as const, amount: 0, status: bleed.id, on: 'enemies' as const }] }),
+});
+
+// C3: the detonation is three times the Bleed (docs/notes/banner-kits.md).
+export const openTheWoundC3 = variant(openTheWound, 3, {
+  effects: [damage(add(4, stat('attack'))), ifConsume('embryo', 2, [loseHp(mul(3, targetStacks(bleed)), { target: 'chosen' })])],
+  text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: the enemy loses HP equal to three times its Bleed.',
+});
+
+const STATS = { hp: 45, attack: 6, defense: 2 };
 
 export const virelle = character({
   id: 'virelle', name: 'Virelle', title: 'the Open Wound', domain: 'flesh',
-  stats: { hp: 45, attack: 6, defense: 2 },
+  stats: STATS,
   cards: [strike, defense, thornSpurBloom, sutureCut, openTheWound],
-  passive: {
-    name: 'Opened Vein', scope: 'combat',
-    // The 10% lives in her Strike's damage; the passive is where the owner placed it, so it's explained here.
-    text: 'The first time each turn you apply Bleed, gain {triggers.0.do.0.amount} Embryo. Her Strike deals 10% more for each Strike played before it this turn.',
-    triggers: [{ on: 'statusApplied', filter: { status: bleed.id, source: 'party' }, once: 'turn', do: [gainResource('embryo', 1)] }],
-  },
+  passive: openedVein(1),
   // Hits every enemy, for the wow of a rare ultimate (owner, 25 Oct).
-  ultimate: {
-    name: 'Thousand Cuts',
-    text: 'Deal {effects.0.branch.0.amount} damage to all enemies {effects.0.times} times. Each hit applies {effects.0.branch.1.stacks} Bleed.',
-    effects: cuts(5),
-    transcended: {
-      text: 'Deal {effects.0.branch.0.amount} damage to all enemies {effects.0.times} times. Each hit applies {effects.0.branch.1.stacks} Bleed.',
-      effects: cuts(7),
-    },
-  },
+  ultimate: thousandCuts(5),
+  dupes: [
+    { text: 'Opened Vein gains 2 Embryo.', passive: openedVein(2) },
+    c2(STATS),
+    { text: "Open the Wound's detonation is three times the Bleed.", cards: { [openTheWound.id]: openTheWoundC3.id } },
+    { text: 'Thousand Cuts hits 2 more times.', ultimate: thousandCuts(7) },
+    { text: 'Bleed on enemies no longer loses a stack when it ticks, whoever applied it.', passive: openedVein(2, true) },
+  ],
 });

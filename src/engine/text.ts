@@ -1,5 +1,6 @@
 import { chargeOf } from './combat.ts';
 import type { CardDef, CharacterDef, OpCall, Registry } from './defs.ts';
+import { characterOf } from './dupes.ts';
 import { evaluate, formulaSchema, formulaText, titleCase, type Formula } from './formula.ts';
 import { pipeline } from './modifiers.ts';
 import type { ShowAmount } from './operation.ts';
@@ -7,15 +8,18 @@ import { getOp } from './ops/index.ts';
 import type { CardInstance, CombatState, EntityId } from './state.ts';
 
 /** Which pipeline a formula's live number goes through, by the operation and argument holding it. */
-const VALUE_OF: Record<string, Record<string, 'damage' | 'shield'>> = {
+const VALUE_OF: Record<string, Record<string, 'damage' | 'shield' | 'stacks'>> = {
   damage: { amount: 'damage' },
   volley: { damage: 'damage' },
   gainShield: { amount: 'shield' },
+  applyStatus: { stacks: 'stacks' },
 };
 
 interface Slot {
   formula: Formula;
-  value?: 'damage' | 'shield';
+  value?: 'damage' | 'shield' | 'stacks';
+  /** For stacks: the status applied. */
+  status?: string;
 }
 
 /** Finds the formula a template slot points at, e.g. `effects.0.amount`. */
@@ -28,9 +32,10 @@ export function slotAt(root: unknown, path: string): Slot | undefined {
     node = typeof node === 'object' && node !== null ? (node as Record<string, unknown>)[key] : undefined;
   }
   if (!formulaSchema.safeParse(node).success) return undefined;
-  const op = typeof parent === 'object' && parent !== null ? (parent as OpCall).op : undefined;
-  const value = op === undefined ? undefined : VALUE_OF[op]?.[keys.at(-1) as string];
-  return value ? { formula: node as Formula, value } : { formula: node as Formula };
+  const call = typeof parent === 'object' && parent !== null ? (parent as OpCall) : undefined;
+  const value = call?.op === undefined ? undefined : VALUE_OF[call.op]?.[keys.at(-1) as string];
+  if (!value) return { formula: node as Formula };
+  return value === 'stacks' && typeof call?.status === 'string' ? { formula: node as Formula, value, status: call.status } : { formula: node as Formula, value };
 }
 
 /** The `{path}` slots in a template. */
@@ -40,7 +45,7 @@ export const templateSlots = (template: string): string[] => [...template.matchA
 export function renderTemplate(template: string, root: unknown, show: ShowAmount): string {
   return template.replace(/\{([\w.]+)\}/g, (whole, path: string) => {
     const slot = slotAt(root, path);
-    return slot ? show(slot.formula, slot.value) : whole;
+    return slot ? show(slot.formula, slot.value, slot.status) : whole;
   });
 }
 
@@ -70,9 +75,9 @@ export function describeCard(def: CardDef, registry: Registry, show: ShowAmount 
 /** Live numbers for one party member: her stats and outgoing modifiers, no target yet. */
 export function showFor(state: CombatState, owner: EntityId, registry: Registry, mark?: TextOptions['mark']): ShowAmount {
   const ctx = { source: owner, owner };
-  return (f, value) => {
-    const text = String(value ? pipeline(value, f, state, ctx, registry) : Math.floor(evaluate(f, state, ctx, registry)));
-    return mark ? mark(text, value) : text;
+  return (f, value, status) => {
+    const text = String(value ? pipeline(value, f, state, ctx, registry, undefined, status) : Math.floor(evaluate(f, state, ctx, registry)));
+    return mark ? mark(text, value === 'stacks' ? undefined : value) : text;
   };
 }
 
@@ -95,7 +100,7 @@ export function showStats(stats: CharacterDef['stats'], mark?: TextOptions['mark
     const v = value(f);
     if (v === undefined) return formulaText(f);
     const text = String(Math.floor(v));
-    return mark ? mark(text, kind) : text;
+    return mark ? mark(text, kind === 'stacks' ? undefined : kind) : text;
   };
 }
 
@@ -108,7 +113,7 @@ export function describeCardLive(card: CardInstance, state: CombatState, registr
 /** A member's passive and ultimate text with live numbers. */
 export function describeKit(state: CombatState, member: EntityId, registry: Registry) {
   const m = state.members.find((x) => x.id === member);
-  const def = m ? registry.characters[m.character] : undefined;
+  const def = m ? characterOf(m, registry) : undefined;
   const show = showFor(state, member, registry);
   const passive = def?.passive?.text ? renderTemplate(def.passive.text, def.passive, show) : undefined;
   const upgraded = m?.transcended ? def?.ultimate?.transcended : undefined;

@@ -1,23 +1,30 @@
 import type { ModifierDef, Registry } from './defs.ts';
+import { characterOf } from './dupes.ts';
 import { evaluate, type Formula } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { isImmune } from './phases.ts';
 import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
 
+/** The numbers modifiers change through the pipeline (`volleys` counts passes instead). */
+export type PipelineValue = 'damage' | 'shield' | 'stacks' | 'stackLoss';
+
 /**
  * The one modifier pipeline. Steps: base formula, flat outgoing, outgoing multipliers (an enemy's
  * damage includes the fight's enemy scale), incoming multipliers (damage with a target only). Rounds down at every step and never
- * goes below 0. Shield absorption is the damage operation's step 5.
+ * goes below 0. Shield absorption is the damage operation's step 5. `status` picks out the
+ * modifiers for one status's stacks.
  */
 export function pipeline(
-  value: 'damage' | 'shield',
+  value: PipelineValue,
   base: Formula,
   state: CombatState,
   ctx: OpContext,
   registry: Registry,
   target?: EntityId,
+  status?: string,
 ): number {
-  const outgoing = modifiersOf(state, registry, ctx.source).filter((m) => m.value === value);
+  const applies = (m: ModifierDef) => m.value === value && (m.status === undefined || m.status === status);
+  const outgoing = modifiersOf(state, registry, ctx.source).filter(applies);
   const sum = (mods: ModifierDef[]) => mods.reduce((n, m) => n + evaluate(m.amount, state, ctx, registry), 0);
   const scale = (n: number, mods: ModifierDef[]) =>
     mods.reduce((x, m) => Math.floor(x * evaluate(m.amount, state, ctx, registry)), n);
@@ -31,7 +38,7 @@ export function pipeline(
   // A rousing enemy takes no damage (DESIGN.md "Bosses").
   if (value === 'damage' && isImmune(state, target)) return 0;
   if (value === 'damage' && target !== undefined) {
-    const incoming = modifiersOf(state, registry, target).filter((m) => m.value === value);
+    const incoming = modifiersOf(state, registry, target).filter(applies);
     amount = scale(amount, incoming.filter((m) => m.step === 'incomingMul'));
   }
   return Math.max(0, amount);
@@ -46,7 +53,7 @@ export function volleyPasses(state: CombatState, ctx: OpContext, registry: Regis
 /**
  * Modifiers that belong to an entity's side. A party member: her passive, the party's statuses and
  * every relic. The whole party: every member's passive, its statuses and every relic. An enemy: its
- * own and its statuses'.
+ * own and its statuses', and the party's that act `on` enemies.
  */
 function modifiersOf(state: CombatState, registry: Registry, id: EntityId): ModifierDef[] {
   // Stacks an enemy applied during the enemy turn take hold once that turn is over.
@@ -54,13 +61,17 @@ function modifiersOf(state: CombatState, registry: Registry, id: EntityId): Modi
   const statusMods = (statuses: StatusStack[]) =>
     statuses.filter(holds).flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
   const relicMods = state.relics.flatMap((r) => registry.relics[r.relic]?.modifiers ?? []);
-  const passive = (m: CombatState['members'][number]) => registry.characters[m.character]?.passive?.modifiers ?? [];
+  const passive = (m: CombatState['members'][number]) => characterOf(m, registry)?.passive?.modifiers ?? [];
   const partyStatuses = statusMods(state.party.statuses);
+  const own = (mods: ModifierDef[]) => mods.filter((m) => m.on === undefined);
 
-  if (id === PARTY) return [...state.members.flatMap(passive), ...partyStatuses, ...relicMods];
+  if (id === PARTY) return own([...state.members.flatMap(passive), ...partyStatuses, ...relicMods]);
   const member = state.members.find((m) => m.id === id);
-  if (member) return [...passive(member), ...partyStatuses, ...relicMods];
+  if (member) return own([...passive(member), ...partyStatuses, ...relicMods]);
   const enemy = state.enemies.find((e) => e.id === id);
-  if (enemy) return [...(registry.enemies[enemy.enemy]?.modifiers ?? []), ...statusMods(enemy.statuses)];
+  if (enemy) {
+    const fromParty = [...state.members.flatMap(passive), ...partyStatuses, ...relicMods].filter((m) => m.on === 'enemies');
+    return [...(registry.enemies[enemy.enemy]?.modifiers ?? []), ...statusMods(enemy.statuses), ...fromParty];
+  }
   return [];
 }

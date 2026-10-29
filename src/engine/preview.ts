@@ -1,4 +1,5 @@
 import { cardCost, chargeOf, countDown, playContext, ultimateEffects, validate, type Command } from './combat.ts';
+import { characterOf } from './dupes.ts';
 import { intentOf } from './phases.ts';
 import type { OpCall, Registry } from './defs.ts';
 import { evaluate } from './formula.ts';
@@ -40,7 +41,7 @@ export function previewUltimate(state: CombatState, member: EntityId, registry: 
   if (validate(state, { type: 'fireUltimate', member }, registry) !== undefined) return undefined;
   const scratch = structuredClone(state);
   const m = scratch.members.find((x) => x.id === member);
-  const ultimate = m && registry.characters[m.character]?.ultimate;
+  const ultimate = m && characterOf(m, registry)?.ultimate;
   if (!m || !ultimate) return undefined;
   m.gauge = 0;
   return previewOps(scratch, ultimateEffects(m, registry), { source: m.id, owner: m.id }, registry);

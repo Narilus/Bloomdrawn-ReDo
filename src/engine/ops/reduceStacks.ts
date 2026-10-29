@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import type { OpCall } from '../defs.ts';
 import type { EngineEvent } from '../events.ts';
-import { evaluate, formulaSchema, titleCase, type Formula } from '../formula.ts';
+import { formulaSchema, titleCase, type Formula } from '../formula.ts';
+import { pipeline } from '../modifiers.ts';
 import type { Operation } from '../operation.ts';
 import { bearerOf, stacksOf, takeStacks } from '../statuses.ts';
 
@@ -27,13 +28,13 @@ export const reduceStacksOp: Operation<ReduceStacksArgs> = {
   resolve(draft, args, ctx, registry) {
     const bearer = bearerOf(draft, ctx.source, registry);
     if (!bearer) return { events: [] };
-    const amount = Math.max(0, Math.floor(evaluate(args.amount, draft, ctx, registry)));
+    const amount = pipeline('stackLoss', args.amount, draft, ctx, registry, undefined, args.status);
     if (!takeStacks(bearer.statuses, args.status, amount)) return { events: [] };
     const removed: EngineEvent = { type: 'statusRemoved', source: ctx.source, target: bearer.id, status: args.status };
     return { events: [removed] };
   },
   preview: (state, args, ctx, registry) => [
-    { op: 'reduceStacks', status: args.status, amount: Math.max(0, Math.floor(evaluate(args.amount, state, ctx, registry))) },
+    { op: 'reduceStacks', status: args.status, amount: pipeline('stackLoss', args.amount, state, ctx, registry, undefined, args.status) },
   ],
   describe: (args, show) => `Remove ${show(args.amount)} ${titleCase(args.status.replace(/^status\./, ''))}`,
 };

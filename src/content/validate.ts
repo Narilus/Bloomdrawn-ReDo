@@ -89,8 +89,12 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       if (op.children) checkCalls(kind, defId, op.children(call), `${path}.branch`);
     });
   };
-  const checkHooks = (kind: Kind, defId: string, hooks: Hooks | undefined, at: string) =>
+  const checkHooks = (kind: Kind, defId: string, hooks: Hooks | undefined, at: string) => {
     hooks?.triggers?.forEach((t, i) => checkCalls(kind, defId, t.do, `${at}triggers[${i}].do`));
+    hooks?.modifiers?.forEach((m, i) => {
+      if (m.status !== undefined && !reg.statuses[m.status]) fail(where(kind, defId), defId, `${at}modifiers[${i}]: unknown status "${m.status}"`);
+    });
+  };
   // Every `{path}` slot in authored text must point at a formula inside its own definition.
   const checkText = (kind: Kind, defId: string, text: string | undefined, root: unknown, at: string) => {
     for (const path of templateSlots(text ?? '')) {
@@ -115,8 +119,15 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
     else if (card.reward) {
       if (card.slot || card.generated) fail(at, card.id, 'a card reward has no personal slot and is not generated');
       if (owner.cards.includes(card.id)) fail(at, card.id, `a card reward is not one of ${card.owner}'s five cards`);
+    } else if (card.variantOf !== undefined) {
+      // A dupe level's version of one of the five: same owner and slot, dealt by one of her dupes.
+      const base = reg.cards[card.variantOf];
+      if (!owner.cards.includes(card.variantOf)) fail(at, card.id, `variantOf "${card.variantOf}" is not one of ${card.owner}'s cards`);
+      else if (base?.slot !== card.slot) fail(at, card.id, `a variant keeps the slot of "${card.variantOf}"`);
+      if (!owner.dupes?.some((d) => d.cards?.[card.variantOf!] === card.id)) fail(at, card.id, `no dupe level of ${card.owner} deals it`);
     } else if (!card.generated && !owner.cards.includes(card.id)) fail(at, card.id, `not listed in ${card.owner}'s cards`);
-    if (card.slot) {
+    // A dupe's variant may leave its slot's band (Weighted Net costs 1 at C3; owner, 25 Oct).
+    if (card.slot && card.variantOf === undefined) {
       const [min, max] = COST_BANDS[card.slot];
       if (card.cost < min || card.cost > max) {
         fail(where('card', card.id), card.id, `${card.slot} cost ${card.cost} is outside ${min === max ? min : `${min}–${max}`}`);
@@ -148,6 +159,24 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       }
     }
     if (!reg.domains[c.domain]) fail(where('character', c.id), c.id, `domain "${c.domain}" is not defined`);
+    c.dupes?.forEach((d, i) => {
+      const at = `dupes[${i}].`;
+      checkHooks('character', c.id, d.passive, `${at}passive.`);
+      checkText('character', c.id, d.passive?.text, d.passive, `${at}passive.`);
+      if (d.ultimate) {
+        checkCalls('character', c.id, d.ultimate.effects, `${at}ultimate.effects`);
+        checkText('character', c.id, d.ultimate.text, d.ultimate, `${at}ultimate.`);
+        const up = d.ultimate.transcended;
+        if (up) {
+          checkCalls('character', c.id, up.effects, `${at}ultimate.transcended.effects`);
+          checkText('character', c.id, up.text, up, `${at}ultimate.transcended.`);
+        }
+      }
+      for (const [base, variant] of Object.entries(d.cards ?? {})) {
+        if (!c.cards.includes(base)) fail(where('character', c.id), c.id, `${at}cards: "${base}" is not one of ${c.id}'s cards`);
+        if (reg.cards[variant]?.variantOf !== base) fail(where('character', c.id), c.id, `${at}cards: "${variant}" is not a variant of "${base}"`);
+      }
+    });
   }
   for (const e of Object.values(reg.enemies)) {
     checkHooks('enemy', e.id, e, '');

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { CardSlot, Keyword, Registry } from './defs.ts';
+import { characterOf } from './dupes.ts';
 import type { OpContext } from './operation.ts';
 import { PARTY, type CardInstance, type CombatState } from './state.ts';
 
@@ -74,7 +75,7 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   if (typeof f === 'number') return f;
   if ('stat' in f) {
     const member = state.members.find((m) => m.id === ctx.owner);
-    return member ? (registry.characters[member.character]?.stats[f.stat] ?? 0) : 0;
+    return member ? (characterOf(member, registry)?.stats[f.stat] ?? 0) : 0;
   }
   if ('resource' in f) return state.resources[f.resource] ?? 0;
   if ('add' in f) return f.add.reduce<number>((sum, t) => sum + evaluate(t, state, ctx, registry), 0);

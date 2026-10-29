@@ -27,11 +27,14 @@ const trigger = z.strictObject({
 
 const modifier = z
   .strictObject({
-    value: z.enum(['damage', 'shield', 'volleys']),
+    value: z.enum(['damage', 'shield', 'volleys', 'stacks', 'stackLoss']),
     step: z.enum(['flat', 'outgoingMul', 'incomingMul']),
     amount: formulaSchema,
+    status: id.optional(),
+    on: z.literal('enemies').optional(),
   })
-  .refine((m) => m.value !== 'volleys' || m.step === 'flat', 'Extra volleys are flat.');
+  .refine((m) => m.value !== 'volleys' || m.step === 'flat', 'Extra volleys are flat.')
+  .refine((m) => m.status === undefined || m.value === 'stacks' || m.value === 'stackLoss', 'Only stacks and stack loss name a status.');
 
 const intent = z.strictObject({ id, name: z.string().min(1), effects: z.array(opCall).min(1) });
 
@@ -39,6 +42,22 @@ const hooks = {
   triggers: z.array(trigger).optional(),
   modifiers: z.array(modifier).optional(),
 };
+
+const stats = z.strictObject({ hp: z.int().positive(), attack: z.int().min(0), defense: z.int().min(0) });
+const passive = z.strictObject({ name: z.string().min(1), scope: z.enum(['combat', 'run']), text: z.string().min(1), ...hooks });
+const ultimate = z.strictObject({
+  name: z.string().min(1),
+  text: z.string().min(1),
+  effects: z.array(opCall).min(1),
+  transcended: z.strictObject({ text: z.string().min(1), effects: z.array(opCall).min(1) }).optional(),
+});
+const dupe = z.strictObject({
+  text: z.string().min(1),
+  stats: stats.optional(),
+  passive: passive.optional(),
+  cards: z.record(id, id).optional(),
+  ultimate: ultimate.optional(),
+});
 
 export const schemas = {
   card: z.strictObject({
@@ -56,6 +75,7 @@ export const schemas = {
     text: z.string().min(1).optional(),
     charge: z.int().positive().optional(),
     effects: z.array(opCall).min(1),
+    variantOf: id.optional(),
   }),
   character: z.strictObject({
     kind: z.literal('character'),
@@ -63,17 +83,12 @@ export const schemas = {
     name: z.string().min(1),
     title: z.string().min(1).optional(),
     domain: z.enum(['flesh', 'rapture', 'spirit', 'unbound']),
-    stats: z.strictObject({ hp: z.int().positive(), attack: z.int().min(0), defense: z.int().min(0) }),
+    stats,
     cards: z.array(id),
-    passive: z.strictObject({ name: z.string().min(1), scope: z.enum(['combat', 'run']), text: z.string().min(1), ...hooks }).optional(),
-    ultimate: z
-      .strictObject({
-        name: z.string().min(1),
-        text: z.string().min(1),
-        effects: z.array(opCall).min(1),
-        transcended: z.strictObject({ text: z.string().min(1), effects: z.array(opCall).min(1) }).optional(),
-      })
-      .optional(),
+    passive: passive.optional(),
+    ultimate: ultimate.optional(),
+    // C1 to C5 (DESIGN.md).
+    dupes: z.array(dupe).max(5).optional(),
   }),
   enemy: z.strictObject({
     kind: z.literal('enemy'),

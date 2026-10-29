@@ -42,10 +42,18 @@ export interface TriggerDef {
  * multiplies on the target side (damage only).
  */
 export interface ModifierDef {
-  /** `volleys`: extra passes for every volley (flat only), each choosing its targets afresh. */
-  value: 'damage' | 'shield' | 'volleys';
+  /**
+   * `volleys`: extra passes for every volley (flat only), each choosing its targets afresh.
+   * `stacks`: the stacks a status is applied with. `stackLoss`: the stacks a status's own
+   * triggers take off its bearer (Bleed's tick).
+   */
+  value: 'damage' | 'shield' | 'volleys' | 'stacks' | 'stackLoss';
   step: 'flat' | 'outgoingMul' | 'incomingMul';
   amount: Formula;
+  /** For `stacks` and `stackLoss`: only this status. */
+  status?: string;
+  /** A party member's modifier that acts on every enemy's side instead of her own (Bleed on enemies keeping its stacks). */
+  on?: 'enemies';
 }
 
 /** Anything that can hold triggers and modifiers. */
@@ -87,6 +95,8 @@ export interface CardDef {
   /** Ultimate charge for the owner, once per play (a repeated card does not charge again). */
   charge?: number;
   effects: OpCall[];
+  /** A dupe level's version of one of its owner's five cards, dealt in that card's place (`DupeDef.cards`). */
+  variantOf?: string;
 }
 
 /**
@@ -119,6 +129,22 @@ export interface CharacterDef {
   stats: { hp: number; attack: number; defense: number };
   cards: string[];
   passive?: PassiveDef;
+  ultimate?: UltimateDef;
+  /** Dupe levels C1 to C5, in order (DESIGN.md, "Character dupes"). */
+  dupes?: DupeDef[];
+}
+
+/**
+ * One dupe level. What it sets replaces the character's own from that level up, so a later level
+ * that changes the passive again restates the earlier change. `cards` swaps a personal card for its
+ * variant (base card ID to variant card ID).
+ */
+export interface DupeDef {
+  /** What the level does, in a line for the character page. */
+  text: string;
+  stats?: CharacterDef['stats'];
+  passive?: PassiveDef;
+  cards?: Record<string, string>;
   ultimate?: UltimateDef;
 }
 

@@ -18,6 +18,8 @@ export const STARTER_PARTY = ['maelia', 'agathe', 'anthe', 'leonora'];
 
 export interface ScenarioSpec {
   party?: string[];
+  /** Dupe levels by character ID; others are C0. */
+  dupes?: Record<string, number>;
   enemies?: string[];
   seed?: number;
   setup?: {
@@ -61,8 +63,9 @@ export interface ScenarioRun {
 
 /** Sets up a combat as described, plays the cards in order and records each preview and result. */
 export function runScenario(spec: ScenarioSpec, registry: Registry = gameRegistry): ScenarioRun {
+  const party = spec.party ?? STARTER_PARTY;
   let state = startCombat(
-    { seed: spec.seed ?? 1, party: spec.party ?? STARTER_PARTY, enemies: spec.enemies ?? ['enemy.training-dummy'] },
+    { seed: spec.seed ?? 1, party, enemies: spec.enemies ?? ['enemy.training-dummy'], dupes: party.map((id) => spec.dupes?.[id] ?? 0) },
     registry,
   ).state;
 

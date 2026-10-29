@@ -35,6 +35,8 @@ export interface Member {
   gauge: number;
   /** Transcended this combat: her ultimate is upgraded until the combat ends. */
   transcended?: boolean;
+  /** Her dupe level, 1 to 5 (`characterOf`); absent at C0. */
+  dupes?: number;
 }
 
 export interface Enemy {
