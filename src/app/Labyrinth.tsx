@@ -72,10 +72,10 @@ const SEED = Number(params().get('seed')) || undefined;
 const FIRST_CLOCK = Number(params().get('clock')) || 0;
 const FIRST_OBOLS = Number(params().get('obols')) || 0;
 
-/** A new run for this party, front first, on a random board (or `?seed`'s), with its own ID for the profile to track. */
-export function newRun(party: readonly string[]): RunSave {
+/** A new run for this party, front first, at its dupe levels, on a random board (or `?seed`'s), with its own ID for the profile to track. */
+export function newRun(party: readonly string[], dupes: Readonly<Record<string, number>> = {}): RunSave {
   const seed = SEED ?? Math.floor(Math.random() * 2 ** 31);
-  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
+  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs, dupes), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
   return { id: crypto.randomUUID(), seed, exp };
 }
 
@@ -202,7 +202,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
       {exp.phase === 'outcome' && exp.outcome && <OutcomePanel outcome={exp.outcome} onClose={() => setExp(closeOutcome(exp))} />}
       {exp.phase === 'reward' &&
         (exp.offeredCards.length > 0 ? (
-          <CardChoice offered={exp.offeredCards} onChoose={(index) => setExp(chooseExpeditionCard(exp, index))}>
+          <CardChoice offered={exp.offeredCards} dupes={exp.dupes} onChoose={(index) => setExp(chooseExpeditionCard(exp, index))}>
             <Spoils exp={exp} />
           </CardChoice>
         ) : (
@@ -299,7 +299,7 @@ function RunDeck({ exp }: { exp: Expedition }) {
       </div>
       <ul>
         {rows.map((c) => (
-          <li key={key(c)} className={c.owner ? undefined : 'symptom'} title={c.owner ? runCardText(c, registry) : symptomText(exp, c.card, registry)}>
+          <li key={key(c)} className={c.owner ? undefined : 'symptom'} title={c.owner ? runCardText(c, registry, {}, exp.dupes) : symptomText(exp, c.card, registry)}>
             <span>{registry.cards[c.card]?.name ?? c.card}</span>
             <span className="owner">{c.owner ? registry.characters[c.owner]?.name : 'Symptom'}</span>
             <span className="count">×{exp.deck.filter((d) => key(d) === key(c)).length}</span>
@@ -327,7 +327,18 @@ function Spoils({ exp }: { exp: Expedition }) {
 }
 
 /** A normal fight's card pick: each card shows the member it goes to and her numbers. */
-function CardChoice({ offered, onChoose, children }: { offered: readonly RunCard[]; onChoose: (index: number | null) => void; children?: ReactNode }) {
+function CardChoice({
+  offered,
+  dupes,
+  onChoose,
+  children,
+}: {
+  offered: readonly RunCard[];
+  /** The run's dupe levels, for the owners' numbers. */
+  dupes: Expedition['dupes'];
+  onChoose: (index: number | null) => void;
+  children?: ReactNode;
+}) {
   return (
     <div className="result reward" role="dialog" aria-label="Victory">
       <h2>Victory</h2>
@@ -343,7 +354,7 @@ function CardChoice({ offered, onChoose, children }: { offered: readonly RunCard
                 id={c.card}
                 def={def}
                 owner={owner}
-                text={runCardText(c, registry, { charge: false, keywords: false, mark: markNumber })}
+                text={runCardText(c, registry, { charge: false, keywords: false, mark: markNumber }, dupes)}
                 cost={def?.cost}
                 registry={registry}
                 playable

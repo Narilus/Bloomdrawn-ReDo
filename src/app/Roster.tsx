@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { registry } from '../content/registry.ts';
-import { describeCharacter, type CardDef } from '../engine/index.ts';
+import { describeCharacter, withDupes, type CardDef } from '../engine/index.ts';
 import { runCardText } from '../game/expedition.ts';
 import { PARTY_SIZE, partyProblem, placeInTeam, quickTeam, removeFromTeam, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
 import { battleArt } from '../stage/art.ts';
@@ -28,8 +28,8 @@ export function Art({ id, className }: { id: string; className: string }) {
   );
 }
 
-/** A character as a tile: her art, name and Domain, and her place in the party if she has one. */
-function Tile({ id, place, onClick }: { id: string; place?: number | undefined; onClick: () => void }) {
+/** A character as a tile: her art, name and Domain, her dupe level if any, and her place in the party if she has one. */
+function Tile({ id, place, level, onClick }: { id: string; place?: number | undefined; level?: number | undefined; onClick: () => void }) {
   const def = registry.characters[id];
   return (
     <button className={`roster-tile domain-${def?.domain ?? ''}${place !== undefined ? ' chosen' : ''}`} aria-label={def?.name ?? id} aria-pressed={place !== undefined} onClick={onClick}>
@@ -37,6 +37,7 @@ function Tile({ id, place, onClick }: { id: string; place?: number | undefined; 
       <strong>{def?.name ?? id}</strong>
       <span>{DOMAIN_LABEL[def?.domain ?? ''] ?? def?.domain}</span>
       {place !== undefined && <em className="roster-place">{place + 1}</em>}
+      {level ? <em className="roster-level">C{level}</em> : null}
     </button>
   );
 }
@@ -216,16 +217,16 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, onC
   );
 }
 
-/** Every owned character; one opens her page. */
-export function Roster({ owned, onBack }: { owned: readonly string[]; onBack: () => void }) {
+/** Every owned character, with her dupe level; one opens her page. */
+export function Roster({ owned, dupes = {}, onBack }: { owned: readonly string[]; dupes?: Readonly<Record<string, number>> | undefined; onBack: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
-  if (open) return <CharacterPage id={open} onBack={() => setOpen(null)} />;
+  if (open) return <CharacterPage id={open} level={dupes[open] ?? 0} onBack={() => setOpen(null)} />;
   return (
     <div className="roster-screen">
       <h2 className="panel-title">Roster</h2>
       <div className="roster-grid">
         {owned.map((id) => (
-          <Tile key={id} id={id} onClick={() => setOpen(id)} />
+          <Tile key={id} id={id} level={dupes[id]} onClick={() => setOpen(id)} />
         ))}
       </div>
       <div className="panel-buttons">
@@ -237,10 +238,11 @@ export function Roster({ owned, onBack }: { owned: readonly string[]; onBack: ()
   );
 }
 
-/** A character's stats and kit, with the numbers her stats fix. */
-function CharacterPage({ id, onBack }: { id: string; onBack: () => void }) {
-  const def = registry.characters[id];
-  if (!def) return null;
+/** A character's stats and kit at her dupe level, with the numbers her stats fix, and what each dupe level does. */
+function CharacterPage({ id, level, onBack }: { id: string; level: number; onBack: () => void }) {
+  const base = registry.characters[id];
+  if (!base) return null;
+  const def = withDupes(base, level);
   const kit = describeCharacter(def);
   const cards = def.cards.map((c) => registry.cards[c]).filter((c): c is CardDef => c !== undefined);
   const rewards = Object.values(registry.cards).filter((c) => c.reward && c.owner === id);
@@ -250,7 +252,7 @@ function CharacterPage({ id, onBack }: { id: string; onBack: () => void }) {
       id={card.id}
       def={card}
       owner={def}
-      text={runCardText({ card: card.id, owner: id }, registry, { charge: false, keywords: false, mark: markNumber })}
+      text={runCardText({ card: card.id, owner: id }, registry, { charge: false, keywords: false, mark: markNumber }, { [id]: level })}
       cost={card.cost}
       registry={registry}
       playable
@@ -261,7 +263,10 @@ function CharacterPage({ id, onBack }: { id: string; onBack: () => void }) {
       <Art id={id} className="character-art" />
       <div className="character-info">
         <h2>{fullName(id)}</h2>
-        <p className="character-domain">{DOMAIN_LABEL[def.domain] ?? def.domain}</p>
+        <p className="character-domain">
+          {DOMAIN_LABEL[def.domain] ?? def.domain}
+          {base.dupes?.length ? ` · C${level}` : ''}
+        </p>
         <dl className="character-stats">
           <dt>HP</dt>
           <dd>{def.stats.hp}</dd>
@@ -299,6 +304,18 @@ function CharacterPage({ id, onBack }: { id: string; onBack: () => void }) {
             <div className="character-cards">{rewards.map(face)}</div>
           </>
         )}
+        {base.dupes?.length ? (
+          <section>
+            <h3>Dupes</h3>
+            <ol className="character-dupes" aria-label="Dupes">
+              {base.dupes.map((d, i) => (
+                <li key={i} className={i < level ? 'reached' : undefined}>
+                  <em>C{i + 1}</em> {d.text}
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
       </div>
       <div className="panel-buttons character-back">
         <button className="ghost" onClick={onBack}>

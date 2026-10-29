@@ -41,6 +41,20 @@ describe('saves', () => {
     expect(boot.profile.run).toEqual({ id: 'run-1', elites: 0 });
   });
 
+  it('a run at dupe levels resumes at them, mid-fight with its variant cards; a level outside C1 to C5 is refused (M5.4)', async () => {
+    const { saves, adapter } = setup();
+    const party = ['virelle', 'isadora', 'kibane', 'hester'];
+    const save: RunSave = { id: 'run-1', seed: 4, exp: { ...startExpedition(4, party, M3_EXPEDITION, registry.motifs, { kibane: 3 }), phase: 'fight', fightSeed: 9 } };
+    const combat = startCombat({ seed: 9, party, enemies: ['enemy.bloom-rib-hound'], dupes: [0, 0, 3, 0] }, registry).state;
+    expect([...combat.piles.draw, ...combat.piles.hand].map((c) => c.card)).toContain('kibane.foxfire-rite-c3');
+    await saves.start(save);
+    await saves.save({ ...save, combat });
+    expect((await saves.boot(M3_EXPEDITION)).run).toEqual({ ...save, combat });
+    adapter.data.set('run:current', encodeSave(RUN_SAVE, save, CONTENT_VERSION).replace('"dupes":{"kibane":3}', '"dupes":{"kibane":6}'));
+    adapter.data.delete('run:previous');
+    expect((await saves.boot(M3_EXPEDITION)).ended?.reason).toMatch(/dupes/);
+  });
+
   it("the profile keeps the run's elite tally as it changes", async () => {
     const { saves, store } = setup();
     const save = run();

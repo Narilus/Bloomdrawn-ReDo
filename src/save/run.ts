@@ -21,6 +21,7 @@ const runSchema = z.strictObject({
   seed: z.int(),
   exp: z.looseObject({
     party: ids,
+    dupes: z.record(z.string(), z.int().min(1).max(5)).optional(),
     phase: z.enum(['map', 'tile', 'fight', 'reward', 'outcome', 'won', 'lost']),
     board: z.looseObject({ tiles: z.record(z.string(), z.looseObject({ kind: z.string() })), at: z.string(), seen: ids }),
     clock: z.int().nonnegative(),

@@ -25,6 +25,7 @@ import {
   symptomText,
   takeSymptom,
   expeditionFight,
+  expeditionMaxHp,
   finishExpeditionFight,
   leaveTile,
   M3_EXPEDITION,
@@ -278,6 +279,22 @@ describe('card rewards', () => {
     for (let seed = 1; seed <= 20; seed++) {
       for (const { card, owner } of won(seed, party).offeredCards) expect(eligibleOwners(card, party, registry)).toContain(owner);
     }
+  });
+
+  it("a run fields its party at the dupe levels it began with: fights, max HP and card numbers (M5.4)", () => {
+    const party = ['virelle', 'isadora', 'kibane', 'hester'];
+    // Leonora isn't fielded and Isadora is at C0, so neither is kept.
+    const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, { virelle: 2, kibane: 5, isadora: 0, leonora: 3 }), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
+    expect(exp.dupes).toEqual({ virelle: 2, kibane: 5 });
+    const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
+    expect(combat.members.map((m) => m.dupes)).toEqual([2, undefined, 5, undefined]);
+    // C2 adds 5 to Virelle's 45 and to Kibane's 50.
+    expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([210, 210]);
+    // Thorn Spur deals 3 + Attack: 6 at C0, 7 at C2.
+    const spur = { card: 'virelle.thorn-spur', owner: 'virelle' };
+    expect([runCardText(spur, registry), runCardText(spur, registry, {}, exp.dupes)]).toEqual(['Deal 9 damage twice.', 'Deal 10 damage twice.']);
+    // A run at C0 has no levels to keep, so its save is as before.
+    expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('dupes');
   });
 
   it('elites give relics only, the Boss ends the run, and a Bloom node fight offers cards like any fight', () => {

@@ -39,8 +39,8 @@ export function Game() {
     void load();
   });
 
-  const startNew = async (party: readonly string[]) => {
-    const save = newRun(party);
+  const startNew = async (party: readonly string[], dupes: Profile['dupes']) => {
+    const save = newRun(party, dupes);
     await saves.start(save);
     setScreen({ kind: 'run', save });
   };
@@ -66,12 +66,12 @@ export function Game() {
         teams={teamsOf(screen.profile, owned)}
         team={screen.profile.team ?? 0}
         onChange={(teams, team) => void saves.teams(teams, team)}
-        onStart={(party) => void startNew(party)}
+        onStart={(party) => void startNew(party, screen.profile.dupes)}
         onBack={toTitle}
       />
     );
   }
-  if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} onBack={toTitle} />;
+  if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} dupes={screen.profile.dupes} onBack={toTitle} />;
   if (screen.kind === 'banner') {
     // The seed only starts the gacha's stream on a profile's first pull; after that the profile carries it.
     return (

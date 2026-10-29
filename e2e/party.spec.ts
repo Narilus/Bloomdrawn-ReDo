@@ -84,3 +84,21 @@ test('the roster shows a kit, and a run starts with the team chosen, in its orde
   await expect(names).toHaveText(['Leonora', 'Maelia', 'Anthe', 'Agathe']);
   expect(errors).toEqual([]);
 });
+
+test("a character's dupe level shows on the roster, and the page shows her at it, with every level listed (M5.4)", async ({ page }) => {
+  const data = { pulls: 0, runs: 0, owned: ['kibane'], dupes: { kibane: 3 } };
+  const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 6, contentVersion: 1, data } } });
+  await page.goto('/');
+  await page.locator('.title-files input[type="file"]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(backup) });
+  await page.getByRole('button', { name: 'Roster' }).click();
+  await expect(page.locator('.roster-tile[aria-label="Kibane"] .roster-level')).toHaveText('C3');
+  await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-level')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Kibane', exact: true }).click();
+  // C2's +10% HP and +1 Attack; C3's Foxfire Rite at 12 × Essence.
+  await expect(page.locator('.character-stats')).toContainText('HP55Attack6');
+  await expect(page.locator('.character-cards').first()).toContainText('Deal 4 + 12 × Essence damage.');
+  await expect(page.locator('.character-dupes li')).toHaveCount(5);
+  await expect(page.locator('.character-dupes li.reached')).toHaveCount(3);
+  await page.locator('.character-dupes').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-results/screenshots/character-page-dupes.png' });
+});

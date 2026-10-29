@@ -18,6 +18,7 @@ import {
   type RunCard,
   type Streams,
   type TextOptions,
+  withDupes,
 } from '../engine/index.ts';
 import { BLOOM_NODES, bloomNodeDue, bloomTick, reached, spawnBloomNode, stageOf, type BloomStage } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
@@ -87,6 +88,8 @@ export type BloomChoice = 'fight' | 'gamble' | 'symptom';
 /** Plain JSON, like combat state. */
 export interface Expedition {
   party: string[];
+  /** The party's dupe levels when the run began, by character (C0 left out): a copy pulled mid-run counts from the next run. */
+  dupes?: Record<string, number>;
   board: Board;
   /**
    * map: choosing where to walk. tile: stopped on a Shop, Camp, Event, Symptom or Bloom node.
@@ -122,9 +125,17 @@ export interface Expedition {
   rng: Streams<ExpeditionStream>;
 }
 
-export function startExpedition(seed: number, party: string[], def: ExpeditionDef, motifs: Readonly<Record<string, MotifDef>>): Expedition {
+export function startExpedition(
+  seed: number,
+  party: string[],
+  def: ExpeditionDef,
+  motifs: Readonly<Record<string, MotifDef>>,
+  dupes: Readonly<Record<string, number>> = {},
+): Expedition {
+  const levels = Object.fromEntries(party.filter((id) => (dupes[id] ?? 0) > 0).map((id) => [id, dupes[id]!]));
   return {
     party,
+    ...(Object.keys(levels).length > 0 && { dupes: levels }),
     board: generateBoard(seed, def.board, motifs),
     phase: 'map',
     hp: null,
@@ -228,6 +239,7 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
   const setup: CombatSetup = { seed: exp.fightSeed ?? 0, party: exp.party, enemies: encounter.enemies, relics: exp.relics, gauges: exp.gauges };
   if (exp.hp !== null) setup.partyHp = exp.hp;
   if (exp.deck.length > 0) setup.deck = exp.deck;
+  if (exp.dupes) setup.dupes = exp.party.map((id) => exp.dupes?.[id] ?? 0);
   const scale = boss ? 0 : stageOf(exp.clock).enemyScale;
   if (scale > 0) setup.enemyScale = scale;
   return setup;
@@ -316,17 +328,23 @@ function closeVictory(exp: Expedition): Expedition {
   return next;
 }
 
-/** A run card's text with its owner's stats as numbers; what depends on the fight shows as written. */
-export function runCardText(card: RunCard, registry: Registry, options: TextOptions = {}): string {
+/** A character as she fights: at her dupe level, if one is given (`Expedition.dupes`, `Profile.dupes`). */
+export function fieldedCharacter(id: string, registry: Registry, dupes: Readonly<Record<string, number>> = {}) {
+  const def = registry.characters[id];
+  return def && withDupes(def, dupes[id]);
+}
+
+/** A run card's text with its owner's stats (at her dupe level) as numbers; what depends on the fight shows as written. */
+export function runCardText(card: RunCard, registry: Registry, options: TextOptions = {}, dupes: Readonly<Record<string, number>> = {}): string {
   const def = registry.cards[card.card];
-  const stats = registry.characters[card.owner ?? '']?.stats;
+  const stats = fieldedCharacter(card.owner ?? '', registry, dupes)?.stats;
   if (!def) return card.card;
   return describeCard(def, registry, stats ? showStats(stats, options.mark) : formulaText, options);
 }
 
 /** The party's max HP: its members' HP added up, as combat starts it. */
 export function expeditionMaxHp(exp: Expedition, registry: Registry): number {
-  return exp.party.reduce((sum, id) => sum + (registry.characters[id]?.stats.hp ?? 0), 0);
+  return exp.party.reduce((sum, id) => sum + (fieldedCharacter(id, registry, exp.dupes)?.stats.hp ?? 0), 0);
 }
 
 /** The stock of the Shop the party is in, if it is in one. */
