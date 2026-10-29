@@ -68,6 +68,32 @@ describe('the profile save', () => {
     expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(result.profile);
   });
 
+  it('keeps levels and ascensions, and a v6 profile (M5.4) reads with everyone at level 1', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, levels: { maelia: 20, virelle: 4 }, ascensions: { maelia: 2 } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 6, contentVersion: 1, data: NEW_PROFILE }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: NEW_PROFILE, savedSchemaVersion: 6 });
+  });
+
+  it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
+    const saves = createSaveStore(memoryAdapter(), 1);
+    for (const bad of [
+      { levels: { maelia: 1 } },
+      { levels: { maelia: 41 } },
+      { levels: { maelia: 11 } },
+      { levels: { maelia: 21 }, ascensions: { maelia: 1 } },
+      { ascensions: { maelia: 1 } },
+      { levels: { maelia: 19 }, ascensions: { maelia: 2 } },
+      { levels: { maelia: 40 }, ascensions: { maelia: 4 } },
+    ]) {
+      await expect(saves.write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
+    }
+    await expect(saves.write(profileSave, { ...NEW_PROFILE, levels: { maelia: 10 } })).resolves.not.toThrow();
+    await expect(saves.write(profileSave, { ...NEW_PROFILE, levels: { maelia: 40 }, ascensions: { maelia: 3 } })).resolves.not.toThrow();
+  });
+
   it('never writes a malformed pull history or negative items', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     const result = pull({ ...NEW_PROFILE, focus: 'virelle' }, BANNER, 1, 3);

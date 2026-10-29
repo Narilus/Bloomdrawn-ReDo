@@ -1,10 +1,12 @@
+import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { missingContent } from '../game/check.ts';
 import type { ExpeditionDef } from '../game/expedition.ts';
 import type { BannerDef } from '../engine/index.ts';
 import { chooseFocus, pull } from '../game/gacha.ts';
-import { bank, lossBanking, NEW_PROFILE, type Banked, type Profile, type Team } from '../game/profile.ts';
+import { ascend, levelUp } from '../game/levels.ts';
+import { bank, buyPreset, lossBanking, NEW_PROFILE, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
 import { runSave, type RunSave } from '../save/run.ts';
@@ -57,6 +59,12 @@ export function createSaves(adapter: SaveAdapter) {
     }
   }
 
+  /** Writes the profile a profile action left, if it wasn't refused. */
+  const keep = async <R extends { ok: true; profile: Profile } | { ok: false; reason: string }>(result: R): Promise<R> => {
+    if (result.ok) await store.write(profileSave, result.profile);
+    return result;
+  };
+
   /** Banks a run that ended and forgets its save. */
   const end = (banked: Banked) =>
     enqueue(async () => {
@@ -90,7 +98,7 @@ export function createSaves(adapter: SaveAdapter) {
             : save!.data.id !== profile.run.id
               ? 'its save belongs to another run'
               : 'it was saved by a different version of the game';
-        const banked = lossBanking(profile.run.elites, def);
+        const banked = lossBanking(profile.run.elites, def, itemCount);
         const after = bank(profile, banked);
         await store.write(profileSave, after);
         await store.remove(RUN_SAVE);
@@ -138,6 +146,15 @@ export function createSaves(adapter: SaveAdapter) {
         await store.write(profileSave, profile);
         return profile;
       }),
+
+    /** Raises a character `levels` levels, paying in Memories and Ducats; a refusal writes nothing. */
+    levelUp: (character: string, levels: number) => enqueue(async () => keep(levelUp(await readProfile(), character, levels))),
+
+    /** Ascends a character at her level cap; a refusal writes nothing. */
+    ascend: (character: string) => enqueue(async () => keep(ascend(await readProfile(), character, registry))),
+
+    /** Buys one more team preset with Ducats; a refusal writes nothing. */
+    buyPreset: (owned: readonly string[]) => enqueue(async () => keep(buyPreset(await readProfile(), owned))),
 
     /** The profile as saved, after any writes in flight. */
     profile: () => enqueue(readProfile),

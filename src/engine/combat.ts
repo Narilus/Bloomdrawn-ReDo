@@ -56,6 +56,8 @@ export interface CombatSetup {
   gauges?: number[];
   /** Dupe levels from the profile, in slot order; default 0 (C0). */
   dupes?: number[];
+  /** Levels from the profile, in slot order; default 1. */
+  levels?: number[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
   /** The cards the run has gained, dealt in after the personal cards. */
@@ -86,6 +88,8 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     const member: Member = { id: `m${slot}`, character, gauge: Math.min(GAUGE_MAX, Math.max(0, setup.gauges?.[slot] ?? 0)) };
     const dupes = Math.floor(setup.dupes?.[slot] ?? 0);
     if (dupes > 0) member.dupes = dupes;
+    const level = Math.floor(setup.levels?.[slot] ?? 1);
+    if (level > 1) member.level = level;
     return member;
   });
   const characters = members.map((m) => characterOf(m, registry)!);

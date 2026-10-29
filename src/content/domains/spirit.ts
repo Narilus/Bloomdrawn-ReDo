@@ -3,7 +3,7 @@ import { card, domain } from '../define.ts';
 
 // Rituals Retain (the engine keeps them at cleanup); each cleanup they are held through makes them 1 cheaper, to 0.
 export const spirit = domain({
-  id: 'spirit', name: 'Spirit',
+  id: 'spirit', name: 'Spirit', material: 'material.spirit',
   resources: [{ id: 'essence', name: 'Essence' }],
   counter: {
     label: 'Essence', icon: 'essence', count: resource('essence'),

@@ -6,7 +6,7 @@ export const tentacleVolley = () => volley(resource('tentacles'), resource('pote
 
 // Damage per hit starts at 3; raises to it last the whole combat, so Tentacle damage ramps.
 export const rapture = domain({
-  id: 'rapture', name: 'Rapture',
+  id: 'rapture', name: 'Rapture', material: 'material.rapture',
   resources: [
     { id: 'tentacles', name: 'Tentacles' },
     { id: 'potency', name: 'damage per hit', start: 3 },

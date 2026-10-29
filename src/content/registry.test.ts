@@ -28,8 +28,9 @@ describe('content registry', () => {
   it('the character banner pools the banner four, never a starter, and every item it gives has a name', () => {
     expect([...CHARACTER_BANNER.pool].sort()).toEqual(['hester', 'isadora', 'kibane', 'virelle']);
     expect(CHARACTER_BANNER.pool.filter((id) => !registry.characters[id] || STARTERS.includes(id))).toEqual([]);
-    // One material per Domain.
-    expect(CHARACTER_BANNER.sr.one.map((m) => m.replace('material.', '')).sort()).toEqual(Object.keys(registry.domains).sort());
+    // One material per Domain: the one its characters ascend with.
+    expect([...CHARACTER_BANNER.sr.one].sort()).toEqual(Object.values(registry.domains).map((d) => d.material).sort());
+    expect(Object.values(registry.domains).filter((d) => !d.material || !ITEM_NAMES[d.material])).toEqual([]);
     expect([...CHARACTER_BANNER.sr.one, ...Object.keys(CHARACTER_BANNER.r), 'pollen'].filter((item) => !ITEM_NAMES[item])).toEqual([]);
   });
 

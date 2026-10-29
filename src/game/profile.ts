@@ -13,6 +13,10 @@ export interface Profile {
   owned: string[];
   /** Dupe levels (C1–C5) by character; a character gained once has none. */
   dupes?: Record<string, number>;
+  /** Levels by character, above 1 (`levels.ts`); one never levelled is level 1. */
+  levels?: Record<string, number>;
+  /** Ascensions made by character, 1 to 3; none is left out. */
+  ascensions?: Record<string, number>;
   /** Items banked, by ID: Pollen, Ducats (`money`), Memories and ascension materials. Absent is none. */
   items?: Record<string, number>;
   /** The character banner's Focus: the pool character an SSR's 50/50 is for (owner, 28 Oct). */
@@ -39,8 +43,11 @@ export interface ActiveRun {
 export const NEW_PROFILE: Profile = { pulls: 10, runs: 0, owned: [] };
 
 export const PARTY_SIZE = 4;
-/** Presets every profile has (owner, 26 Oct: 5 to start; more bought with Ducats later). */
+/** Presets every profile has (owner, 26 Oct: 5 to start; more bought with Ducats). */
 export const TEAM_PRESETS = 5;
+/** The first preset bought costs this many Ducats, and each after it costs `PRESET_STEP` more (owner, 29 Oct, placeholders). */
+export const PRESET_COST = 500;
+export const PRESET_STEP = 250;
 export const TEAM_NAME_LENGTH = 24;
 
 /** A team preset: a name the player can change and the party's places, front first; null is an empty place. */
@@ -71,6 +78,20 @@ export function teamsOf(profile: Profile, owned: readonly string[]): Team[] {
   return teams;
 }
 
+/** What the next preset costs in Ducats. */
+export const presetCost = (profile: Profile) => PRESET_COST + PRESET_STEP * Math.max(0, (profile.teams?.length ?? TEAM_PRESETS) - TEAM_PRESETS);
+
+/** Buys one more preset, empty and chosen, with Ducats; or refuses and changes nothing. */
+export function buyPreset(profile: Profile, owned: readonly string[]): { ok: true; profile: Profile } | { ok: false; reason: string } {
+  const cost = presetCost(profile);
+  const money = profile.items?.money ?? 0;
+  if (money < cost) return { ok: false, reason: `This needs ${cost} Ducats.` };
+  const teams = teamsOf(profile, owned);
+  const { money: _spent, ...rest } = profile.items ?? {};
+  const items = money > cost ? { ...rest, money: money - cost } : rest;
+  return { ok: true, profile: { ...profile, items, teams: [...teams, emptyTeam(teams.length)], team: teams.length } };
+}
+
 /**
  * Puts a character in a place. If she is already in another place the two swap, so the one there
  * moves to hers (owner, 26 Oct).
@@ -99,9 +120,10 @@ export function renameTeam(name: string, index: number): string {
 
 export type RunEnd = 'won' | 'lost' | 'abandoned';
 
-/** What a run banks, with one line per reason for the result screen. */
+/** What a run banks: pulls, items (Memories, Ducats, a material), and one line per reason for the result screen. */
 export interface Banked {
   pulls: number;
+  items?: Record<string, number>;
   lines: string[];
 }
 
@@ -109,31 +131,56 @@ export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n ==
 /** A pull's working name on screen (docs/notes/m5-collection.md, "Names"). */
 export const BLOOM = 'Purified Bloom';
 
+/** How a count of an item reads on screen; the names are content's (`src/content/items.ts`). */
+export type ItemText = (id: string, n: number) => string;
+
+type Items = Readonly<Record<string, number>>;
+const times = (items: Items, n: number): Record<string, number> => Object.fromEntries(Object.entries(items).map(([id, k]) => [id, k * n]));
+function sum(...all: Items[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const items of all) for (const [id, n] of Object.entries(items)) if (n > 0) out[id] = (out[id] ?? 0) + n;
+  return out;
+}
+/** "5 Purified Blooms, 1 Vivid Memory, 500 Ducats". */
+const gains = (pulls: number, items: Items, name: ItemText) =>
+  [...(pulls > 0 ? [plural(pulls, BLOOM)] : []), ...Object.entries(items).filter(([, n]) => n > 0).map(([id, n]) => name(id, n))].join(', ');
+
 /**
- * A win banks the win's pulls, multiplied if the Boss fell at Fruiting (her fight never ticks the
- * clock, so the run's clock is the one she was fought at). A defeat or abandon banks per elite
- * beaten, up to a cap, and nothing else: a run quit before any progress banks nothing (owner, 24 Oct).
+ * A win banks the win's pulls with Memories and Ducats for the Boss, each normal fight won and each
+ * elite, all multiplied if the Boss fell at Fruiting (her fight never ticks the clock, so the run's
+ * clock is the one she was fought at), and the Boss's material, never multiplied. A defeat or abandon
+ * banks per elite beaten, up to a cap, and nothing else: a run quit before any progress banks nothing
+ * (owner, 24 Oct; Memories and Ducats, 29 Oct). Later, deeper or harder runs will multiply the
+ * Memories and Ducats by a percentage (owner, 29 Oct).
  */
-export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef): Banked {
-  const { win, fruiting } = def.banking;
-  if (end === 'won') {
-    if (!reached(exp.clock, 'fruiting')) return { pulls: win, lines: [`The Boss beaten: ${plural(win, BLOOM)}`] };
-    return { pulls: win * fruiting, lines: [`The Boss beaten: ${plural(win, BLOOM)}`, `The Boss at Fruiting: ×${fruiting}`] };
-  }
-  return lossBanking(exp.elites, def);
+export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef, name: ItemText): Banked {
+  const { win, fruiting, items } = def.banking;
+  if (end !== 'won') return lossBanking(exp.elites, def, name);
+  const fights = exp.fights ?? 0;
+  const lines = [`The Boss beaten: ${gains(win, items.boss, name)}`];
+  if (fights > 0) lines.push(`${plural(fights, 'fight')} won: ${gains(0, times(items.fight, fights), name)}`);
+  if (exp.elites > 0) lines.push(`${plural(exp.elites, 'elite')} beaten: ${gains(0, times(items.elite, exp.elites), name)}`);
+  const n = reached(exp.clock, 'fruiting') ? fruiting : 1;
+  if (n > 1) lines.push(`The Boss at Fruiting: ×${n}`);
+  const earned = times(sum(items.boss, times(items.fight, fights), times(items.elite, exp.elites)), n);
+  if (exp.material) lines.push(`The Boss's material: ${name(exp.material, 1)}`);
+  return { pulls: win * n, items: sum(earned, exp.material ? { [exp.material]: 1 } : {}), lines };
 }
 
 /** What a run that didn't win banks: its share for the elites it beat, up to the cap. */
-export function lossBanking(elites: number, def: ExpeditionDef): Banked {
-  const { perElite, elitesMax } = def.banking;
+export function lossBanking(elites: number, def: ExpeditionDef, name: ItemText): Banked {
+  const { perElite, elitesMax, items } = def.banking;
   if (elites === 0) return { pulls: 0, lines: ['No elites beaten: nothing banked'] };
-  const pulls = Math.min(elites * perElite, elitesMax * perElite);
+  const counted = Math.min(elites, elitesMax);
+  const pulls = counted * perElite;
+  const banked = times(items.elite, counted);
   const capped = elites > elitesMax ? ` (${elitesMax} at most)` : '';
-  return { pulls, lines: [`${plural(elites, 'elite')} beaten: ${plural(pulls, BLOOM)}${capped}`] };
+  return { pulls, items: banked, lines: [`${plural(elites, 'elite')} beaten: ${gains(pulls, banked, name)}${capped}`] };
 }
 
-/** The profile after a run ends: its pulls banked, the run counted and no longer in progress. */
+/** The profile after a run ends: what it banked added, the run counted and no longer in progress. */
 export function bank(profile: Profile, banked: Banked): Profile {
   const { run: _ended, ...rest } = profile;
-  return { ...rest, pulls: profile.pulls + banked.pulls, runs: profile.runs + 1 };
+  const items = banked.items && Object.keys(banked.items).length > 0 ? { items: sum(profile.items ?? {}, banked.items) } : {};
+  return { ...rest, ...items, pulls: profile.pulls + banked.pulls, runs: profile.runs + 1 };
 }

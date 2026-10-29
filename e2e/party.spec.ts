@@ -102,3 +102,41 @@ test("a character's dupe level shows on the roster, and the page shows her at it
   await page.locator('.character-dupes').scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'test-results/screenshots/character-page-dupes.png' });
 });
+
+test('a character levels up and ascends on her page, and party select buys a preset with Ducats (M5.5)', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  const data = { pulls: 0, runs: 0, owned: [], items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 } };
+  const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 7, contentVersion: 1, data } } });
+  await page.goto('/');
+  await page.locator('.title-files input[type="file"]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(backup) });
+  await page.getByRole('button', { name: 'Roster' }).click();
+  await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-lv')).toHaveText('Lv 1');
+  await page.getByRole('button', { name: 'Maelia', exact: true }).click();
+  const growth = page.getByRole('region', { name: 'Level' });
+  await expect(growth.locator('h3')).toContainText('Level 1 of 10');
+  await expect(page.locator('.character-stats')).toContainText('HP55Attack3Defense5');
+  // Three Vivid Memories pay for nine levels (4,500 EXP), 1,500 coming back as Clear ones.
+  await growth.getByRole('button', { name: /To level 10/ }).click();
+  await expect(growth.locator('h3')).toContainText('Level 10 of 10');
+  await expect(growth.locator('.character-note')).toHaveText('Level 10. Spent: 3 Vivid Memories, 900 Ducats. Back: 3 Clear Memories.');
+  await expect(page.locator('.character-stats')).toContainText('HP67Attack4Defense6');
+  await expect(page.locator('.character-cards').first()).toContainText('Deal 10 damage.');
+  await growth.getByRole('button', { name: /Ascend/ }).click();
+  await expect(growth.locator('h3')).toContainText('Level 10 of 20');
+  await expect(growth.locator('.character-bank')).toContainText('3 Clear Memories');
+  await expect(growth.locator('.character-bank')).toContainText('1,100 Ducats');
+  await page.screenshot({ path: 'test-results/screenshots/character-page-level.png' });
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-lv')).toHaveText('Lv 10');
+  await page.getByRole('button', { name: 'Back' }).click();
+
+  await page.getByRole('button', { name: 'New run' }).click();
+  await expect(page.locator('.team-preset')).toHaveCount(5);
+  await page.getByRole('button', { name: 'New preset: 500 Ducats' }).click();
+  await expect(page.locator('.team-preset')).toHaveCount(6);
+  await expect(page.getByRole('button', { name: 'Team 6' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'New preset: 750 Ducats' })).toBeDisabled();
+  await page.screenshot({ path: 'test-results/screenshots/party-buy-preset.png' });
+  expect(errors).toEqual([]);
+});

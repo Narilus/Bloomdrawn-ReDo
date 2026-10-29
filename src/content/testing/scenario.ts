@@ -20,6 +20,8 @@ export interface ScenarioSpec {
   party?: string[];
   /** Dupe levels by character ID; others are C0. */
   dupes?: Record<string, number>;
+  /** Levels by character ID; others are level 1. */
+  levels?: Record<string, number>;
   enemies?: string[];
   seed?: number;
   setup?: {
@@ -65,7 +67,7 @@ export interface ScenarioRun {
 export function runScenario(spec: ScenarioSpec, registry: Registry = gameRegistry): ScenarioRun {
   const party = spec.party ?? STARTER_PARTY;
   let state = startCombat(
-    { seed: spec.seed ?? 1, party, enemies: spec.enemies ?? ['enemy.training-dummy'], dupes: party.map((id) => spec.dupes?.[id] ?? 0) },
+    { seed: spec.seed ?? 1, party, enemies: spec.enemies ?? ['enemy.training-dummy'], dupes: party.map((id) => spec.dupes?.[id] ?? 0), levels: party.map((id) => spec.levels?.[id] ?? 1) },
     registry,
   ).state;
 

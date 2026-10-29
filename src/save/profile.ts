@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ASCENSIONS, levelCap, MAX_LEVEL } from '../game/levels.ts';
 import { emptyTeam, PARTY_SIZE, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
 import type { SaveKind } from './store.ts';
 
@@ -29,6 +30,8 @@ const profileSchema = z.strictObject({
   runs: z.int().nonnegative(),
   owned: z.array(id),
   dupes: z.record(id, z.int().positive()).optional(),
+  levels: z.record(id, z.int().min(2).max(MAX_LEVEL)).optional(),
+  ascensions: z.record(id, z.int().min(1).max(ASCENSIONS.length)).optional(),
   items: items.optional(),
   focus: id.optional(),
   gacha: z.strictObject({ stream: z.int().nonnegative(), pity: z.record(id, count), losses: z.record(id, count), history: z.array(pullRecord) }).optional(),
@@ -39,11 +42,12 @@ const profileSchema = z.strictObject({
 
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
- * gained and their dupes, items, the Focus and the gacha, the team presets and the run in progress's tally.
+ * gained and their dupes, levels and ascensions, items, the Focus and the gacha, the team presets and
+ * the run in progress's tally.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 6,
+  schemaVersion: 7,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -76,10 +80,18 @@ export const profileSave: SaveKind<Profile> = {
         },
       };
     },
+    // v7 added levels and ascensions (M5.5); every character in a v6 profile is level 1.
+    6: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;
     if (profile.team !== undefined && profile.team >= (profile.teams?.length ?? TEAM_PRESETS)) throw new Error('the chosen team is not one of the presets');
+    for (const [character, ascensions] of Object.entries(profile.ascensions ?? {})) {
+      if ((profile.levels?.[character] ?? 1) < levelCap(ascensions - 1)) throw new Error(`${character} ascended below level ${levelCap(ascensions - 1)}`);
+    }
+    for (const [character, level] of Object.entries(profile.levels ?? {})) {
+      if (level > levelCap(profile.ascensions?.[character] ?? 0)) throw new Error(`${character} is past level ${levelCap(profile.ascensions?.[character] ?? 0)} without ascending`);
+    }
     return profile;
   },
 };

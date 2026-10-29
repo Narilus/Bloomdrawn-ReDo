@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { startCombat } from '../engine/index.ts';
@@ -44,7 +45,7 @@ describe('saves', () => {
   it('a run at dupe levels resumes at them, mid-fight with its variant cards; a level outside C1 to C5 is refused (M5.4)', async () => {
     const { saves, adapter } = setup();
     const party = ['virelle', 'isadora', 'kibane', 'hester'];
-    const save: RunSave = { id: 'run-1', seed: 4, exp: { ...startExpedition(4, party, M3_EXPEDITION, registry.motifs, { kibane: 3 }), phase: 'fight', fightSeed: 9 } };
+    const save: RunSave = { id: 'run-1', seed: 4, exp: { ...startExpedition(4, party, M3_EXPEDITION, registry.motifs, { dupes: { kibane: 3 } }), phase: 'fight', fightSeed: 9 } };
     const combat = startCombat({ seed: 9, party, enemies: ['enemy.bloom-rib-hound'], dupes: [0, 0, 3, 0] }, registry).state;
     expect([...combat.piles.draw, ...combat.piles.hand].map((c) => c.card)).toContain('kibane.foxfire-rite-c3');
     await saves.start(save);
@@ -71,6 +72,25 @@ describe('saves', () => {
     await saves.start(run());
     await saves.end({ pulls: 2, lines: [] });
     expect(await profileOf(store)).toEqual({ pulls: 10 + 2, runs: 1, owned: [], teams, team: 1 });
+  });
+
+  it('levelling, ascending and buying a preset keep the profile they leave; a refusal writes nothing (M5.5)', async () => {
+    const { saves, store } = setup();
+    await saves.end({ pulls: 0, items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 }, lines: [] });
+    expect(await saves.levelUp('maelia', 10)).toEqual({ ok: false, reason: 'Level 10 needs an ascension first.' });
+    const levelled = await saves.levelUp('maelia', 9);
+    if (!levelled.ok) throw new Error(levelled.reason);
+    expect(await profileOf(store)).toEqual(levelled.profile);
+    // Levels 1 to 10: 4,500 EXP from three Vivid (6,000), 1,500 back as three Clear; 900 Ducats.
+    expect([levelled.profile.levels, levelled.profile.items]).toEqual([{ maelia: 10 }, { 'memory.clear': 3, 'material.flesh': 1, money: 2100 }]);
+    const ascended = await saves.ascend('maelia');
+    if (!ascended.ok) throw new Error(ascended.reason);
+    expect(await profileOf(store)).toMatchObject({ ascensions: { maelia: 1 }, items: { money: 3000 - 900 - 1000 } });
+    expect(await saves.ascend('maelia')).toMatchObject({ ok: false });
+    const bought = await saves.buyPreset(['maelia', 'agathe', 'anthe', 'leonora']);
+    if (!bought.ok) throw new Error(bought.reason);
+    expect(await profileOf(store)).toMatchObject({ team: 5, items: { money: 3000 - 900 - 1000 - 500 } });
+    expect(bought.profile.teams).toHaveLength(6);
   });
 
   it('pulling mid-run keeps the profile it leaves, and the run, its save and its tally stay as they were', async () => {
@@ -109,12 +129,12 @@ describe('saves', () => {
     adapter.data.set('run:previous', 'not json');
     const boot = await saves.boot(M3_EXPEDITION);
     expect(boot).toEqual({
-      profile: { pulls: 10 + 2, runs: 1, owned: [] },
+      profile: { pulls: 10 + 2, runs: 1, owned: [], items: { 'memory.clear': 2, money: 300 } },
       run: null,
-      ended: { reason: 'The save is not valid JSON.', banked: lossBanking(2, M3_EXPEDITION) },
+      ended: { reason: 'The save is not valid JSON.', banked: lossBanking(2, M3_EXPEDITION, itemCount) },
     });
     expect(adapter.data.has('run:current')).toBe(false);
-    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 2, runs: 1, owned: [] }, run: null });
+    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 2, runs: 1, owned: [], items: { 'memory.clear': 2, money: 300 } }, run: null });
   });
 
   it('a run naming content the game no longer has, or saved with other content, ends as abandoned', async () => {

@@ -306,6 +306,8 @@ export interface DomainDef {
   resources: ResourceDef[];
   /** Slots into any team: its generic cards are offered to every party and may go to any member. */
   anyTeam?: boolean;
+  /** The profile item its characters ascend with (an ascension material). */
+  material?: string;
   triggers?: TriggerDef[];
   /**
    * The HUD badge: a count, and optionally damage for each one (shown as count × each = total).

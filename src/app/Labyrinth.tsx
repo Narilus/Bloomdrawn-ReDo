@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import type { CombatState, RunCard } from '../engine/index.ts';
 import { BLOOM_NODES, BLOOM_STAGES, bossDirection, reached, stageOf, ticksToNext } from '../game/bloom.ts';
@@ -36,6 +37,7 @@ import {
   turnBack,
   type Expedition,
   type ExpeditionDef,
+  type Growth,
   type Outcome,
   type ShopStock,
 } from '../game/expedition.ts';
@@ -72,10 +74,10 @@ const SEED = Number(params().get('seed')) || undefined;
 const FIRST_CLOCK = Number(params().get('clock')) || 0;
 const FIRST_OBOLS = Number(params().get('obols')) || 0;
 
-/** A new run for this party, front first, at its dupe levels, on a random board (or `?seed`'s), with its own ID for the profile to track. */
-export function newRun(party: readonly string[], dupes: Readonly<Record<string, number>> = {}): RunSave {
+/** A new run for this party, front first, at its dupe levels and levels, on a random board (or `?seed`'s), with its own ID for the profile to track. */
+export function newRun(party: readonly string[], growth: Growth = {}): RunSave {
   const seed = SEED ?? Math.floor(Math.random() * 2 ** 31);
-  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs, dupes), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
+  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs, growth), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
   return { id: crypto.randomUUID(), seed, exp };
 }
 
@@ -138,7 +140,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
       if (banked.current === ended) return;
       banked.current = ended;
       setProfile(null);
-      saves.end(runBanking(ended, how, DEF)).then(setProfile, (err: unknown) => {
+      saves.end(runBanking(ended, how, DEF, itemCount)).then(setProfile, (err: unknown) => {
         console.error('Banking failed', err);
         setProfile('failed');
       });
@@ -202,7 +204,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
       {exp.phase === 'outcome' && exp.outcome && <OutcomePanel outcome={exp.outcome} onClose={() => setExp(closeOutcome(exp))} />}
       {exp.phase === 'reward' &&
         (exp.offeredCards.length > 0 ? (
-          <CardChoice offered={exp.offeredCards} dupes={exp.dupes} onChoose={(index) => setExp(chooseExpeditionCard(exp, index))}>
+          <CardChoice offered={exp.offeredCards} growth={exp} onChoose={(index) => setExp(chooseExpeditionCard(exp, index))}>
             <Spoils exp={exp} />
           </CardChoice>
         ) : (
@@ -236,7 +238,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
         <div className="result reward" role="dialog" aria-label="Abandon run">
           <h2 className="panel-title">Abandon this run?</h2>
           <p className="result-line">It ends here and banks only its share:</p>
-          <Banking banked={runBanking(exp, 'abandoned', DEF)} profile={undefined} />
+          <Banking banked={runBanking(exp, 'abandoned', DEF, itemCount)} profile={undefined} />
           <div className="panel-buttons">
             <button className="end-turn" onClick={() => setMenu('closed')}>
               Keep playing
@@ -253,7 +255,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
           <p className="result-line">
             {result === 'won' ? `The Boss falls with ${exp.hp} HP left.` : result === 'lost' ? 'The Bloom keeps the expedition.' : 'The expedition turns back.'}
           </p>
-          <Banking banked={runBanking(exp, result, DEF)} profile={profile} />
+          <Banking banked={runBanking(exp, result, DEF, itemCount)} profile={profile} />
           <div className="panel-buttons">
             <button className="end-turn" onClick={onAgain} disabled={profile === null}>
               Run again
@@ -277,7 +279,7 @@ export function Banking({ banked, profile }: { banked: Banked; profile: Profile 
           <li key={line}>{line}</li>
         ))}
       </ul>
-      <p className="banked-total">This run: {plural(banked.pulls, BLOOM)}</p>
+      <p className="banked-total">This run: {[plural(banked.pulls, BLOOM), ...Object.entries(banked.items ?? {}).map(([id, n]) => itemCount(id, n))].join(', ')}</p>
       {profile !== undefined && (
         <p className="banked-profile">
           {profile === 'failed' ? 'The profile could not be saved.' : profile ? `${BLOOM}s banked in all: ${profile.pulls}` : 'Banking…'}
@@ -299,7 +301,7 @@ function RunDeck({ exp }: { exp: Expedition }) {
       </div>
       <ul>
         {rows.map((c) => (
-          <li key={key(c)} className={c.owner ? undefined : 'symptom'} title={c.owner ? runCardText(c, registry, {}, exp.dupes) : symptomText(exp, c.card, registry)}>
+          <li key={key(c)} className={c.owner ? undefined : 'symptom'} title={c.owner ? runCardText(c, registry, {}, exp) : symptomText(exp, c.card, registry)}>
             <span>{registry.cards[c.card]?.name ?? c.card}</span>
             <span className="owner">{c.owner ? registry.characters[c.owner]?.name : 'Symptom'}</span>
             <span className="count">×{exp.deck.filter((d) => key(d) === key(c)).length}</span>
@@ -329,13 +331,13 @@ function Spoils({ exp }: { exp: Expedition }) {
 /** A normal fight's card pick: each card shows the member it goes to and her numbers. */
 function CardChoice({
   offered,
-  dupes,
+  growth,
   onChoose,
   children,
 }: {
   offered: readonly RunCard[];
-  /** The run's dupe levels, for the owners' numbers. */
-  dupes: Expedition['dupes'];
+  /** The run's dupe levels and levels, for the owners' numbers. */
+  growth: Growth;
   onChoose: (index: number | null) => void;
   children?: ReactNode;
 }) {
@@ -354,7 +356,7 @@ function CardChoice({
                 id={c.card}
                 def={def}
                 owner={owner}
-                text={runCardText(c, registry, { charge: false, keywords: false, mark: markNumber }, dupes)}
+                text={runCardText(c, registry, { charge: false, keywords: false, mark: markNumber }, growth)}
                 cost={def?.cost}
                 registry={registry}
                 playable

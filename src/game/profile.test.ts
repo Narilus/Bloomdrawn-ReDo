@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NEW_PROFILE, ownedCharacters, partyProblem, placeInTeam, quickTeam, removeFromTeam, renameTeam, teamsOf } from './profile.ts';
+import { buyPreset, NEW_PROFILE, ownedCharacters, partyProblem, placeInTeam, presetCost, quickTeam, removeFromTeam, renameTeam, teamsOf } from './profile.ts';
 
 // Party select (docs/notes/m5-collection.md; owner, 26 Oct): any four owned characters, in order, kept in team presets.
 
@@ -59,5 +59,19 @@ describe('the roster and party select', () => {
     expect(renameTeam('  Bleeders ', 0)).toBe('Bleeders');
     expect(renameTeam('x'.repeat(30), 0)).toBe('x'.repeat(24));
     expect(renameTeam('   ', 2)).toBe('Team 3');
+  });
+
+  it('one more preset costs 500 Ducats and each after it 250 more; bought, it is empty and chosen (owner, 29 Oct)', () => {
+    const rich = { ...NEW_PROFILE, items: { money: 1250, pollen: 3 } };
+    expect(presetCost(rich)).toBe(500);
+    const sixth = buyPreset(rich, STARTERS);
+    if (!sixth.ok) throw new Error(sixth.reason);
+    expect(sixth.profile.teams).toEqual([...teamsOf(rich, STARTERS), { name: 'Team 6', members: [null, null, null, null] }]);
+    expect([sixth.profile.team, sixth.profile.items, presetCost(sixth.profile)]).toEqual([5, { money: 750, pollen: 3 }, 750]);
+    const seventh = buyPreset(sixth.profile, STARTERS);
+    if (!seventh.ok) throw new Error(seventh.reason);
+    // All the Ducats spent leaves none.
+    expect([seventh.profile.teams?.length, seventh.profile.items, presetCost(seventh.profile)]).toEqual([7, { pollen: 3 }, 1000]);
+    expect(buyPreset(seventh.profile, STARTERS)).toEqual({ ok: false, reason: 'This needs 1000 Ducats.' });
   });
 });

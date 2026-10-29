@@ -37,6 +37,8 @@ export interface Member {
   transcended?: boolean;
   /** Her dupe level, 1 to 5 (`characterOf`); absent at C0. */
   dupes?: number;
+  /** Her level, above 1 (`characterOf`); absent at level 1. */
+  level?: number;
 }
 
 export interface Enemy {

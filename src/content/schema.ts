@@ -168,6 +168,7 @@ export const schemas = {
     name: z.string().min(1),
     resources: z.array(z.strictObject({ id, name: z.string().min(1), start: z.int().min(0).optional() })),
     anyTeam: z.literal(true).optional(),
+    material: id.optional(),
     triggers: hooks.triggers,
     counter: z
       .strictObject({

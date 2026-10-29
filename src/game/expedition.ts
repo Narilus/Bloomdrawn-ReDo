@@ -19,6 +19,7 @@ import {
   type Streams,
   type TextOptions,
   withDupes,
+  withLevel,
 } from '../engine/index.ts';
 import { BLOOM_NODES, bloomNodeDue, bloomTick, reached, spawnBloomNode, stageOf, type BloomStage } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
@@ -47,8 +48,19 @@ export interface ExpeditionDef {
   cards: { pool: string[]; offer: number };
   /** Obols for winning a fight, before the Bloom's bonus. */
   obols: { fight: number; elite: number };
-  /** Pulls banked when a run ends: a win, doubled at Fruiting; otherwise per elite beaten, up to a cap. */
-  banking: { win: number; fruiting: number; perElite: number; elitesMax: number };
+  /**
+   * What a run banks when it ends (`runBanking`): a win's pulls, and items (Memories and Ducats) for
+   * the Boss, each normal fight won and each elite, all multiplied at Fruiting, with one of
+   * `materials` from the Boss; otherwise pulls and the elite items per elite beaten, up to a cap.
+   */
+  banking: {
+    win: number;
+    fruiting: number;
+    perElite: number;
+    elitesMax: number;
+    items: { fight: Record<string, number>; elite: Record<string, number>; boss: Record<string, number> };
+    materials: string[];
+  };
   shop: {
     /** A relic's price by its tier. */
     prices: Record<RelicTier, number>;
@@ -85,11 +97,24 @@ export interface Outcome {
 /** A Bloom node's choices (owner, 20 Oct). */
 export type BloomChoice = 'fight' | 'gamble' | 'symptom';
 
+/**
+ * Dupe levels and levels by character, C0 and level 1 left out: a profile's, or a run's copy of them.
+ * A profile and an expedition are each one.
+ */
+export interface Growth {
+  dupes?: Readonly<Record<string, number>> | undefined;
+  levels?: Readonly<Record<string, number>> | undefined;
+}
+
 /** Plain JSON, like combat state. */
 export interface Expedition {
   party: string[];
-  /** The party's dupe levels when the run began, by character (C0 left out): a copy pulled mid-run counts from the next run. */
+  /**
+   * The party's dupe levels and levels when the run began, by character (C0 and level 1 left out):
+   * a copy pulled or a level gained mid-run counts from the next run.
+   */
   dupes?: Record<string, number>;
+  levels?: Record<string, number>;
   board: Board;
   /**
    * map: choosing where to walk. tile: stopped on a Shop, Camp, Event, Symptom or Bloom node.
@@ -114,6 +139,10 @@ export interface Expedition {
   obols: number;
   /** Elite tiles beaten, for banking a lost or abandoned run. */
   elites: number;
+  /** Other fights won (not elite tiles or the Boss), for banking a won run; absent is none. */
+  fights?: number;
+  /** The material the Boss gave, once she is beaten. */
+  material?: string;
   /** What the last won fight gave, for the Victory panel: Obols, including the bonus (percent) of the Bloom stage it started at. */
   spoils?: { obols: number; bonus: number; stage: BloomStage };
   /** Each Shop's stock by tile key, once entered. */
@@ -130,12 +159,15 @@ export function startExpedition(
   party: string[],
   def: ExpeditionDef,
   motifs: Readonly<Record<string, MotifDef>>,
-  dupes: Readonly<Record<string, number>> = {},
+  growth: Growth = {},
 ): Expedition {
-  const levels = Object.fromEntries(party.filter((id) => (dupes[id] ?? 0) > 0).map((id) => [id, dupes[id]!]));
+  const of = (table: Growth['dupes'], above: number) => Object.fromEntries(party.filter((id) => (table?.[id] ?? 0) > above).map((id) => [id, table![id]!]));
+  const dupes = of(growth.dupes, 0);
+  const levels = of(growth.levels, 1);
   return {
     party,
-    ...(Object.keys(levels).length > 0 && { dupes: levels }),
+    ...(Object.keys(dupes).length > 0 && { dupes }),
+    ...(Object.keys(levels).length > 0 && { levels }),
     board: generateBoard(seed, def.board, motifs),
     phase: 'map',
     hp: null,
@@ -240,6 +272,7 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
   if (exp.hp !== null) setup.partyHp = exp.hp;
   if (exp.deck.length > 0) setup.deck = exp.deck;
   if (exp.dupes) setup.dupes = exp.party.map((id) => exp.dupes?.[id] ?? 0);
+  if (exp.levels) setup.levels = exp.party.map((id) => exp.levels?.[id] ?? 1);
   const scale = boss ? 0 : stageOf(exp.clock).enemyScale;
   if (scale > 0) setup.enemyScale = scale;
   return setup;
@@ -258,8 +291,11 @@ export function finishExpeditionFight(exp: Expedition, combat: CombatState, def:
   next.gauges = combat.members.map((m) => m.gauge);
   const kind = exp.board.tiles[exp.board.at]?.kind;
   if (combat.outcome === 'defeat') next.phase = 'lost';
-  else if (kind === 'boss') next.phase = 'won';
-  else {
+  else if (kind === 'boss') {
+    next.phase = 'won';
+    const { materials } = def.banking;
+    if (materials.length > 0) next.material = materials[nextInt(next.rng, 'rewards', materials.length)]!;
+  } else {
     // The stage the fight started at, before its own tick.
     const { obolBonus: bonus, id: stage } = stageOf(exp.clock);
     const obols = Math.floor(((kind === 'elite' ? def.obols.elite : def.obols.fight) * (100 + bonus)) / 100);
@@ -268,6 +304,7 @@ export function finishExpeditionFight(exp: Expedition, combat: CombatState, def:
     next.board = resolveTile(next.board);
     next.phase = 'reward';
     if (kind !== 'bloom') tick(next, def);
+    if (kind !== 'elite') next.fights = (next.fights ?? 0) + 1;
     if (kind === 'elite') {
       next.elites += 1;
       const pool = def.relicPool.filter((id) => !exp.relics.includes(id));
@@ -328,23 +365,23 @@ function closeVictory(exp: Expedition): Expedition {
   return next;
 }
 
-/** A character as she fights: at her dupe level, if one is given (`Expedition.dupes`, `Profile.dupes`). */
-export function fieldedCharacter(id: string, registry: Registry, dupes: Readonly<Record<string, number>> = {}) {
+/** A character as she fights: at her dupe level and level, if given (an expedition's or a profile's). */
+export function fieldedCharacter(id: string, registry: Registry, growth: Growth = {}) {
   const def = registry.characters[id];
-  return def && withDupes(def, dupes[id]);
+  return def && withLevel(withDupes(def, growth.dupes?.[id]), growth.levels?.[id]);
 }
 
-/** A run card's text with its owner's stats (at her dupe level) as numbers; what depends on the fight shows as written. */
-export function runCardText(card: RunCard, registry: Registry, options: TextOptions = {}, dupes: Readonly<Record<string, number>> = {}): string {
+/** A run card's text with its owner's stats (at her dupe level and level) as numbers; what depends on the fight shows as written. */
+export function runCardText(card: RunCard, registry: Registry, options: TextOptions = {}, growth: Growth = {}): string {
   const def = registry.cards[card.card];
-  const stats = fieldedCharacter(card.owner ?? '', registry, dupes)?.stats;
+  const stats = fieldedCharacter(card.owner ?? '', registry, growth)?.stats;
   if (!def) return card.card;
   return describeCard(def, registry, stats ? showStats(stats, options.mark) : formulaText, options);
 }
 
 /** The party's max HP: its members' HP added up, as combat starts it. */
 export function expeditionMaxHp(exp: Expedition, registry: Registry): number {
-  return exp.party.reduce((sum, id) => sum + (fieldedCharacter(id, registry, exp.dupes)?.stats.hp ?? 0), 0);
+  return exp.party.reduce((sum, id) => sum + (fieldedCharacter(id, registry, exp)?.stats.hp ?? 0), 0);
 }
 
 /** The stock of the Shop the party is in, if it is in one. */
@@ -658,8 +695,19 @@ export const M3_EXPEDITION: ExpeditionDef = {
     offer: 3,
   },
   obols: { fight: 20, elite: 45 },
-  // M4.3 (owner, 24 Oct; provisional until M5's profile systems).
-  banking: { win: 5, fruiting: 2, perElite: 1, elitesMax: 3 },
+  // Pulls: M4.3 (owner, 24 Oct). Memories, Ducats and the Boss's material: M5.5 (owner, 29 Oct, placeholders).
+  banking: {
+    win: 5,
+    fruiting: 2,
+    perElite: 1,
+    elitesMax: 3,
+    items: {
+      fight: { 'memory.faint': 1, money: 50 },
+      elite: { 'memory.clear': 1, money: 150 },
+      boss: { 'memory.vivid': 1, money: 500 },
+    },
+    materials: ['material.flesh', 'material.rapture', 'material.spirit', 'material.unbound'],
+  },
   shop: {
     prices: { common: 50, uncommon: 80, rare: 120, cursed: 30 },
     mend: { price: 40, percent: 25 },

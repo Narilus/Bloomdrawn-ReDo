@@ -1853,7 +1853,7 @@ kbd {
 
 .team-list-pane {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto auto;
   gap: 24px;
   min-height: 0;
 }
@@ -1863,6 +1863,22 @@ kbd {
   font-family: var(--serif);
   font-size: 48px;
   color: var(--blush);
+}
+
+/* One more preset, bought with Ducats. */
+.team-buy {
+  justify-self: start;
+  font-size: 18px;
+}
+
+.team-buy:disabled {
+  opacity: 0.5;
+}
+
+.team-money {
+  margin: -12px 0 0;
+  font-size: 16px;
+  opacity: 0.7;
 }
 
 .team-list {
@@ -2140,6 +2156,66 @@ kbd {
   font-style: normal;
   font-weight: 800;
   font-size: 16px;
+}
+
+/* Her level, as the dupe tag's twin on the other corner. */
+.roster-lv {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  padding: 2px 10px;
+  border-radius: 8px;
+  background: rgba(20, 12, 24, 0.75);
+  color: var(--blush);
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* Levelling: level and ascensions, what is banked to pay with, and the buttons. */
+.character-growth {
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: 10px;
+  background: rgba(20, 12, 24, 0.45);
+}
+
+.character-growth h3 {
+  margin: 0;
+}
+
+.character-growth .panel-buttons {
+  justify-content: start;
+  gap: 12px;
+}
+
+.character-growth .end-turn {
+  position: static;
+  display: grid;
+  gap: 2px;
+  padding: 8px 18px;
+  font-size: 20px;
+}
+
+.character-growth .end-turn small {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.character-info .character-bank,
+.character-info .character-note {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.character-info .character-note:empty {
+  display: none;
 }
 
 .character-stats {

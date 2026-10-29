@@ -38,6 +38,7 @@ import {
 } from '../game/expedition.ts';
 import { bloomNodeDue } from '../game/bloom.ts';
 import { bank, NEW_PROFILE, runBanking } from '../game/profile.ts';
+import { itemCount } from '../content/items.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { decodeSave, encodeSave } from '../save/store.ts';
 import { RUN_SAVE } from './saves.ts';
@@ -284,7 +285,7 @@ describe('card rewards', () => {
   it("a run fields its party at the dupe levels it began with: fights, max HP and card numbers (M5.4)", () => {
     const party = ['virelle', 'isadora', 'kibane', 'hester'];
     // Leonora isn't fielded and Isadora is at C0, so neither is kept.
-    const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, { virelle: 2, kibane: 5, isadora: 0, leonora: 3 }), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
+    const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, { dupes: { virelle: 2, kibane: 5, isadora: 0, leonora: 3 } }), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
     expect(exp.dupes).toEqual({ virelle: 2, kibane: 5 });
     const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
     expect(combat.members.map((m) => m.dupes)).toEqual([2, undefined, 5, undefined]);
@@ -292,9 +293,23 @@ describe('card rewards', () => {
     expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([210, 210]);
     // Thorn Spur deals 3 + Attack: 6 at C0, 7 at C2.
     const spur = { card: 'virelle.thorn-spur', owner: 'virelle' };
-    expect([runCardText(spur, registry), runCardText(spur, registry, {}, exp.dupes)]).toEqual(['Deal 9 damage twice.', 'Deal 10 damage twice.']);
+    expect([runCardText(spur, registry), runCardText(spur, registry, {}, exp)]).toEqual(['Deal 9 damage twice.', 'Deal 10 damage twice.']);
     // A run at C0 has no levels to keep, so its save is as before.
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('dupes');
+  });
+
+  it('a run fields its party at the levels it began with, on top of their dupe levels (M5.5)', () => {
+    const party = ['virelle', 'isadora', 'kibane', 'hester'];
+    // Leonora isn't fielded and Hester is level 1, so neither is kept.
+    const growth = { dupes: { virelle: 2 }, levels: { virelle: 21, hester: 1, leonora: 9 } };
+    const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, growth), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
+    expect([exp.dupes, exp.levels]).toEqual([{ virelle: 2 }, { virelle: 21 }]);
+    const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
+    expect(combat.members.map((m) => [m.dupes, m.level])).toEqual([[2, 21], [undefined, undefined], [undefined, undefined], [undefined, undefined]]);
+    // Virelle's C2 50 HP and Attack 7, × 1.5 at level 21: 75 HP and Attack 11.
+    expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([75 + 50 + 50 + 55, 75 + 50 + 50 + 55]);
+    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 14 damage twice.');
+    expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('levels');
   });
 
   it('elites give relics only, the Boss ends the run, and a Bloom node fight offers cards like any fight', () => {
@@ -388,43 +403,73 @@ describe('banking', () => {
     });
     return exp;
   }
-  const banked = (exp: Expedition, end: 'won' | 'lost' | 'abandoned' = exp.phase as 'won' | 'lost') => runBanking(exp, end, M3_EXPEDITION);
+  const banked = (exp: Expedition, end: 'won' | 'lost' | 'abandoned' = exp.phase as 'won' | 'lost') => runBanking(exp, end, M3_EXPEDITION, itemCount);
+  const { materials } = M3_EXPEDITION.banking;
 
-  it('a win banks 5 pulls, and elites beaten on the way add nothing to it', () => {
-    expect(banked(play([BOSS], 'victory'))).toEqual({ pulls: 5, lines: ['The Boss beaten: 5 Purified Blooms'] });
-    const past = play([ELITE, ELITE, BOSS], 'victory');
-    expect([past.phase, past.elites, banked(past).pulls]).toEqual(['won', 2, 5]);
+  // M5.5 (owner, 29 Oct): Memories and Ducats bank with the pulls, and a won run's Boss gives a material.
+  it('a win banks 5 pulls however many elites fell, with Memories and Ducats for the Boss, each fight and each elite, and the Boss\'s material', () => {
+    const alone = play([BOSS], 'victory');
+    expect(materials).toContain(alone.material);
+    expect(banked(alone)).toEqual({
+      pulls: 5,
+      items: { 'memory.vivid': 1, money: 500, [alone.material!]: 1 },
+      lines: ['The Boss beaten: 5 Purified Blooms, 1 Vivid Memory, 500 Ducats', `The Boss's material: ${itemCount(alone.material!, 1)}`],
+    });
+    const past = play([HOUND, ELITE, HOUND, ELITE, BOSS], 'victory');
+    expect([past.phase, past.elites, past.fights]).toEqual(['won', 2, 2]);
+    expect(banked(past)).toEqual({
+      pulls: 5,
+      items: { 'memory.vivid': 1, 'memory.faint': 2, 'memory.clear': 2, money: 500 + 2 * 50 + 2 * 150, [past.material!]: 1 },
+      lines: [
+        'The Boss beaten: 5 Purified Blooms, 1 Vivid Memory, 500 Ducats',
+        '2 fights won: 2 Faint Memories, 100 Ducats',
+        '2 elites beaten: 2 Clear Memories, 300 Ducats',
+        `The Boss's material: ${itemCount(past.material!, 1)}`,
+      ],
+    });
   });
 
-  it('a win over the Boss at Fruiting banks double', () => {
+  it('a win over the Boss at Fruiting banks double, but her material only once', () => {
     const exp = play([BOSS], 'victory', 12);
-    expect(banked(exp)).toEqual({ pulls: 10, lines: ['The Boss beaten: 5 Purified Blooms', 'The Boss at Fruiting: ×2'] });
+    expect(banked(exp)).toEqual({
+      pulls: 10,
+      items: { 'memory.vivid': 2, money: 1000, [exp.material!]: 1 },
+      lines: ['The Boss beaten: 5 Purified Blooms, 1 Vivid Memory, 500 Ducats', 'The Boss at Fruiting: ×2', `The Boss's material: ${itemCount(exp.material!, 1)}`],
+    });
     // Fruiting reached by fights on the way counts too: the Boss's own fight never ticks the clock.
-    expect(banked(play([ELITE, BOSS], 'victory', 11)).pulls).toBe(10);
+    expect(banked(play([ELITE, BOSS], 'victory', 11))).toMatchObject({ pulls: 10, items: { 'memory.vivid': 2, 'memory.clear': 2, money: 1300 } });
   });
 
-  it('a defeat banks 1 pull per elite beaten, 3 at most', () => {
+  it('a defeat banks 1 pull, 1 Clear Memory and 150 Ducats per elite beaten, 3 at most, and no material', () => {
     expect(banked(play([HOUND], 'defeat'))).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
-    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, lines: ['1 elite beaten: 1 Purified Bloom'] });
-    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, lines: ['2 elites beaten: 2 Purified Blooms'] });
-    expect(banked(play([ELITE, ELITE, ELITE, ELITE, HOUND], 'defeat'))).toEqual({ pulls: 3, lines: ['4 elites beaten: 3 Purified Blooms (3 at most)'] });
+    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, items: { 'memory.clear': 1, money: 150 }, lines: ['1 elite beaten: 1 Purified Bloom, 1 Clear Memory, 150 Ducats'] });
+    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, items: { 'memory.clear': 2, money: 300 }, lines: ['2 elites beaten: 2 Purified Blooms, 2 Clear Memories, 300 Ducats'] });
+    expect(banked(play([ELITE, ELITE, ELITE, ELITE, HOUND], 'defeat'))).toEqual({
+      pulls: 3,
+      items: { 'memory.clear': 3, money: 450 },
+      lines: ['4 elites beaten: 3 Purified Blooms, 3 Clear Memories, 450 Ducats (3 at most)'],
+    });
+    expect(play([ELITE, ELITE, BOSS], 'defeat').material).toBeUndefined();
   });
 
   it('an abandoned run banks like a defeat, so a run quit before any progress banks nothing', () => {
     expect(banked(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs), 'abandoned')).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
     expect(banked(play([HOUND, HOUND], 'victory'), 'abandoned').pulls).toBe(0);
-    expect(banked(play([ELITE, HOUND], 'victory'), 'abandoned').pulls).toBe(1);
+    expect(banked(play([ELITE, HOUND], 'victory'), 'abandoned')).toMatchObject({ pulls: 1, items: { 'memory.clear': 1, money: 150 } });
   });
 
   it("only elite tiles count: an elite's roster on a normal tile (Flowering) is a normal fight", () => {
-    expect(play([{ kind: 'fight', content: 'encounter.thorn-wall' }, HOUND], 'defeat').elites).toBe(0);
+    const exp = play([{ kind: 'fight', content: 'encounter.thorn-wall' }, HOUND], 'defeat');
+    expect([exp.elites, exp.fights]).toEqual([0, 1]);
   });
 
-  it('banking adds the pulls to the profile and counts the run', () => {
+  it('banking adds the pulls and items to the profile and counts the run', () => {
     // A new profile starts with 10.
-    const once = bank(NEW_PROFILE, banked(play([BOSS], 'victory')));
-    expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [] });
-    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ pulls: 10 + 5, runs: 2, owned: [] });
+    const win = play([BOSS], 'victory');
+    const once = bank(NEW_PROFILE, banked(win));
+    expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [], items: { 'memory.vivid': 1, money: 500, [win.material!]: 1 } });
+    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ ...once, runs: 2 });
+    expect(bank(once, banked(play([ELITE, HOUND], 'defeat'))).items).toEqual({ 'memory.vivid': 1, 'memory.clear': 1, money: 650, [win.material!]: 1 });
   });
 });
 

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
-import { BLOOM, ownedCharacters, runBanking, teamsOf, type Profile } from '../game/profile.ts';
+import type { Growth } from '../game/expedition.ts';
+import { MAX_LEVEL } from '../game/levels.ts';
+import { BLOOM, ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
 import type { RunSave } from '../save/run.ts';
 import { Banner } from './Banner.tsx';
 import { Banking, DEF, Labyrinth, newRun } from './Labyrinth.tsx';
@@ -22,11 +25,17 @@ type Screen =
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
 const OWN_ALL = import.meta.env.DEV && new URLSearchParams(window.location.search).get('owned') === 'all';
+const devNumber = (name: string, max: number) =>
+  import.meta.env.DEV ? Math.min(max, Math.max(0, Math.floor(Number(new URLSearchParams(window.location.search).get(name)) || 0))) : 0;
 /** Dev builds only: `?dupes=N` (1 to 5) puts every character with dupe levels at CN, on the roster and in new runs. Nothing is saved. */
-const DEV_DUPES = import.meta.env.DEV ? Math.min(5, Math.max(0, Math.floor(Number(new URLSearchParams(window.location.search).get('dupes')) || 0))) : 0;
-/** The profile's dupe levels, or `?dupes`'s. */
-const dupesOf = (profile: Profile): Profile['dupes'] =>
-  DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes;
+const DEV_DUPES = devNumber('dupes', 5);
+/** Dev builds only: `?level=N` (2 to 40) puts every character at level N, on the roster and in new runs. Nothing is saved. */
+const DEV_LEVEL = devNumber('level', MAX_LEVEL);
+/** The profile's dupe levels and levels, or `?dupes`'s and `?level`'s. */
+const growthOf = (profile: Profile): Growth => ({
+  dupes: DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes,
+  levels: DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, DEV_LEVEL])) : profile.levels,
+});
 
 /** The characters a profile can field, leaving out any the game no longer has. */
 const ownedBy = (profile: Profile) =>
@@ -44,8 +53,8 @@ export function Game() {
     void load();
   });
 
-  const startNew = async (party: readonly string[], dupes: Profile['dupes']) => {
-    const save = newRun(party, dupes);
+  const startNew = async (party: readonly string[], growth: Growth) => {
+    const save = newRun(party, growth);
     await saves.start(save);
     setScreen({ kind: 'run', save });
   };
@@ -67,16 +76,41 @@ export function Game() {
     const owned = ownedBy(screen.profile);
     return (
       <PartySelect
+        // A bought preset opens party select afresh on it.
+        key={screen.profile.teams?.length ?? 0}
         owned={owned}
         teams={teamsOf(screen.profile, owned)}
         team={screen.profile.team ?? 0}
+        money={screen.profile.items?.money ?? 0}
+        presetCost={presetCost(screen.profile)}
+        onBuy={async () => {
+          const result = await saves.buyPreset(owned);
+          if (result.ok) setScreen({ kind: 'party', profile: result.profile });
+        }}
         onChange={(teams, team) => void saves.teams(teams, team)}
-        onStart={(party) => void startNew(party, dupesOf(screen.profile))}
+        onStart={(party) => void startNew(party, growthOf(screen.profile))}
         onBack={toTitle}
       />
     );
   }
-  if (screen.kind === 'roster') return <Roster owned={ownedBy(screen.profile)} dupes={dupesOf(screen.profile)} onBack={toTitle} />;
+  if (screen.kind === 'roster') {
+    // An action that went through shows the profile it saved; a refusal changes nothing.
+    const act = async <R extends { ok: true; profile: Profile } | { ok: false; reason: string }>(job: Promise<R>) => {
+      const result = await job;
+      if (result.ok) setScreen({ kind: 'roster', profile: result.profile });
+      return result;
+    };
+    return (
+      <Roster
+        owned={ownedBy(screen.profile)}
+        profile={screen.profile}
+        growth={growthOf(screen.profile)}
+        onLevelUp={(id, levels) => act(saves.levelUp(id, levels))}
+        onAscend={(id) => act(saves.ascend(id))}
+        onBack={toTitle}
+      />
+    );
+  }
   if (screen.kind === 'banner') {
     // The seed only starts the gacha's stream on a profile's first pull; after that the profile carries it.
     return (
@@ -93,7 +127,7 @@ export function Game() {
       boot={screen.boot}
       onContinue={(save) => setScreen({ kind: 'run', save })}
       onNew={async (saved) => {
-        if (saved) await saves.end(runBanking(saved.exp, 'abandoned', DEF));
+        if (saved) await saves.end(runBanking(saved.exp, 'abandoned', DEF, itemCount));
         chooseParty();
       }}
       onRoster={() => setScreen({ kind: 'roster', profile: screen.boot.profile })}
@@ -156,7 +190,7 @@ function Title({ boot, onContinue, onNew, onRoster, onBanner, onExport, onImport
       {confirming && run ? (
         <div className="title-notice" role="dialog" aria-label="New run">
           <p>Start a new run? The saved run ends now as abandoned and banks only its share:</p>
-          <Banking banked={runBanking(run.exp, 'abandoned', DEF)} profile={undefined} />
+          <Banking banked={runBanking(run.exp, 'abandoned', DEF, itemCount)} profile={undefined} />
           <div className="panel-buttons">
             <button className="end-turn" onClick={() => setConfirming(false)}>
               Keep it
