@@ -282,7 +282,20 @@ function changeText(change: Readonly<Record<string, number>>, pulls = 0): string
  * level once, as far as can be paid for, or ascend at a level cap. The game prices each and refuses
  * what can't be paid; the page only shows it.
  */
-function Growing({ id, profile, onLevelUp, onAscend }: { id: string; profile: Profile; onLevelUp: RosterProps['onLevelUp']; onAscend: RosterProps['onAscend'] }) {
+function Growing({
+  id,
+  profile,
+  onLevelUp,
+  onAscend,
+  onGained,
+}: {
+  id: string;
+  profile: Profile;
+  onLevelUp: RosterProps['onLevelUp'];
+  onAscend: RosterProps['onAscend'];
+  /** Called with the Purified Blooms an action gave, to show them in a pop-up. */
+  onGained: (pulls: number) => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const level = levelOf(profile, id);
@@ -294,7 +307,10 @@ function Growing({ id, profile, onLevelUp, onAscend }: { id: string; profile: Pr
     if (busy) return;
     setBusy(true);
     job()
-      .then((result) => setNote(result.ok ? `${done(result.level)} ${changeText(result.change, result.pulls)}` : result.reason))
+      .then((result) => {
+        setNote(result.ok ? `${done(result.level)} ${changeText(result.change, result.pulls)}` : result.reason);
+        if (result.ok && result.pulls) onGained(result.pulls);
+      })
       .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
       .finally(() => setBusy(false));
   };
@@ -342,6 +358,7 @@ function Growing({ id, profile, onLevelUp, onAscend }: { id: string; profile: Pr
 function CharacterPage({ id, profile, growth, onLevelUp, onAscend, onBack }: Omit<RosterProps, 'owned' | 'onBack'> & { id: string; onBack: () => void }) {
   const base = registry.characters[id];
   const def = fieldedCharacter(id, registry, growth);
+  const [gained, setGained] = useState(0);
   if (!base || !def) return null;
   const level = growth.dupes?.[id] ?? 0;
   const kit = describeCharacter(def);
@@ -377,7 +394,7 @@ function CharacterPage({ id, profile, growth, onLevelUp, onAscend, onBack }: Omi
           <dt>Defense</dt>
           <dd>{def.stats.defense}</dd>
         </dl>
-        <Growing id={id} profile={profile} onLevelUp={onLevelUp} onAscend={onAscend} />
+        <Growing id={id} profile={profile} onLevelUp={onLevelUp} onAscend={onAscend} onGained={setGained} />
         {def.passive && (
           <section>
             <h3>
@@ -425,6 +442,23 @@ function CharacterPage({ id, profile, growth, onLevelUp, onAscend, onBack }: Omi
           Back
         </button>
       </div>
+      {gained > 0 && (
+        <div className="result reward ascension-reward" role="dialog" aria-label="Ascension reward">
+          <h2 className="panel-title">Ascended</h2>
+          <p className="result-line">
+            {def.name} can now reach level {levelCap(ascensionsOf(profile, id))}.
+          </p>
+          <div className="banking">
+            <p className="banked-total">+{plural(gained, BLOOM)}</p>
+            <p className="banked-profile">
+              {BLOOM}s banked in all: {profile.pulls}
+            </p>
+          </div>
+          <button className="end-turn" autoFocus onClick={() => setGained(0)}>
+            Collect
+          </button>
+        </div>
+      )}
     </div>
   );
 }

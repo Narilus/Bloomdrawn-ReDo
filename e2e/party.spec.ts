@@ -124,6 +124,13 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await expect(page.locator('.character-cards').first()).toContainText('Deal 10 damage.');
   await expect(growth.getByRole('button', { name: /Ascend/ })).toContainText('gives 1 Purified Bloom');
   await growth.getByRole('button', { name: /Ascend/ }).click();
+  const reward = page.getByRole('dialog', { name: 'Ascension reward' });
+  await expect(reward).toContainText('Maelia can now reach level 20.');
+  await expect(reward.locator('.banked-total')).toHaveText('+1 Purified Bloom');
+  await expect(reward.locator('.banked-profile')).toHaveText('Purified Blooms banked in all: 1');
+  await page.screenshot({ path: 'test-results/screenshots/character-page-ascended.png' });
+  await reward.getByRole('button', { name: 'Collect' }).click();
+  await expect(reward).toHaveCount(0);
   await expect(growth.locator('h3')).toContainText('Level 10 of 20');
   await expect(growth.locator('.character-note')).toHaveText('Ascended. Spent: 1 Flesh Sac, 1,000 Ducats. Gained: 1 Purified Bloom.');
   await expect(growth.locator('.character-bank')).toContainText('3 Clear Memories');

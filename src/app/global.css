@@ -2218,6 +2218,12 @@ kbd {
   display: none;
 }
 
+/* The pop-up after an ascension, with the Purified Blooms it gave: dark and blurred, so the page's text behind doesn't read through. */
+.result.ascension-reward {
+  background: rgba(18, 12, 16, 0.85);
+  backdrop-filter: blur(8px);
+}
+
 .character-stats {
   display: flex;
   gap: 10px 28px;
