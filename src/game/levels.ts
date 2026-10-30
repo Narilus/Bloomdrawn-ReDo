@@ -5,7 +5,8 @@ import type { Profile } from './profile.ts';
 // 29 Oct, placeholders). Levels 1 to 40. The next level costs 100 × the current level in EXP and
 // 20 × it in Ducats. Memories pay the EXP, the smallest first; a bigger one spent on a cheap level
 // refunds the excess as smaller ones. At 10, 20 and 30 a character takes no EXP until she ascends,
-// which costs her Domain's material plus Ducats. Pure, like the rest of the profile.
+// which costs her Domain's material plus Ducats, and each ascension gives a Purified Bloom (owner,
+// 30 Oct). Pure, like the rest of the profile.
 
 export const MAX_LEVEL = 40;
 export const MONEY = 'money';
@@ -21,6 +22,8 @@ export const ASCENSIONS: readonly { at: number; materials: number; money: number
   { at: 20, materials: 2, money: 3000 },
   { at: 30, materials: 3, money: 6000 },
 ];
+/** Purified Blooms (pulls) each ascension gives. */
+export const ASCENSION_PULLS = 1;
 
 export const expToNext = (level: number) => 100 * level;
 export const moneyToNext = (level: number) => 20 * level;
@@ -58,7 +61,8 @@ export function payExp(items: Readonly<Record<string, number>>, exp: number): Re
   return out;
 }
 
-export type GrowthResult = { ok: true; profile: Profile; level: number; change: Record<string, number> } | { ok: false; reason: string };
+/** `change` is each item's change; `pulls` the Purified Blooms gained, if any. */
+export type GrowthResult = { ok: true; profile: Profile; level: number; change: Record<string, number>; pulls?: number } | { ok: false; reason: string };
 
 /** Each item's change between two item tables, leaving out what didn't change. */
 function changeOf(before: Readonly<Record<string, number>>, after: Readonly<Record<string, number>>): Record<string, number> {
@@ -119,7 +123,10 @@ export function ascensionCost(profile: Profile, id: string, registry: Registry):
   return { [material]: next.materials, [MONEY]: next.money };
 }
 
-/** Ascends a character at her level cap, paying her Domain's material and Ducats, or refuses and changes nothing. */
+/**
+ * Ascends a character at her level cap, paying her Domain's material and Ducats, and gives
+ * ASCENSION_PULLS Purified Blooms; or refuses and changes nothing.
+ */
 export function ascend(profile: Profile, id: string, registry: Registry): GrowthResult {
   const ascensions = ascensionsOf(profile, id);
   const cost = ascensionCost(profile, id, registry);
@@ -133,8 +140,9 @@ export function ascend(profile: Profile, id: string, registry: Registry): Growth
   for (const [item, n] of Object.entries(cost)) after[item] = (after[item] ?? 0) - n;
   return {
     ok: true,
-    profile: { ...profile, items: withoutEmpty(after), ascensions: { ...profile.ascensions, [id]: ascensions + 1 } },
+    profile: { ...profile, pulls: profile.pulls + ASCENSION_PULLS, items: withoutEmpty(after), ascensions: { ...profile.ascensions, [id]: ascensions + 1 } },
     level,
     change: changeOf(before, after),
+    pulls: ASCENSION_PULLS,
   };
 }

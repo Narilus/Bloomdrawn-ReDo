@@ -96,9 +96,25 @@ describe('ascension', () => {
     expect(ascend(at(20, 1), 'ana', registry)).toEqual({
       ok: true,
       level: 20,
-      profile: { ...at(20, 2), items: { [MAT]: 7, money: 96999 } },
+      profile: { ...at(20, 2), pulls: at(20, 2).pulls + 1, items: { [MAT]: 7, money: 96999 } },
       change: { [MAT]: -2, money: -3000 },
+      pulls: 1,
     });
+  });
+
+  it('gives one Purified Bloom at each of the three ascensions, and a refusal gives none', () => {
+    let profile = at(10);
+    const start = profile.pulls;
+    const pulls = [start];
+    for (const level of [10, 20, 30]) {
+      profile = { ...profile, levels: { ana: level } };
+      const ascended = ascend(profile, 'ana', registry);
+      if (!ascended.ok) throw new Error(ascended.reason);
+      profile = ascended.profile;
+      pulls.push(profile.pulls);
+    }
+    expect(pulls).toEqual([start, start + 1, start + 2, start + 3]);
+    expect(ascend(at(9), 'ana', registry)).toMatchObject({ ok: false });
   });
 
   it('needs her level cap, the material and the Ducats, and refuses otherwise', () => {

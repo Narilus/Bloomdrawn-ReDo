@@ -122,14 +122,17 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await expect(growth.locator('.character-note')).toHaveText('Level 10. Spent: 3 Vivid Memories, 900 Ducats. Back: 3 Clear Memories.');
   await expect(page.locator('.character-stats')).toContainText('HP67Attack4Defense6');
   await expect(page.locator('.character-cards').first()).toContainText('Deal 10 damage.');
+  await expect(growth.getByRole('button', { name: /Ascend/ })).toContainText('gives 1 Purified Bloom');
   await growth.getByRole('button', { name: /Ascend/ }).click();
   await expect(growth.locator('h3')).toContainText('Level 10 of 20');
+  await expect(growth.locator('.character-note')).toHaveText('Ascended. Spent: 1 Flesh Sac, 1,000 Ducats. Gained: 1 Purified Bloom.');
   await expect(growth.locator('.character-bank')).toContainText('3 Clear Memories');
   await expect(growth.locator('.character-bank')).toContainText('1,100 Ducats');
   await page.screenshot({ path: 'test-results/screenshots/character-page-level.png' });
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-lv')).toHaveText('Lv 10');
   await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.locator('.title-pulls strong')).toHaveText('1');
 
   await page.getByRole('button', { name: 'New run' }).click();
   await expect(page.locator('.team-preset')).toHaveCount(5);

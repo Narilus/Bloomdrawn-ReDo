@@ -158,6 +158,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Kibane's C3 (owner, 29 Oct): Foxfire Rite deals 12 × Essence, for now. Dupe text states the new number only, without "instead of" the old one.
 
 - M5.5 numbers (owner, 29 Oct, placeholders): each level adds 2.5% of base HP, Attack and Defense, rounded, and level 1 is today's stats. The next level costs 100 × the current level in EXP and 20 × it in Ducats. Ascension at 10, 20 and 30 costs 1, 2 and 3 of the Domain's material plus 1,000, 3,000 and 6,000 Ducats, and a character at 10, 20 or 30 takes no EXP until ascended. A win banks per fight won 1 Faint Memory and 50 Ducats, per elite 1 Clear Memory and 150 Ducats, and for the Boss 1 Vivid Memory and 500 Ducats plus one random material; Fruiting doubles all but the material. A defeat or abandon banks the elite share, 3 elites at most. The sixth team preset costs 500 Ducats and each after it 250 more. Once run depth and difficulty exist, Ducats and Memories rewards scale with them by a % multiplier for harder content.
+- Ascension reward (owner, 30 Oct): each ascension (at 10, 20 and 30) gives 1 pull. M5.5 signed off; the small per-level growth means Attack and Defense don't rise every level, and balance waits for a later pass.
 
 ## Open
 - Gear at launch or later (recommendation: later).

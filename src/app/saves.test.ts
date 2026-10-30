@@ -85,7 +85,7 @@ describe('saves', () => {
     expect([levelled.profile.levels, levelled.profile.items]).toEqual([{ maelia: 10 }, { 'memory.clear': 3, 'material.flesh': 1, money: 2100 }]);
     const ascended = await saves.ascend('maelia');
     if (!ascended.ok) throw new Error(ascended.reason);
-    expect(await profileOf(store)).toMatchObject({ ascensions: { maelia: 1 }, items: { money: 3000 - 900 - 1000 } });
+    expect(await profileOf(store)).toMatchObject({ pulls: levelled.profile.pulls + 1, ascensions: { maelia: 1 }, items: { money: 3000 - 900 - 1000 } });
     expect(await saves.ascend('maelia')).toMatchObject({ ok: false });
     const bought = await saves.buyPreset(['maelia', 'agathe', 'anthe', 'leonora']);
     if (!bought.ok) throw new Error(bought.reason);

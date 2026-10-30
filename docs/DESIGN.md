@@ -304,7 +304,7 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 | --- | --- | --- |
 | Character level | Spend EXP items plus profile money | Stats grow; teams get stronger |
 | EXP bank | EXP items in three tiers accumulate passively from all play; low tiers cover early levels and refund excess | A newly pulled character can be levelled at once, with no regrinding |
-| Ascension | Every 10 levels needs Domain materials plus money | Build checks and challenges between bands |
+| Ascension | Every 10 levels needs Domain materials plus money, and each gives 1 pull (owner, 30 Oct) | Build checks and challenges between bands |
 | Skill levels | Skill items level each personal card, the ultimate and the passive individually; levels raise numbers only, with mechanical changes reserved for bespoke kit designs | Targeted investment in a favourite |
 | Character dupes | C1–C5: passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
 | Weapons | One per character; SSR, SR or R; level, ascend and dupe from +0 to +5. Signature weapons are SSR | Pull sink; stats and build options |

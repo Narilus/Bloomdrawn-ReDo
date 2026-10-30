@@ -3,8 +3,8 @@ import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { describeCharacter, type CardDef } from '../engine/index.ts';
 import { fieldedCharacter, runCardText, type Growth } from '../game/expedition.ts';
-import { affordableLevels, ascend, ascensionCost, ASCENSIONS, ascensionsOf, levelCap, levelCost, levelOf, MAX_LEVEL, MEMORIES, type GrowthResult } from '../game/levels.ts';
-import { PARTY_SIZE, partyProblem, plural, type Profile, placeInTeam, quickTeam, removeFromTeam, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
+import { affordableLevels, ascend, ascensionCost, ASCENSIONS, ASCENSION_PULLS, ascensionsOf, levelCap, levelCost, levelOf, MAX_LEVEL, MEMORIES, type GrowthResult } from '../game/levels.ts';
+import { BLOOM, PARTY_SIZE, partyProblem, plural, type Profile, placeInTeam, quickTeam, removeFromTeam, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
 import { battleArt } from '../stage/art.ts';
 import { CardFace, markNumber } from './CardView.tsx';
 
@@ -270,11 +270,11 @@ const itemsText = (items: Readonly<Record<string, number>>) =>
     .map(([id, n]) => itemCount(id, n))
     .join(', ');
 
-/** "Spent: 3 Clear Memories, 120 Ducats. Back: 2 Faint Memories." */
-function changeText(change: Readonly<Record<string, number>>): string {
+/** "Spent: 3 Clear Memories, 120 Ducats. Back: 2 Faint Memories." and "Gained: 1 Purified Bloom." */
+function changeText(change: Readonly<Record<string, number>>, pulls = 0): string {
   const side = (sign: number) => Object.fromEntries(Object.entries(change).filter(([, n]) => n * sign > 0).map(([id, n]) => [id, n * sign]));
   const back = side(1);
-  return `Spent: ${itemsText(side(-1))}.${Object.keys(back).length > 0 ? ` Back: ${itemsText(back)}.` : ''}`;
+  return `Spent: ${itemsText(side(-1))}.${Object.keys(back).length > 0 ? ` Back: ${itemsText(back)}.` : ''}${pulls > 0 ? ` Gained: ${plural(pulls, BLOOM)}.` : ''}`;
 }
 
 /**
@@ -294,7 +294,7 @@ function Growing({ id, profile, onLevelUp, onAscend }: { id: string; profile: Pr
     if (busy) return;
     setBusy(true);
     job()
-      .then((result) => setNote(result.ok ? `${done(result.level)} ${changeText(result.change)}` : result.reason))
+      .then((result) => setNote(result.ok ? `${done(result.level)} ${changeText(result.change, result.pulls)}` : result.reason))
       .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
       .finally(() => setBusy(false));
   };
@@ -327,7 +327,7 @@ function Growing({ id, profile, onLevelUp, onAscend }: { id: string; profile: Pr
           </>
         ) : (
           <button className="end-turn" disabled={busy || !ascension || !ascend(profile, id, registry).ok} onClick={() => act(() => onAscend(id), () => 'Ascended.')}>
-            Ascend <small>{ascension ? itemsText(ascension) : ''}</small>
+            Ascend <small>{ascension ? `${itemsText(ascension)} · gives ${plural(ASCENSION_PULLS, BLOOM)}` : ''}</small>
           </button>
         )}
       </div>
