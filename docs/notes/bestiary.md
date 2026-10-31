@@ -60,7 +60,7 @@ Looks and story: `bestiary-direction.md` 4.2. The Boss is the man who made his c
 | Cartographer | Normal, debuffer | 50 | Survey, party 2 Vulnerable; Compass Point 30; Wrong Turn, you draw 1 fewer next turn | normal |
 | Tent-Walker | Normal, summoner | 140 | Open the Flap, a Seedling (max 2); Collapse 36 and 12 Shield | large |
 | **The Quartermaster** | Elite: racing heals | 900 | Ration, heals itself 60; Cleaver 55; Ration; Strongbox, 40 Shield. Resists control. | large |
-| **The Cocooned Scout** | Elite: timing | 750 | Cocoon, takes no damage until its next action (Q2); Unfurl 70, and it is Vulnerable until its next action; Wing Cut 45; Moth Dust, party 2 Weak. Resists control. | large |
+| **The Cocooned Scout** | Elite: timing | 750 | Cocoon, takes no damage until its next action, though statuses still tick; Unfurl 70, and it is Vulnerable until its next action; Wing Cut 45; Moth Dust, party 2 Weak. Resists control. | large |
 | **The Expedition Leader** | Boss | 1,050, then 1,050 | *Muster:* Bone Saw 60; Survey, party 2 Vulnerable; Call the Crew, a Pack Porter and a Field Surgeon. *Rouse:* He Opens Himself. *Second bar:* Graft, the lowest-HP ally gains 30 Shield and heals 20; Needle Threads 24 ×3; The Last Incision 105. *Full Bloom, second bar:* Call the Crew; Graft; Graft; The Last Incision 115. | huge |
 
 **Fights:** Porter and Surgeon; Cartographer and Surgeon; the Tent-Walker alone; Porter and Cartographer; Tent-Walker and Surgeon.
@@ -105,7 +105,7 @@ Each one shows on the intent before the player commits.
   - *the lowest-HP ally*, as heals already have;
   - *the ally with the most max HP*, which is the Bear or the Queen.
 - **Burst, then withers** (the Garden Husk): after the Burst, the enemy loses all its HP. Ripen's intent says the Burst comes next.
-- **Cocoon** (the Scout): reuses the Rouse's immunity, for one action in a cycle of four (Q2).
+- **Cocoon** (the Scout): its own immunity to damage until its next action, for one action in a cycle of four. Statuses still land and tick; the Rouse's immunity is unchanged (owner, 31 Oct).
 - **Vulnerable on itself** (Unfurl): an enemy applies Vulnerable to itself. The status exists; only the target is new for enemy intents.
 
 ## Prompting
@@ -117,29 +117,19 @@ I checked the owner's looks against the prompt rules (the banned words, and what
   - every join drawn as a seam;
   - soft glow from flesh, petals and pollen, with no glints or points of light;
   - solid bodies;
-  - limbs that end in paws, talons, blades or tools, never in fingers unless the brief asks for one hand.
+  - five fingers on every human hand, and monstrous limbs that end cleanly in paws, talons, blades or tools.
   
   The gold filigree is left out, because it reads as jewellery on an animal. Bands 2–5 use this stem.
 - **Glowing pollen** is briefed as a soft dust or haze on a surface. Loose bright points on a dark ground turn into crystal sparkle or a starfield.
 - **"See-through" parts** (the Pollinator's and the Queen's lantern abdomens, the Seed-Bladder) are briefed as *thin opaque skin lit from inside*. A see-through part asked for on a transparent background comes back as real holes in the alpha, and the stage shows through them.
 - **The Seed-Bladder** as written is a floating bladder hanging from a crown of tendrils: a jellyfish, so an underwater image. I'll brief it hanging like a ripe fruit from a thick root-stalk that arches up from the ground, with the tendrils gripping the ground as roots.
 - **Battle backgrounds** (the Thicket's and the Calyx's "pale pollen motes in the air"): the motes stay in soft clumps near trunks and petals, never across the dark. Otherwise the ground reads as a night sky. Backgrounds are the art pass's (M6.11) and use the painterly prompt stem.
-- **Hands.** The Expedition Leader shows two: the free hand trailing root threads from its fingertips, and the saw hand. I'll brief the saw hand in a black leather glove gripping the handle, so only the free hand has drawn fingers. The Hive-Bear's paws, the Surgeon's tools and the Quartermaster's cleavers already avoid fingers.
+- **Hands** (owner, 31 Oct: the one-hand limit is loosened): hands may show, humanoid enemies included, with care over the finger count on monstrous designs. The Expedition Leader keeps both hands as designed.
 - **Counts.** "A dozen hare heads" and "bees crawling in its fur" become noise at sprite size. I briefed "many" heads, of which about six read clearly, and "a few large bees".
 
-## Questions
+## Answers (owner, 31 Oct)
 
-1. **Three band 2 normals sit on band 1's rung.** The Heron-Stalk, the Thornback Boar and the Moth-Mantle are each one animal with Bloom growths. That is "taken", but band 2 is "hybrid": two or three animals fused, with the joins visible. Your ladder and these three designs disagree, so I've generated both:
-   - as written, and
-   - with a second animal:
-     - two herons fused down the breast, sharing one pair of legs, their stem-necks twisting together;
-     - a boar's front half sutured to a badger's striped back half;
-     - a moth with an owl's face and talons, joined at a ruff of skin-petals.
-   
-   Pick on the sheet, or tell me which reading of the ladder holds.
-2. **Cocoon and status ticks.** The Rouse's immunity today blocks status ticks as well as damage: a rousing Boss loses nothing to Poison or Bleed. Your rule for the Scout is that statuses still tick. Options:
-   - **(a)** Change the shared rule, so immunity blocks only damage and statuses tick through every Rouse. The Abbess's Rouse turn then takes its ticks. (My pick: one rule, and it matches DESIGN.md's "immune to damage".)
-   - **(b)** Keep the Rouse as it is, and give the Cocoon its own damage-only immunity.
-
-   Volleys already pass over an immune enemy to the next target, so Rapture needs no change.
-3. **Repeated antlers.** The Gathered Beast's antlers of rose branches repeat the Grafted Stag's in band 5. The two never share a pool. Should either change?
+1. **Band 2's art:** two herons fused (Heron-Stalk), the boar and badger (Thornback Boar), the moth as written (Moth-Mantle), Litter-Mound 01, Three-Throated Wolf 03, Hive-Bear 03, Gathered Beast 03 (every Beast option is kept in `art/raw/`).
+2. **Cocoon** gets its own damage-only immunity: statuses tick and land through it. The Rouse is unchanged and still blocks status ticks.
+3. **Repeated motifs** such as the antlers are fine.
+4. **Hands** may show, and humanoid enemies are welcome when they have more flavour than a job or a plain man. Watch the finger count on monstrous designs.
