@@ -160,7 +160,7 @@ Numbers are never calculated inside a card. Every damage, Shield, healing and co
 | 3. Outgoing multipliers | Source-side multipliers | Weak ×0.75 |
 | 4. Incoming multipliers | Target-side multipliers | Vulnerable ×1.5 |
 | 5. Shield | Absorbs damage unless the hit ignores Shield | — |
-| 6. Floor | Round down at each multiplier step; never below 0 | — |
+| 6. Floor | Every step is exact; round down once, at the end, never below 0 (`docs/notes/m6-scaling.md`, 4.7) | 12 × 1.15 × 1.5 = 20.7 → 20 |
 
 A modifier is data: which value it touches, which step, a formula, a filter ("Flesh cards only", "against Bleeding targets"), and a lifetime (this card, this turn, this combat, while a status lasts). Statuses, relics, weapons and passives all register modifiers the same way. Previews run this exact pipeline, so a preview and its result cannot disagree. Besides damage and Shield, a modifier can change the stacks a status is applied with (`stacks`, shown live in card text) or the stacks a status's own trigger takes off (`stackLoss`, Bleed's tick), each for one named status. A party modifier marked `on: 'enemies'` acts on every enemy's side instead of the party's.
 

@@ -1,7 +1,7 @@
 import type { ModifierDef, Registry } from './defs.ts';
 import { characterOf } from './dupes.ts';
 import { evaluate, type Formula } from './formula.ts';
-import { byLevel, enemyLevelScale } from './levels.ts';
+import { enemyLevelScale } from './levels.ts';
 import type { OpContext } from './operation.ts';
 import { isImmune } from './phases.ts';
 import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
@@ -10,10 +10,17 @@ import { PARTY, type CombatState, type EntityId, type StatusStack } from './stat
 export type PipelineValue = 'damage' | 'shield' | 'stacks' | 'stackLoss';
 
 /**
+ * Rounds an exact amount down once, at the end (docs/notes/m6-scaling.md, 4.7). The small allowance
+ * keeps a product that is whole on paper (12 × 1.25 × 2) whole after floating-point error.
+ */
+export const floorAmount = (x: number): number => Math.max(0, Math.floor(x + 1e-9));
+
+/**
  * The one modifier pipeline. Steps: base formula, flat outgoing, outgoing multipliers (an enemy's
- * damage includes the fight's enemy scale, and its damage and Shield its level), incoming multipliers (damage with a target only). Rounds down at every step and never
- * goes below 0. Shield absorption is the damage operation's step 5. `status` picks out the
- * modifiers for one status's stacks.
+ * damage includes the fight's enemy scale, and its damage and Shield its level), incoming
+ * multipliers (damage with a target only). Every step is exact; the amount is rounded down once at
+ * the end and never goes below 0, so a % effect is never lost to rounding (owner, 31 Oct). Shield
+ * absorption is the damage operation's step 5. `status` picks out the modifiers for one status's stacks.
  */
 export function pipeline(
   value: PipelineValue,
@@ -27,20 +34,17 @@ export function pipeline(
   const applies = (m: ModifierDef) => m.value === value && (m.status === undefined || m.status === status);
   const outgoing = modifiersOf(state, registry, ctx.source).filter(applies);
   const sum = (mods: ModifierDef[]) => mods.reduce((n, m) => n + evaluate(m.amount, state, ctx, registry), 0);
-  const scale = (n: number, mods: ModifierDef[]) =>
-    mods.reduce((x, m) => Math.floor(x * evaluate(m.amount, state, ctx, registry)), n);
+  const scale = (n: number, mods: ModifierDef[]) => mods.reduce((x, m) => x * evaluate(m.amount, state, ctx, registry), n);
 
-  let amount = Math.floor(evaluate(base, state, ctx, registry));
-  amount += Math.floor(sum(outgoing.filter((m) => m.step === 'flat')));
+  let amount = evaluate(base, state, ctx, registry);
+  amount += sum(outgoing.filter((m) => m.step === 'flat'));
   amount = scale(amount, outgoing.filter((m) => m.step === 'outgoingMul'));
   const fromEnemy = state.enemies.some((e) => e.id === ctx.source);
-  if (value === 'damage' && state.enemyScale && fromEnemy) {
-    amount = Math.floor((amount * (100 + state.enemyScale)) / 100);
-  }
+  if (value === 'damage' && state.enemyScale && fromEnemy) amount *= (100 + state.enemyScale) / 100;
   if (fromEnemy && state.enemyLevel) {
     const level = enemyLevelScale(state.enemyLevel);
-    if (value === 'damage') amount = byLevel(amount, level.damage);
-    if (value === 'shield') amount = byLevel(amount, level.hp);
+    if (value === 'damage') amount *= level.damage / 1000;
+    if (value === 'shield') amount *= level.hp / 1000;
   }
   // A rousing enemy takes no damage (DESIGN.md "Bosses").
   if (value === 'damage' && isImmune(state, target)) return 0;
@@ -48,7 +52,7 @@ export function pipeline(
     const incoming = modifiersOf(state, registry, target).filter(applies);
     amount = scale(amount, incoming.filter((m) => m.step === 'incomingMul'));
   }
-  return Math.max(0, amount);
+  return floorAmount(amount);
 }
 
 /** How many times each volley fires: once, plus any `volleys` modifiers on the source's side (Dance of Bells). */

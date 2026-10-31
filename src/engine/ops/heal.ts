@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import type { OpCall } from '../defs.ts';
 import { evaluate, formulaSchema, type Formula } from '../formula.ts';
-import { byLevel, enemyLevelScale } from '../levels.ts';
+import { enemyLevelScale } from '../levels.ts';
+import { floorAmount } from '../modifiers.ts';
 import type { Operation, OpContext } from '../operation.ts';
 import { isAlive, PARTY, type CombatState, type EntityId } from '../state.ts';
 
@@ -27,9 +28,9 @@ function poolOf(state: CombatState, args: HealArgs, ctx: OpContext): { id: Entit
 const healed = (state: CombatState, args: HealArgs, ctx: OpContext, registry: Parameters<typeof evaluate>[3]) => {
   const target = poolOf(state, args, ctx);
   if (!target) return undefined;
-  const written = Math.max(0, Math.floor(evaluate(args.amount, state, ctx, registry)));
-  // An enemy heals in step with its HP at the fight's enemy level.
-  const amount = target.id === PARTY ? written : byLevel(written, enemyLevelScale(state.enemyLevel).hp);
+  // An enemy heals in step with its HP at the fight's enemy level; rounded once, at the end.
+  const scale = target.id === PARTY ? 1 : enemyLevelScale(state.enemyLevel).hp / 1000;
+  const amount = floorAmount(evaluate(args.amount, state, ctx, registry) * scale);
   return { target, amount: Math.min(amount, target.pool.maxHp - target.pool.hp) };
 };
 
