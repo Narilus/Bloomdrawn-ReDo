@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a191b1-63fa-7372-9560-f12d31493f13
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Limbs end in paws, hooves, talons, blades, tendrils or tools, never in human fingers unless the brief asks for one hand. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: the whole cluster turned toward the left edge of the image, filling the frame. A knot of six fat amber-and-black bees clinging together into one ball, their wings blush skin-petals with fine veins, their legs tangled with pale root threads. Amber, black and blush palette, no human features.
+
+Background: fully transparent.

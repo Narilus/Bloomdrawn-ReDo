@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a191af-239c-7cf0-a4c2-bc187cce78bf
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Limbs end in paws, hooves, talons, blades, tendrils or tools, never in human fingers unless the brief asks for one hand. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: the whole creature turned toward the left edge of the image. A grey heron standing on two long reed-thin legs bound in pale roots. Its neck has grown into a jointed green-gold flower stem three times the length of its body, rising in a tall S-curve, with a collar of blush skin-petals where the stem joins the grey feathers. Its head is a closed blush rose bud that splits at the front into a long beak of stiff petals lined with small ivory teeth. The most beautiful part is the rose-bud head, perfect and tightly furled. Grey feathers, green-gold stem, blush and raw-pink palette, no human features.
+
+Background: fully transparent.
