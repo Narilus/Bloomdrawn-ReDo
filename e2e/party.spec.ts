@@ -121,8 +121,9 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await growth.getByRole('button', { name: /To level 10/ }).click();
   await expect(growth.locator('h3')).toContainText('Level 10 of 10');
   await expect(growth.locator('.character-note')).toHaveText('Level 10. Spent: 3 Vivid Memories, 900 Ducats. Back: 3 Clear Memories.');
-  await expect(page.locator('.character-stats')).toContainText('HP67Attack4Defense6');
-  await expect(page.locator('.character-cards').first()).toContainText('Deal 10 damage.');
+  // A Support at level 10 before ascending (m6-scaling.md, 4.4–4.5).
+  await expect(page.locator('.character-stats')).toContainText('HP117Attack5Defense10');
+  await expect(page.locator('.character-cards').first()).toContainText('Deal 11 damage.');
   await expect(growth.getByRole('button', { name: /Ascend/ })).toContainText('gives 1 Purified Bloom');
   await growth.getByRole('button', { name: /Ascend/ }).click();
   const reward = page.getByRole('dialog', { name: 'Ascension reward' });
@@ -133,6 +134,8 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await reward.getByRole('button', { name: 'Collect' }).click();
   await expect(reward).toHaveCount(0);
   await expect(growth.locator('h3')).toContainText('Level 10 of 20');
+  // The ascension is a step up in stats too.
+  await expect(page.locator('.character-stats')).toContainText('HP156Attack7Defense13');
   await expect(growth.locator('.character-note')).toHaveText('Ascended. Spent: 1 Flesh Sac, 1,000 Ducats. Gained: 1 Purified Bloom.');
   await expect(growth.locator('.character-bank')).toContainText('3 Clear Memories');
   await expect(growth.locator('.character-bank')).toContainText('1,100 Ducats');

@@ -11,7 +11,7 @@ const strike = card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'stri
 const slotted = (slot: 'defense' | 'transcend' | 'flavourA' | 'flavourB', cost: number) =>
   card({ id: `test.${slot.toLowerCase()}`, name: 'X', owner: 'tester', slot, cost, target: 'none', effects: [gainShield(1)] });
 const kit = { strike, defense: slotted('defense', 1), transcend: slotted('transcend', 3), flavourA: slotted('flavourA', 2), flavourB: slotted('flavourB', 2) };
-const tester = character({ id: 'tester', name: 'Tester', domain: 'flesh', stats: { hp: 10, attack: 1, defense: 1 }, cards: Object.values(kit) });
+const tester = character({ id: 'tester', name: 'Tester', domain: 'flesh', role: 'hybrid', stats: { hp: 10, attack: 1, defense: 1 }, cards: Object.values(kit) });
 const testerModule = { ...kit, tester };
 const flesh = domain({ id: 'flesh', name: 'Flesh', resources: [] });
 const errorsFor = (extra: Record<string, unknown>) =>
@@ -49,7 +49,7 @@ describe('content registry', () => {
   });
 
   it('reports a character without exactly one card in each of the five slots', () => {
-    const short = character({ id: 'tester', name: 'Tester', domain: 'flesh', stats: { hp: 10, attack: 1, defense: 1 }, cards: [strike] });
+    const short = character({ id: 'tester', name: 'Tester', domain: 'flesh', role: 'hybrid', stats: { hp: 10, attack: 1, defense: 1 }, cards: [strike] });
     expect(validateContent({ './characters/tester.ts': { strike, tester: short }, './domains/flesh.ts': { flesh } }).errors).toEqual([
       'src/content/characters/tester.ts › tester: needs exactly one card in each slot (strike, defense, transcend, flavourA, flavourB)',
     ]);
@@ -147,7 +147,7 @@ describe('content registry', () => {
 
   it('reports a slot cost outside its band', () => {
     const transcend = card({ id: 'test.t', name: 'X', owner: 'tester', slot: 'transcend', cost: 2, target: 'none', effects: [gainShield(1)] });
-    const t = character({ id: 'tester', name: 'Tester', domain: 'flesh', stats: { hp: 10, attack: 1, defense: 1 }, cards: [...Object.values(kit).filter((c) => c.slot !== 'transcend'), transcend] });
+    const t = character({ id: 'tester', name: 'Tester', domain: 'flesh', role: 'hybrid', stats: { hp: 10, attack: 1, defense: 1 }, cards: [...Object.values(kit).filter((c) => c.slot !== 'transcend'), transcend] });
     const { transcend: _, ...rest } = kit;
     expect(validateContent({ './characters/t.ts': { ...rest, transcend, t }, './domains/flesh.ts': { flesh } }).errors).toEqual([
       'src/content/characters/t.ts › test.t: transcend cost 2 is outside 3–5',

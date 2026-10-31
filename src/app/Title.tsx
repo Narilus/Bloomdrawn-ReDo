@@ -4,7 +4,7 @@ import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
 import { depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
-import { MAX_LEVEL } from '../game/levels.ts';
+import { ASCENSIONS, MAX_LEVEL } from '../game/levels.ts';
 import { ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
 import type { RunSave } from '../save/run.ts';
 import { Banner } from './Banner.tsx';
@@ -34,12 +34,14 @@ const devNumber = (name: string, max: number) =>
   import.meta.env.DEV ? Math.min(max, Math.max(0, Math.floor(Number(new URLSearchParams(window.location.search).get(name)) || 0))) : 0;
 /** Dev builds only: `?dupes=N` (1 to 5) puts every character with dupe levels at CN, on the roster and in new runs. Nothing is saved. */
 const DEV_DUPES = devNumber('dupes', 5);
-/** Dev builds only: `?level=N` (2 to 40) puts every character at level N, on the roster and in new runs. Nothing is saved. */
+/** Dev builds only: `?level=N` (2 to 40) puts every character at level N, with the ascensions it needed, on the roster and in new runs. Nothing is saved. */
 const DEV_LEVEL = devNumber('level', MAX_LEVEL);
-/** The profile's dupe levels and levels, or `?dupes`'s and `?level`'s. */
+/** The profile's dupe levels, levels and ascensions, or `?dupes`'s and `?level`'s. */
 const growthOf = (profile: Profile): Growth => ({
   dupes: DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes,
   levels: DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, DEV_LEVEL])) : profile.levels,
+  ascensions:
+    DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, ASCENSIONS.filter((a) => a.at < DEV_LEVEL).length])) : profile.ascensions,
 });
 
 /** The characters a profile can field, leaving out any the game no longer has. */

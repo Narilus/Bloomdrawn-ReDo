@@ -111,6 +111,7 @@ A run party is exactly four unique characters. Each brings her stats, five perso
 ### What a character contributes
 
 - **Stats:** HP, Attack, Defense. HP adds to the shared pool; Attack and Defense scale her own cards.
+- **Role:** how her stats grow, fixed per character: Attacker (Virelle, Isadora, Kibane), Support (Maelia, Leonora, Hester), Hybrid (Agathe, Anthe) or Sentinel (none yet) (owner, 31 Oct; `docs/notes/m6-scaling.md`).
 - **Five personal cards:** one copy each of Strike, Defense, Transcend, Flavour A and Flavour B (cost bands in Combat).
 - **Passive:** always labelled as combat-scoped or run-scoped.
 - **Ultimate:** a gauge from 0 to 100, fired by a deliberate confirm during the action phase. Ultimates cost no Mana unless stated.
@@ -302,7 +303,7 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 
 | System | How it works | Why it exists |
 | --- | --- | --- |
-| Character level | Spend EXP items plus profile money | Stats grow; teams get stronger |
+| Character level | Spend EXP items plus profile money. Stats grow a lot, by role: at level 40 with every ascension, ×5 to ×9 base, about 70% of it from levels and 10% from each ascension (owner, 31 Oct; `docs/notes/m6-scaling.md`) | Stats grow; teams get stronger |
 | EXP bank | EXP items in three tiers accumulate passively from all play; low tiers cover early levels and refund excess | A newly pulled character can be levelled at once, with no regrinding |
 | Ascension | Every 10 levels needs Domain materials plus money, and each gives 1 pull (owner, 30 Oct) | Build checks and challenges between bands |
 | Skill levels | Skill items level each personal card, the ultimate and the passive individually; levels raise numbers only, with mechanical changes reserved for bespoke kit designs | Targeted investment in a favourite |

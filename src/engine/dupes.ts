@@ -1,10 +1,10 @@
 import type { CharacterDef, Registry } from './defs.ts';
-import { withLevel } from './levels.ts';
+import { withGrowth } from './levels.ts';
 import type { Member } from './state.ts';
 
 // Dupe levels (DESIGN.md, "Character dupes"): C1 to C5 each replace parts of a character from that
 // level up. Combat reads a member's character only through `characterOf`, so her dupe level and her
-// character level (`levels.ts`) apply everywhere: stats, passive, ultimate and the cards dealt.
+// level and ascensions (`levels.ts`) apply everywhere: stats, passive, ultimate and the cards dealt.
 
 /** The character as she is at a dupe level: each level up to it applied in order. */
 export function withDupes(def: CharacterDef, level = 0): CharacterDef {
@@ -21,8 +21,8 @@ export function withDupes(def: CharacterDef, level = 0): CharacterDef {
   return out;
 }
 
-/** A party member's character at her dupe level, then her level. */
+/** A party member's character at her dupe level, then her level and ascensions. */
 export function characterOf(member: Member, registry: Registry): CharacterDef | undefined {
   const def = registry.characters[member.character];
-  return def && withLevel(withDupes(def, member.dupes), member.level);
+  return def && withGrowth(withDupes(def, member.dupes), member.level, member.ascensions);
 }

@@ -81,6 +81,7 @@ const STATS = { hp: 50, attack: 5, defense: 3 };
 
 export const isadora = character({
   id: 'isadora', name: 'Isadora', title: 'the Ecstatic', domain: 'rapture',
+  role: 'attacker',
   stats: STATS,
   cards: [strike, defense, theVeilTorn, ankleBells, ecstaticSpin],
   passive: rapt(1),

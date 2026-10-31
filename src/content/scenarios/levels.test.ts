@@ -1,11 +1,11 @@
 import { describe, expect } from 'vitest';
-import { statsAtLevel } from '../../engine/index.ts';
+import { statsAt } from '../../engine/index.ts';
 import { registry } from '../registry.ts';
 import { scenario, STARTER_PARTY, type ScenarioPlay } from '../testing/scenario.ts';
 
-// Levels (owner, 29 Oct, placeholders): each level past 1 adds 2.5% of base HP, Attack and Defense,
-// rounded. Strike is 6 + Attack and Defense 5 + Defense for everyone, so a levelled character's
-// cards show and do her levelled numbers. The party's HP is its members' HP added up.
+// Growth (docs/notes/m6-scaling.md, 4.4–4.5; owner, 31 Oct, placeholders): stats grow by role with
+// level and ascension. Strike and Defense read Attack and Defense, so a grown character's cards show
+// and do her grown numbers. The party's HP is its members' HP added up.
 
 /** Every damage and Shield number the preview showed is what the play actually did. */
 function previewMatchesResult({ preview, events }: ScenarioPlay) {
@@ -19,23 +19,28 @@ const BANNER = ['virelle', 'isadora', 'kibane', 'hester'];
 const DUMMY_HP = 60;
 
 describe('a levelled character', () => {
-  scenario('Maelia at level 21 (×1.5): Attack 5, Defense 8, HP 83; her Strike and Defense preview and do 11 and 13', {
+  // A Support at level 21 with two ascensions: HP 270, Attack 11, Defense 22.
+  scenario('Maelia at level 21 with two ascensions: her Strike and Defense preview and do 17 and 27', {
     levels: { maelia: 21 },
+    ascensions: { maelia: 2 },
     setup: { hand: ['maelia.strike', 'maelia.defense'] },
     play: [{ card: 'maelia.strike', target: 0 }, { card: 'maelia.defense' }],
-    expect: { enemyHp: [DUMMY_HP - 11], partyShield: 13 },
+    expect: { enemyHp: [DUMMY_HP - 17], partyShield: 27 },
     check: ({ state, plays }) => {
       plays.forEach(previewMatchesResult);
-      expect(state.party.maxHp).toBe(83 + 50 + 60 + 45);
+      expect(state.party.maxHp).toBe(270 + 50 + 60 + 45);
     },
   });
 
   for (const [party, level] of [[STARTER_PARTY, 40], [BANNER, 20]] as const) {
     for (const who of party) {
-      const stats = statsAtLevel(registry.characters[who]!.stats, level);
-      scenario(`${who} at level ${level}: Strike then Defense preview equals result, at her levelled stats`, {
+      const def = registry.characters[who]!;
+      const ascensions = level === 40 ? 3 : 1;
+      const stats = statsAt(def.stats, def.role, level, ascensions);
+      scenario(`${who} at level ${level}: Strike then Defense preview equals result, at her grown stats`, {
         party: [...party],
         levels: { [who]: level },
+        ascensions: { [who]: ascensions },
         setup: { hand: [`${who}.strike`, `${who}.defense`] },
         play: [{ card: `${who}.strike`, target: 0 }, { card: `${who}.defense` }],
         expect: { enemyHp: [DUMMY_HP - 6 - stats.attack], partyShield: 5 + stats.defense },
@@ -44,17 +49,17 @@ describe('a levelled character', () => {
     }
   }
 
-  scenario('levels grow her stats at her dupe level: Virelle at C2 and level 21 has Attack 11 (7 × 1.5, rounded)', {
+  // An Attacker at level 21, no ascension: C2's 7 Attack × (1 + 8 × 0.359) is 27; C2's 50 HP × (1 + 5 × 0.359) is 140.
+  scenario('growth starts from her stats at her dupe level: Virelle at C2 and level 21 has Attack 27', {
     party: BANNER,
     dupes: { virelle: 2 },
     levels: { virelle: 21 },
     setup: { hand: ['virelle.strike'] },
     play: [{ card: 'virelle.strike', target: 0 }],
-    expect: { enemyHp: [DUMMY_HP - 17] },
+    expect: { enemyHp: [DUMMY_HP - 33] },
     check: ({ plays, state }) => {
       plays.forEach(previewMatchesResult);
-      // C2's 50 HP × 1.5.
-      expect(state.party.maxHp).toBe(75 + 50 + 50 + 55);
+      expect(state.party.maxHp).toBe(140 + 50 + 50 + 55);
     },
   });
 });

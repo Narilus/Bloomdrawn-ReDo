@@ -47,6 +47,7 @@ export const writOfSeizure = card({
 
 export const leonora = character({
   id: 'leonora', name: 'Leonora', title: 'the Quartermaster', domain: 'unbound',
+  role: 'support',
   stats: { hp: 45, attack: 5, defense: 3 },
   cards: [strike, defense, callInTheDebts, promissoryNote, requisition],
   passive: {

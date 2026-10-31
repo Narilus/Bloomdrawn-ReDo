@@ -84,6 +84,7 @@ const STATS = { hp: 55, attack: 4, defense: 4 };
 
 export const hester = character({
   id: 'hester', name: 'Hester', title: 'the Snare-Warden', domain: 'unbound',
+  role: 'support',
   stats: STATS,
   cards: [strike, defense, ironHooks, weightedNet, boneWhistle],
   passive: huntersPatience(2),

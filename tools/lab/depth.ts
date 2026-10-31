@@ -1,11 +1,11 @@
 // The depth model (docs/notes/m6-depth.md, "Depth tiers"; owner, 31 Oct): what a party at each level
 // can take and deal, the enemy scaling that keeps a depth as hard as its level, and the reward
 // multiplier that keeps levelling to 40 to a bounded number of runs. A measuring tool, not a test.
-// Run `npm run lab:depth -- [--seeds 40] [--turns 6] [--growth 0.025] [--attack 1]`.
-// `--growth` tries another per-level growth and `--attack` weighs Attack more in every card formula,
-// both on a copy of the content; the game is unchanged.
+// Run `npm run lab:depth -- [--seeds 40] [--turns 6] [--attack 1]`. Characters grow by role
+// (`statsAt`), with every ascension due made; `--attack` weighs Attack more in every card formula,
+// on a copy of the content; the game is unchanged.
 import { parseArgs } from 'node:util';
-import { LEVEL_GROWTH, statsAtLevel, type CardDef, type Formula, type Registry } from '../../src/engine/index.ts';
+import { statsAt, type CardDef, type Formula, type Registry } from '../../src/engine/index.ts';
 import { ASCENSIONS, expToNext, MAX_LEVEL, moneyToNext } from '../../src/game/levels.ts';
 import { M3_EXPEDITION } from '../../src/game/expedition.ts';
 import { fight, mean, type Setup } from './play.ts';
@@ -15,7 +15,6 @@ const { values } = parseArgs({
   options: {
     seeds: { type: 'string', default: '40' },
     turns: { type: 'string', default: '6' },
-    growth: { type: 'string', default: String(LEVEL_GROWTH) },
     attack: { type: 'string', default: '1' },
     fights: { type: 'string', default: '6' },
     elites: { type: 'string', default: '2' },
@@ -23,7 +22,6 @@ const { values } = parseArgs({
 });
 const SEEDS = Number(values.seeds);
 const TURNS = Number(values.turns);
-const GROWTH = Number(values.growth);
 const ATTACK = Number(values.attack);
 /** A won run's fights: normal fights and elites, then the Boss. */
 const FIGHTS = Number(values.fights);
@@ -49,17 +47,12 @@ function weighAttack(f: Formula, by: number): Formula {
 const weighCalls = (calls: CardDef['effects'], by: number): CardDef['effects'] =>
   calls.map((c) => ({ ...c, ...(c.amount !== undefined ? { amount: weighAttack(c.amount as Formula, by) } : {}), ...(Array.isArray(c.branch) ? { branch: weighCalls(c.branch as CardDef['effects'], by) } : {}) }));
 
-/**
- * The content at a level under the model's growth: each character's base stats grown as `statsAtLevel`
- * would at GROWTH, and fought at level 1, so the engine's own growth adds nothing.
- */
-function atLevel(base: Registry, level: number): Registry {
-  const grow = (n: number) => Math.round(n * (1 + GROWTH * (level - 1)));
-  const characters = Object.fromEntries(
-    Object.entries(base.characters).map(([id, c]) => [id, { ...c, stats: { hp: grow(c.stats.hp), attack: grow(c.stats.attack), defense: grow(c.stats.defense) } }]),
-  );
-  return { ...base, characters };
-}
+/** Ascensions due at a level: those whose gate is below it. */
+const ascensionsAt = (level: number) => ASCENSIONS.filter((a) => a.at < level).length;
+const grown = (registry: Registry, id: string, level: number) => {
+  const c = registry.characters[id]!;
+  return statsAt(c.stats, c.role, level, ascensionsAt(level));
+};
 
 const content = await loadRegistry();
 const weighed: Registry = ATTACK === 1 ? content : { ...content, cards: Object.fromEntries(Object.entries(content.cards).map(([id, c]) => [id, { ...c, effects: weighCalls(c.effects, ATTACK) }])) };
@@ -72,12 +65,12 @@ interface Row {
   damage: number;
 }
 const rows: Row[] = LEVELS.map((level) => {
-  const registry = atLevel(weighed, level);
-  const hp = mean(PARTIES.map((p) => p.party.reduce((n, id) => n + registry.characters[id]!.stats.hp, 0)));
-  const shield = mean(PARTIES.flatMap((p) => p.party.map((id) => 5 + registry.characters[id]!.stats.defense)));
+  const registry = weighed;
+  const hp = mean(PARTIES.map((p) => p.party.reduce((n, id) => n + grown(registry, id, level).hp, 0)));
+  const shield = mean(PARTIES.flatMap((p) => p.party.map((id) => 5 + grown(registry, id, level).defense)));
   const damage = mean(
     PARTIES.map((p) => {
-      const fights = Array.from({ length: SEEDS }, (_, i) => fight(i + 1, { ...p, ultimates: true }, registry, { turns: TURNS, enemies: 1 }));
+      const fights = Array.from({ length: SEEDS }, (_, i) => fight(i + 1, { ...p, ultimates: true }, registry, { turns: TURNS, enemies: 1, level, ascensions: ascensionsAt(level) }));
       return mean(fights.map((f) => f.perTurn.reduce((a, b) => a + b, 0) / TURNS));
     }),
   );
@@ -87,7 +80,7 @@ const first = rows[0]!;
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 console.log(`\n## The party by level\n`);
-console.log(`Growth ${GROWTH * 100}% of base per level${ATTACK === 1 ? '' : `, Attack weighed ×${ATTACK} in cards`}. Means over ${PARTIES.map((p) => p.name).join(', ')}; damage is per turn over ${TURNS} turns, ${SEEDS} seeds, against one dummy.\n`);
+console.log(`Growth by role, every ascension due made${ATTACK === 1 ? '' : `, Attack weighed ×${ATTACK} in cards`}. Means over ${PARTIES.map((p) => p.name).join(', ')}; damage is per turn over ${TURNS} turns, ${SEEDS} seeds, against one dummy.\n`);
 console.log('| Level | Party HP | vs L1 | Defense Shield | vs L1 | Damage per turn | vs L1 |');
 console.log('|---:|---:|---:|---:|---:|---:|---:|');
 for (const r of rows) console.log(`| ${r.level} | ${Math.round(r.hp)} | ${pct(r.hp / first.hp)} | ${r.shield.toFixed(1)} | ${pct(r.shield / first.shield)} | ${Math.round(r.damage)} | ${pct(r.damage / first.damage)} |`);
@@ -144,10 +137,3 @@ for (const b of bands) {
 const total = bands.reduce((n, b) => n + b.exp, 0);
 console.log(`\nLevel 1 to 40 is ${total.toLocaleString('en-GB')} EXP: ${(total / runExp).toFixed(0)} won runs at Depth 1, or about ${bands.reduce((n, b) => n + b.exp / (runExp * multiplier(b.mid)), 0).toFixed(1)} raising the depth with the band.`);
 console.log(`\n| Depth | 1 | 10 | 20 | 30 | 40 | ${DEPTH_MAX} |\n|---|---:|---:|---:|---:|---:|---:|\n| Multiplier | ${[1, 10, 20, 30, 40, DEPTH_MAX].map((d) => `×${multiplier(d).toFixed(2)}`).join(' | ')} |`);
-
-// A check that the model's growth at the game's own rate matches the engine's.
-if (GROWTH === LEVEL_GROWTH) {
-  const engine = statsAtLevel(content.characters['maelia']!.stats, 40);
-  const model = atLevel(content, 40).characters['maelia']!.stats;
-  if (JSON.stringify(engine) !== JSON.stringify(model)) throw new Error(`The model's growth ${JSON.stringify(model)} differs from the engine's ${JSON.stringify(engine)}`);
-}

@@ -39,6 +39,8 @@ export interface Member {
   dupes?: number;
   /** Her level, above 1 (`characterOf`); absent at level 1. */
   level?: number;
+  /** Ascensions she has made, 1 to 3 (`characterOf`); absent if none. */
+  ascensions?: number;
 }
 
 export interface Enemy {

@@ -83,6 +83,8 @@ export const schemas = {
     name: z.string().min(1),
     title: z.string().min(1).optional(),
     domain: z.enum(['flesh', 'rapture', 'spirit', 'unbound']),
+    // How her stats grow (docs/notes/m6-scaling.md, 4.5; owner, 31 Oct): every character has one.
+    role: z.enum(['attacker', 'sentinel', 'support', 'hybrid']),
     stats,
     cards: z.array(id),
     passive: passive.optional(),

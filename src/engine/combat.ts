@@ -58,6 +58,8 @@ export interface CombatSetup {
   dupes?: number[];
   /** Levels from the profile, in slot order; default 1. */
   levels?: number[];
+  /** Ascensions made, from the profile, in slot order; default 0. */
+  ascensions?: number[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
   /** Every enemy's level, scaling its HP and damage (`enemyLevelScale`); default 1. */
@@ -92,6 +94,8 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     if (dupes > 0) member.dupes = dupes;
     const level = Math.floor(setup.levels?.[slot] ?? 1);
     if (level > 1) member.level = level;
+    const ascensions = Math.floor(setup.ascensions?.[slot] ?? 0);
+    if (ascensions > 0) member.ascensions = ascensions;
     return member;
   });
   const characters = members.map((m) => characterOf(m, registry)!);

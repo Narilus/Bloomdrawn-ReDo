@@ -1,21 +1,54 @@
-import type { CharacterDef } from './defs.ts';
+import type { CharacterDef, Role, Stats } from './defs.ts';
 
-// Character levels (DESIGN.md, "RPG layer"; owner, 29 Oct, placeholders): each level past 1 adds a
-// small share of base HP, Attack and Defense, rounded, so cards grow slowly. Level 1 is the
-// character as written. Base is her stats at her dupe level, so C2's stats grow too.
+// Character growth (docs/notes/m6-scaling.md, 4.4–4.6; owner, 31 Oct): stats grow a lot, by role,
+// and card numbers are ratios of them, so every source of a stat feeds every card. About 70% of the
+// growth comes from levels, spread evenly from 1 to 40, and about 30% from the three ascensions,
+// 10% each when she ascends. Level 1 with no ascension is the character as written. Base is her
+// stats at her dupe level, so C2's stats grow too. Multipliers are placeholders for the lab.
 
-/** The share of base each level past 1 adds. */
-export const LEVEL_GROWTH = 0.025;
+/** Each role's stats at level 40 with every ascension made, as multiples of base; Attackers also gain crit per ascension. */
+export const ROLES: Record<Role, { hp: number; attack: number; defense: number; critRate: number; critDamage: number }> = {
+  attacker: { hp: 6, attack: 9, defense: 5, critRate: 5, critDamage: 10 },
+  sentinel: { hp: 9, attack: 5, defense: 9, critRate: 0, critDamage: 0 },
+  support: { hp: 8, attack: 6, defense: 7, critRate: 0, critDamage: 0 },
+  hybrid: { hp: 7, attack: 7.5, defense: 7, critRate: 0, critDamage: 0 },
+};
+/** The share of growth levels give, spread from level 1 to GROWTH_TOP, and the share each ascension gives. */
+export const LEVEL_SHARE = 0.7;
+export const ASCENSION_SHARE = 0.1;
+export const GROWTH_TOP = 40;
+/** Every character's crit before growth: a 5% chance, and a crit deals 150% (owner, 31 Oct). */
+export const BASE_CRIT = { rate: 5, damage: 50 };
+export const CRIT_RATE_MAX = 100;
 
-/** Stats at a level: base × (1 + 2.5% per level past 1), each rounded. */
-export function statsAtLevel(stats: CharacterDef['stats'], level = 1): CharacterDef['stats'] {
-  const grow = (n: number) => Math.round(n * (1 + LEVEL_GROWTH * Math.max(0, level - 1)));
-  return { hp: grow(stats.hp), attack: grow(stats.attack), defense: grow(stats.defense) };
+/** A character's crit chance and crit damage bonus, in percent. */
+export const critOf = (stats: Stats): { rate: number; damage: number } => ({
+  rate: Math.min(CRIT_RATE_MAX, stats.critRate ?? BASE_CRIT.rate),
+  damage: stats.critDamage ?? BASE_CRIT.damage,
+});
+
+/**
+ * Stats at a level and number of ascensions: `base × (1 + (M − 1) × (0.7 × (level − 1) / 39 + 0.1 × ascensions))`,
+ * each rounded, with M the role's multiplier; crit rate and damage rise by the role's amount per ascension.
+ */
+export function statsAt(stats: Stats, role: Role = 'hybrid', level = 1, ascensions = 0): Stats {
+  if (level <= 1 && ascensions <= 0) return stats;
+  const r = ROLES[role];
+  const share = (LEVEL_SHARE * (Math.min(level, GROWTH_TOP) - 1)) / (GROWTH_TOP - 1) + ASCENSION_SHARE * ascensions;
+  const grow = (n: number, m: number) => Math.round(n * (1 + (m - 1) * share));
+  const crit = critOf(stats);
+  return {
+    hp: grow(stats.hp, r.hp),
+    attack: grow(stats.attack, r.attack),
+    defense: grow(stats.defense, r.defense),
+    ...(r.critRate * ascensions > 0 || stats.critRate !== undefined ? { critRate: Math.min(CRIT_RATE_MAX, crit.rate + r.critRate * ascensions) } : {}),
+    ...(r.critDamage * ascensions > 0 || stats.critDamage !== undefined ? { critDamage: crit.damage + r.critDamage * ascensions } : {}),
+  };
 }
 
-/** The character at a level; level 1 (or none) is the character unchanged. */
-export function withLevel(def: CharacterDef, level = 1): CharacterDef {
-  return level > 1 ? { ...def, stats: statsAtLevel(def.stats, level) } : def;
+/** The character at a level and number of ascensions; level 1 with none (or neither given) is the character unchanged. */
+export function withGrowth(def: CharacterDef, level = 1, ascensions = 0): CharacterDef {
+  return level > 1 || ascensions > 0 ? { ...def, stats: statsAt(def.stats, def.role, level, ascensions) } : def;
 }
 
 /**

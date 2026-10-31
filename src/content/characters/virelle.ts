@@ -100,6 +100,7 @@ const STATS = { hp: 45, attack: 6, defense: 2 };
 
 export const virelle = character({
   id: 'virelle', name: 'Virelle', title: 'the Open Wound', domain: 'flesh',
+  role: 'attacker',
   stats: STATS,
   cards: [strike, defense, thornSpurBloom, sutureCut, openTheWound],
   passive: openedVein(1),

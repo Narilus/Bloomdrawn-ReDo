@@ -298,18 +298,19 @@ describe('card rewards', () => {
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('dupes');
   });
 
-  it('a run fields its party at the levels it began with, on top of their dupe levels (M5.5)', () => {
+  it('a run fields its party at the levels and ascensions it began with, on top of their dupe levels (M5.5, M6)', () => {
     const party = ['virelle', 'isadora', 'kibane', 'hester'];
-    // Leonora isn't fielded and Hester is level 1, so neither is kept.
-    const growth = { dupes: { virelle: 2 }, levels: { virelle: 21, hester: 1, leonora: 9 } };
+    // Leonora isn't fielded and Hester is level 1 with none, so neither is kept.
+    const growth = { dupes: { virelle: 2 }, levels: { virelle: 21, hester: 1, leonora: 9 }, ascensions: { virelle: 2, hester: 0, leonora: 1 } };
     const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, growth), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
-    expect([exp.dupes, exp.levels]).toEqual([{ virelle: 2 }, { virelle: 21 }]);
+    expect([exp.dupes, exp.levels, exp.ascensions]).toEqual([{ virelle: 2 }, { virelle: 21 }, { virelle: 2 }]);
     const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
-    expect(combat.members.map((m) => [m.dupes, m.level])).toEqual([[2, 21], [undefined, undefined], [undefined, undefined], [undefined, undefined]]);
-    // Virelle's C2 50 HP and Attack 7, × 1.5 at level 21: 75 HP and Attack 11.
-    expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([75 + 50 + 50 + 55, 75 + 50 + 50 + 55]);
-    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 14 damage twice.');
+    expect(combat.members.map((m) => [m.dupes, m.level, m.ascensions])).toEqual([[2, 21, 2], [undefined, undefined, undefined], [undefined, undefined, undefined], [undefined, undefined, undefined]]);
+    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: C2's 50 HP becomes 190, its Attack 7 becomes 38.
+    expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([190 + 50 + 50 + 55, 190 + 50 + 50 + 55]);
+    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 41 damage twice.');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('levels');
+    expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('ascensions');
   });
 
   it('elites give relics only, the Boss ends the run, and a Bloom node fight offers cards like any fight', () => {

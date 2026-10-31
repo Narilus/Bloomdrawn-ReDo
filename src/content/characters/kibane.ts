@@ -87,6 +87,7 @@ const STATS = { hp: 50, attack: 5, defense: 3 };
 
 export const kibane = character({
   id: 'kibane', name: 'Kibane', title: 'the Nine-Tailed', domain: 'spirit',
+  role: 'attacker',
   stats: STATS,
   cards: [strike, defense, theNinthTail, foxfireRite, shrineBell],
   passive: foxfire(10),

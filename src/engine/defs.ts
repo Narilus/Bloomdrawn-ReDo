@@ -120,13 +120,27 @@ export interface UltimateDef {
   transcended?: { text: string; effects: OpCall[] };
 }
 
+/** How a character's stats grow (docs/notes/m6-scaling.md, 4.5): fixed per character. */
+export type Role = 'attacker' | 'sentinel' | 'support' | 'hybrid';
+
+/** HP, Attack and Defense as written; crit rate and crit damage (percent) only once growth or a dupe sets them. */
+export interface Stats {
+  hp: number;
+  attack: number;
+  defense: number;
+  critRate?: number;
+  critDamage?: number;
+}
+
 export interface CharacterDef {
   id: string;
   name: string;
   /** Her epithet, shown with her name outside combat ("Maelia, Midwife of the Bloom"). */
   title?: string;
   domain: string;
-  stats: { hp: number; attack: number; defense: number };
+  /** How her stats grow; content always sets it, and engine fixtures without one grow as Hybrids. */
+  role?: Role;
+  stats: Stats;
   cards: string[];
   passive?: PassiveDef;
   ultimate?: UltimateDef;

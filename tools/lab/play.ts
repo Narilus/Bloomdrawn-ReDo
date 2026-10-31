@@ -31,6 +31,8 @@ export interface FightOptions {
   enemies: number;
   /** Every member's level; 1 if absent. */
   level?: number;
+  /** Every member's ascensions; none if absent. */
+  ascensions?: number;
 }
 
 export interface Fight {
@@ -74,8 +76,9 @@ function choose(state: CombatState, registry: Registry, setup: Setup): Command |
 }
 
 export function fight(seed: number, setup: Setup, registry: Registry, options: FightOptions): Fight {
-  const { turns, enemies, level = 1 } = options;
-  let state = startCombat({ seed, party: setup.party, enemies: Array<string>(enemies).fill(DUMMY), levels: setup.party.map(() => level) }, registry).state;
+  const { turns, enemies, level = 1, ascensions = 0 } = options;
+  const party = setup.party;
+  let state = startCombat({ seed, party, enemies: Array<string>(enemies).fill(DUMMY), levels: party.map(() => level), ascensions: party.map(() => ascensions) }, registry).state;
   const perTurn = Array<number>(turns).fill(0);
   const ultimate = Array<number>(turns).fill(0);
   let cards = 0;
