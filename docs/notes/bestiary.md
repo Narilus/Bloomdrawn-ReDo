@@ -39,15 +39,22 @@ Looks: `bestiary-direction.md` 4.1, briefed in `art/briefs/` (see "Prompting" be
 | Enemy | Tier, role | HP | Intents | Size |
 |---|---|---|---|---|
 | Heron-Stalk | Normal, attacker | 60 | Spear Strike 30; Wade, 12 Shield; Snap 52 | normal |
-| Thornback Boar | Normal, defender | 75 | Root Down, 10 Shield to every enemy; Gore 40 | large |
-| Moth-Mantle | Normal, debuffer | 50 | Pollen Dust, party 2 Weak + 4 Poison; Wing Beat 30 | large |
-| Litter-Mound | Normal, summoner | 130 | Shed, a Kit (max 2); Smother 34 | large |
+| Thornback Boar | Normal, defender | 70 | Root Down, 10 Shield to every enemy; Gore 40 | normal |
+| Moth-Mantle | Normal, debuffer | 50 | Pollen Dust, party 2 Weak + 4 Poison; Wing Beat 30 | normal |
+| Litter-Mound | Normal, summoner | 130 | Shed, a Kit (max 2); Smother 34 | normal |
 | Kit | Summoned | 14 | Nip 14 | small |
 | **Three-Throated Wolf** | Elite: slow setups | 800 | Bite 25; Bite 40; Bite 55; Three Jaws 32 ×3; then from the start. Resists control. | large |
-| **Hive-Bear**, with two Bloom-Bee knots | Elite: kill order | 600; knots 70 | Bear: Maul 60; Rear Up, 30 Shield; Swipe 45. Resists control. Knots: Sting 12 + 2 Poison; Feed the Hive, 25 Shield to the Bear. | large; knots small |
-| **The Gathered Beast** | Boss | 1,050, then 1,050 | *Gathered:* Trample 58; Bellow, party 2 Weak; Call the Thicket, 2 Heron-Stalks. *Rouse:* the Peony Opens. *Many Heads:* Three Heads 26 ×3; Rend, party 2 Vulnerable; Gore 105. *Full Bloom, second bar:* Brood, 2 Kits; Many Heads 26 ×4; Gore 115. | huge |
+| **Hive-Bear**, with two Bloom-Bee knots | Elite: kill order | 600; knots 70 | Bear: Maul 60; Rear Up, 30 Shield; Swipe 45. Resists control. Knots: Sting 12 + 2 Poison; Feed the Hive, 25 Shield to the ally with the most max HP (the Bear while it lives). | large; knots small |
+| **The Gathered Beast** | Boss | 1,050, then 1,050 | *Gathered:* Trample 58; Bellow, party 2 Weak; Call the Thicket, 2 Heron-Stalks. *Rouse:* the Peony Opens. *Many Heads:* Three Heads 26 ×3; Rend, party 2 Vulnerable; Gore 90. *Full Bloom, second bar:* Brood, 2 Kits; Many Heads 26 ×4; Gore 100. | huge |
 
 **Fights:** Heron-Stalk and Moth-Mantle; Boar and Heron-Stalk; the Litter-Mound alone; Moth-Mantle and Boar; two Heron-Stalks.
+
+_Built 31 Oct._ The lab plays them at Depth 20 (Average build):
+- normal fights take 2.6–3.0 turns;
+- elites take 5.3 (Wolf) and 5.7 (Hive-Bear);
+- the Gathered Beast takes 10.5, with its worst turn at 56% of party HP.
+
+The Boss's Gore came down from 105 to 90 to get there, and the Boar's HP from 75 to 70. The wide sprites (Boar, Moth, Litter-Mound) stand at normal size, so pairs fit their two slots.
 
 ## Band 3, Depths 21–30: the Lost Expedition (remade)
 
@@ -129,7 +136,7 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 
 ## Answers (owner, 31 Oct)
 
-1. **Band 2's art:** two herons fused (Heron-Stalk), the boar and badger (Thornback Boar), the moth as written (Moth-Mantle), Litter-Mound 01, Three-Throated Wolf 03, Hive-Bear 03, Gathered Beast 03 (every Beast option is kept in `art/raw/`).
+1. **Band 2's art:** two herons fused (Heron-Stalk), the boar and badger (Thornback Boar), the moth as written (Moth-Mantle), Litter-Mound 01, Kit 02, Three-Throated Wolf 03, Hive-Bear 03, bee knot 02, Gathered Beast 03 (every Beast option is kept in `art/raw/`).
 2. **Cocoon** gets its own damage-only immunity: statuses tick and land through it. The Rouse is unchanged and still blocks status ticks.
 3. **Repeated motifs** such as the antlers are fine.
 4. **Hands** may show, and humanoid enemies are welcome when they have more flavour than a job or a plain man. Watch the finger count on monstrous designs.

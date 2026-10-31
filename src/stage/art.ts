@@ -20,6 +20,15 @@ import rootSwornNoviceBattle from '../assets/battle/root-sworn-novice.png';
 import seedlingBattle from '../assets/battle/seedling.png';
 import matronBattle from '../assets/battle/thorn-wall-matron.png';
 import virelleBattle from '../assets/battle/virelle.png';
+import beeKnotBattle from '../assets/battle/bloom-bee-knot.png';
+import gatheredBeastBattle from '../assets/battle/gathered-beast.png';
+import heronStalkBattle from '../assets/battle/heron-stalk.png';
+import hiveBearBattle from '../assets/battle/hive-bear.png';
+import kitBattle from '../assets/battle/kit.png';
+import litterMoundBattle from '../assets/battle/litter-mound.png';
+import mothMantleBattle from '../assets/battle/moth-mantle.png';
+import thornbackBoarBattle from '../assets/battle/thornback-boar.png';
+import threeThroatedWolfBattle from '../assets/battle/three-throated-wolf.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -44,6 +53,17 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.root-sworn-novice': rootSwornNoviceBattle,
   'enemy.seedling': seedlingBattle,
   'enemy.thorn-wall-matron': matronBattle,
+  // Band 2, the Thicket.
+  'enemy.heron-stalk': heronStalkBattle,
+  'enemy.thornback-boar': thornbackBoarBattle,
+  'enemy.moth-mantle': mothMantleBattle,
+  'enemy.litter-mound': litterMoundBattle,
+  'enemy.kit': kitBattle,
+  'enemy.three-throated-wolf': threeThroatedWolfBattle,
+  'enemy.hive-bear': hiveBearBattle,
+  'enemy.bloom-bee-knot': beeKnotBattle,
+  'enemy.gathered-beast': gatheredBeastBattle,
+  'enemy.gathered-beast-full-bloom': gatheredBeastBattle,
 };
 
 export const portraitArt: Readonly<Record<string, string>> = {

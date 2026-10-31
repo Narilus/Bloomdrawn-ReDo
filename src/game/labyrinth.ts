@@ -246,6 +246,11 @@ export const M3_LABYRINTH: LabyrinthDef = {
       elite: ['encounter.thorn-wall', 'encounter.hound-mother'],
       boss: ['encounter.hollow-abbess'],
     },
+    {
+      fight: ['encounter.heron-and-moth', 'encounter.boar-and-heron', 'encounter.litter-mound', 'encounter.moth-and-boar', 'encounter.two-herons'],
+      elite: ['encounter.three-throated-wolf', 'encounter.hive-bear'],
+      boss: ['encounter.gathered-beast'],
+    },
   ],
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
   symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],
