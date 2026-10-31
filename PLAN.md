@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.3: the owner plays the retuned game (a level-1 run, and a level-40 party at Depth 40)
+**Current task:** M6.5: the bestiary, drafted in `docs/notes/bestiary.md` for the owner's approval
 
 ## Milestones
 
@@ -335,7 +335,7 @@ Items carry tags; the inventory lists what the profile holds in a tab per tag.
 
 _Built 31 Oct. Each item (`src/content/items.ts`) has a tag (currency, memory or material), an icon and a line on what it is for. The Inventory (`src/app/Inventory.tsx`) has All, Currencies, Memories and Materials tabs; every item shows, dimmed at 0, with Purified Blooms among the currencies, and the chosen one's details beside the grid. Weapons get a tab with weapons. Tests: `src/app/items.test.ts` (every item the game uses is defined, tagged, drawn and described), `e2e/menu.spec.ts`._
 
-### M6.3 Enemy levels and the model
+### M6.3 Enemy levels and the model ✅
 Enemies have a level that scales their HP and damage, shown as a small tag. `npm run lab` models party HP and damage output at levels 1–40 and enemy HP and damage at 1–50, and the Memories and Ducats needed to reach 40 against a per-depth reward multiplier. The owner sees the curves before they're final.
 **Done when:**
 - a level 1 enemy is today's, so the golden replay is unchanged;
@@ -347,6 +347,8 @@ _In progress 31 Oct. Combat state carries the enemies' level (`enemyLevel`, abse
 _31 Oct, scaling (owner; `docs/notes/m6-scaling.md`): stats are the multiplier. Done: role growth with ascension steps, round-once pipeline, crit for the party, card numbers as stat ratios with a validation guard rail, Rapture's potency as a stored amount, enemy-applied Bleed and Poison on the damage curve. `npm run lab:depth` now models Average and Strong builds and fits the enemy curves; the proposed curves and where they miss the targets are in `docs/notes/m6-depth.md`, "The depth model". They go into the engine once the owner has seen them; then he plays a level-1 run and a level-40 party at Depth 40._
 
 _31 Oct, retune (owner: every level-1 stat is a placeholder; reach the targets): level-1 Attack and Defense tripled, enemies retuned per enemy against the real encounters at Depth 1, and the fitted enemy curve put in the engine (`ENEMY_CURVE`). Real fights at Depths 1 to 40 take 2–3 turns (normal), 5.5–6 (elite) and about 11 (Boss). The table and where it misses the anchors are in `docs/notes/m6-depth.md`, "The depth model". Next: the owner plays a level-1 run and a level-40 party at Depth 40._
+
+_Signed off 31 Oct: the owner played the retune and agreed the curves._
 
 ### M6.4 Depth tiers
 Party select chooses a depth. A new profile's first run is at Depth 1, then 1–10 open; winning Depth 10 opens 11–20, and so on to 50. The run fields enemies at its depth's level and banks rewards at its multiplier.
