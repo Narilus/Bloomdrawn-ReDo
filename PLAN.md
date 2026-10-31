@@ -360,6 +360,8 @@ _Built 31 Oct. Party select has a Depth stepper showing the enemies' level and t
 More normal enemies, elites and bosses, more of them opening deeper, drafted in `docs/notes/bestiary.md` for the owner's approval, with art he picks.
 **Done when:** every new enemy has a scenario test, the encounter pools by depth are validated, and the owner has approved the roster and art.
 
+_Drafted 31 Oct in `docs/notes/bestiary.md`, for the owner's answers: five bands of ten depths, each adding three normal enemies, two elites and a Boss (band 1 adds a crow flock), with seven questions._
+
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.
