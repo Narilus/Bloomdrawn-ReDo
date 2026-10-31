@@ -309,16 +309,16 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 | Character dupes | C1–C5: passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
 | Weapons | One per character; SSR, SR or R; level, ascend and dupe from +0 to +5. Signature weapons are SSR | Pull sink; stats and build options |
 | Gear | Six slots, set bonuses, main stats, substats, rerolls | Deep build tuning; recommended for a later phase |
-| Profile level | Earned from runs, Trials and milestones; caps the roster's character level | Paces raw power behind real play |
+| Profile level | Earned by play (fights, Trials, first Trial clears, SSR pulls), never by EXP items; 1 to 50 on an exponential curve. Profile levels 5, 10 and 15 allow the ascensions at 10, 20 and 30, and each level gives 1 pull (owner, 31 Oct) | Paces raw power behind real play |
 
 Materials drop from ordinary runs, scaled by depth. **Trials** are optional boss challenges that let the player target a specific material. No material has a single mandatory source.
 
-- **Trials are the main source of ascension materials.** Each Domain has Trials in difficulty tiers, and a higher tier pays more. A Trial is a fight straight against a boss, with no map; a defeat pays nothing. Tier 1 is no real challenge, but not impossible, for a team at its level (owner, 25 Oct).
+- **Trials are the main source of ascension materials.** Each Domain has Trials in difficulty tiers, and a higher tier pays more. A Trial is a fight straight against a boss, with no map; a defeat pays nothing. Tier 1 is no real challenge, but not impossible, for a team at its level (owner, 25 Oct). Each Domain has one new boss, in five tiers at levels 10 to 50; a tier pays enough material to ascend a character at its level (Tier 5, two), and first clears give a pull (Tier 5, three) (owner, 31 Oct).
 - **A won run gives a random material on the side,** generally one, with the Boss victory. It isn't doubled at Fruiting and isn't given on defeat (owner, 25 Oct).
 
 ### Depth tiers
 
-The player chooses a run depth, and each depth names a recommended power band. Enemy stats and rewards scale with depth. Out-statting an earlier depth is intended progression: today's hard tier becomes tomorrow's comfortable one, and the next tier opens. Encounters are tuned against power bands, so the band table is a core balance artefact.
+The player chooses a run depth, about 50 in all, and a depth fields enemies at its own level (Depth 36, level 36), each showing a small level tag; players compare those levels with their own (owner, 31 Oct). Enemy stats scale by level, and rewards by a depth multiplier, both modelled against the party's expected stats and the cost of levelling to 40. Out-statting an earlier depth is intended progression: today's hard tier becomes tomorrow's comfortable one, and the next tier opens. A new profile's first run is Depth 1; then Depths 1–10 are open, and winning Depth 10 opens 11–20, and so on. More enemies, elites and bosses appear deeper.
 
 ### Profile Shop
 
@@ -527,7 +527,7 @@ These are deliberately undecided; each is settled before the milestone that need
 - [ ] Does gear ship at launch, or in a later phase? Recommendation: design now, ship later.
 - [ ] How many clock ticks per Bloom stage, and the exact effects of each stage.
 - [ ] Does using a Camp advance the clock? Lean: yes.
-- [ ] The power-band table: recommended power and enemy scaling per depth tier.
+- [x] Decided (owner, 31 Oct): no power-band table; a depth's enemies are at its level, and the scaling is modelled.
 - [ ] Reward economy: pulls, EXP and materials earned per run, depth and milestone.
 - [ ] Final names for Anthe and Hester; Shiori's place (post-launch, or Spirit with a mythic source).
 - [ ] Final names for Obols, pulls, profile money and item tiers. Working names: Purified Blooms (pulls), Ducats (money), Faint, Clear and Vivid Memories (EXP), Pollen (the shop currency from pulls and overflow), and Flesh Sac, Rapture Tendril, Spirit Shard and Unbound Badge (ascension materials).

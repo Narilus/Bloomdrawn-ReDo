@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** the owner answers the M6 questions (`docs/notes/m6-depth.md`); then M6.1 Depth tiers
+**Current task:** M6.1 Main menu and Options
 
 ## Milestones
 
@@ -319,16 +319,61 @@ _Built 29 Oct, with the owner's placeholder numbers (DECISIONS.md). Each level p
 
 ## M6 tasks
 
-Proposed in `docs/notes/m6-depth.md`, with the questions each needs answered first. Tasks get "done when" lines once the owner has answered.
+Rules and readings are in `docs/notes/m6-depth.md` (answered by the owner 31 Oct, in his `docs/notes/m6-direction.md`).
 
-- M6.1 Depth tiers: a depth chosen before a run; enemies and rewards scale with it; the next depth opens on a win.
-- M6.2 Trials: per-Domain boss fights in tiers, the main source of ascension materials.
-- M6.3 Profile level: earned from play; caps character growth.
-- M6.4 Accessibility: text size, reduced motion and animation speed settings; keyword tooltips; keyboard and screen-reader pass.
-- M6.5 Weapons: drafted for approval in their own note, then built with their banner.
-- M6.6 Profile Shop: Pollen buys specific characters' dupes.
-- M6.7 Audio; M6.8 Art pass; M6.9 Balance.
-- M6.10 The owner's playtest.
+### M6.1 Main menu and Options
+A layout pass on the title screen as a main menu: Expedition, Trials, Roster, Banners (character, weapon), Inventory, Options, Exit. Ducats and Purified Blooms top right as icons with tooltips. Options holds Profile management: export, import, and Reset behind a ticked box, "RESET" typed and Confirm.
+**Done when:**
+- a test proves Reset leaves a new profile and no run;
+- e2e opens every menu item, and Reset stays disabled until the box is ticked and "RESET" typed.
+
+### M6.2 Inventory
+Items carry tags; the inventory lists what the profile holds in a tab per tag.
+**Done when:** content validation proves every item has a tag, and e2e opens each tab.
+
+### M6.3 Enemy levels and the model
+Enemies have a level that scales their HP and damage, shown as a small tag. `npm run lab` models party HP and damage output at levels 1–40 and enemy HP and damage at 1–50, and the Memories and Ducats needed to reach 40 against a per-depth reward multiplier. The owner sees the curves before they're final.
+**Done when:**
+- a level 1 enemy is today's, so the golden replay is unchanged;
+- tests prove HP, intent damage and previews at a level;
+- the owner has seen and agreed the curves.
+
+### M6.4 Depth tiers
+Party select chooses a depth. A new profile's first run is at Depth 1, then 1–10 open; winning Depth 10 opens 11–20, and so on to 50. The run fields enemies at its depth's level and banks rewards at its multiplier.
+**Done when:** tests prove the unlocks, the enemy levels in a run, and the banked multiplier; a run save keeps its depth; e2e starts a run at a chosen depth.
+
+### M6.5 The bestiary
+More normal enemies, elites and bosses, more of them opening deeper, drafted in `docs/notes/bestiary.md` for the owner's approval, with art he picks.
+**Done when:** every new enemy has a scenario test, the encounter pools by depth are validated, and the owner has approved the roster and art.
+
+### M6.6 Profile level and the profile page
+Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
+**Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.
+
+### M6.7 Trials
+A new boss per Domain, with art. Five tiers at levels 10–50, each paying its Domain's material (1, 2, 3, 3, 6) and first clears 1 Purified Bloom (3 for Tier 5). Winning a tier opens the next.
+**Done when:** each boss has scenario tests, tests prove pay, first clears and unlocking, and the owner has approved the bosses and their art.
+
+### M6.8 Weapons
+Drafted in `docs/notes/weapons.md` for approval: signature SSR weapons, SR and R sets per Domain, stats and a passive, levelling and refining. Then equipping on the character page, SR and R pull results as weapons, and the weapon banner with its own pity.
+**Done when:** every weapon passive has a scenario test, tests prove the weapon banner's pity is its own and the new pull results, and e2e equips a weapon.
+
+### M6.9 Profile Shop
+Character dupes for 100 Pollen each, the starters' included.
+**Done when:** tests prove a purchase and its refusals, and e2e buys a dupe.
+
+### M6.10 Accessibility and audio
+Options: text size, reduced motion and animation speed; keyword tooltips; a keyboard and screen-reader pass. CC0 sound effects for cards, hits and the UI, with volume and mute.
+**Done when:** settings persist and apply, and e2e plays a fight with reduced motion and sound muted.
+
+### M6.11 Art pass
+Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
+
+### M6.12 Balance
+A pass with the lab and the owner over depths, Trials and weapons.
+
+### M6.13 The owner's playtest
+**Done when:** the owner plays the deeper game and signs off.
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.

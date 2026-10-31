@@ -1,49 +1,69 @@
 # M6 Depth and polish
 
-Status: **questions for the owner, 31 Oct.** M6 is weapons, Trials, depth tiers, an art pass, audio, accessibility and balance (DESIGN.md), plus what M5 left for it: profile level, the Ducats and Memories multiplier for harder runs, and possibly the Profile Shop. DESIGN.md sets each system's shape; this note covers what it leaves open. Every number below is a proposal for the owner to accept or change.
+Status: **answered by the owner, 31 Oct** (his answers are in his `docs/notes/m6-direction.md` and folded in below; my readings of what they leave open are marked "my reading" and his to overturn). M6 is depth tiers, more enemies, Trials, profile level, weapons, the Profile Shop, a menu and options pass, an inventory, audio, an art pass and balance. Numbers marked "model" come from a lab model the owner sees before they're final.
 
-## Proposed order
+## Main menu, Options and inventory
 
-Depth first, because levels already make the one run easy and nothing scales it back up. Then Trials, because materials are scarce (only SR pulls and Boss wins give them). Weapons are the biggest design job and get their own kit-style note.
+- **The menu:** Expedition (the player-facing name for a run), Trials, Roster, Banners (a sub-menu: the character banner, then the weapon banner), Inventory, Options, Exit. It gets a professional layout pass.
+- **Top right:** Ducats and Purified Blooms, each as an icon and a number, the name in a tooltip.
+- **Top left:** the profile level badge. It opens the profile page.
+- **Options:** settings (volume and mute, accessibility) and Profile management: export, import, and Reset. Reset wipes the profile and any run. It needs a ticked confirmation box, "RESET" typed, then Confirm.
+- **Inventory:** every item the profile holds, in sub-menus by item tag (such as resources and weapons).
+- My reading: with a run saved, Expedition opens Continue or a new expedition (which abandons the saved one, as now). A browser can't close its own tab, so Exit closes the window where it can and otherwise says the tab can be closed; the desktop wrapper will quit properly.
 
-1. **M6.1 Depth tiers:** choose a depth before a run; enemies and rewards scale with it; the next depth opens on a win.
-2. **M6.2 Trials:** per-Domain boss fights in tiers, the main source of materials.
-3. **M6.3 Profile level:** earned from play; caps character level.
-4. **M6.4 Accessibility:** settings for text size, reduced motion and animation speed; keyword tooltips; keyboard and screen-reader pass.
-5. **M6.5 Weapons:** drafted in `docs/notes/weapons.md` for approval, then built with their banner.
-6. **M6.6 Profile Shop:** Pollen buys specific characters' dupes (the starters' included).
-7. **M6.7 Audio**, **M6.8 Art pass**, **M6.9 Balance**, then **M6.10 the owner's playtest.**
+## Depth tiers
 
-## Questions
+- **About 50 depths. A depth's enemies are at that level:** Depth 36 fields level 36 enemies. Enemies scale by their level and show a small level tag. Characters reach 40; Depths 41–50 are the challenge above that.
+- **Scaling is modelled:** the expected party HP and damage output at each level, and enemy HP and damage from level 1 to 50 set against it. Level 1 enemies are today's, so the M4 run and its golden replay stay as they are.
+- **Rewards are modelled:** what levelling a character to 40 costs in Memories and Ducats, and a per-depth multiplier, so a player who raises the depth as the party levels needs a bounded number of runs. Depth 40 shouldn't need dozens of runs to level one character.
+- **Unlocking:** a new profile's first run is at Depth 1. After it, Depths 1–10 are open. Winning Depth 10 opens 11–20, winning 20 opens 21–30, and so on.
+- **No power-band wording.** Players compare the enemies' levels with their own.
+- **Monster variety:** a much larger pool of normal enemies, elites and bosses, more of it opening deeper. They're drafted in `docs/notes/bestiary.md` for the owner's approval, with new art.
 
-### Depth tiers
-1. **How many depths at first?** Proposal: 5, on the same Labyrinth board.
-2. **Enemy scaling per depth?** Proposal: +25% enemy HP and damage per depth past 1 (Depth 5 is double).
-3. **Reward multiplier?** The owner set a % multiplier for Memories and Ducats (29 Oct). Proposal: +25% per depth, matching the enemies. Do Purified Blooms scale too, or stay flat?
-4. **Unlocking:** proposal: Depth N+1 opens when a run at Depth N is won. Any depth already opened can be chosen.
-5. **The power band:** DESIGN.md has each depth name a recommended power. Proposal: team power is the sum of the four characters' levels, shown next to each depth's band (for example, Depth 2 recommends 40–80). Or should power come from stats?
+## Trials
 
-### Trials
-6. **Which bosses?** Proposal: one per Domain, reusing the current elites and the Boss with each Domain's look, no new art for now. Or does each Domain get a new boss (new art)?
-7. **How many tiers, and the pay?** Proposal: 5 tiers; tier N gives N of that Domain's material, plus Memories and Ducats at the depth multiplier for that tier.
-8. **First clears:** DESIGN.md lists Trial first clears as a pull source. Proposal: 1 Purified Bloom the first time each tier of each Trial is won.
-9. **Opening tiers:** proposal: tier N+1 opens on winning tier N. Trials are unlimited (no energy).
+- **One new boss per Domain**, heavily thematic, which really looks like a boss. All new art.
+- **Five tiers:** bosses at level 10, 20, 30, 40 and 50. Each tier pays enough of its Domain's material to ascend a character at that level; Tier 5 pays enough for two. My reading: Tier 1 pays 1, Tier 2 pays 2, Tier 3 pays 3, Tier 4 pays 3 (there is no ascension at 40, so it pays the largest), and Tier 5 pays 6.
+- **First clears:** 1 Purified Bloom for each of Tiers 1–4, and 3 for Tier 5.
+- Winning a tier opens the next. Attempts are unlimited. A defeat pays nothing (DESIGN.md).
 
-### Profile level
-10. **How is it earned?** Proposal: profile EXP from each won fight, elite, Boss and Trial, so it rises with play and not with Memories.
-11. **What does it cap?** Proposal: the profile level gates each ascension (ascension 1 at profile level 5, 2 at 10, 3 at 15), rather than capping every character level.
+## Profile level
 
-### Weapons
-12. **What does a weapon give?** Proposal: stats (Attack or HP) plus one passive line, like a small relic that belongs to the character. Signature SSR weapons boost their owner's kit; SR and R weapons are generic, one set per Domain.
-13. **SR and R pulls on the character banner** become weapons when weapons arrive, replacing the materials, Memories and Ducats they give now?
-14. **The weapon banner:** the character banner's rates and pity (3% SSR, pity at 30, 50/50 Focus), or its own?
+- **Earned by play, never by Memories,** like a completion status: fights, elites, bosses, Trials, first Trial clears, and SSR pulls (characters and weapons). A level-up has no pop-up; the badge shows it.
+- **Caps at 50.** Ascension needs profile level 5 (the ascension at 10), 10 (at 20) and 15 (at 30).
+- **The EXP curve:** the first 5 levels come fast, 10 somewhat slower, 15 takes more work but no unfriendly amount, and 50 takes real time (exponential). The model proposes it.
+- **Each level gives 1 Purified Bloom,** claimed on the **profile page**. The page also shows stats: wins and losses, and enemies defeated (normal, elite, Boss, Trial).
+- **Levels 25 and 50 give an SSR selector:** an item that gives a chosen SSR, outside pity. My reading: a character from the banner pool, taken like a pulled copy (a dupe if owned).
+- My reading: ascensions made before profile level existed stay made. Profile stats count from M6 on.
 
-### Profile Shop
-15. **In M6, or later?** Proposal: M6, with only character dupes for sale at first. Price proposal: 100 Pollen per dupe.
+## Weapons
 
-### Audio and art
-16. **Where do sounds and music come from?** I can't make audio. Options: CC0 libraries (such as Kenney's), files the owner provides, or a generator the owner picks. Proposal: CC0 sound effects for cards, hits and UI first, and music later.
-17. **What does the art pass cover?** Every character and enemy has battle art. Candidates are card art, battle backgrounds, map tiles, the title screen and the banner screen. Which come first?
+- **A weapon gives stats** (Attack, Defense or HP) **and one passive line,** like a small relic that belongs to its character. **Signature SSR weapons** boost their owner's kit. **SR and R weapons** are generic, one set per Domain. Each is drafted in `docs/notes/weapons.md` for approval.
+- **Pull results:** SR and R results become weapons of that rarity. An R is as likely to be today's Memories and Ducats as an R weapon. My reading: an SR is always an SR weapon, since Trials now supply materials.
+- **The weapon banner** has the same rates and rules (Focus, 50/50, pity at 30, a ten-pull's SR) with its own pity, separate from the character banner's.
+- Levelling, ascending and refining (+0 to +5, from copies) are DESIGN.md's; the weapons note proposes their numbers.
 
-## Owner's answers
-(waiting)
+## Profile Shop
+
+- Character dupes for 100 Pollen each, the starters' included. Other wares come later.
+
+## Audio and art
+
+- CC0 sound effects for cards, hits and the UI first, and music later. Options has volume controls and mute.
+- The art pass covers portraits, card art, battle backgrounds, map tiles, the title screen and the banner screens, in any order.
+
+## Tasks
+
+1. **M6.1 Main menu and Options:** the menu, currency counter, Banners sub-menu, Options with profile management and Reset, Exit.
+2. **M6.2 Inventory:** item tags and the tabbed inventory.
+3. **M6.3 Enemy levels and the model:** enemies scale by level and show it; the lab models party and enemy curves, and the reward multiplier.
+4. **M6.4 Depth tiers:** choose a depth, unlocking, scaled rewards.
+5. **M6.5 The bestiary:** new enemies, elites and bosses by depth, with art.
+6. **M6.6 Profile level and the profile page:** profile EXP and stats, Bloom claims, ascension gates, the SSR selector, the badge.
+7. **M6.7 Trials:** four Domain bosses with art, five tiers, rewards and first clears.
+8. **M6.8 Weapons:** the weapons note, then weapons, equipping, refining and the weapon banner.
+9. **M6.9 Profile Shop:** dupes for Pollen.
+10. **M6.10 Accessibility and audio:** settings in Options; sound effects with volume and mute.
+11. **M6.11 Art pass.**
+12. **M6.12 Balance.**
+13. **M6.13 The owner's playtest.**

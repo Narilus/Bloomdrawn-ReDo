@@ -162,10 +162,18 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Ascension pop-up (owner, 30 Oct): the pull an ascension gives is announced in a pop-up, not only in the page's note. M5.5 signed off with it.
 
 - M5 signed off (owner, 31 Oct): M5.6, the collection playtest, passed; M6 Depth and polish is next.
+- M6 direction (owner, 31 Oct; his `docs/notes/m6-direction.md`, folded into `docs/notes/m6-depth.md`):
+  - Depth tiers: about 50, each fielding enemies at its own level, with a small level tag. Scaling and the reward multiplier are modelled against party stats and the cost of reaching 40, so a deep player levels a character in a bounded number of runs. A new profile's first run is Depth 1, then 1–10 open; winning 10 opens 11–20, and so on. No power-band wording. Many more enemies, elites and bosses deeper.
+  - Trials: one new, heavily thematic boss per Domain with all-new art; five tiers at levels 10, 20, 30, 40 and 50; each pays enough material to ascend a character at that level, Tier 5 enough for two; first clears give 1 Purified Bloom (Tiers 1–4) and 3 (Tier 5); winning a tier opens the next; unlimited attempts.
+  - Profile level: earned by play (fights, Trials, first Trial clears, SSR pulls), never Memories; caps at 50 on an exponential curve (5 fast, 10 slower, 15 more work). Profile level 5, 10 and 15 allow the ascensions at 10, 20 and 30. Each level gives 1 Purified Bloom, claimed on a profile page with stats (wins, losses, enemies defeated by kind). Levels 25 and 50 give an SSR selector outside pity. A badge top left of the main menu, no level-up pop-ups.
+  - Weapons: stats plus one passive line; signature SSR weapons boost their owner's kit; SR and R are generic, one set per Domain. SR and R pulls become weapons, an R as likely to be today's materials. The weapon banner has the same rates and rules with its own pity.
+  - Profile Shop in M6: character dupes for 100 Pollen.
+  - Audio: CC0 sound effects first, music later; Options has volume and mute. Art pass: portraits, card art, battle backgrounds, map tiles, title and banner screens.
+  - Main menu: Expedition (the player-facing name for New run), Trials, Roster, Banners (character or weapon), Inventory, Options (settings, and profile management: export, import, and Reset behind a ticked box, "RESET" typed and Confirm), Exit; Ducats and Purified Blooms top right as icons with tooltips; a professional layout pass. An inventory tabbed by item tag.
 
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
-- Power-band table; reward economy.
+- Reward economy.
 - Final names: Anthe, Hester, Obols, pull and currency names. Shiori's place.
 - Content warnings and intensity settings; the desktop wrapper.
