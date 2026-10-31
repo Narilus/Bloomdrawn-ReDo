@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useEffectEvent, useState } from 'react';
 import { isAlive, previewCard, validate, type CombatState, type EntityId, type Preview, type Registry } from '../engine/index.ts';
-import { enemyBox, enemyHeight, enemyHome, PLAY_LINE, type Point } from '../stage/layout.ts';
+import { enemyHeight, enemyHome, enemyUnder, PLAY_LINE, type Point } from '../stage/layout.ts';
 import { CardView } from './CardView.tsx';
 import { AIM_ORIGIN, AIM_POSE, CARD_H, CARD_W, fanPose, type Pose } from './fan.ts';
 import { useFrame } from './Frame.tsx';
@@ -65,15 +65,14 @@ export function Hand({ state, registry, onPlay, onAim }: Props) {
     const card = hand.find((c) => c.uid === uid);
     return card ? registry.cards[card.card]?.target === 'chosenEnemy' : false;
   };
-  const enemyAt = (p: Point): EntityId | null => {
-    for (const enemy of state.enemies) {
-      const home = enemyHome(enemy.slot, state.enemySlots);
-      if (!home || !isAlive(enemy)) continue;
-      const box = enemyBox(home, enemyHeight(registry.enemies[enemy.enemy]?.size));
-      if (p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h) return enemy.id;
-    }
-    return null;
-  };
+  const enemyAt = (p: Point): EntityId | null =>
+    enemyUnder(
+      p,
+      living.flatMap((enemy) => {
+        const home = enemyHome(enemy.slot, state.enemySlots);
+        return home ? [{ id: enemy.id, home, height: enemyHeight(registry.enemies[enemy.enemy]?.size) }] : [];
+      }),
+    );
   const playable = (uid: EntityId) =>
     validate(state, { type: 'playCard', card: uid, ...(targeted(uid) && living[0] ? { target: living[0].id } : {}) }, registry) ===
     undefined;

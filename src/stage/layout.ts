@@ -30,7 +30,9 @@ export const PARTY_HOMES: readonly (Point & { scale: number })[] = [
 /**
  * Enemy feet positions by slot, for a fight laid out with 1–4 slots. A lone enemy stands
  * centre-right, clear of the party's back slot; with three, slot 0 is the centre anchor and
- * the others flank it (an elite and its summons). Bodies, plates and intents never overlap.
+ * the others flank it (an elite and its summons). Plates, intents and target areas never
+ * overlap; with three, a flank's body may tuck behind the anchor's, which stands lower and so in
+ * front, and is always the taller (owner, 1 Nov).
  */
 const ENEMY_LAYOUTS: Readonly<Record<number, readonly Point[]>> = {
   1: [{ x: 1440, y: 690 }],
@@ -57,4 +59,13 @@ export const PLAY_LINE = 630;
 export function enemyBox(home: Point, height: number): { x: number; y: number; w: number; h: number } {
   const w = Math.min(280, height * 0.9);
   return { x: home.x - w / 2, y: home.y - height - 20, w, h: height + 40 };
+}
+
+/** The enemy whose body area holds `p`; where areas overlap, the one drawn in front (standing lowest). */
+export function enemyUnder<Id>(p: Point, bodies: readonly { id: Id; home: Point; height: number }[]): Id | null {
+  const hits = bodies.filter(({ home, height }) => {
+    const box = enemyBox(home, height);
+    return p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h;
+  });
+  return hits.reduce<(typeof hits)[number] | undefined>((front, b) => (!front || b.home.y > front.home.y ? b : front), undefined)?.id ?? null;
 }

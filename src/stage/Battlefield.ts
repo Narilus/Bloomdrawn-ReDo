@@ -57,9 +57,12 @@ export class Battlefield {
     const breath = () => ({ duration: 2.8 + nextFloat(cosmetic, 'idle') * 0.9, delay: nextFloat(cosmetic, 'idle') * 1.5 });
     field.breath = breath;
     const world = field.world;
+    // Bodies sort by depth (Actor), so a summon that arrives later still stands behind a nearer
+    // anchor; shadows stay at 0, under everyone.
+    world.sortableChildren = true;
     app.stage.addChild(backdrop(), world);
 
-    // Party: back slot first so the front slot is drawn last and hides no one.
+    // Party: back slot first.
     for (let slot = state.members.length - 1; slot >= 0; slot--) {
       const member = state.members[slot];
       const home = PARTY_HOMES[slot];
