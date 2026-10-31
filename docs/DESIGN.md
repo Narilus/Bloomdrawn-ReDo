@@ -275,7 +275,7 @@ Each enemy has base art plus overlays for the later clock stages. A hound at See
 
 ### Layout
 
-Enemies stand on the right of the stage, the party on the left. Independently targetable enemies never overlap their target areas, HP or intent labels. Bosses take a large anchor, with adds in side lanes; an add may tuck behind the anchor's body, drawn by depth like the party, as long as it is smaller than the anchor (owner, 1 Nov).
+Enemies stand on the right of the stage, the party on the left. Independently targetable enemies never overlap their target areas, HP or intent labels. Bosses take a large anchor, with adds in side lanes; an add may overlap the anchor's body as long as it is smaller than the anchor, and smaller enemies are always drawn in front of larger ones, so no add is ever hidden; within a size, whoever stands lower is in front, as in the party (owner, 1 Nov). Aiming picks whoever is drawn in front.
 
 ### Bosses
 

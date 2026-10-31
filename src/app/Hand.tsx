@@ -70,7 +70,7 @@ export function Hand({ state, registry, onPlay, onAim }: Props) {
       p,
       living.flatMap((enemy) => {
         const home = enemyHome(enemy.slot, state.enemySlots);
-        return home ? [{ id: enemy.id, home, height: enemyHeight(registry.enemies[enemy.enemy]?.size) }] : [];
+        return home ? [{ id: enemy.id, home, size: registry.enemies[enemy.enemy]?.size }] : [];
       }),
     );
   const playable = (uid: EntityId) =>

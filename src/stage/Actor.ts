@@ -2,8 +2,8 @@ import { animate, type AnimationPlaybackControls } from 'motion';
 import { Container, Text, type ContainerChild } from 'pixi.js';
 import { HEIGHT, type Point } from './layout.ts';
 
-/** Popups float over every body, whatever its depth. */
-const POPUP_DEPTH = HEIGHT * 2;
+/** Popups float over every body, whatever its depth (layout.ts, enemyDepth). */
+const POPUP_DEPTH = HEIGHT * 10;
 
 /**
  * One battlefield figure. Each motion lives on its own layer so none of them can accumulate:
@@ -41,6 +41,7 @@ export class Actor {
     this.root.position.set(home.x, home.y);
     this.root.scale.set(scale);
     // Drawn by depth: whoever stands lower on the stage is in front, as in the party's slots.
+    // Enemies are drawn by size first (Battlefield).
     this.root.zIndex = home.y;
     this.breathLayer.addChild(body);
     this.recoilLayer.addChild(this.breathLayer);

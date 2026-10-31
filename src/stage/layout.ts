@@ -31,8 +31,8 @@ export const PARTY_HOMES: readonly (Point & { scale: number })[] = [
  * Enemy feet positions by slot, for a fight laid out with 1–4 slots. A lone enemy stands
  * centre-right, clear of the party's back slot; with three, slot 0 is the centre anchor and
  * the others flank it (an elite and its summons). Plates, intents and target areas never
- * overlap; with three, a flank's body may tuck behind the anchor's, which stands lower and so in
- * front, and is always the taller (owner, 1 Nov).
+ * overlap; with three, a flank's body may overlap the anchor's, drawn in front of it, and the
+ * anchor is always the taller (owner, 1 Nov).
  */
 const ENEMY_LAYOUTS: Readonly<Record<number, readonly Point[]>> = {
   1: [{ x: 1440, y: 690 }],
@@ -44,9 +44,18 @@ const ENEMY_LAYOUTS: Readonly<Record<number, readonly Point[]>> = {
 /** An enemy's feet position, given its slot and how many slots the fight lays out. */
 export const enemyHome = (slot: number, slots: number): Point | undefined => ENEMY_LAYOUTS[Math.min(4, Math.max(1, slots))]?.[slot];
 
+export type EnemySize = 'small' | 'normal' | 'large' | 'huge';
+const SIZES: readonly EnemySize[] = ['small', 'normal', 'large', 'huge'];
+
 /** On-screen height of an enemy body by its size; a Boss stands huge, as the anchor of its fight. */
-export const enemyHeight = (size?: 'small' | 'normal' | 'large' | 'huge'): number =>
+export const enemyHeight = (size?: EnemySize): number =>
   size === 'small' ? 190 : size === 'large' ? 400 : size === 'huge' ? 480 : ENEMY_HEIGHT;
+
+/**
+ * An enemy body's draw order (higher is in front): smaller sizes in front of larger, so an add is
+ * never hidden behind its anchor (owner, 1 Nov); within a size, whoever stands lower.
+ */
+export const enemyDepth = (home: Point, size?: EnemySize): number => (SIZES.length - SIZES.indexOf(size ?? 'normal')) * HEIGHT + home.y;
 
 /** Party sprites are drawn at this height before their slot scale. */
 export const PARTY_HEIGHT = 400;
@@ -61,11 +70,12 @@ export function enemyBox(home: Point, height: number): { x: number; y: number; w
   return { x: home.x - w / 2, y: home.y - height - 20, w, h: height + 40 };
 }
 
-/** The enemy whose body area holds `p`; where areas overlap, the one drawn in front (standing lowest). */
-export function enemyUnder<Id>(p: Point, bodies: readonly { id: Id; home: Point; height: number }[]): Id | null {
-  const hits = bodies.filter(({ home, height }) => {
-    const box = enemyBox(home, height);
+/** The enemy whose body area holds `p`; where areas overlap, the one drawn in front. */
+export function enemyUnder<Id>(p: Point, bodies: readonly { id: Id; home: Point; size: EnemySize | undefined }[]): Id | null {
+  const hits = bodies.filter(({ home, size }) => {
+    const box = enemyBox(home, enemyHeight(size));
     return p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h;
   });
-  return hits.reduce<(typeof hits)[number] | undefined>((front, b) => (!front || b.home.y > front.home.y ? b : front), undefined)?.id ?? null;
+  const depth = (b: (typeof hits)[number]) => enemyDepth(b.home, b.size);
+  return hits.reduce<(typeof hits)[number] | undefined>((front, b) => (!front || depth(b) > depth(front) ? b : front), undefined)?.id ?? null;
 }

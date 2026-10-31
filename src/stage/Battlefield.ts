@@ -4,7 +4,7 @@ import { Actor } from './Actor.ts';
 import { battleArt } from './art.ts';
 import { downscale, sharpen, type Pixels } from './resample.ts';
 import { registry } from '../content/registry.ts';
-import { ENEMY_HEIGHT, enemyHeight, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
+import { ENEMY_HEIGHT, enemyDepth, enemyHeight, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type Fit } from './layout.ts';
 
 const COLOURS = {
   damage: '#F6E6DC',
@@ -57,8 +57,8 @@ export class Battlefield {
     const breath = () => ({ duration: 2.8 + nextFloat(cosmetic, 'idle') * 0.9, delay: nextFloat(cosmetic, 'idle') * 1.5 });
     field.breath = breath;
     const world = field.world;
-    // Bodies sort by depth (Actor), so a summon that arrives later still stands behind a nearer
-    // anchor; shadows stay at 0, under everyone.
+    // Bodies sort by depth (Actor; enemyDepth for enemies), so a summon that arrives later still
+    // takes its place; shadows stay at 0, under everyone.
     world.sortableChildren = true;
     app.stage.addChild(backdrop(), world);
 
@@ -93,6 +93,7 @@ export class Battlefield {
     this.world.addChild(ground);
     const body = texture ? this.sizedSprite(texture, height, 1) : trainingDummy(enemy.slot, height / ENEMY_HEIGHT);
     const actor = new Actor(enemy.id, home, body, height, 1, this.breath());
+    actor.root.zIndex = enemyDepth(home, registry.enemies[enemy.enemy]?.size);
     actor.shadow = ground;
     this.world.addChild(actor.root);
     this.actors.set(enemy.id, actor);
