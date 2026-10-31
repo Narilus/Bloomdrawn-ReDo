@@ -4,16 +4,17 @@ import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
 import type { Growth } from '../game/expedition.ts';
 import { MAX_LEVEL } from '../game/levels.ts';
-import { BLOOM, ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
+import { ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
 import type { RunSave } from '../save/run.ts';
 import { Banner } from './Banner.tsx';
-import { Banking, DEF, Labyrinth, newRun } from './Labyrinth.tsx';
+import { DEF, Labyrinth, newRun } from './Labyrinth.tsx';
+import { MainMenu } from './MainMenu.tsx';
+import { Options } from './Options.tsx';
 import { PartySelect, Roster } from './Roster.tsx';
 import { browserSaves, type Boot } from './saves.ts';
 
-// The title screen (docs/notes/m4-run.md, "Save and resume"; m5-collection.md): Continue a saved run,
-// choose a party for a new one, see the roster and the banked Purified Blooms, pull on the banner,
-// and move saves between browsers with a file.
+// The game's screens (docs/notes/m4-run.md, "Save and resume"; m5-collection.md; m6-depth.md): the
+// main menu, and the run, party select, roster, banner and options it leads to.
 
 type Screen =
   | { kind: 'loading' }
@@ -21,6 +22,7 @@ type Screen =
   | { kind: 'party'; profile: Profile }
   | { kind: 'roster'; profile: Profile }
   | { kind: 'banner'; profile: Profile }
+  | { kind: 'options'; profile: Profile }
   | { kind: 'run'; save: RunSave };
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
@@ -122,130 +124,44 @@ export function Game() {
       />
     );
   }
+  if (screen.kind === 'options') {
+    return (
+      <Options
+        profile={screen.profile}
+        onExport={async () => {
+          const text = await saves.exportFile();
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+          link.download = 'bloomdrawn-save.json';
+          link.click();
+          URL.revokeObjectURL(link.href);
+        }}
+        onImport={async (text) => {
+          await saves.importFile(text);
+          toTitle();
+        }}
+        onReset={async () => {
+          await saves.reset();
+          toTitle();
+        }}
+        onBack={toTitle}
+      />
+    );
+  }
+  const { profile } = screen.boot;
+  const owned = ownedBy(profile);
   return (
-    <Title
+    <MainMenu
       boot={screen.boot}
+      featured={teamsOf(profile, owned)[profile.team ?? 0]?.members.find((id) => id !== null) ?? undefined}
       onContinue={(save) => setScreen({ kind: 'run', save })}
       onNew={async (saved) => {
         if (saved) await saves.end(runBanking(saved.exp, 'abandoned', DEF, itemCount));
         chooseParty();
       }}
-      onRoster={() => setScreen({ kind: 'roster', profile: screen.boot.profile })}
-      onBanner={() => setScreen({ kind: 'banner', profile: screen.boot.profile })}
-      onExport={async () => {
-        const text = await saves.exportFile();
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-        link.download = 'bloomdrawn-save.json';
-        link.click();
-        URL.revokeObjectURL(link.href);
-      }}
-      onImport={async (text) => {
-        await saves.importFile(text);
-        toTitle();
-      }}
+      onRoster={() => setScreen({ kind: 'roster', profile })}
+      onBanner={() => setScreen({ kind: 'banner', profile })}
+      onOptions={() => setScreen({ kind: 'options', profile })}
     />
-  );
-}
-
-interface TitleProps {
-  boot: Boot;
-  onContinue: (save: RunSave) => void;
-  /** Goes on to party select for a new run, abandoning the saved one (given) first. */
-  onNew: (saved: RunSave | null) => Promise<void>;
-  onRoster: () => void;
-  onBanner: () => void;
-  onExport: () => Promise<void>;
-  /** Throws if the file is refused. */
-  onImport: (text: string) => Promise<void>;
-}
-
-function Title({ boot, onContinue, onNew, onRoster, onBanner, onExport, onImport }: TitleProps) {
-  const { profile, run, ended } = boot;
-  const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const file = useRef<HTMLInputElement>(null);
-  const act = (job: () => Promise<void>) => {
-    if (busy) return;
-    setBusy(true);
-    job().finally(() => setBusy(false));
-  };
-
-  return (
-    <div className="title-screen">
-      <h1>Bloomdrawn</h1>
-      <p className="title-pulls">
-        {BLOOM}s <strong>{profile.pulls}</strong>
-        <span>
-          {profile.runs} {profile.runs === 1 ? 'run' : 'runs'}
-        </span>
-      </p>
-      {ended && (
-        <div className="title-notice" role="status">
-          <p>The saved run couldn't be resumed ({ended.reason}), so it ended as abandoned.</p>
-          <Banking banked={ended.banked} profile={undefined} />
-        </div>
-      )}
-      {confirming && run ? (
-        <div className="title-notice" role="dialog" aria-label="New run">
-          <p>Start a new run? The saved run ends now as abandoned and banks only its share:</p>
-          <Banking banked={runBanking(run.exp, 'abandoned', DEF, itemCount)} profile={undefined} />
-          <div className="panel-buttons">
-            <button className="end-turn" onClick={() => setConfirming(false)}>
-              Keep it
-            </button>
-            <button className="ghost" onClick={() => act(() => onNew(run))}>
-              Abandon it
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="title-buttons">
-          {run && (
-            <button className="end-turn" onClick={() => onContinue(run)}>
-              Continue
-            </button>
-          )}
-          <button className="end-turn" onClick={() => (run ? setConfirming(true) : act(() => onNew(null)))}>
-            New run
-          </button>
-          <button className="end-turn" onClick={onRoster}>
-            Roster
-          </button>
-          <button className="end-turn" onClick={onBanner}>
-            Banner
-          </button>
-        </div>
-      )}
-      <div className="title-files">
-        <button onClick={() => act(onExport)}>Export save</button>
-        <button onClick={() => file.current?.click()}>Import save</button>
-        <input
-          ref={file}
-          type="file"
-          accept=".json,application/json"
-          hidden
-          onChange={(e) => {
-            const chosen = e.target.files?.[0];
-            e.target.value = '';
-            if (!chosen) return;
-            act(async () => {
-              try {
-                setImportError(null);
-                await onImport(await chosen.text());
-              } catch (err) {
-                setImportError(err instanceof Error ? err.message : String(err));
-              }
-            });
-          }}
-        />
-      </div>
-      {importError && (
-        <p className="title-error" role="alert">
-          That file couldn't be imported: {importError} Nothing was changed.
-        </p>
-      )}
-    </div>
   );
 }

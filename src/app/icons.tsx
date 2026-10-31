@@ -111,6 +111,25 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M4 21h16" fill="none" strokeWidth="2" strokeLinecap="round" />
     </>
   ),
+  // Ducats: a coin with a raised rim, stamped with a four-petal flower.
+  ducat: (
+    <>
+      <circle cx="12" cy="12" r="9.5" fill="none" strokeWidth="2" />
+      <circle cx="12" cy="12" r="6.6" fill="none" strokeWidth="1" />
+      <path d="M12 7.6c1.3 1.4 1.3 3 0 4.4-1.3-1.4-1.3-3 0-4.4zM12 16.4c-1.3-1.4-1.3-3 0-4.4 1.3 1.4 1.3 3 0 4.4zM7.6 12c1.4-1.3 3-1.3 4.4 0-1.4 1.3-3 1.3-4.4 0zM16.4 12c-1.4 1.3-3 1.3-4.4 0 1.4-1.3 3-1.3 4.4 0z" stroke="none" />
+    </>
+  ),
+  // A Purified Bloom: five round petals open around a cut-out heart.
+  bloom: (
+    <>
+      <g stroke="none">
+        {[0, 72, 144, 216, 288].map((turn) => (
+          <ellipse key={turn} cx="12" cy="6.6" rx="3.6" ry="5" transform={`rotate(${turn} 12 12)`} />
+        ))}
+      </g>
+      <circle cx="12" cy="12" r="2.6" fill="var(--icon-cut, #2e1e2a)" stroke="none" />
+    </>
+  ),
   // Two arrows chasing each other round a circle: switch.
   switch: (
     <>

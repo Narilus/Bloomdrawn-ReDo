@@ -164,6 +164,14 @@ export function createSaves(adapter: SaveAdapter) {
 
     /** Replaces both saves with a file's; a file that fails validation changes nothing. Throws SaveError. */
     importFile: (text: string) => enqueue(() => store.importBackup([...kinds], text)),
+
+    /** Deletes the profile and any run, leaving a new profile (owner, 31 Oct: Options, Reset). */
+    reset: () =>
+      enqueue(async () => {
+        pending = null;
+        await store.remove(RUN_SAVE);
+        await store.remove(profileSave);
+      }),
   };
 }
 

@@ -173,7 +173,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
             Quick select
           </button>
           <button className="end-turn" disabled={problem !== undefined} onClick={() => onStart(current.members as string[])}>
-            Start run
+            Start expedition
           </button>
         </div>
       </section>

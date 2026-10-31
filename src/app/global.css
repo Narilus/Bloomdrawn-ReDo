@@ -1629,92 +1629,361 @@ kbd {
   font-size: 64px;
 }
 
-/* The title screen: the name, the banked pulls, Continue and New run, and the save file. */
+/* Loading, between screens. */
 .title-screen {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 28px;
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(142, 44, 58, 0.25), transparent 60%),
-    var(--charcoal-plum);
+  background: var(--charcoal-plum);
 }
 
-.title-screen h1 {
+/* Text for screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The main menu (M6.1): the name and the menu down the left, the team's front character on the right. */
+.main-menu {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 900px 1000px at 72% 70%, rgba(142, 44, 58, 0.28), transparent 70%),
+    radial-gradient(ellipse 700px 600px at 12% 30%, rgba(122, 79, 160, 0.14), transparent 70%),
+    linear-gradient(90deg, #170f13 0%, var(--charcoal-plum) 55%, #24171f 100%);
+}
+
+.menu-art {
+  position: absolute;
+  right: 60px;
+  bottom: -40px;
+  width: 1100px;
+  height: 1060px;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+  filter: drop-shadow(0 0 60px rgba(18, 12, 16, 0.9));
+}
+
+.menu-column {
+  position: absolute;
+  top: 120px;
+  left: 140px;
+  display: grid;
+  gap: 56px;
+  justify-items: start;
+}
+
+.menu-column h1 {
   margin: 0;
   font-family: var(--serif);
-  font-size: 140px;
+  font-size: 128px;
   font-weight: 700;
+  line-height: 0.9;
   color: var(--blush);
-  text-shadow: 0 0 40px rgba(232, 160, 168, 0.5);
+  text-shadow: 0 0 40px rgba(232, 160, 168, 0.45);
 }
 
-.title-pulls {
-  margin: -12px 0 0;
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
+.menu-list {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.menu-item {
+  position: relative;
+  padding: 6px 0 6px 28px;
+  border: 0;
+  background: none;
+  color: var(--petal-ivory);
   font-family: var(--serif);
-  font-size: 28px;
+  font-size: 46px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
 }
 
-.title-pulls strong {
-  font-size: 40px;
+/* A gold rule beside the item under the pointer or focus. */
+.menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--antique-gold);
+  transform: translateY(-50%);
+  transition: height 0.15s;
+}
+
+.menu-item:hover:not(:disabled),
+.menu-item:focus-visible,
+.menu-item[aria-expanded='true'] {
+  color: var(--blush);
+  transform: translateX(6px);
+}
+
+.menu-item:hover:not(:disabled)::before,
+.menu-item:focus-visible::before,
+.menu-item[aria-expanded='true']::before {
+  height: 70%;
+}
+
+.menu-item:focus-visible {
+  outline: none;
+}
+
+.menu-item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.menu-item small {
+  margin-left: 12px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-sub {
+  display: grid;
+  justify-items: start;
+  margin: -2px 0 8px 40px;
+  padding-left: 4px;
+  border-left: 1px solid rgba(184, 149, 90, 0.4);
+}
+
+.menu-sub .menu-item {
+  font-size: 32px;
+}
+
+/* Ducats and Purified Blooms, top right of the menu. */
+.currencies {
+  position: absolute;
+  top: 40px;
+  right: 48px;
+  display: flex;
+  gap: 14px;
+  z-index: 2;
+}
+
+.currency {
+  position: relative;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 22px 8px 12px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 999px;
+  background: rgba(30, 21, 25, 0.75);
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums;
+  outline: none;
+}
+
+.currency .icon {
+  width: 34px;
+  height: 34px;
+  --icon-cut: rgba(30, 21, 25, 1);
+}
+
+.currency-ducat .icon {
   color: var(--antique-gold);
 }
 
-.title-pulls span {
+.currency-bloom .icon {
+  color: var(--flesh-pink);
+}
+
+.currency strong {
+  font-size: 32px;
+  color: var(--petal-ivory);
+}
+
+/* The name of a currency, shown on hover or focus. */
+.currency::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 12px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 8px;
+  background: var(--aubergine);
   font-family: var(--sans);
-  font-size: 18px;
-  opacity: 0.7;
+  font-size: 17px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
 }
 
-.title-buttons {
-  display: flex;
-  gap: 20px;
+.currency:hover::after,
+.currency:focus-visible::after {
+  opacity: 1;
 }
 
-.title-screen .end-turn {
-  position: static;
-}
-
-.title-notice {
+.menu-notice {
+  position: absolute;
+  left: 140px;
+  bottom: 60px;
   display: grid;
-  justify-items: center;
+  justify-items: start;
   gap: 14px;
-  max-width: 760px;
-  text-align: center;
+  max-width: 720px;
+  padding: 18px 26px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 12px;
+  background: rgba(30, 21, 25, 0.9);
   font-size: 20px;
 }
 
-.title-notice p {
+.menu-notice p {
   margin: 0;
 }
 
-.title-files {
-  display: flex;
-  gap: 12px;
+.menu-notice .end-turn {
+  position: static;
+  padding: 8px 26px;
+  font-size: 24px;
 }
 
-.title-files button {
-  padding: 6px 14px;
-  border: 1px solid rgba(184, 149, 90, 0.5);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--petal-ivory);
-  font-family: var(--sans);
-  font-size: 16px;
+.result.menu-dialog {
+  background: rgba(18, 12, 16, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.result.menu-dialog h2.panel-title {
+  font-size: 72px;
+}
+
+/* Options (M6.1): profile management, its Reset behind a ticked box and a typed word. */
+.options-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  gap: 24px;
+  padding: 48px 0 44px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(122, 79, 160, 0.14), transparent 60%),
+    var(--charcoal-plum);
+}
+
+.options-screen h2.panel-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 72px;
+  color: var(--blush);
+}
+
+.options-panel {
+  width: 900px;
+  align-self: start;
+  padding: 24px 40px 32px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 12px;
+  background: rgba(46, 30, 42, 0.6);
+  font-size: 20px;
+}
+
+.options-panel h3 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-size: 40px;
+}
+
+.options-panel h4 {
+  margin: 28px 0 8px;
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--antique-gold);
+}
+
+.options-panel p {
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.options-summary {
   opacity: 0.8;
+}
+
+.options-files {
+  display: flex;
+  gap: 14px;
+}
+
+.options-error {
+  color: var(--flesh-pink);
+}
+
+.options-reset {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  padding: 18px 22px;
+  border: 1px solid rgba(217, 118, 122, 0.6);
+  border-radius: 10px;
+  background: rgba(142, 44, 58, 0.14);
+}
+
+.options-reset p {
+  margin: 0;
+}
+
+.options-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
 }
 
-.title-error {
-  margin: 0;
-  max-width: 760px;
-  text-align: center;
-  color: var(--flesh-pink);
+.options-check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--raw-pink);
+}
+
+.options-type {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.options-type input {
+  width: 180px;
+  padding: 6px 12px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 8px;
+  background: rgba(18, 12, 16, 0.7);
+  color: var(--petal-ivory);
+  font-family: var(--sans);
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  user-select: text;
+}
+
+.ghost.danger {
+  border-color: var(--raw-pink);
+  color: var(--blush);
+}
+
+.ghost.danger:not(:disabled):hover {
+  background: rgba(142, 44, 58, 0.5);
+}
+
+.ghost:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* The roster (M5.1): every owned character as a tile. */

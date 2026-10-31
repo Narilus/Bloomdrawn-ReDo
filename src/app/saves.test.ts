@@ -186,6 +186,16 @@ describe('saves', () => {
     expect(await to.saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 3, runs: 1, owned: [], run: { id: 'run-2', elites: 0 } }, run: save });
   });
 
+  it('a reset deletes the profile and the run, leaving a new profile with nothing to continue (M6.1)', async () => {
+    const { saves, adapter } = setup();
+    await saves.start(run());
+    await saves.end({ pulls: 3, items: { money: 500 }, lines: [] });
+    await saves.start(run('run-2', 8));
+    await saves.reset();
+    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10, runs: 0, owned: [] }, run: null });
+    expect([...adapter.data.keys()].filter((key) => key.startsWith('run:'))).toEqual([]);
+  });
+
   it('a file that fails validation changes nothing', async () => {
     const { saves } = setup();
     await saves.start(run());

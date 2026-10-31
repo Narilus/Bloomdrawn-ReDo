@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { blooms, importSave, saveFile } from './menu.ts';
 
 // The roster and party select (M5.1; owner, 26 Oct): every character's art stands the same height,
 // a character's page shows her kit, and party select keeps team presets: a place swaps, quick select
@@ -33,7 +34,7 @@ test('the roster shows a kit, and a run starts with the team chosen, in its orde
   await page.getByRole('button', { name: 'Back' }).click();
   await page.getByRole('button', { name: 'Back' }).click();
 
-  await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Expedition' }).click();
   const slots = page.locator('.team-slot');
   const names = page.locator('.team-slot strong');
   await expect(page.getByRole('button', { name: 'Team 1' })).toHaveAttribute('aria-pressed', 'true');
@@ -46,7 +47,7 @@ test('the roster shows a kit, and a run starts with the team chosen, in its orde
   // Team 2 starts empty; quick select fills it in click order, and it can be renamed.
   await page.getByRole('button', { name: 'Team 2' }).click();
   await expect(slots).toHaveText(['Front+', '2+', '3+', '4+']);
-  await expect(page.getByRole('button', { name: 'Start run' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Start expedition' })).toBeDisabled();
   await expect(page.locator('.roster-hint')).toHaveText('A party is 4 characters.');
   await page.getByRole('button', { name: 'Quick select' }).click();
   const quick = page.getByRole('dialog', { name: 'Quick select' });
@@ -68,15 +69,15 @@ test('the roster shows a kit, and a run starts with the team chosen, in its orde
   await page.getByRole('dialog').getByRole('button', { name: 'Maelia', exact: true }).click();
   await expect(names).toHaveText(['Anthe', 'Leonora', 'Maelia', 'Agathe']);
   await page.screenshot({ path: 'test-results/screenshots/party-select.png' });
-  await page.getByRole('button', { name: 'Start run' }).click();
+  await page.getByRole('button', { name: 'Start expedition' }).click();
 
   await page.locator('[data-tile="2,0"]').click();
   await expect(page.locator('.mana strong')).toBeVisible();
   await expect(page.locator('.portrait-name')).toHaveText(['Anthe', 'Leonora', 'Maelia', 'Agathe']);
 
-  // Back at the title, party select opens on the same team, and Team 1 kept its swap.
+  // Back at the main menu, party select opens on the same team, and Team 1 kept its swap.
   await page.reload();
-  await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'New expedition' }).click();
   await page.getByRole('button', { name: 'Abandon it' }).click();
   await expect(page.getByRole('button', { name: 'Sphinx first' })).toHaveAttribute('aria-pressed', 'true');
   await expect(names).toHaveText(['Anthe', 'Leonora', 'Maelia', 'Agathe']);
@@ -89,7 +90,7 @@ test("a character's dupe level shows on the roster, and the page shows her at it
   const data = { pulls: 0, runs: 0, owned: ['kibane'], dupes: { kibane: 3 } };
   const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 6, contentVersion: 1, data } } });
   await page.goto('/');
-  await page.locator('.title-files input[type="file"]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(backup) });
+  await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Roster' }).click();
   await expect(page.locator('.roster-tile[aria-label="Kibane"] .roster-level')).toHaveText('C3');
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-level')).toHaveCount(0);
@@ -109,7 +110,7 @@ test('a character levels up and ascends on her page, and party select buys a pre
   const data = { pulls: 0, runs: 0, owned: [], items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 } };
   const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 7, contentVersion: 1, data } } });
   await page.goto('/');
-  await page.locator('.title-files input[type="file"]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(backup) });
+  await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Roster' }).click();
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-lv')).toHaveText('Lv 1');
   await page.getByRole('button', { name: 'Maelia', exact: true }).click();
@@ -139,9 +140,9 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-lv')).toHaveText('Lv 10');
   await page.getByRole('button', { name: 'Back' }).click();
-  await expect(page.locator('.title-pulls strong')).toHaveText('1');
+  await expect(blooms(page)).toHaveText('1');
 
-  await page.getByRole('button', { name: 'New run' }).click();
+  await page.getByRole('button', { name: 'Expedition' }).click();
   await expect(page.locator('.team-preset')).toHaveCount(5);
   await page.getByRole('button', { name: 'New preset: 500 Ducats' }).click();
   await expect(page.locator('.team-preset')).toHaveCount(6);

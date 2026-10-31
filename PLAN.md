@@ -327,6 +327,8 @@ A layout pass on the title screen as a main menu: Expedition, Trials, Roster, Ba
 - a test proves Reset leaves a new profile and no run;
 - e2e opens every menu item, and Reset stays disabled until the box is ticked and "RESET" typed.
 
+_Built 31 Oct. The title screen is now the main menu (`src/app/MainMenu.tsx`): the name and the menu down the left, the chosen team's front character large on the right, Ducats and Purified Blooms top right as icons (a stamped coin, a five-petal bloom) whose names show on hover or focus. With a run saved, Expedition opens on Continue and New expedition (which asks before abandoning); otherwise it goes straight to party select, whose button is now Start expedition. Banners opens Character banner and Weapon banner; Trials, Inventory and the weapon banner are marked "soon" until their tasks. Exit closes the window where the browser allows it, and otherwise says the tab can be closed. Options (`src/app/Options.tsx`) holds Profile management: the expeditions ended, Export and Import (moved from the title screen), and Reset, which deletes the profile and any run once the box is ticked and RESET typed. Tests: the reset in `src/app/saves.test.ts`, `e2e/menu.spec.ts`; the other specs load saves through Options (`e2e/menu.ts`)._
+
 ### M6.2 Inventory
 Items carry tags; the inventory lists what the profile holds in a tab per tag.
 **Done when:** content validation proves every item has a tag, and e2e opens each tab.
