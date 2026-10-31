@@ -19,10 +19,10 @@ const endTurn: Command = { type: 'endTurn' };
 
 describe('Rapture', () => {
   it("starts damage per hit at 80% of the party's average Attack, only when a Rapture character is in the party", () => {
-    // Agathe's First Hymn adds the 1 Tentacle; the Domain starts it at 0. Attack 4 and 3 average 3.5: 2.8 a hit.
+    // Agathe's First Hymn adds the 1 Tentacle; the Domain starts it at 0. Attack 12 and 9 average 10.5: 8.4 a hit.
     const pair = begin(['agathe', 'maelia']).resources;
-    expect([pair['tentacles'], pair['potency']]).toEqual([1, expect.closeTo(2.8)]);
-    expect(begin(['agathe', 'maelia', 'anthe', 'leonora']).resources['potency']).toBe(3);
+    expect([pair['tentacles'], pair['potency']]).toEqual([1, expect.closeTo(8.4)]);
+    expect(begin(['agathe', 'maelia', 'anthe', 'leonora']).resources['potency']).toBeCloseTo(9);
     expect(begin(['maelia', 'leonora']).resources['potency']).toBeUndefined();
   });
 
@@ -32,7 +32,7 @@ describe('Rapture', () => {
     Object.assign(state.resources, { tentacles: 3, potency: 4 });
     const after = run(state, endTurn).state;
     // Hit 1 leaves the 5-HP dummy on 1; hit 2 kills it and 3 carries over; hit 3 lands on the other.
-    expect(after.enemies.map((e) => e.hp)).toEqual([60 - 3 - 4, 0]);
+    expect(after.enemies.map((e) => e.hp)).toEqual([600 - 3 - 4, 0]);
     expect(after.resources['tentacles']).toBe(3);
   });
 
@@ -41,7 +41,7 @@ describe('Rapture', () => {
     Object.assign(state.resources, { tentacles: 2, potency: 5 });
     const one = run(state, endTurn).state;
     const two = run(one, endTurn).state;
-    expect([one.enemies[0]!.hp, two.enemies[0]!.hp]).toEqual([50, 40]);
+    expect([one.enemies[0]!.hp, two.enemies[0]!.hp]).toEqual([590, 580]);
   });
 });
 
@@ -87,10 +87,10 @@ describe('Poison', () => {
     target.statuses.push({ status: 'status.poison', stacks: 4 });
     target.shield = 3;
     const { state: after, events } = run(state, endTurn);
-    expect(after.enemies[1]!.hp).toBe(60 - 1);
+    expect(after.enemies[1]!.hp).toBe(600 - 1);
     expect(after.enemies[1]!.statuses).toEqual([{ status: 'status.poison', stacks: 4 }]);
     const hits = events.filter((e) => e.type === 'damageDealt').map((e) => [e.source, e.target, e.amount]);
-    // The Tentacle hit the first dummy (both at 60, earlier slot wins), then Poison ticked on the second.
+    // The Tentacle hit the first dummy (both at 600, earlier slot wins), then Poison ticked on the second.
     const [first, second] = state.enemies.map((e) => e.id);
     expect(hits).toEqual([
       ['m0', first, 3],

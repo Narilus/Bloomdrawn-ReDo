@@ -84,7 +84,7 @@ const foxfire = (charge: number) => ({
 // C3: more damage per Essence. Placeholder 12 × (the draft's 5 to 6, a fifth more, on today's 10); the owner sets it.
 export const foxfireRiteC3 = variant(foxfireRite, 3, { effects: [damage(mul(stat('attack'), add(0.8, mul(2.4, resource('essence')))))] });
 
-const STATS = { hp: 50, attack: 5, defense: 3 };
+const STATS = { hp: 50, attack: 15, defense: 9 };
 
 export const kibane = character({
   id: 'kibane', name: 'Kibane', title: 'the Nine-Tailed', domain: 'spirit',

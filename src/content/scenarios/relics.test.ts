@@ -56,9 +56,9 @@ describe('relics', () => {
 
   it('Choir Bell: the Tentacles also volley at turn start', () => {
     const state = begin(['relic.choir-bell']);
-    // Turn 1 start: First Hymn's Tentacle hits for 3. End of turn: 3. Turn 2 start: 3.
-    expect(state.enemies[0]!.hp).toBe(60 - 3);
-    expect(run(state, endTurn).state.enemies[0]!.hp).toBe(60 - 9);
+    // Turn 1 start: First Hymn's Tentacle hits for 9. End of turn: 9. Turn 2 start: 9.
+    expect(state.enemies[0]!.hp).toBe(600 - 9);
+    expect(run(state, endTurn).state.enemies[0]!.hp).toBe(600 - 27);
   });
 
   it('Blooming Coin: +1 Mana every turn, and 3 damage to the party at turn start', () => {

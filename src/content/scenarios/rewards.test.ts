@@ -2,8 +2,9 @@ import { describe, expect } from 'vitest';
 import type { CombatState } from '../../engine/index.ts';
 import { scenario } from '../testing/scenario.ts';
 
-// The M4 card rewards (docs/notes/m4-run.md), one scenario per card. The party is Maelia, Agathe,
-// Anthe, Leonora against 60-HP training dummies; Agathe starts each fight with 1 Tentacle.
+// The M4 card rewards (docs/notes/m4-run.md), one scenario per card. The party is Maelia (Attack 9),
+// Agathe (12), Anthe (9) and Leonora (15) against 600-HP training dummies; Agathe starts each fight
+// with 1 Tentacle, and Tentacles hit for 9.
 const DUMMY = 'enemy.training-dummy';
 const statusesOf = (state: CombatState) => state.enemies.map((e) => e.statuses.map((s) => `${s.status} ${s.stacks}`));
 
@@ -14,19 +15,19 @@ describe('Maelia', () => {
     expect: { resources: { embryo: 3 }, gauges: { maelia: 10, agathe: 0 }, mana: 5 },
   });
 
-  scenario('Pollen Drift Poisons every enemy by 12, without Embryo to consume', {
+  scenario('Pollen Drift Poisons every enemy by 400% of her Attack, without Embryo to consume', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['maelia.pollen-drift'] },
     play: [{ card: 'maelia.pollen-drift' }],
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 12'], ['status.poison 12']]),
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 36'], ['status.poison 36']]),
   });
 
-  scenario('Pollen Drift consumes 2 Embryo to Poison every enemy by 12 more', {
+  scenario('Pollen Drift consumes 2 Embryo to Poison every enemy by as much again', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['maelia.pollen-drift'], resources: { embryo: 3 } },
     play: [{ card: 'maelia.pollen-drift' }],
     expect: { resources: { embryo: 1 } },
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 24'], ['status.poison 24']]),
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.poison 72'], ['status.poison 72']]),
   });
 });
 
@@ -40,14 +41,14 @@ describe('Agathe', () => {
   scenario('Thurible Swing deals 200% of Attack, and with 4 Tentacles triggers a volley', {
     setup: { hand: ['agathe.thurible-swing'], resources: { tentacles: 4 } },
     play: [{ card: 'agathe.thurible-swing', target: 0 }],
-    // 4 + 4 Attack = 8; then 4 Tentacles × 3 = 12.
-    expect: { enemyHp: [60 - 8 - 12], resources: { tentacles: 4 } },
+    // 200% of Attack 12 = 24; then 4 Tentacles × 9 = 36.
+    expect: { enemyHp: [600 - 24 - 36], resources: { tentacles: 4 } },
   });
 
   scenario('Thurible Swing with fewer than 4 Tentacles only strikes', {
     setup: { hand: ['agathe.thurible-swing'], resources: { tentacles: 3 } },
     play: [{ card: 'agathe.thurible-swing', target: 0 }],
-    expect: { enemyHp: [60 - 8] },
+    expect: { enemyHp: [600 - 24] },
   });
 });
 
@@ -58,12 +59,13 @@ describe('Anthe', () => {
     expect: { resources: { essence: 2 }, mana: 5 },
   });
 
-  scenario('Long Vigil is a Ritual that deals 334% of Attack plus 200% per Essence (10 + 6 × Essence) to every enemy', {
+  scenario('Long Vigil is a Ritual that deals 334% of Attack plus 200% per Essence (30 + 18 × Essence) to every enemy', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['anthe.long-vigil'], resources: { essence: 2 } },
     play: [{ card: 'anthe.long-vigil' }],
-    expect: { enemyHp: [60 - 22, 60 - 22], mana: 0 },
-    check: ({ plays }) => expect(plays[0]!.preview.map((p) => [p.target, p.amount])).toEqual([['e20', 22], ['e21', 22]]),
+    // Attack 9 × (3.34 + 2 × 2).
+    expect: { enemyHp: [600 - 66, 600 - 66], mana: 0 },
+    check: ({ plays }) => expect(plays[0]!.preview.map((p) => [p.target, p.amount])).toEqual([['e20', 66], ['e21', 66]]),
   });
 });
 
@@ -87,21 +89,22 @@ describe("the Domains' generic cards, played by the member they went to", () => 
   scenario("Grafting Knife deals 234% of its owner's Attack and applies 300% of it in Bleed", {
     setup: { hand: [{ card: 'flesh.grafting-knife', owner: 'agathe' }] },
     play: [{ card: 'flesh.grafting-knife', target: 0 }],
-    // Agathe's Attack is 4, so 9 and 12 (Maelia's 3, the ratios' starting point, makes 7 and 9).
-    expect: { enemyHp: [60 - 9] },
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.bleed 12']]),
+    // Agathe's Attack is 12, so 28 and 36 (Maelia's 9 makes 21 and 27).
+    expect: { enemyHp: [600 - 28] },
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.bleed 36']]),
   });
 
   scenario("Chalk Circle gains 1 Tentacle and 200% of its owner's Defense in Shield", {
     setup: { hand: [{ card: 'rapture.chalk-circle', owner: 'agathe' }] },
     play: [{ card: 'rapture.chalk-circle' }],
-    expect: { resources: { tentacles: 1 + 1 }, partyShield: 4 + 4 },
+    // 200% of Agathe's Defense 12.
+    expect: { resources: { tentacles: 1 + 1 }, partyShield: 24 },
   });
 
-  scenario('Quiet Prayer is a Ritual that gains 160% of Defense plus 40% per Essence (8 + 2 × Essence) in Shield', {
+  scenario('Quiet Prayer is a Ritual that gains 160% of Defense plus 40% per Essence (24 + 6 × Essence) in Shield', {
     setup: { hand: [{ card: 'spirit.quiet-prayer', owner: 'anthe' }], resources: { essence: 3 } },
     play: [{ card: 'spirit.quiet-prayer' }],
-    expect: { partyShield: 8 + 6, mana: 2 },
+    expect: { partyShield: 24 + 18, mana: 2 },
   });
 
   scenario('Pocket Watch draws 2 cards', {

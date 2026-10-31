@@ -52,21 +52,30 @@ export function withGrowth(def: CharacterDef, level = 1, ascensions = 0): Charac
 }
 
 /**
- * Enemies by level (owner, 31 Oct: a depth fields enemies at its own level; docs/notes/m6-depth.md).
- * Placeholders from the depth model (`npm run lab:depth`): HP, Shield and heals follow the party's
- * damage, and damage follows the party's HP, each a straight line to ENEMY_CURVE_TOP as a share of
- * level 1. Past it, characters stop levelling, and both rise PAST_TOP of that level's numbers a level.
+ * Enemies by level (owner, 31 Oct: a depth fields enemies at its own level; docs/notes/m6-scaling.md,
+ * 4.10). Fitted by the depth model (`npm run lab:depth`), so a depth's enemies last as many turns and
+ * threaten as much of the party's HP as Depth 1's do against an Average build at that level: HP (with
+ * Shield and heals) follows the party's damage and damage its HP, each a share of level 1 rising
+ * `perLevel` a level and `perAscension` at each of ENEMY_STEPS, where the party ascends. Past
+ * ENEMY_CURVE_TOP characters stop levelling, and enemies rise `past` of that level's numbers a level:
+ * HP until a Strong build at 50 meets what an Average build meets at 40; damage at half HP's rate, a
+ * placeholder (the fit gives almost none, since a Strong build has little more HP).
  */
-export const ENEMY_LEVEL_GROWTH = { hp: 0.0032, damage: 0.0251 };
+export const ENEMY_CURVE = {
+  hp: { perLevel: 0.13, perAscension: 0.86, past: 0.096 },
+  damage: { perLevel: 0.1144, perAscension: 0.639, past: 0.048 },
+};
+export const ENEMY_STEPS = [10, 20, 30];
 export const ENEMY_CURVE_TOP = 40;
-export const PAST_TOP = 0.03;
 
 /** An enemy's HP and its damage at a level, in thousandths of level 1's; level 1 (or none) is 1000. */
 export function enemyLevelScale(level = 1): { hp: number; damage: number } {
-  const on = Math.min(level, ENEMY_CURVE_TOP) - 1;
-  const past = 1 + PAST_TOP * Math.max(0, level - ENEMY_CURVE_TOP);
-  const at = (growth: number) => Math.round(1000 * (1 + growth * Math.max(0, on)) * past);
-  return { hp: at(ENEMY_LEVEL_GROWTH.hp), damage: at(ENEMY_LEVEL_GROWTH.damage) };
+  if (level <= 1) return { hp: 1000, damage: 1000 };
+  const on = Math.min(level, ENEMY_CURVE_TOP);
+  const steps = ENEMY_STEPS.filter((at) => at <= on).length;
+  const at = (c: { perLevel: number; perAscension: number; past: number }) =>
+    Math.round(1000 * (1 + c.perLevel * (on - 1) + c.perAscension * steps) * (1 + c.past * Math.max(0, level - ENEMY_CURVE_TOP)));
+  return { hp: at(ENEMY_CURVE.hp), damage: at(ENEMY_CURVE.damage) };
 }
 
 /** A number at an enemy level's scale, rounded down: `byLevel(40, enemyLevelScale(40).hp)`. */

@@ -21,7 +21,7 @@ describe('Symptoms', () => {
     },
   });
 
-  // The front member plays it: Maelia here, 350% of Attack 3 (14 with Agathe, Attack 4, in front).
+  // The front member plays it: Maelia here, 350% of Attack 9 (42 with Agathe, Attack 12, in front).
   scenario("Sweet Rot: 350% of the front member's Attack, and Poison equal to 1% of the party's max HP on every enemy and the party", {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['symptom.sweet-rot'] },
@@ -30,8 +30,8 @@ describe('Symptoms', () => {
     expect: { partyHp: 210 - 2 },
     check: ({ plays }) => {
       const after = plays[0]!.after;
-      expect(text(plays[0]!.before, 'symptom.sweet-rot')).toBe("Deal 10 damage. Every enemy and the party gain 2 Poison (1% of the party's max HP).");
-      expect(after.enemies.map((e) => e.hp)).toEqual([60 - 10, 60]);
+      expect(text(plays[0]!.before, 'symptom.sweet-rot')).toBe("Deal 31 damage. Every enemy and the party gain 2 Poison (1% of the party's max HP).");
+      expect(after.enemies.map((e) => e.hp)).toEqual([600 - 31, 600]);
       expect(after.enemies.map((e) => e.statuses)).toEqual([
         [{ status: 'status.poison', stacks: 2 }],
         [{ status: 'status.poison', stacks: 2 }],

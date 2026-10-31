@@ -5,8 +5,10 @@ import {
   previewCard,
   startCombat,
   validate,
+  PARTY,
   type CombatState,
   type Command,
+  type EnemyEntry,
   type EngineEvent,
   type Preview,
   type Registry,
@@ -105,3 +107,50 @@ export function fight(seed: number, setup: Setup, registry: Registry, options: F
 }
 
 export const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+
+export interface EncounterResult {
+  /** The turn the last enemy fell, or `maxTurns` if it never did. */
+  turns: number;
+  won: boolean;
+  /** Damage the enemies dealt the party each turn, before Shield, statuses' ticks included. */
+  incoming: number[];
+}
+
+/**
+ * A real encounter, played by the simple player until it is won or `maxTurns` pass. The caller
+ * gives a registry whose characters can't die, so threat is measured however long the fight runs.
+ */
+export function encounterFight(
+  seed: number,
+  setup: Setup,
+  registry: Registry,
+  enemies: EnemyEntry[],
+  options: { level: number; ascensions: number; dupes: number; enemyLevel: number; maxTurns: number },
+): EncounterResult {
+  const party = setup.party;
+  const dupeLevels = party.map((id) => (registry.characters[id]?.dupes?.length ? options.dupes : 0));
+  let state = startCombat(
+    {
+      seed,
+      party,
+      enemies,
+      levels: party.map(() => options.level),
+      ascensions: party.map(() => options.ascensions),
+      dupes: dupeLevels,
+      ...(options.enemyLevel > 1 && { enemyLevel: options.enemyLevel }),
+    },
+    registry,
+  ).state;
+  const incoming: number[] = [];
+  while (state.phase === 'player' && state.turn <= options.maxTurns) {
+    const turn = state.turn;
+    const command = choose(state, registry, setup) ?? ({ type: 'endTurn' } as const);
+    const result = apply(state, command, registry);
+    if (!result.ok) throw new Error(`${setup.name}, seed ${seed}: ${result.reason}`);
+    const taken = result.events.filter((e) => e.type === 'damageDealt' && e.target === PARTY).reduce((n, e) => n + (e.amount ?? 0), 0);
+    incoming[turn - 1] = (incoming[turn - 1] ?? 0) + taken;
+    state = result.state;
+  }
+  const won = state.outcome === 'victory';
+  return { turns: won ? state.turn : options.maxTurns, won, incoming };
+}

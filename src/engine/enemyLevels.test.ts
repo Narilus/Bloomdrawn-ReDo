@@ -68,12 +68,15 @@ const endTurn = (state: ReturnType<typeof start>) => {
 };
 
 describe('enemy levels', () => {
-  it('level 1 is 1,000 thousandths; HP grows 0.32% and damage 2.51% of level 1 a level to 40, then 3% of level 40 a level', () => {
+  // The fitted curve (owner, 31 Oct): HP 1 + 0.13 a level + 0.86 at each of 10, 20 and 30; damage
+  // 1 + 0.1144 a level + 0.639 at each; past 40, HP +9.6% and damage +4.8% of level 40's a level.
+  it('level 1 is 1,000 thousandths; HP and damage climb a share a level and step at 10, 20 and 30, then rise past 40', () => {
     expect(enemyLevelScale()).toEqual({ hp: 1000, damage: 1000 });
     expect(enemyLevelScale(1)).toEqual({ hp: 1000, damage: 1000 });
-    expect(enemyLevelScale(11)).toEqual({ hp: 1032, damage: 1251 });
-    expect(enemyLevelScale(40)).toEqual({ hp: 1125, damage: 1979 });
-    expect(enemyLevelScale(50)).toEqual({ hp: 1462, damage: 2573 });
+    expect(enemyLevelScale(9)).toEqual({ hp: 2040, damage: 1915 });
+    expect(enemyLevelScale(11)).toEqual({ hp: 3160, damage: 2783 });
+    expect(enemyLevelScale(40)).toEqual({ hp: 8650, damage: 7379 });
+    expect(enemyLevelScale(50)).toEqual({ hp: 16954, damage: 10920 });
   });
 
   it('a level 1 fight is the same state as one with no level, so the golden replay is unchanged', () => {
@@ -83,33 +86,33 @@ describe('enemy levels', () => {
 
   it('raises max HP, encounter overrides included, rounding down, before the Bloom scale', () => {
     expect(start({ enemyLevel: 40 }).enemies.map((e) => [e.hp, e.maxHp])).toEqual([
-      [450, 450],
-      [11, 11],
+      [3460, 3460],
+      [86, 86],
     ]);
-    // 400 at level 40 is 450; Seeded's +10% makes it 495.
-    expect(start({ enemyLevel: 40, enemyScale: 10 }).enemies[0]!.maxHp).toBe(495);
+    // 400 at level 40 is 3,460; Seeded's +10% makes it 3,806.
+    expect(start({ enemyLevel: 40, enemyScale: 10 }).enemies[0]!.maxHp).toBe(3806);
   });
 
   it("raises an enemy's damage, and its intent preview shows what resolves", () => {
     const state = start({ enemyLevel: 40 });
-    expect(previewIntent(state, state.enemies[0]!.id, registry).find((p) => p.op === 'damage')?.amount).toBe(197);
-    expect(state.party.hp - endTurn(state).party.hp).toBe(Math.min(197, state.party.hp));
+    expect(previewIntent(state, state.enemies[0]!.id, registry).find((p) => p.op === 'damage')?.amount).toBe(737);
+    expect(state.party.hp - endTurn(state).party.hp).toBe(Math.min(737, state.party.hp));
   });
 
   it("raises an enemy's Shield and heals by its HP curve", () => {
     const state = start({ enemyLevel: 40 }, ['test.warden']);
-    expect(previewIntent(state, state.enemies[0]!.id, registry).find((p) => p.op === 'gainShield')?.amount).toBe(112);
-    expect(endTurn(state).enemies[0]!.shield).toBe(112);
+    expect(previewIntent(state, state.enemies[0]!.id, registry).find((p) => p.op === 'gainShield')?.amount).toBe(865);
+    expect(endTurn(state).enemies[0]!.shield).toBe(865);
     const mending = endTurn(state);
     const hurt = { ...mending, enemies: mending.enemies.map((e) => ({ ...e, hp: 100 })) };
-    expect(previewIntent(hurt, hurt.enemies[0]!.id, registry).find((p) => p.op === 'heal')?.amount).toBe(112);
+    expect(previewIntent(hurt, hurt.enemies[0]!.id, registry).find((p) => p.op === 'heal')?.amount).toBe(865);
   });
 
   it('the damage stacks an enemy applies follow its damage curve, and turn counts stay as written', () => {
     const state = start({ enemyLevel: 40 }, ['test.blighter']);
     const shown = previewIntent(state, state.enemies[0]!.id, registry).filter((p) => p.op === 'applyStatus');
-    // 10 × 1.979 is 19.79: 19.
-    expect(shown.map((p) => [p.status, p.amount])).toEqual([['test.rot', 19], ['test.slow', 2]]);
+    // 10 × 7.379 is 73.79: 73.
+    expect(shown.map((p) => [p.status, p.amount])).toEqual([['test.rot', 73], ['test.slow', 2]]);
   });
 
   it("leaves the party's damage alone", () => {
@@ -120,12 +123,12 @@ describe('enemy levels', () => {
 
   it('a summoned enemy and a later HP bar come at the fight level', () => {
     const state = endTurn(endTurn(endTurn(start({ enemyLevel: 40 }, ['test.warden']))));
-    expect(state.enemies.find((e) => e.enemy === 'test.dummy')?.maxHp).toBe(Math.floor((registry.enemies['test.dummy']!.hp * 1125) / 1000));
+    expect(state.enemies.find((e) => e.enemy === 'test.dummy')?.maxHp).toBe(Math.floor((registry.enemies['test.dummy']!.hp * 8650) / 1000));
     const barred = start({ enemyLevel: 40 }, ['test.barred']);
-    expect(barred.enemies[0]!.maxHp).toBe(112);
+    expect(barred.enemies[0]!.maxHp).toBe(865);
     const [ready, card] = withCardInHand({ ...barred, enemies: [{ ...barred.enemies[0]!, hp: 1 }] }, 'test.strike');
     const result = apply(ready, { type: 'playCard', card: card.uid, target: ready.enemies[0]!.id }, registry);
     if (!result.ok) throw new Error(result.reason);
-    expect(result.state.enemies[0]!.maxHp).toBe(225);
+    expect(result.state.enemies[0]!.maxHp).toBe(1730);
   });
 });

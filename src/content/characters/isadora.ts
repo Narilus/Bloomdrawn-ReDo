@@ -77,7 +77,7 @@ const danceOf = (tentacles: number) => {
 // C3: Ecstatic Spin costs 3 (docs/notes/banner-kits.md).
 export const ecstaticSpinC3 = variant(ecstaticSpin, 3, { cost: 3 });
 
-const STATS = { hp: 50, attack: 5, defense: 3 };
+const STATS = { hp: 50, attack: 15, defense: 9 };
 
 export const isadora = character({
   id: 'isadora', name: 'Isadora', title: 'the Ecstatic', domain: 'rapture',

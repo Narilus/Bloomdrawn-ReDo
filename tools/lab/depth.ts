@@ -8,13 +8,16 @@
 // - Strong build: the same at C2 with ultimates fired. A single-Domain team needs four of a Domain and
 //   the game has two each, so the three Domain pairs stand in for it.
 // - Enemy HP (with Shield and heals) follows the Average build's damage, and enemy damage its HP, each
-//   as a share of level 1, so level-1 enemies stay as they are. Past 40 enemies climb until a Strong
-//   build at Depth 50 meets what an Average build meets at 40.
+//   as a share of level 1, so every depth plays like Depth 1. Past 40 enemy HP climbs until a Strong
+//   build at Depth 50 meets what an Average build meets at 40. The engine's curve (`ENEMY_CURVE`) is
+//   set from this fit; its damage past 40 is the owner's call, not the fit's.
+// - Real encounters: the Average build plays each encounter at a depth with the engine's curve, for
+//   turns to win and threat. Level-1 enemies are tuned against these (owner, 31 Oct).
 import { parseArgs } from 'node:util';
 import { statsAt, withDupes, type EnemyDef, type Registry } from '../../src/engine/index.ts';
 import { M3_EXPEDITION } from '../../src/game/expedition.ts';
 import { ASCENSIONS, expToNext, MAX_LEVEL, moneyToNext } from '../../src/game/levels.ts';
-import { fight, mean, type Setup } from './play.ts';
+import { encounterFight, fight, mean, type Setup } from './play.ts';
 import { loadRegistry } from './registry.ts';
 
 const { values } = parseArgs({
@@ -154,16 +157,45 @@ for (const { depth, avg, strong, hpX, dmgX } of rows) {
     `| ${depth} | ${round(avg.hp)} / ${round(strong.hp)} | ${round(avg.dpt.elite)} / ${round(strong.dpt.elite)} | ${round(level1.normal.hp * hpX)} | ${round(level1.elite.hp * hpX)} | ${round(level1.boss.hp * hpX)} | ${round(level1.normal.perTurn * dmgX)} | ${round(level1.elite.perTurn * dmgX)} | ${round(level1.boss.perTurn * dmgX)} (${round(level1.boss.biggest * dmgX)}) | ×${hpX.toFixed(2)} | ×${dmgX.toFixed(2)} |`,
   );
 }
-console.log(`\n### Against the targets\n`);
-const head2 = ['Depth', 'Normal: turns (Avg / Strong)', 'threat', 'Elite: turns', 'threat', 'Boss: turns', 'threat (biggest hit)'];
-console.log(`| ${head2.join(' | ')} |`);
-console.log(`|${head2.map((_, i) => (i === 0 ? '---' : '---:')).join('|')}|`);
-for (const { depth, avg, strong, hpX, dmgX } of rows) {
-  const turns = (t: Tier) => `${((level1[t].hp * hpX) / avg.dpt[t]).toFixed(1)} / ${((level1[t].hp * hpX) / strong.dpt[t]).toFixed(1)}`;
+// Threat is what a tier deals a turn while it's unkilled: its intents' plain damage (not statuses or
+// summons) as a share of party HP. Turns come from the real encounters below, which count enemy
+// Shield, heals and summons that a dummy can't.
+console.log(`\n### Threat against the targets\n`);
+console.log('| Depth | Normal fight | Elite | Boss (biggest hit) |');
+console.log('|---|---:|---:|---:|');
+for (const { depth, avg, dmgX } of rows) {
   const threat = (t: Tier) => pct((100 * level1[t].perTurn * dmgX) / avg.hp);
-  console.log(`| ${depth} | ${turns('normal')} | ${threat('normal')} | ${turns('elite')} | ${threat('elite')} | ${turns('boss')} | ${threat('boss')} (${pct((100 * level1.boss.biggest * dmgX) / avg.hp)}) |`);
+  console.log(`| ${depth} | ${threat('normal')} | ${threat('elite')} | ${threat('boss')} (${pct((100 * level1.boss.biggest * dmgX) / avg.hp)}) |`);
 }
 console.log(`\nTargets: normal 2–3 turns (Strong about 1), 15–25% a turn; elite 5–6 (2–3), 25–35%; Boss 10–12 (4–5), 40–60% on big hits.`);
+
+// The real encounters, played by the Average build at a depth with the engine's own enemy curve:
+// turns to win and the damage the enemies deal a turn (before Shield) as a share of party HP.
+const immortal: Registry = {
+  ...registry,
+  characters: Object.fromEntries(Object.entries(registry.characters).map(([id, c]) => [id, { ...c, stats: { ...c.stats, hp: c.stats.hp * 1000 }, ...(c.dupes && { dupes: c.dupes.map((d) => (d.stats ? { ...d, stats: { ...d.stats, hp: d.stats.hp * 1000 } } : d)) }) }])),
+};
+const MAX_TURNS = 30;
+console.log(`\n### Real encounters, Average build (engine curve)\n`);
+console.log('| Encounter | Tier | ' + [1, 20, 40].map((d) => `Depth ${d}: turns · threat a turn · worst turn`).join(' | ') + ' |');
+console.log('|---|---|' + [1, 20, 40].map(() => '---:').join('|') + '|');
+for (const en of Object.values(registry.encounters).filter((e) => e.id !== 'encounter.training' && !e.id.endsWith('full-bloom'))) {
+  const cells = [1, 20, 40].map((depth) => {
+    const level = partyLevel(depth);
+    const runs = PARTIES.flatMap((p) =>
+      Array.from({ length: Math.max(2, Math.round(SEEDS / 4)) }, (_, i) =>
+        encounterFight(i + 1, { ...p, ultimates: false }, immortal, en.enemies, { level, ascensions: ascensionsAt(level), dupes: 0, enemyLevel: depth, maxTurns: MAX_TURNS }),
+      ),
+    );
+    const hp = partyHp(PARTIES, level, 0);
+    const turns = mean(runs.map((r) => r.turns));
+    const threat = mean(runs.map((r) => mean(r.incoming.map((n) => n ?? 0)))) / hp;
+    const worst = mean(runs.map((r) => Math.max(0, ...r.incoming.map((n) => n ?? 0)))) / hp;
+    const lost = runs.filter((r) => !r.won).length;
+    return `${turns.toFixed(1)}${lost ? ` (${lost} unwon)` : ''} · ${pct(threat * 100)} · ${pct(worst * 100)}`;
+  });
+  console.log(`| ${en.id.replace('encounter.', '')} | ${en.tier} | ${cells.join(' | ')} |`);
+}
 
 // 3. Rewards: what each band of ten levels costs one character, what a won run pays at Depth 1,
 // and a multiplier rising with depth so that about one won run (no Fruiting) levels one character

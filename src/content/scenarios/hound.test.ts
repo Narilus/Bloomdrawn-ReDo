@@ -37,24 +37,26 @@ describe('Bloom-Rib Hound', () => {
     }
   });
 
-  it('the party takes Bite 12, Bristle 6, Maul 18', () => {
+  it('the party takes Bite 31, Bristle 16, Maul 47', () => {
     let state = begin();
     const hp: number[] = [];
     for (let turn = 0; turn < 3; turn++) {
       state = run(state, endTurn).state;
       hp.push(state.party.hp);
     }
-    expect(hp).toEqual([210 - 12, 210 - 18, 210 - 36]);
+    expect(hp).toEqual([210 - 31, 210 - 47, 210 - 94]);
   });
 
   it("Bristle's Shield lasts through the party's turn and clears when the Hound next acts", () => {
     let state = run(begin(), endTurn).state;
     state = run(state, endTurn).state; // Bristle
-    expect(state.enemies[0]!.shield).toBe(10);
+    expect(state.enemies[0]!.shield).toBe(7);
     const before = state.enemies[0]!.hp;
-    // Agathe's end-of-turn Tentacle (3) hits the Shield first.
-    const after = run(state, endTurn).state;
-    expect(after.enemies[0]!.hp).toBe(before);
+    // Agathe's end-of-turn Tentacle (9) hits the Shield first, and the rest reaches HP.
+    const { state: after, events } = run(state, endTurn);
+    const hit = events.find((e) => e.type === 'damageDealt' && e.via === 'volley')!;
+    expect(hit.absorbed).toBe(7);
+    expect(after.enemies[0]!.hp).toBe(before - (hit.amount! - 7));
     expect(after.enemies[0]!.shield).toBe(0);
   });
 

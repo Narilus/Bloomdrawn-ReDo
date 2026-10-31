@@ -11,10 +11,13 @@ export const variant = (base: CardDef, level: number, changes: Partial<CardDef>)
   return card({ ...def, ...changes, id: `${base.id}-c${level}`, variantOf: base.id });
 };
 
-/** C2 is one rule for everyone for now (owner, 25 Oct; docs/notes/banner-kits.md): +10% HP, rounded, and +1 Attack and Defense. */
+/**
+ * C2 is one rule for everyone for now (owner, 25 Oct; docs/notes/banner-kits.md): +10% HP, rounded,
+ * +3 Attack and +3 Defense. Both were +1 before level-1 Attack and Defense tripled in the M6 retune (owner, 31 Oct).
+ */
 export const c2 = (stats: CharacterDef['stats']): DupeDef => ({
-  text: '+10% HP, +1 Attack and +1 Defense.',
-  stats: { hp: Math.round(stats.hp * 1.1), attack: stats.attack + 1, defense: stats.defense + 1 },
+  text: '+10% HP, +3 Attack and +3 Defense.',
+  stats: { hp: Math.round(stats.hp * 1.1), attack: stats.attack + 3, defense: stats.defense + 3 },
 });
 
 /** Takes the card definitions themselves, so a character can't list a card that doesn't exist. */

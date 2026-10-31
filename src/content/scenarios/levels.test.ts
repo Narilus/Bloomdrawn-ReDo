@@ -21,17 +21,17 @@ function previewMatchesResult({ preview, events }: ScenarioPlay) {
 }
 
 const BANNER = ['virelle', 'isadora', 'kibane', 'hester'];
-const DUMMY_HP = 60;
+const DUMMY_HP = 600;
 const BIG_HP = 9999;
 
 describe('a levelled character', () => {
-  // A Support at level 21 with two ascensions: HP 270, Attack 11, Defense 22; 300% and 200% of them.
-  scenario('Maelia at level 21 with two ascensions: her Strike and Defense preview and do 33 and 44', {
+  // A Support at level 21 with two ascensions: HP 270, Attack 34, Defense 65; 300% and 200% of them.
+  scenario('Maelia at level 21 with two ascensions: her Strike and Defense preview and do 102 and 130', {
     levels: { maelia: 21 },
     ascensions: { maelia: 2 },
     setup: { hand: ['maelia.strike', 'maelia.defense'] },
     play: [{ card: 'maelia.strike', target: 0 }, { card: 'maelia.defense' }],
-    expect: { enemyHp: [DUMMY_HP - 33], partyShield: 44 },
+    expect: { enemyHp: [DUMMY_HP - 102], partyShield: 130 },
     check: ({ state, plays }) => {
       plays.forEach(previewMatchesResult);
       expect(state.party.maxHp).toBe(270 + 50 + 60 + 45);
@@ -45,7 +45,7 @@ describe('a levelled character', () => {
       const stats = statsAt(def.stats, def.role, level, ascensions);
       scenario(`${who} at level ${level}: Strike then Defense preview equals result, at her grown stats`, {
         party: [...party],
-        // A grown Strike would fell the 60-HP dummy: the big one.
+        // A grown Strike could fell the 600-HP dummy: the big one.
         enemies: ['enemy.practice-dummy'],
         levels: { [who]: level },
         ascensions: { [who]: ascensions },
@@ -57,14 +57,14 @@ describe('a levelled character', () => {
     }
   }
 
-  // An Attacker at level 21, no ascension: C2's 7 Attack × (1 + 8 × 0.359) is 27, and her Strike 200% of it, 54; C2's 50 HP × (1 + 5 × 0.359) is 140.
-  scenario('growth starts from her stats at her dupe level: Virelle at C2 and level 21 has Attack 27', {
+  // An Attacker at level 21, no ascension: C2's 21 Attack × (1 + 8 × 0.359) is 81, and her Strike 200% of it, 162; C2's 50 HP × (1 + 5 × 0.359) is 140.
+  scenario('growth starts from her stats at her dupe level: Virelle at C2 and level 21 has Attack 81', {
     party: BANNER,
     dupes: { virelle: 2 },
     levels: { virelle: 21 },
     setup: { hand: ['virelle.strike'] },
     play: [{ card: 'virelle.strike', target: 0 }],
-    expect: { enemyHp: [DUMMY_HP - 54] },
+    expect: { enemyHp: [DUMMY_HP - 162] },
     check: ({ plays, state }) => {
       plays.forEach(previewMatchesResult);
       expect(state.party.maxHp).toBe(140 + 50 + 50 + 55);

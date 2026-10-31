@@ -15,12 +15,13 @@ describe('starter Strikes and Defenses', () => {
   scenario('Maelia\'s Strike into the dummy: preview equals result', {
     setup: { hand: ['maelia.strike'] },
     play: [{ card: 'maelia.strike', target: 0 }],
-    expect: { enemyHp: [60 - (6 + 3)], mana: 5 },
+    // 300% of Attack 9.
+    expect: { enemyHp: [600 - 27], mana: 5 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 
-  // Defense is 5 + Defense: Maelia 5, Agathe 4, Anthe 5, Leonora 3.
-  const SHIELD: Record<string, number> = { maelia: 10, agathe: 9, anthe: 10, leonora: 8 };
+  // Defense is a share of Defense: 200% of Maelia's 15, 225% of Agathe's 12, 200% of Anthe's 15, 267% of Leonora's 9.
+  const SHIELD: Record<string, number> = { maelia: 30, agathe: 27, anthe: 30, leonora: 24 };
   for (const who of STARTER_PARTY) {
     scenario(`${who}: Strike then Defense preview equals result`, {
       setup: { hand: [`${who}.strike`, `${who}.defense`] },

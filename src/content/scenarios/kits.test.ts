@@ -4,22 +4,23 @@ import { registry } from '../registry.ts';
 import { runScenario, scenario, STARTER_PARTY } from '../testing/scenario.ts';
 
 // The approved starter kits (docs/notes/starter-kits.md), one scenario per card, passive and
-// ultimate. The party is Maelia, Agathe, Anthe, Leonora against a 60-HP training dummy, so
-// Agathe's First Hymn Tentacle (3 damage) hits at every end of turn.
+// ultimate. The party is Maelia (Attack 9, Defense 15), Agathe (12, 12), Anthe (9, 15) and Leonora
+// (15, 9), 210 HP, against a 600-HP training dummy. Tentacles start at 80% of the party's average
+// Attack, 9 a hit, so Agathe's First Hymn Tentacle hits for 9 at every end of turn.
 const DUMMY = 'enemy.training-dummy';
 
 describe('Maelia', () => {
-  scenario('Strike consumes 1 Embryo to apply 4 Poison', {
+  scenario('Strike (300% of Attack) consumes 1 Embryo to apply 134% of her Attack in Poison', {
     setup: { hand: ['maelia.strike'], resources: { embryo: 2 } },
     play: [{ card: 'maelia.strike', target: 0 }],
-    expect: { enemyHp: [60 - 9], resources: { embryo: 1 }, mana: 5 },
-    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 4 }]),
+    expect: { enemyHp: [600 - 27], resources: { embryo: 1 }, mana: 5 },
+    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 12 }]),
   });
 
   scenario('Strike without Embryo deals its damage and Poisons nothing', {
     setup: { hand: ['maelia.strike'] },
     play: [{ card: 'maelia.strike', target: 0 }],
-    expect: { enemyHp: [60 - 9], resources: { embryo: 0 } },
+    expect: { enemyHp: [600 - 27], resources: { embryo: 0 } },
     check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([]),
   });
 
@@ -29,8 +30,8 @@ describe('Maelia', () => {
     play: [{ card: 'maelia.swollen-pod' }],
     expect: { resources: { embryo: 4 }, mana: 4 },
     check: ({ state }) => expect(state.enemies.map((e) => e.statuses)).toEqual([
-      [{ status: 'status.poison', stacks: 8 }],
-      [{ status: 'status.poison', stacks: 8 }],
+      [{ status: 'status.poison', stacks: 24 }],
+      [{ status: 'status.poison', stacks: 24 }],
     ]),
   });
 
@@ -43,23 +44,24 @@ describe('Maelia', () => {
   scenario('Bud Cutting: the next card resolves twice but charges once, and 2 Embryo charges every gauge', {
     setup: { hand: ['maelia.bud-cutting', 'maelia.strike'], resources: { embryo: 2 } },
     play: [{ card: 'maelia.bud-cutting' }, { card: 'maelia.strike', target: 0 }],
-    expect: { resources: { embryo: 0 }, enemyHp: [60 - 9 - 9], gauges: { maelia: 20, agathe: 10, anthe: 10, leonora: 10 } },
+    expect: { resources: { embryo: 0 }, enemyHp: [600 - 27 - 27], gauges: { maelia: 20, agathe: 10, anthe: 10, leonora: 10 } },
   });
 
   scenario('Bud Cutting without 2 Embryo spends and charges nothing, but still repeats', {
     setup: { hand: ['maelia.bud-cutting', 'maelia.swollen-pod'], resources: { embryo: 1 } },
     play: [{ card: 'maelia.bud-cutting' }, { card: 'maelia.swollen-pod' }],
     expect: { resources: { embryo: 1 + 4 + 3 }, gauges: { maelia: 0, agathe: 0, anthe: 0, leonora: 0 } },
-    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 16 }]),
+    check: ({ state }) => expect(state.enemies[0]?.statuses).toEqual([{ status: 'status.poison', stacks: 48 }]),
   });
 
-  scenario('Birthing Bloom consumes all Embryo: heal 3 and Shield 4 per Embryo, preview equal to result', {
+  // 1.43% of 210 max HP is 3.003 a heal, and 80% of Defense 15 is 12 Shield, per Embryo.
+  scenario('Birthing Bloom consumes all Embryo: heal 3 and Shield 12 per Embryo, preview equal to result', {
     setup: { hand: [], gauges: { maelia: 100 }, resources: { embryo: 5 }, partyHp: 150 },
     play: [{ ultimate: 'maelia' }],
-    expect: { resources: { embryo: 0 }, partyHp: 165, partyShield: 20, gauges: { maelia: 0 }, mana: 6 },
+    expect: { resources: { embryo: 0 }, partyHp: 165, partyShield: 60, gauges: { maelia: 0 }, mana: 6 },
     check: ({ plays }) => {
       const branch = plays[0]?.preview[0]?.branch ?? [];
-      expect(branch.map((p) => [p.op, p.amount])).toEqual([['heal', 15], ['gainShield', 20]]);
+      expect(branch.map((p) => [p.op, p.amount])).toEqual([['heal', 15], ['gainShield', 60]]);
     },
   });
 });
@@ -67,7 +69,7 @@ describe('Maelia', () => {
 describe('Agathe', () => {
   scenario('First Hymn: the fight starts with a Tentacle', {
     play: [],
-    expect: { resources: { tentacles: 1, potency: 3 } },
+    expect: { resources: { tentacles: 1, potency: 9 } },
   });
 
   scenario('Call the Choir below 4 Tentacles draws nothing', {
@@ -82,12 +84,12 @@ describe('Agathe', () => {
     expect: { resources: { tentacles: 4 }, handSize: 1 },
   });
 
-  scenario('Censer Rite: +2 damage per hit for the rest of combat, and a volley now', {
+  scenario('Censer Rite: +50% of her Attack per hit for the rest of combat, and a volley now', {
     setup: { hand: ['agathe.censer-rite'], resources: { tentacles: 2 } },
     play: [{ card: 'agathe.censer-rite' }, { endTurn: true }],
-    // Volley now: 2 × 5. End of turn: 2 × 5 again, still at 5 per hit.
-    expect: { resources: { potency: 5, tentacles: 2 }, enemyHp: [60 - 10 - 10] },
-    check: ({ plays }) => expect(plays[0]?.preview.filter((p) => p.op === 'volley').map((p) => p.amount)).toEqual([5, 5]),
+    // 9 + 6 a hit. Volley now: 2 × 15. End of turn: 2 × 15 again.
+    expect: { resources: { potency: 15, tentacles: 2 }, enemyHp: [600 - 30 - 30] },
+    check: ({ plays }) => expect(plays[0]?.preview.filter((p) => p.op === 'volley').map((p) => p.amount)).toEqual([15, 15]),
   });
 
   scenario('Hymn of the Hundred Arms gains 3 Tentacles', {
@@ -101,7 +103,8 @@ describe('Anthe', () => {
   scenario('Votive Candle deals 267% of Attack plus 200% per Essence (8 + 6 × Essence)', {
     setup: { hand: ['anthe.votive-candle'], resources: { essence: 4 } },
     play: [{ card: 'anthe.votive-candle', target: 0 }],
-    expect: { enemyHp: [60 - 32], mana: 1 },
+    // Attack 9 × (2.67 + 2 × 4).
+    expect: { enemyHp: [600 - 96], mana: 1 },
   });
 
   scenario('Vigil: each Ritual held at end of turn gains 2 Essence, and the Ritual gets 1 cheaper', {
@@ -150,7 +153,7 @@ describe('Leonora', () => {
   scenario('Requisition: draw 2, and the next card costs 2 less', {
     setup: { hand: ['leonora.requisition', 'leonora.strike'] },
     play: [{ card: 'leonora.requisition' }, { card: 'leonora.strike', target: 0 }],
-    expect: { mana: 4, handSize: 2, enemyHp: [60 - 11] },
+    expect: { mana: 4, handSize: 2, enemyHp: [600 - 33] },
   });
 
   scenario('Balance the Books gains the Mana spent this turn', {
@@ -171,22 +174,23 @@ describe('Transcend', () => {
     },
   });
 
+  // 4 Embryo: heal 12, Shield 48, and 34% of Attack 9 in Poison each, 12.
   scenario('Transcended Birthing Bloom also Poisons every enemy for the Embryo consumed', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['maelia.ripened-womb'], gauges: { maelia: 100 }, partyHp: 150 },
     play: [{ card: 'maelia.ripened-womb' }, { ultimate: 'maelia' }],
-    expect: { resources: { embryo: 0 }, partyHp: 150 + 12, partyShield: 16 },
+    expect: { resources: { embryo: 0 }, partyHp: 150 + 12, partyShield: 48 },
     check: ({ state }) => expect(state.enemies.map((e) => e.statuses)).toEqual([
-      [{ status: 'status.poison', stacks: 4 }],
-      [{ status: 'status.poison', stacks: 4 }],
+      [{ status: 'status.poison', stacks: 12 }],
+      [{ status: 'status.poison', stacks: 12 }],
     ]),
   });
 
-  scenario('The Choir Answers: +2 Tentacles and +1 damage per hit; the Transcended Hymn volleys', {
+  scenario('The Choir Answers: +2 Tentacles and +25% of her Attack per hit; the Transcended Hymn volleys', {
     setup: { hand: ['agathe.the-choir-answers'], gauges: { agathe: 100 } },
     play: [{ card: 'agathe.the-choir-answers' }, { ultimate: 'agathe' }],
-    // 1 + 2 + 3 Tentacles at 4 per hit, all volleyed once by the ultimate.
-    expect: { resources: { tentacles: 6, potency: 4 }, enemyHp: [60 - 24] },
+    // 1 + 2 + 3 Tentacles at 9 + 3 per hit, all volleyed once by the ultimate.
+    expect: { resources: { tentacles: 6, potency: 12 }, enemyHp: [600 - 72] },
   });
 
   scenario('The Riddle Answered: 2 Essence, held Rituals cheaper; Transcended Hours Kept doubles', {

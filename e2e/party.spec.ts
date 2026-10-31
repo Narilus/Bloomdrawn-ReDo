@@ -95,9 +95,9 @@ test("a character's dupe level shows on the roster, and the page shows her at it
   await expect(page.locator('.roster-tile[aria-label="Kibane"] .roster-level')).toHaveText('C3');
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-level')).toHaveCount(0);
   await page.getByRole('button', { name: 'Kibane', exact: true }).click();
-  // C2's +10% HP and +1 Attack; C3's Foxfire Rite at 80% of Attack 6 plus 240% of it per Essence.
-  await expect(page.locator('.character-stats')).toContainText('HP55Attack6');
-  await expect(page.locator('.character-cards').first()).toContainText('Deal 4 + 14 × Essence damage.');
+  // C2's +10% HP and +3 Attack; C3's Foxfire Rite at 80% of Attack 18 plus 240% of it per Essence.
+  await expect(page.locator('.character-stats')).toContainText('HP55Attack18');
+  await expect(page.locator('.character-cards').first()).toContainText('Deal 14 + 43 × Essence damage.');
   await expect(page.locator('.character-dupes li')).toHaveCount(5);
   await expect(page.locator('.character-dupes li.reached')).toHaveCount(3);
   await page.locator('.character-dupes').scrollIntoViewIfNeeded();
@@ -116,15 +116,15 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await page.getByRole('button', { name: 'Maelia', exact: true }).click();
   const growth = page.getByRole('region', { name: 'Level' });
   await expect(growth.locator('h3')).toContainText('Level 1 of 10');
-  await expect(page.locator('.character-stats')).toContainText('HP55Attack3Defense5');
+  await expect(page.locator('.character-stats')).toContainText('HP55Attack9Defense15');
   // Three Vivid Memories pay for nine levels (4,500 EXP), 1,500 coming back as Clear ones.
   await growth.getByRole('button', { name: /To level 10/ }).click();
   await expect(growth.locator('h3')).toContainText('Level 10 of 10');
   await expect(growth.locator('.character-note')).toHaveText('Level 10. Spent: 3 Vivid Memories, 900 Ducats. Back: 3 Clear Memories.');
   // A Support at level 10 before ascending (m6-scaling.md, 4.4–4.5).
-  await expect(page.locator('.character-stats')).toContainText('HP117Attack5Defense10');
-  // Her Strike is 300% of Attack 5.
-  await expect(page.locator('.character-cards').first()).toContainText('Deal 15 damage.');
+  await expect(page.locator('.character-stats')).toContainText('HP117Attack16Defense30');
+  // Her Strike is 300% of Attack 16.
+  await expect(page.locator('.character-cards').first()).toContainText('Deal 48 damage.');
   await expect(growth.getByRole('button', { name: /Ascend/ })).toContainText('gives 1 Purified Bloom');
   await growth.getByRole('button', { name: /Ascend/ }).click();
   const reward = page.getByRole('dialog', { name: 'Ascension reward' });
@@ -136,7 +136,7 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await expect(reward).toHaveCount(0);
   await expect(growth.locator('h3')).toContainText('Level 10 of 20');
   // The ascension is a step up in stats too.
-  await expect(page.locator('.character-stats')).toContainText('HP156Attack7Defense13');
+  await expect(page.locator('.character-stats')).toContainText('HP156Attack21Defense39');
   await expect(growth.locator('.character-note')).toHaveText('Ascended. Spent: 1 Flesh Sac, 1,000 Ducats. Gained: 1 Purified Bloom.');
   await expect(growth.locator('.character-bank')).toContainText('3 Clear Memories');
   await expect(growth.locator('.character-bank')).toContainText('1,100 Ducats');

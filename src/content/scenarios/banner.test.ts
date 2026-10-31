@@ -5,10 +5,11 @@ import { scenario, type ScenarioPlay } from '../testing/scenario.ts';
 
 // The banner four (docs/notes/banner-kits.md, reviewed by the owner 25 Oct), one scenario or more
 // per card, passive, ultimate, Transcend and reward card. The party is one per Domain: Virelle
-// (Attack 6, Defense 2), Isadora (5, 3), Kibane (5, 3) and Hester (4, 4). Nobody starts with a
-// Tentacle, so the end-of-turn volley does nothing until Isadora makes some. Card numbers are ratios
-// of the owner's stats (docs/notes/m6-scaling.md); damage per hit starts at 80% of the party's average
-// Attack, 4 for these four, and each gain is a share of its card owner's Attack (Isadora's 20%: 1).
+// (Attack 18, Defense 6), Isadora (15, 9), Kibane (15, 9) and Hester (12, 12), against 600-HP
+// training dummies. Nobody starts with a Tentacle, so the end-of-turn volley does nothing until
+// Isadora makes some. Card numbers are ratios of the owner's stats (docs/notes/m6-scaling.md); damage
+// per hit starts at 80% of the party's average Attack, 12 for these four, and each gain is a share of
+// its card owner's Attack (Isadora's 20%: 3).
 const BANNER = ['virelle', 'isadora', 'kibane', 'hester'];
 const DUMMY = 'enemy.training-dummy';
 const BIG = 'enemy.practice-dummy';
@@ -29,21 +30,23 @@ function previewMatchesResult({ preview, events }: ScenarioPlay) {
 }
 
 describe('Strikes and Defenses', () => {
-  const SHIELD: Record<string, number> = { virelle: 7, isadora: 8, kibane: 8, hester: 9 };
-  const STRIKE: Record<string, number> = { virelle: 12, isadora: 11, kibane: 11, hester: 10 };
+  // 350% of 6, 267% of 9 and 225% of 12.
+  const SHIELD: Record<string, number> = { virelle: 21, isadora: 24, kibane: 24, hester: 27 };
+  // 200% of 18, 220% of 15 and 250% of 12.
+  const STRIKE: Record<string, number> = { virelle: 36, isadora: 33, kibane: 33, hester: 30 };
   for (const who of BANNER) {
     scenario(`${who}: Strike then Defense, preview equals result`, {
       party: BANNER,
       setup: { hand: [`${who}.strike`, `${who}.defense`] },
       play: [{ card: `${who}.strike`, target: 0 }, { card: `${who}.defense` }],
-      expect: { enemyHp: [60 - (STRIKE[who] as number)], partyShield: SHIELD[who] as number, mana: 4, gauges: { [who]: 20 } },
+      expect: { enemyHp: [600 - (STRIKE[who] as number)], partyShield: SHIELD[who] as number, mana: 4, gauges: { [who]: 20 } },
       check: ({ plays }) => plays.forEach(previewMatchesResult),
     });
   }
 });
 
 describe('Virelle', () => {
-  scenario('Strike chains while Embryo lasts: each costs 1 Embryo for 6 Bleed and a free Fleeting copy, 10% more per Strike before it', {
+  scenario('Strike chains while Embryo lasts: each costs 1 Embryo for 100% of her Attack in Bleed and a free Fleeting copy, 10% more per Strike before it', {
     party: BANNER,
     setup: { hand: ['virelle.strike'], resources: { embryo: 2 } },
     play: [
@@ -52,12 +55,12 @@ describe('Virelle', () => {
       { card: 'virelle.strike', target: 0 },
       { card: 'virelle.strike', target: 0 },
     ],
-    // 12, then 12 × 1.1, × 1.2 and × 1.3, rounded down. Opened Vein gives back the first Embryo, so three
-    // copies come; the last one finds no Embryo and makes none. Only the first Strike costs Mana, and every
-    // one charges her ultimate.
-    expect: { enemyHp: [60 - 12 - 13 - 14 - 15], resources: { embryo: 0 }, mana: 5, gauges: { virelle: 40 } },
+    // 36, then 36 × 1.1, × 1.2 and × 1.3, rounded down. Opened Vein gives back the first Embryo, so three
+    // copies come, each with 18 Bleed; the last one finds no Embryo and makes none. Only the first Strike
+    // costs Mana, and every one charges her ultimate.
+    expect: { enemyHp: [600 - 36 - 39 - 43 - 46], resources: { embryo: 0 }, mana: 5, gauges: { virelle: 40 } },
     check: ({ state, plays }) => {
-      expect(marks(state)).toEqual([[['bleed', 18]]]);
+      expect(marks(state)).toEqual([[['bleed', 54]]]);
       expect(state.piles.hand).toEqual([]);
       expect(state.piles.graveyard.map((c) => c.card)).toEqual(['virelle.strike', 'virelle.strike', 'virelle.strike']);
       expect(state.piles.discard.map((c) => c.card)).toEqual(['virelle.strike']);
@@ -69,7 +72,8 @@ describe('Virelle', () => {
     party: BANNER,
     setup: { hand: ['hester.strike', 'kibane.strike', 'virelle.strike'] },
     play: [{ card: 'hester.strike', target: 0 }, { card: 'kibane.strike', target: 0 }, { card: 'virelle.strike', target: 0 }],
-    expect: { enemyHp: [60 - 10 - 11 - 14] },
+    // 30, 33, then 36 × 1.2.
+    expect: { enemyHp: [600 - 30 - 33 - 43] },
   });
 
   scenario("Strike's text in hand shows its damage as it grows with each Strike played", {
@@ -79,7 +83,7 @@ describe('Virelle', () => {
     check: ({ state }) => {
       const strike = state.piles.hand.find((c) => c.card === 'virelle.strike')!;
       expect(describeCardLive(strike, state, registry, { charge: false })).toBe(
-        'Deal 14 damage. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand.',
+        'Deal 43 damage. Consume 1 Embryo: apply 18 Bleed and add a free Fleeting copy to your hand.',
       );
     },
   });
@@ -88,7 +92,7 @@ describe('Virelle', () => {
     party: BANNER,
     setup: { hand: ['virelle.strike'] },
     play: [{ card: 'virelle.strike', target: 0 }],
-    expect: { enemyHp: [60 - 12], resources: { embryo: 0 }, mana: 5 },
+    expect: { enemyHp: [600 - 36], resources: { embryo: 0 }, mana: 5 },
     check: ({ state }) => {
       expect(marks(state)).toEqual([[]]);
       expect(state.piles.hand).toEqual([]);
@@ -106,13 +110,13 @@ describe('Virelle', () => {
     },
   });
 
-  scenario('Suture Cut deals 150% of Attack and applies 150% of it in Bleed (9 and 9); Opened Vein gains 1 Embryo', {
+  scenario('Suture Cut deals 150% of Attack and applies 150% of it in Bleed (27 and 27); Opened Vein gains 1 Embryo', {
     party: BANNER,
     setup: { hand: ['virelle.suture-cut'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }],
-    expect: { enemyHp: [60 - 9], resources: { embryo: 1 }, mana: 4 },
+    expect: { enemyHp: [600 - 27], resources: { embryo: 1 }, mana: 4 },
     check: ({ state, plays }) => {
-      expect(marks(state)).toEqual([[['bleed', 9]]]);
+      expect(marks(state)).toEqual([[['bleed', 27]]]);
       previewMatchesResult(plays[0] as ScenarioPlay);
     },
   });
@@ -123,7 +127,7 @@ describe('Virelle', () => {
     setup: { hand: ['virelle.suture-cut', 'virelle.bloodletting'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.bloodletting', target: 0 }],
     expect: { resources: { embryo: 1 } },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 9 + 12]]]),
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 27 + 36]]]),
   });
 
   scenario("Opened Vein counts any member's Bleed, Grafting Knife's too", {
@@ -137,10 +141,10 @@ describe('Virelle', () => {
     party: BANNER,
     setup: { hand: ['virelle.suture-cut', 'virelle.open-the-wound'], resources: { embryo: 2 } },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.open-the-wound', target: 0 }],
-    // Suture Cut 9, Open the Wound 10, then 2 × 9 Bleed.
-    expect: { enemyHp: [60 - 9 - 10 - 18], resources: { embryo: 2 + 1 - 2 }, mana: 2 },
+    // Suture Cut 27, Open the Wound 30 (167%), then 2 × 27 Bleed.
+    expect: { enemyHp: [600 - 27 - 30 - 54], resources: { embryo: 2 + 1 - 2 }, mana: 2 },
     check: ({ state, plays }) => {
-      expect(marks(state)).toEqual([[['bleed', 9]]]);
+      expect(marks(state)).toEqual([[['bleed', 27]]]);
       previewMatchesResult(plays[1] as ScenarioPlay);
     },
   });
@@ -149,30 +153,30 @@ describe('Virelle', () => {
     party: BANNER,
     setup: { hand: ['virelle.open-the-wound'], resources: { embryo: 1 } },
     play: [{ card: 'virelle.open-the-wound', target: 0 }],
-    expect: { enemyHp: [60 - 10], resources: { embryo: 1 } },
+    expect: { enemyHp: [600 - 30], resources: { embryo: 1 } },
   });
 
-  scenario('Thorn-Spur Bloom: 9 Bleed on every enemy, 2 Embryo and 1 from Opened Vein, and Transcend', {
+  scenario('Thorn-Spur Bloom: 150% of her Attack in Bleed on every enemy, 2 Embryo and 1 from Opened Vein, and Transcend', {
     party: BANNER,
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['virelle.thorn-spur-bloom'] },
     play: [{ card: 'virelle.thorn-spur-bloom' }],
     expect: { resources: { embryo: 3 }, gauges: { virelle: 35 }, mana: 3 },
     check: ({ state }) => {
-      expect(marks(state)).toEqual([[['bleed', 9]], [['bleed', 9]]]);
+      expect(marks(state)).toEqual([[['bleed', 27]], [['bleed', 27]]]);
       expect(transcended(state, 'virelle')).toBe(true);
       expect(state.piles.graveyard.map((c) => c.card)).toEqual(['virelle.thorn-spur-bloom']);
     },
   });
 
-  scenario('Thousand Cuts hits every enemy 5 times for 150% of Attack, each hit 17% of it in Bleed (9 and 1); preview equals result', {
+  scenario('Thousand Cuts hits every enemy 5 times for 150% of Attack, each hit 17% of it in Bleed (27 and 3); preview equals result', {
     party: BANNER,
     enemies: [DUMMY, DUMMY],
     setup: { hand: [], gauges: { virelle: 100 } },
     play: [{ ultimate: 'virelle' }],
-    expect: { enemyHp: [60 - 45, 60 - 45], resources: { embryo: 1 }, gauges: { virelle: 0 }, mana: 6 },
+    expect: { enemyHp: [600 - 135, 600 - 135], resources: { embryo: 1 }, gauges: { virelle: 0 }, mana: 6 },
     check: ({ state, plays }) => {
-      expect(marks(state)).toEqual([[['bleed', 5]], [['bleed', 5]]]);
+      expect(marks(state)).toEqual([[['bleed', 15]], [['bleed', 15]]]);
       expect(plays[0]?.preview[0]).toMatchObject({ op: 'repeat', amount: 5 });
       previewMatchesResult(plays[0] as ScenarioPlay);
     },
@@ -183,40 +187,40 @@ describe('Virelle', () => {
     enemies: [BIG],
     setup: { hand: ['virelle.thorn-spur-bloom'], gauges: { virelle: 65 } },
     play: [{ card: 'virelle.thorn-spur-bloom' }, { ultimate: 'virelle' }],
-    expect: { enemyHp: [9999 - 7 * 9] },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 9 + 7]]]),
+    expect: { enemyHp: [9999 - 7 * 27] },
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 27 + 7 * 3]]]),
   });
 
-  scenario('Bloodletting applies 12 Bleed', {
+  scenario('Bloodletting applies 200% of her Attack in Bleed', {
     party: BANNER,
     setup: { hand: ['virelle.bloodletting'] },
     play: [{ card: 'virelle.bloodletting', target: 0 }],
     expect: { mana: 5, resources: { embryo: 1 } },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 12]]]),
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 36]]]),
   });
 
   scenario('Thorn Spur deals 150% of Attack twice', {
     party: BANNER,
     setup: { hand: ['virelle.thorn-spur'] },
     play: [{ card: 'virelle.thorn-spur', target: 0 }],
-    expect: { enemyHp: [60 - 18], mana: 5 },
+    expect: { enemyHp: [600 - 54], mana: 5 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 });
 
 describe('Isadora', () => {
-  scenario('Ankle Bells: 2 Tentacles and +1 damage per hit', {
+  scenario('Ankle Bells: 2 Tentacles and +20% of her Attack per hit', {
     party: BANNER,
     setup: { hand: ['isadora.ankle-bells'] },
     play: [{ card: 'isadora.ankle-bells' }],
-    expect: { resources: { tentacles: 2, potency: 5 }, mana: 4 },
+    expect: { resources: { tentacles: 2, potency: 15 }, mana: 4 },
   });
 
-  scenario('Ecstatic Spin volleys twice; Rapt adds +1 per hit after', {
+  scenario('Ecstatic Spin volleys twice; Rapt adds +20% of her Attack per hit after', {
     party: BANNER,
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 3 } },
     play: [{ card: 'isadora.ecstatic-spin' }],
-    expect: { enemyHp: [60 - 2 * 12], resources: { tentacles: 3, potency: 5 }, mana: 2 },
+    expect: { enemyHp: [600 - 2 * 3 * 12], resources: { tentacles: 3, potency: 15 }, mana: 2 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 
@@ -225,22 +229,22 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.ribbon-lash', 'isadora.ecstatic-spin'], resources: { tentacles: 2 } },
     play: [{ card: 'isadora.ribbon-lash', target: 0 }, { card: 'isadora.ecstatic-spin' }, { endTurn: true }],
-    expect: { resources: { potency: 5 } },
+    expect: { resources: { potency: 15 } },
   });
 
   scenario('Rapt counts any member\'s card volley, Censer Rite\'s too', {
     party: ['agathe', 'isadora', 'maelia', 'leonora'],
     setup: { hand: ['agathe.censer-rite'] },
     play: [{ card: 'agathe.censer-rite' }],
-    // A start of 80% of the party's average Attack (4.25), then 50% of Agathe's 4, then Rapt's 20% of Isadora's 5.
-    expect: { resources: { potency: 3.4 + 2 + 1 } },
+    // A start of 80% of the party's average Attack (12.75), then 50% of Agathe's 12, then Rapt's 20% of Isadora's 15.
+    check: ({ state }) => expect(state.resources['potency']).toBeCloseTo(10.2 + 6 + 3),
   });
 
   scenario('The Veil Torn: 3 Tentacles, a volley, and Transcend', {
     party: BANNER,
     setup: { hand: ['isadora.the-veil-torn'] },
     play: [{ card: 'isadora.the-veil-torn' }],
-    expect: { enemyHp: [60 - 12], resources: { tentacles: 3, potency: 5 }, gauges: { isadora: 35 }, mana: 2 },
+    expect: { enemyHp: [600 - 3 * 12], resources: { tentacles: 3, potency: 15 }, gauges: { isadora: 35 }, mana: 2 },
     check: ({ state }) => expect(transcended(state, 'isadora')).toBe(true),
   });
 
@@ -249,8 +253,8 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 2 }, gauges: { isadora: 100 } },
     play: [{ ultimate: 'isadora' }, { card: 'isadora.ecstatic-spin' }, { endTurn: true }],
-    // Spin: 2 volleys × 2 passes × 2 hits × 4. End of turn: 2 passes × 2 hits × 5 (after Rapt).
-    expect: { enemyHp: [9999 - 32 - 20] },
+    // Spin: 2 volleys × 2 passes × 2 hits × 12. End of turn: 2 passes × 2 hits × 15 (after Rapt).
+    expect: { enemyHp: [9999 - 96 - 60] },
     check: ({ state, plays }) => {
       expect(plays[1]?.after.party.statuses.map((s) => s.status)).toEqual(['status.dance-of-bells']);
       expect(state.party.statuses).toEqual([]);
@@ -263,9 +267,9 @@ describe('Isadora', () => {
     enemies: [BIG, 'enemy.bloom-rib-whelp'],
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 3, potency: 10 }, gauges: { isadora: 100 } },
     play: [{ ultimate: 'isadora' }, { card: 'isadora.ecstatic-spin' }],
-    // First volley, pass one: five 10s empty the 50-HP Whelp, the sixth goes to the big dummy; every
-    // later hit goes to the big dummy.
-    expect: { enemyHp: [9999 - (6 * 2 * 10 - 50), 0] },
+    // Twelve hits of 10 over two volleys of two passes: the 95-HP Whelp takes the first ten, the tenth
+    // emptying it with 5 to spare for the big dummy, and every later hit goes to the big dummy.
+    expect: { enemyHp: [9999 - (12 * 10 - 95), 0] },
   });
 
   scenario('Dance of Bells, Transcended, also volleys at once, twice over', {
@@ -273,32 +277,33 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.the-veil-torn'], gauges: { isadora: 65 } },
     play: [{ card: 'isadora.the-veil-torn' }, { ultimate: 'isadora' }],
-    // Veil Torn: 3 hits of 4. Then 2 passes of 3 hits of 5 (after Rapt).
-    expect: { enemyHp: [9999 - 12 - 30] },
+    // Veil Torn: 3 hits of 12. Then 2 passes of 3 hits of 15 (after Rapt).
+    expect: { enemyHp: [9999 - 36 - 90] },
   });
 
-  scenario('Petal Ribbon: +1 damage per hit, draw 1', {
+  scenario('Petal Ribbon: +20% of her Attack per hit, draw 1', {
     party: BANNER,
     setup: { hand: ['isadora.petal-ribbon'] },
     play: [{ card: 'isadora.petal-ribbon' }],
-    expect: { resources: { potency: 5 }, handSize: 1, mana: 5 },
+    expect: { resources: { potency: 15 }, handSize: 1, mana: 5 },
   });
 
   scenario('Ribbon Lash: 160% of Attack, then a volley', {
     party: BANNER,
     setup: { hand: ['isadora.ribbon-lash'], resources: { tentacles: 2 } },
     play: [{ card: 'isadora.ribbon-lash', target: 0 }],
-    expect: { enemyHp: [60 - 8 - 8], mana: 4 },
+    // 160% of 15, then 2 hits of 12.
+    expect: { enemyHp: [600 - 24 - 24], mana: 4 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 });
 
 describe('Kibane', () => {
-  scenario('Foxfire Rite deals 80% of Attack plus 200% per Essence (4 + 10 × Essence), and a Ritual played charges Kibane by 10', {
+  scenario('Foxfire Rite deals 80% of Attack plus 200% per Essence (12 + 30 × Essence), and a Ritual played charges Kibane by 10', {
     party: BANNER,
     setup: { hand: ['kibane.foxfire-rite'], resources: { essence: 4 } },
     play: [{ card: 'kibane.foxfire-rite', target: 0 }],
-    expect: { enemyHp: [60 - 44], gauges: { kibane: 10 }, mana: 1 },
+    expect: { enemyHp: [600 - 132], gauges: { kibane: 10 }, mana: 1 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 
@@ -331,11 +336,11 @@ describe('Kibane', () => {
     expect: { resources: { essence: 2 } },
   });
 
-  scenario('The Ninth Tail: 3 Essence, a Foxfire Wisp in hand, and Transcend; the Wisp deals 6 × Essence and exhausts', {
+  scenario('The Ninth Tail: 3 Essence, a Foxfire Wisp in hand, and Transcend; the Wisp deals 120% of her Attack per Essence and exhausts', {
     party: BANNER,
     setup: { hand: ['kibane.the-ninth-tail'], mana: 7 },
     play: [{ card: 'kibane.the-ninth-tail' }, { card: 'kibane.foxfire-wisp', target: 0 }],
-    expect: { enemyHp: [60 - 18], resources: { essence: 3 }, gauges: { kibane: 35 + 10 }, mana: 0 },
+    expect: { enemyHp: [600 - 54], resources: { essence: 3 }, gauges: { kibane: 35 + 10 }, mana: 0 },
     check: ({ state, plays }) => {
       expect(plays[0]?.after.piles.hand.map((c) => c.card)).toEqual(['kibane.foxfire-wisp']);
       expect(transcended(state, 'kibane')).toBe(true);
@@ -343,28 +348,30 @@ describe('Kibane', () => {
     },
   });
 
-  scenario("Kyubi's Judgement consumes all Essence: 10 + 8 per Essence to every enemy", {
+  scenario("Kyubi's Judgement consumes all Essence: 200% of her Attack plus 160% per Essence to every enemy", {
     party: BANNER,
     enemies: [DUMMY, DUMMY],
     setup: { hand: [], resources: { essence: 5 }, gauges: { kibane: 100 } },
     play: [{ ultimate: 'kibane' }],
-    expect: { enemyHp: [10, 10], resources: { essence: 0 } },
+    // 30 + 24 × 5.
+    expect: { enemyHp: [600 - 150, 600 - 150], resources: { essence: 0 } },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 
-  scenario("Kyubi's Judgement with no Essence still deals 10", {
+  scenario("Kyubi's Judgement with no Essence still deals 200% of her Attack", {
     party: BANNER,
     setup: { hand: [], gauges: { kibane: 100 } },
     play: [{ ultimate: 'kibane' }],
-    expect: { enemyHp: [50] },
+    expect: { enemyHp: [600 - 30] },
   });
 
-  scenario("Kyubi's Judgement, Transcended: 12 per Essence", {
+  scenario("Kyubi's Judgement, Transcended: 240% of her Attack per Essence", {
     party: BANNER,
     enemies: [BIG, BIG],
     setup: { hand: ['kibane.the-ninth-tail'], resources: { essence: 2 }, gauges: { kibane: 65 } },
     play: [{ card: 'kibane.the-ninth-tail' }, { ultimate: 'kibane' }],
-    expect: { enemyHp: [9999 - 70, 9999 - 70], resources: { essence: 0 } },
+    // 30 + 36 × 5.
+    expect: { enemyHp: [9999 - 210, 9999 - 210], resources: { essence: 0 } },
   });
 
   scenario('Fox Lantern: 1 Essence, draw 1', {
@@ -378,7 +385,7 @@ describe('Kibane', () => {
     party: BANNER,
     setup: { hand: ['kibane.gauntlet-rake'] },
     play: [{ card: 'kibane.gauntlet-rake', target: 0 }],
-    expect: { enemyHp: [50], resources: { essence: 1 }, mana: 4 },
+    expect: { enemyHp: [600 - 30], resources: { essence: 1 }, mana: 4 },
   });
 });
 
@@ -465,7 +472,8 @@ describe('Hester', () => {
     party: BANNER,
     setup: { hand: ['hester.pitfall', 'virelle.strike'] },
     play: [{ card: 'hester.pitfall', target: 0 }, { card: 'virelle.strike', target: 0 }],
-    expect: { enemyHp: [60 - 18], mana: 4 },
+    // Virelle's 36 × 1.5.
+    expect: { enemyHp: [600 - 54], mana: 4 },
     check: ({ plays }) => expect(marks(plays[0]!.after)).toEqual([[['vulnerable', 2]]]),
   });
 
@@ -474,7 +482,7 @@ describe('Hester', () => {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['hester.tangle-line'] },
     play: [{ card: 'hester.tangle-line' }],
-    expect: { partyShield: 8, mana: 5 },
+    expect: { partyShield: 24, mana: 5 },
     check: ({ state }) => expect(marks(state)).toEqual([[['weak', 1]], [['weak', 1]]]),
   });
 });

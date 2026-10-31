@@ -73,7 +73,7 @@ export const pollenDrift = card({
 export const maelia = character({
   id: 'maelia', name: 'Maelia', title: 'Midwife of the Bloom', domain: 'flesh',
   role: 'support',
-  stats: { hp: 55, attack: 3, defense: 5 },
+  stats: { hp: 55, attack: 9, defense: 15 },
   cards: [strike, defense, ripenedWomb, swollenPod, budCutting],
   passive: {
     name: "Midwife's Hands", scope: 'combat',

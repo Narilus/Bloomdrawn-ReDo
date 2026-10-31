@@ -80,7 +80,7 @@ const snare = (vulnerableToo = false) => {
 // C3: Weighted Net costs 1 (docs/notes/banner-kits.md).
 export const weightedNetC3 = variant(weightedNet, 3, { cost: 1 });
 
-const STATS = { hp: 55, attack: 4, defense: 4 };
+const STATS = { hp: 55, attack: 12, defense: 12 };
 
 export const hester = character({
   id: 'hester', name: 'Hester', title: 'the Snare-Warden', domain: 'unbound',

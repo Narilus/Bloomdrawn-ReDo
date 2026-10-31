@@ -19,7 +19,7 @@ import { STARTER_PARTY } from '../testing/scenario.ts';
 // The launch statuses (DESIGN.md, docs/notes/m2-content.md). Damage over time on enemies lands at
 // the end of the party's turn, on the party after the enemy phase. Turn counts drop at the end of
 // the turns they matter on, except the turn they land in (owner, 19 Oct). Agathe's First Hymn
-// Tentacle (3 damage) hits at every end of turn.
+// Tentacle (9 damage) hits at every end of turn. The Hound bites for 31 and Leonora strikes for 33.
 
 const stunCard: CardDef = { id: 'test.stun', name: 'Stun', owner: 'leonora', cost: 0, target: 'chosenEnemy', effects: [applyStatus({ id: 'status.stun' }, 1)] };
 const delayCard: CardDef = { ...stunCard, id: 'test.delay', effects: [applyStatus({ id: 'status.delay' }, 1)] };
@@ -65,7 +65,7 @@ describe('Bleed', () => {
     hound(state).statuses.push({ status: 'status.bleed', stacks: 4 });
     hound(state).shield = 50;
     const after = run(state, endTurn).state;
-    // The Tentacle's 3 hits the Shield; Bleed's 4 goes straight to HP.
+    // The Tentacle's 9 hits the Shield; Bleed's 4 goes straight to HP.
     expect(hound(after).hp).toBe(HOUND_HP - 4);
     expect(hound(after).statuses).toEqual([{ status: 'status.bleed', stacks: 3 }]);
   });
@@ -76,7 +76,7 @@ describe('Bleed', () => {
     const { state: after, events } = run(state, endTurn);
     const types = events.map((e) => (e.type === 'damageDealt' ? `hit:${e.source}` : e.type));
     expect(types.indexOf('hit:party')).toBeGreaterThan(types.indexOf('enemyActed'));
-    expect(after.party.hp).toBe(210 - 12 - 1);
+    expect(after.party.hp).toBe(210 - 31 - 1);
     expect(after.party.statuses).toEqual([]);
   });
 });
@@ -87,8 +87,8 @@ describe('Poison', () => {
     state.party.statuses.push({ status: 'status.poison', stacks: 5 });
     state.party.shield = 14;
     const after = run(state, endTurn).state;
-    // Bite 12 leaves 2 Shield; Poison 5 takes it and 3 HP.
-    expect(after.party.hp).toBe(210 - 3);
+    // Bite 31 takes the 14 Shield and 17 HP; Poison 5 takes 5 more.
+    expect(after.party.hp).toBe(210 - 17 - 5);
     expect(after.party.statuses).toEqual([{ status: 'status.poison', stacks: 5 }]);
   });
 });
@@ -99,9 +99,10 @@ describe('Vulnerable and Weak', () => {
     hound(state).statuses.push({ status: 'status.vulnerable', stacks: 1 });
     const strike = hold(state, 'leonora.strike');
     const command: Command = { type: 'playCard', card: strike.uid, target: hound(state).id };
-    expect(previewCard(state, command, registry)?.find((p) => p.op === 'damage')?.amount).toBe(16);
+    // 33 × 1.5 is 49.5: 49.
+    expect(previewCard(state, command, registry)?.find((p) => p.op === 'damage')?.amount).toBe(49);
     const played = run(state, command).state;
-    expect(hound(played).hp).toBe(HOUND_HP - 16);
+    expect(hound(played).hp).toBe(HOUND_HP - 49);
     expect(hound(run(played, endTurn).state).statuses).toEqual([]);
   });
 
@@ -110,17 +111,17 @@ describe('Vulnerable and Weak', () => {
     state.party.statuses.push({ status: 'status.weak', stacks: 2 });
     const strike = hold(state, 'leonora.strike');
     const played = run(state, { type: 'playCard', card: strike.uid, target: hound(state).id }).state;
-    expect(hound(played).hp).toBe(HOUND_HP - 8); // 11 × 0.75, rounded down
+    expect(hound(played).hp).toBe(HOUND_HP - 24); // 33 × 0.75, rounded down
     const after = run(played, endTurn).state;
-    expect(hound(after).hp).toBe(HOUND_HP - 8 - 2); // the Tentacle's 3 × 0.75
+    expect(hound(after).hp).toBe(HOUND_HP - 24 - 6); // the Tentacle's 9 × 0.75
     expect(after.party.statuses).toEqual([{ status: 'status.weak', stacks: 1 }]);
   });
 
   it("Vulnerable on the party and Weak on the Hound change the Hound's shown and dealt damage alike", () => {
     // Both matter on the enemies' turn and count down at its end, so a single stack covers the bite.
     const cases = [
-      ['party', 1, 18],
-      ['hound', 1, 9],
+      ['party', 1, 46],
+      ['hound', 1, 23],
     ] as const;
     for (const [side, stacks, expected] of cases) {
       const state = begin();
@@ -138,11 +139,11 @@ describe('Vulnerable and Weak', () => {
     const vulnerable = hold(state, 'test.vulnerable');
     const marked = run(state, { type: 'playCard', card: vulnerable.uid, target: hound(state).id }).state;
     const strike = (s: CombatState) => run(s, { type: 'playCard', card: hold(s, 'leonora.strike').uid, target: hound(s).id }).state;
-    expect(HOUND_HP - hound(strike(marked)).hp).toBe(16);
+    expect(HOUND_HP - hound(strike(marked)).hp).toBe(49);
     // It landed this turn, so this turn's end doesn't count.
     const next = run(marked, endTurn).state;
     expect(hound(next).statuses).toEqual([{ status: 'status.vulnerable', stacks: 1 }]);
-    expect(hound(next).hp - hound(strike(next)).hp).toBe(16);
+    expect(hound(next).hp - hound(strike(next)).hp).toBe(49);
     expect(hound(run(next, endTurn).state).statuses).toEqual([]);
   });
 
@@ -150,9 +151,9 @@ describe('Vulnerable and Weak', () => {
     const state = begin();
     const weak = hold(state, 'test.weak');
     const marked = run(state, { type: 'playCard', card: weak.uid, target: hound(state).id }).state;
-    expect(previewIntent(marked, hound(marked).id, registry)[0]?.amount).toBe(9);
+    expect(previewIntent(marked, hound(marked).id, registry)[0]?.amount).toBe(23);
     const after = run(marked, endTurn).state;
-    expect(after.party.hp).toBe(210 - 9);
+    expect(after.party.hp).toBe(210 - 23);
     expect(hound(after).statuses).toEqual([]);
   });
 
@@ -169,11 +170,11 @@ describe('Vulnerable and Weak', () => {
   it("the enemies' turn is one moment: Vulnerable an enemy applies doesn't boost the enemies after it that turn", () => {
     const state = begin(['test.hexer', HOUND]);
     const houndOf = (s: CombatState) => s.enemies[1]!;
-    expect(previewIntent(state, houndOf(state).id, registry)[0]?.amount).toBe(12);
+    expect(previewIntent(state, houndOf(state).id, registry)[0]?.amount).toBe(31);
     const hexed = run(state, endTurn).state;
-    expect(210 - hexed.party.hp).toBe(12);
-    // From the next enemy turn it holds: Bristle's 6 becomes 9.
-    expect(previewIntent(hexed, houndOf(hexed).id, registry).find((p) => p.op === 'damage')?.amount).toBe(9);
+    expect(210 - hexed.party.hp).toBe(31);
+    // From the next enemy turn it holds: Bristle's 16 becomes 24.
+    expect(previewIntent(hexed, houndOf(hexed).id, registry).find((p) => p.op === 'damage')?.amount).toBe(24);
   });
 });
 
@@ -202,9 +203,9 @@ describe('Stun, Delay and Falter', () => {
     const card = hold(state, 'test.stun');
     const faltered = run(state, { type: 'playCard', card: card.uid, target: hound(state).id }).state;
     expect(hound(faltered).statuses).toEqual([{ status: 'status.falter', stacks: 1 }]);
-    expect(previewIntent(faltered, hound(faltered).id, registry)[0]?.amount).toBe(9);
+    expect(previewIntent(faltered, hound(faltered).id, registry)[0]?.amount).toBe(23);
     const after = run(faltered, endTurn).state;
-    expect(after.party.hp).toBe(210 - 9);
+    expect(after.party.hp).toBe(210 - 23);
     expect(hound(after).statuses).toEqual([]);
     expect(intentOf(hound(after), registry)?.name).toBe('Bristle');
   });

@@ -1,6 +1,6 @@
-fight 1: encounter.roots-and-smoke -> victory on turn 6, HP 171, gauges 30/40/20/65
+fight 1: encounter.roots-and-smoke -> victory on turn 3, HP 156, gauges 20/20/10/45
   offered relic.choir-bell, relic.cracked-reliquary, relic.brass-thimble; took relic.choir-bell
-fight 2: encounter.two-hounds -> victory on turn 5, HP 139, gauges 50/0/40/95
+fight 2: encounter.two-hounds -> victory on turn 2, HP 155, gauges 30/40/20/65
   offered relic.midwifes-shears, relic.cracked-reliquary, relic.brass-thimble; took relic.midwifes-shears
-fight 3: encounter.thorn-wall -> victory on turn 4, HP 131, gauges 0/55/85/20
-run won: HP 131, relics relic.choir-bell, relic.midwifes-shears
+fight 3: encounter.thorn-wall -> victory on turn 5, HP 58, gauges 85/95/65/20
+run won: HP 58, relics relic.choir-bell, relic.midwifes-shears

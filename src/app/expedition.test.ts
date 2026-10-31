@@ -35,6 +35,7 @@ import {
   startExpedition,
   turnBack,
   type Expedition,
+  type Growth,
 } from '../game/expedition.ts';
 import { bloomNodeDue } from '../game/bloom.ts';
 import { bank, NEW_PROFILE, runBanking } from '../game/profile.ts';
@@ -291,9 +292,9 @@ describe('card rewards', () => {
     expect(combat.members.map((m) => m.dupes)).toEqual([2, undefined, 5, undefined]);
     // C2 adds 5 to Virelle's 45 and to Kibane's 50.
     expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([210, 210]);
-    // Thorn Spur deals 3 + Attack: 6 at C0, 7 at C2.
+    // Thorn Spur deals 150% of Attack twice: 27 at C0 (Attack 18), 31 at C2 (21).
     const spur = { card: 'virelle.thorn-spur', owner: 'virelle' };
-    expect([runCardText(spur, registry), runCardText(spur, registry, {}, exp)]).toEqual(['Deal 9 damage twice.', 'Deal 10 damage twice.']);
+    expect([runCardText(spur, registry), runCardText(spur, registry, {}, exp)]).toEqual(['Deal 27 damage twice.', 'Deal 31 damage twice.']);
     // A run at C0 has no levels to keep, so its save is as before.
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('dupes');
   });
@@ -306,10 +307,10 @@ describe('card rewards', () => {
     expect([exp.dupes, exp.levels, exp.ascensions]).toEqual([{ virelle: 2 }, { virelle: 21 }, { virelle: 2 }]);
     const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
     expect(combat.members.map((m) => [m.dupes, m.level, m.ascensions])).toEqual([[2, 21, 2], [undefined, undefined, undefined], [undefined, undefined, undefined], [undefined, undefined, undefined]]);
-    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: C2's 50 HP becomes 190, its Attack 7 becomes 38,
-    // so Thorn Spur's 150% of Attack is 57.
+    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: C2's 50 HP becomes 190, its Attack 21 becomes 115,
+    // so Thorn Spur's 150% of Attack is 172.
     expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([190 + 50 + 50 + 55, 190 + 50 + 50 + 55]);
-    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 57 damage twice.');
+    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 172 damage twice.');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('levels');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('ascensions');
   });
@@ -360,13 +361,13 @@ describe('card rewards', () => {
   });
 
   it("an offered card shows its numbers with its owner's stats, and what depends on the fight as written", () => {
-    expect(runCardText({ card: 'flesh.grafting-knife', owner: 'maelia' }, registry)).toBe('Deal 7 damage. Apply 9 Bleed.');
+    expect(runCardText({ card: 'flesh.grafting-knife', owner: 'maelia' }, registry)).toBe('Deal 21 damage. Apply 27 Bleed.');
     expect(runCardText({ card: 'unbound.pocket-watch', owner: 'agathe' }, registry)).toBe('Draw 2 cards.');
-    expect(runCardText({ card: 'rapture.chalk-circle', owner: 'agathe' }, registry)).toBe('Gain 1 Tentacle. Gain 8 Shield.');
-    expect(runCardText({ card: 'anthe.long-vigil', owner: 'anthe' }, registry)).toBe('Ritual. Deal 10 + 6 × Essence damage to all enemies.');
+    expect(runCardText({ card: 'rapture.chalk-circle', owner: 'agathe' }, registry)).toBe('Gain 1 Tentacle. Gain 24 Shield.');
+    expect(runCardText({ card: 'anthe.long-vigil', owner: 'anthe' }, registry)).toBe('Ritual. Deal 30 + 18 × Essence damage to all enemies.');
     // No Strike has been played outside a fight, so Virelle's Strike shows its base damage.
     expect(runCardText({ card: 'virelle.strike', owner: 'virelle' }, registry, { charge: false })).toBe(
-      'Deal 12 damage. Consume 1 Embryo: apply 6 Bleed and add a free Fleeting copy to your hand.',
+      'Deal 36 damage. Consume 1 Embryo: apply 18 Bleed and add a free Fleeting copy to your hand.',
     );
   });
 });
@@ -529,7 +530,7 @@ describe("Symptoms and the run's deck", () => {
   it("the tile shows the card's text with the HP cost for the party as it stands", () => {
     const exp = { ...on({ kind: 'entrance' }), hp: 150 };
     expect(symptomText(exp, 'symptom.fevered-pulse', registry)).toBe('Exhaust. Gain 2 Mana. The party loses 6 HP (4% of current).');
-    expect(symptomText(exp, 'symptom.sweet-rot', registry)).toBe("Deal 14 damage. Every enemy and the party gain 2 Poison (1% of the party's max HP).");
+    expect(symptomText(exp, 'symptom.sweet-rot', registry)).toBe("Deal 42 damage. Every enemy and the party gain 2 Poison (1% of the party's max HP).");
   });
 });
 
@@ -721,8 +722,12 @@ describe('a whole Labyrinth run', () => {
     return best?.key;
   }
 
+  // The scripted player plays naively, so its party is out-levelled for Depth 1 (level 10, ascended
+  // once), letting the replay reach the shops, Events, Camps and the Boss since the M6 retune made
+  // Depth 1's elites a real threat (owner, 31 Oct).
+  const SCRIPTED: Growth = { levels: Object.fromEntries(PARTY.map((id) => [id, 10])), ascensions: Object.fromEntries(PARTY.map((id) => [id, 1])) };
   function play(seed: number, between = asIs): string[] {
-    let exp = startExpedition(seed, PARTY, M3_EXPEDITION, registry.motifs);
+    let exp = startExpedition(seed, PARTY, M3_EXPEDITION, registry.motifs, SCRIPTED);
     const left = new Set<string>();
     const log: string[] = [];
     const note = (line: string) => log.push(`${line} | HP ${exp.hp ?? 'full'}, clock ${exp.clock}, ${exp.obols} Obols`);

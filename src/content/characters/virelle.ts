@@ -96,7 +96,7 @@ export const openTheWoundC3 = variant(openTheWound, 3, {
   text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: the enemy loses HP equal to three times its Bleed.',
 });
 
-const STATS = { hp: 45, attack: 6, defense: 2 };
+const STATS = { hp: 45, attack: 18, defense: 6 };
 
 export const virelle = character({
   id: 'virelle', name: 'Virelle', title: 'the Open Wound', domain: 'flesh',

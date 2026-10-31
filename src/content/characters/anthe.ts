@@ -48,7 +48,7 @@ export const longVigil = card({
 export const anthe = character({
   id: 'anthe', name: 'Anthe', title: "the Sphinx's Vigil", domain: 'spirit',
   role: 'hybrid',
-  stats: { hp: 60, attack: 3, defense: 5 },
+  stats: { hp: 60, attack: 9, defense: 15 },
   cards: [strike, defense, theRiddleAnswered, votiveCandle, gildedThread],
   passive: {
     name: 'Vigil', scope: 'combat',

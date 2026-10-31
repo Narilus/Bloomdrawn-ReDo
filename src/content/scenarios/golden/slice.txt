@@ -14,7 +14,7 @@ handDrawn
 > playCard maelia.swollen-pod
   cardPlayed src=m1 card=c8
   resourceGained src=m1 embryo amt=3
-  statusApplied src=m1 tgt=e20 status.poison amt=8
+  statusApplied src=m1 tgt=e20 status.poison amt=24
   resourceGained src=m1 embryo amt=1
 > playCard maelia.bud-cutting
   cardPlayed src=m1 card=c9
@@ -25,23 +25,23 @@ handDrawn
   ultimateCharged src=m1 tgt=m3 amt=10
 > playCard agathe.defense
   cardPlayed src=m0 card=c1
-  shieldGained src=m0 tgt=party amt=9
-  shieldGained src=m0 tgt=party amt=9
+  shieldGained src=m0 tgt=party amt=27
+  shieldGained src=m0 tgt=party amt=27
   ultimateCharged src=m0 tgt=m0 amt=10
 > endTurn
   cleanup
   turnEnd
   resourceGained src=m2 essence amt=0
   volleyFired src=m0
-  damageDealt src=m0 tgt=e20 amt=3
-  damageTaken src=m0 tgt=e20 amt=3
+  damageDealt src=m0 tgt=e20 amt=9
+  damageTaken src=m0 tgt=e20 amt=9
   statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=8
-  damageTaken src=e20 tgt=e20 status.poison amt=8
+  damageDealt src=e20 tgt=e20 status.poison amt=24
+  damageTaken src=e20 tgt=e20 status.poison amt=24
   enemyPhaseStart
   enemyActed src=e20 tgt=party
-  damageDealt src=e20 tgt=party amt=12 abs=12
-  damageTaken src=e20 tgt=party amt=12 abs=12
+  damageDealt src=e20 tgt=party amt=31 abs=31
+  damageTaken src=e20 tgt=party amt=31 abs=31
   statusTick tgt=party
   turnStart
   cardDrawn card=c0
@@ -54,8 +54,8 @@ handDrawn
   cardDrawn src=m3 card=c13
 > playCard agathe.strike
   cardPlayed src=m0 tgt=e20 card=c0
-  damageDealt src=m0 tgt=e20 amt=10
-  damageTaken src=m0 tgt=e20 amt=10
+  damageDealt src=m0 tgt=e20 amt=30
+  damageTaken src=m0 tgt=e20 amt=30
   ultimateCharged src=m0 tgt=m0 amt=10
 > fireUltimate m0
   ultimateFired src=m0
@@ -66,33 +66,33 @@ handDrawn
   cardDrawn src=m3 card=c14
 > playCard anthe.defense
   cardPlayed src=m2 card=c11
-  shieldGained src=m2 tgt=party amt=10
+  shieldGained src=m2 tgt=party amt=30
   ultimateCharged src=m2 tgt=m2 amt=10
 > playCard leonora.defense
   cardPlayed src=m3 card=c16
-  shieldGained src=m3 tgt=party amt=8
+  shieldGained src=m3 tgt=party amt=24
   ultimateCharged src=m3 tgt=m3 amt=10
 > endTurn
   cleanup
   turnEnd
   resourceGained src=m2 essence amt=2
   volleyFired src=m0
-  damageDealt src=m0 tgt=e20 amt=3
-  damageTaken src=m0 tgt=e20 amt=3
-  damageDealt src=m0 tgt=e20 amt=3
-  damageTaken src=m0 tgt=e20 amt=3
-  damageDealt src=m0 tgt=e20 amt=3
-  damageTaken src=m0 tgt=e20 amt=3
-  damageDealt src=m0 tgt=e20 amt=3
-  damageTaken src=m0 tgt=e20 amt=3
+  damageDealt src=m0 tgt=e20 amt=9
+  damageTaken src=m0 tgt=e20 amt=9
+  damageDealt src=m0 tgt=e20 amt=9
+  damageTaken src=m0 tgt=e20 amt=9
+  damageDealt src=m0 tgt=e20 amt=9
+  damageTaken src=m0 tgt=e20 amt=9
+  damageDealt src=m0 tgt=e20 amt=9
+  damageTaken src=m0 tgt=e20 amt=9
   statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=8
-  damageTaken src=e20 tgt=e20 status.poison amt=8
+  damageDealt src=e20 tgt=e20 status.poison amt=24
+  damageTaken src=e20 tgt=e20 status.poison amt=24
   enemyPhaseStart
   enemyActed src=e20 tgt=party
-  shieldGained src=e20 tgt=e20 amt=10
-  damageDealt src=e20 tgt=party amt=6 abs=6
-  damageTaken src=e20 tgt=party amt=6 abs=6
+  shieldGained src=e20 tgt=e20 amt=7
+  damageDealt src=e20 tgt=party amt=16 abs=16
+  damageTaken src=e20 tgt=party amt=16 abs=16
   statusTick tgt=party
   turnStart
   cardDrawn card=c15
@@ -102,157 +102,7 @@ handDrawn
   handDrawn
 > playCard anthe.votive-candle
   cardPlayed src=m2 tgt=e20 card=c13
-  damageDealt src=m2 tgt=e20 amt=20 abs=10
-  damageTaken src=m2 tgt=e20 amt=20 abs=10
-> playCard leonora.strike
-  cardPlayed src=m3 tgt=e20 card=c15
-  damageDealt src=m3 tgt=e20 amt=11
-  damageTaken src=m3 tgt=e20 amt=11
-  ultimateCharged src=m3 tgt=m3 amt=10
-> fireUltimate m3
-  ultimateFired src=m3
-  resourceGained src=m3 mana amt=5
-> playCard leonora.call-in-the-debts
-  cardPlayed src=m3 card=c17
-  cardDrawn src=m3 card=c4
-  cardDrawn src=m3 card=c12
-  resourceGained src=m3 mana amt=2
-  transcended src=m3
-  ultimateCharged src=m3 tgt=m3 amt=35
-  cardExhausted src=m3 card=c17
-> playCard anthe.strike
-  cardPlayed src=m2 tgt=e20 card=c10
-  damageDealt src=m2 tgt=e20 amt=9
-  damageTaken src=m2 tgt=e20 amt=9
-  ultimateCharged src=m2 tgt=m2 amt=10
-> fireUltimate m2
-  ultimateFired src=m2
-  resourceGained src=m2 essence amt=0
-> playCard maelia.defense
-  cardPlayed src=m1 card=c6
-  shieldGained src=m1 tgt=party amt=10
-  ultimateCharged src=m1 tgt=m1 amt=10
-> playCard agathe.censer-rite
-  cardPlayed src=m0 card=c4
-  resourceGained src=m0 potency amt=2
-  volleyFired src=m0 card=c4
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-> endTurn
-  cleanup
-  turnEnd
-  resourceGained src=m2 essence amt=0
-  volleyFired src=m0
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  damageDealt src=m0 tgt=e20 amt=5
-  damageTaken src=m0 tgt=e20 amt=5
-  statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=8
-  damageTaken src=e20 tgt=e20 status.poison amt=8
-  enemyPhaseStart
-  enemyActed src=e20 tgt=party
-  damageDealt src=e20 tgt=party amt=18 abs=10
-  damageTaken src=e20 tgt=party amt=18 abs=10
-  statusTick tgt=party
-  turnStart
-  cardDrawn card=c2
-  deckShuffled
-  cardDrawn card=c7
-  cardDrawn card=c0
-  cardDrawn card=c1
-  cardDrawn card=c11
-  handDrawn
-> playCard agathe.the-choir-answers
-  cardPlayed src=m0 card=c2
-  resourceGained src=m0 tentacles amt=2
-  resourceGained src=m0 potency amt=1
-  transcended src=m0
-  ultimateCharged src=m0 tgt=m0 amt=35
-  cardExhausted src=m0 card=c2
-> playCard agathe.strike
-  cardPlayed src=m0 tgt=e20 card=c0
-  damageDealt src=m0 tgt=e20 amt=10
-  damageTaken src=m0 tgt=e20 amt=10
-  ultimateCharged src=m0 tgt=m0 amt=10
-> playCard agathe.defense
-  cardPlayed src=m0 card=c1
-  shieldGained src=m0 tgt=party amt=9
-  ultimateCharged src=m0 tgt=m0 amt=10
-> endTurn
-  cleanup
-  turnEnd
-  resourceGained src=m2 essence amt=0
-  volleyFired src=m0
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=8
-  damageTaken src=e20 tgt=e20 status.poison amt=8
-  enemyPhaseStart
-  enemyActed src=e20 tgt=party
-  damageDealt src=e20 tgt=party amt=12 abs=9
-  damageTaken src=e20 tgt=party amt=12 abs=9
-  statusTick tgt=party
-  turnStart
-  cardDrawn card=c15
-  cardDrawn card=c6
-  cardDrawn card=c9
-  cardDrawn card=c13
-  cardDrawn card=c18
-  handDrawn
-> playCard leonora.strike
-  cardPlayed src=m3 tgt=e20 card=c15
-  damageDealt src=m3 tgt=e20 amt=16 crit
-  damageTaken src=m3 tgt=e20 amt=16 crit
-  ultimateCharged src=m3 tgt=m3 amt=10
-> playCard maelia.defense
-  cardPlayed src=m1 card=c6
-  shieldGained src=m1 tgt=party amt=10
-  ultimateCharged src=m1 tgt=m1 amt=10
-> fireUltimate m1
-  ultimateFired src=m1
-  resourceConsumed src=m1 embryo amt=2
-  healed src=m1 tgt=party amt=6
-  shieldGained src=m1 tgt=party amt=8
-> playCard maelia.bud-cutting
-  cardPlayed src=m1 card=c9
-> endTurn
-  cleanup
-  turnEnd
-  resourceGained src=m2 essence amt=2
-  volleyFired src=m0
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  damageDealt src=m0 tgt=e20 amt=6
+  damageDealt src=m2 tgt=e20 amt=60 abs=7
   combatEnd victory
 
-final: {"turn":5,"outcome":"victory","party":{"hp":205,"maxHp":210,"shield":18,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":6,"embryo":0,"essence":4},"gauges":[55,0,0,45]}
+final: {"turn":3,"outcome":"victory","party":{"hp":210,"maxHp":210,"shield":0,"statuses":[]},"enemies":[0],"resources":{"tentacles":4,"potency":9,"embryo":2,"essence":2},"gauges":[0,80,90,90]}

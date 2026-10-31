@@ -3,6 +3,8 @@ import {
   apply,
   applyStatus,
   damage,
+  mul,
+  stat,
   intentOf,
   isAlive,
   previewIntent,
@@ -15,11 +17,12 @@ import {
 import { registry as gameRegistry } from '../registry.ts';
 import { STARTER_PARTY } from '../testing/scenario.ts';
 
-// The M4 Boss (docs/notes/m4-run.md): the Hollow Abbess, two bars of 500, and her Novices. The party mostly ends
-// turns here, so changes come from her (and Agathe's 3-damage First Hymn Tentacle at each end of turn).
+// The M4 Boss (docs/notes/m4-run.md): the Hollow Abbess, two bars of 1,025 (the M6 retune), and her Novices.
+// The party mostly ends turns here, so changes come from her (and Agathe's 9-damage First Hymn Tentacle at
+// each end of turn).
 
 const cards: CardDef[] = [
-  { id: 'test.break', name: 'Break', owner: 'leonora', cost: 0, target: 'chosenEnemy', effects: [damage(500)] },
+  { id: 'test.break', name: 'Break', owner: 'leonora', cost: 0, target: 'chosenEnemy', effects: [damage(mul(1000, stat('attack')))] },
   { id: 'test.expose', name: 'Expose', owner: 'leonora', cost: 0, target: 'chosenEnemy', effects: [applyStatus({ id: 'status.vulnerable' }, 2)] },
   { id: 'test.stun', name: 'Stun', owner: 'leonora', cost: 0, target: 'chosenEnemy', effects: [applyStatus({ id: 'status.stun' }, 1)] },
 ];
@@ -46,19 +49,19 @@ const shown = (state: CombatState) => previewIntent(state, abbess(state).id, reg
 describe('The Hollow Abbess, Sermon', () => {
   it('a huge anchor with room for two Novices in the side lanes; resists control', () => {
     const start = begin('encounter.hollow-abbess');
-    expect([start.enemySlots, abbess(start).slot, abbess(start).maxHp, abbess(start).phase]).toEqual([3, 0, 500, 0]);
+    expect([start.enemySlots, abbess(start).slot, abbess(start).maxHp, abbess(start).phase]).toEqual([3, 0, 1025, 0]);
     expect(registry.enemies['enemy.hollow-abbess']?.size).toBe('huge');
     expect(abbess(play(start, 'test.stun').state).statuses.map((s) => s.status)).toEqual(['status.falter']);
   });
 
-  it('Censer Sermon gives the party 2 Weak, Crozier Blow deals 26, Call the Faithful brings a Novice to each side lane', () => {
+  it('Censer Sermon gives the party 2 Weak, Crozier Blow deals 61, Call the Faithful brings a Novice to each side lane', () => {
     const start = begin('encounter.hollow-abbess');
     expect([intent(start), shown(start)]).toEqual(['Censer Sermon', ['applyStatus status.weak 2']]);
     const one = turns(start, 1);
     expect(one.party.statuses).toEqual([{ status: 'status.weak', stacks: 2 }]);
-    expect([intent(one), shown(one)]).toEqual(['Crozier Blow', ['damage 26']]);
+    expect([intent(one), shown(one)]).toEqual(['Crozier Blow', ['damage 61']]);
     const two = turns(one, 1);
-    expect(two.party.hp).toBe(210 - 26);
+    expect(two.party.hp).toBe(210 - 61);
     expect(intent(two)).toBe('Call the Faithful');
     const three = turns(two, 1);
     expect(three.enemies.filter(isAlive).map((e) => [e.enemy, e.slot])).toEqual([
@@ -71,33 +74,34 @@ describe('The Hollow Abbess, Sermon', () => {
 });
 
 describe('The Hollow Abbess, her second bar', () => {
-  it('a hit that empties her first bar brings up the second at 500; she takes nothing until Taking Root', () => {
+  it('a hit that empties her first bar brings up the second at 1,025; she takes nothing until Taking Root', () => {
     const exposed = play(play(begin('encounter.hollow-abbess'), 'test.break').state, 'test.expose').state;
-    expect(abbess(exposed)).toMatchObject({ hp: 500, maxHp: 500, phase: 1, rousing: true });
+    expect(abbess(exposed)).toMatchObject({ hp: 1025, maxHp: 1025, phase: 1, rousing: true });
     expect([intent(exposed), shown(exposed)]).toEqual(['Taking Root', ['clearStatuses 1']]);
     // Agathe's Tentacle passes her by at the end of the turn, and her Rouse clears the Vulnerable.
     const rooted = turns(exposed, 1);
-    expect(abbess(rooted)).toMatchObject({ hp: 500, statuses: [] });
+    expect(abbess(rooted)).toMatchObject({ hp: 1025, statuses: [] });
     expect(abbess(rooted).rousing).toBeUndefined();
     expect(rooted.party.hp).toBe(210);
   });
 
-  it('Rooted: Root Lash deals 13 twice, Grasping Roots gives 2 Vulnerable, Bloom Burst deals 44', () => {
+  it('Rooted: Root Lash deals 30 twice, Grasping Roots gives 2 Vulnerable, Bloom Burst deals 103', () => {
     const rooted = turns(play(begin('encounter.hollow-abbess'), 'test.break').state, 1);
-    expect([intent(rooted), shown(rooted)]).toEqual(['Root Lash', ['damage 13', 'damage 13']]);
+    expect([intent(rooted), shown(rooted)]).toEqual(['Root Lash', ['damage 30', 'damage 30']]);
     const lashed = turns(rooted, 1);
-    expect(lashed.party.hp).toBe(210 - 26);
+    expect(lashed.party.hp).toBe(210 - 60);
     expect([intent(lashed), shown(lashed)]).toEqual(['Grasping Roots', ['applyStatus status.vulnerable 2']]);
     const gripped = turns(lashed, 1);
     expect(gripped.party.statuses).toEqual([{ status: 'status.vulnerable', stacks: 2 }]);
-    // Bloom Burst is 44; the party's Vulnerable makes it 66.
-    expect([intent(gripped), shown(gripped)]).toEqual(['Bloom Burst', ['damage 66']]);
-    expect(intent(turns(gripped, 1))).toBe('Root Lash');
+    // Bloom Burst is 103; the party's Vulnerable makes it 154.5, dealt as 154.
+    expect([intent(gripped), shown(gripped)]).toEqual(['Bloom Burst', ['damage 154']]);
+    // An idle party falls to it now (60 + 154 of 210); healed, it lives to see her cycle come round.
+    expect(intent(turns({ ...gripped, party: { ...gripped.party, hp: 210 } }, 1))).toBe('Root Lash');
   });
 
-  it('at Fruiting she is Full Bloom: Blossoming, then Root Lash three times, Pollen Choir, Call the Faithful and Bloom Burst 51', () => {
+  it('at Fruiting she is Full Bloom: Blossoming, then Root Lash three times, Pollen Choir, Call the Faithful and Bloom Burst 119', () => {
     const start = begin('encounter.hollow-abbess-full-bloom');
-    expect([intent(start), abbess(start).maxHp]).toEqual(['Censer Sermon', 500]);
+    expect([intent(start), abbess(start).maxHp]).toEqual(['Censer Sermon', 1025]);
     const broken = play(start, 'test.break').state;
     expect(intent(broken)).toBe('Blossoming');
     let state = turns(broken, 1);
@@ -109,10 +113,10 @@ describe('The Hollow Abbess, her second bar', () => {
       state = { ...next, party: { ...next.party, statuses: [], hp: 210 } };
     }
     expect(seen).toEqual([
-      ['Root Lash', ['damage 13', 'damage 13', 'damage 13']],
+      ['Root Lash', ['damage 30', 'damage 30', 'damage 30']],
       ['Pollen Choir', ['applyStatus status.weak 2', 'applyStatus status.vulnerable 2']],
       ['Call the Faithful', ['summon 2']],
-      ['Bloom Burst', ['damage 51']],
+      ['Bloom Burst', ['damage 119']],
     ]);
   });
 
@@ -127,17 +131,17 @@ describe("The Abbess's Novices", () => {
   const called = () => turns(begin('encounter.hollow-abbess'), 3);
   const novices = (state: CombatState) => state.enemies.filter((e) => e.enemy === 'enemy.root-sworn-novice');
 
-  it('Kneeling Prayer shields every enemy, the Abbess included; Bitter Incense leaves the party Vulnerable; Thorn Rosary deals 9', () => {
+  it('Kneeling Prayer shields every enemy, the Abbess included; Bitter Incense leaves the party Vulnerable; Thorn Rosary deals 21', () => {
     const start = called();
-    expect(novices(start).map((e) => e.hp)).toEqual([80, 80]);
+    expect(novices(start).map((e) => e.hp)).toEqual([165, 165]);
     const prayed = turns(start, 1);
-    // Two Novices pray: 12 Shield each to every enemy.
-    expect(prayed.enemies.map((e) => e.shield)).toEqual([24, 24, 24]);
+    // Two Novices pray: 25 Shield each to every enemy.
+    expect(prayed.enemies.map((e) => e.shield)).toEqual([50, 50, 50]);
     const incensed = turns(prayed, 1);
     expect(incensed.party.statuses).toContainEqual({ status: 'status.vulnerable', stacks: 2 });
     const before = incensed.party.hp;
     const rosary = turns(incensed, 1);
-    // Censer Sermon's turn: the Abbess only applies Weak, so the party loses the Novices' 9 each, raised by Vulnerable.
-    expect(before - rosary.party.hp).toBe(2 * 13); // 9 × 1.5, rounded down
+    // Censer Sermon's turn: the Abbess only applies Weak, so the party loses the Novices' 21 each, raised by Vulnerable.
+    expect(before - rosary.party.hp).toBe(2 * 31); // 21 × 1.5, rounded down
   });
 });

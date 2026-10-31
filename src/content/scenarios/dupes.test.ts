@@ -5,10 +5,11 @@ import { scenario } from '../testing/scenario.ts';
 
 // The banner four's dupe levels (docs/notes/banner-kits.md, reviewed by the owner 25 Oct), one
 // scenario or more per level. A level holds every level below it, so each scenario sets the one it
-// tests and leans on the rest only where it says so. The party is one per Domain: Virelle (Attack 6,
-// Defense 2), Isadora (5, 3), Kibane (5, 3) and Hester (4, 4), 200 HP at C0. Mana starts at 6. Card
-// numbers are ratios of her stats (docs/notes/m6-scaling.md), so C2's raised stats raise them all.
-// Rapture's damage per hit starts at 80% of the party's average Attack: 4 (5.25 with Isadora at C2, 4.2).
+// tests and leans on the rest only where it says so. The party is one per Domain: Virelle (Attack 18,
+// Defense 6), Isadora (15, 9), Kibane (15, 9) and Hester (12, 12), 200 HP at C0, against 600-HP
+// training dummies. Mana starts at 6. Card numbers are ratios of her stats (docs/notes/m6-scaling.md),
+// so C2's raised stats (+3 Attack, +3 Defense) raise them all. Rapture's damage per hit starts at 80%
+// of the party's average Attack: 12 (12.6 with Isadora at C2).
 const BANNER = ['virelle', 'isadora', 'kibane', 'hester'];
 const DUMMY = 'enemy.training-dummy';
 const BIG = 'enemy.practice-dummy';
@@ -21,17 +22,17 @@ const manaSpent = (play: { before: CombatState; after: CombatState }) => play.be
 
 describe('C2: +10% HP, rounded, and +1 Attack and +1 Defense, for everyone', () => {
   const HP: Record<string, number> = { virelle: 45, isadora: 50, kibane: 50, hester: 55 };
-  // Strike and Defense at C2's stats: Virelle 200% of Attack 7 and 350% of Defense 3; Isadora and
-  // Kibane 220% of 6 and 267% of 4; Hester 250% of 5 and 225% of 5; each rounded down.
-  const SHIELD: Record<string, number> = { virelle: 10, isadora: 10, kibane: 10, hester: 11 };
-  const STRIKE: Record<string, number> = { virelle: 14, isadora: 13, kibane: 13, hester: 12 };
+  // Strike and Defense at C2's stats: Virelle 200% of Attack 21 and 350% of Defense 9; Isadora and
+  // Kibane 220% of 18 and 267% of 12; Hester 250% of 15 and 225% of 15; each rounded down.
+  const SHIELD: Record<string, number> = { virelle: 31, isadora: 32, kibane: 32, hester: 33 };
+  const STRIKE: Record<string, number> = { virelle: 42, isadora: 39, kibane: 39, hester: 37 };
   for (const who of BANNER) {
     scenario(`${who} at C2: Strike and Defense read her raised Attack and Defense, and the party has her extra HP`, {
       party: BANNER,
       dupes: { [who]: 2 },
       setup: { hand: [`${who}.strike`, `${who}.defense`] },
       play: [{ card: `${who}.strike`, target: 0 }, { card: `${who}.defense` }],
-      expect: { enemyHp: [60 - STRIKE[who]!], partyShield: SHIELD[who]!, partyHp: 200 - HP[who]! + Math.round(HP[who]! * 1.1) },
+      expect: { enemyHp: [600 - STRIKE[who]!], partyShield: SHIELD[who]!, partyHp: 200 - HP[who]! + Math.round(HP[who]! * 1.1) },
       check: ({ state }) => expect(state.party.maxHp).toBe(200 - HP[who]! + Math.round(HP[who]! * 1.1)),
     });
   }
@@ -52,8 +53,8 @@ describe('Virelle', () => {
     dupes: { virelle: 3 },
     setup: { hand: ['virelle.suture-cut', 'virelle.open-the-wound-c3'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.open-the-wound-c3', target: 0 }],
-    // With C2's Attack 7. Suture Cut: 10 damage and 10 Bleed (150% each), and C1's 2 Embryo. Open the Wound: 11 damage (167%), then 3 × 10.
-    expect: { enemyHp: [60 - 10 - 11 - 30], resources: { embryo: 0 } },
+    // With C2's Attack 21. Suture Cut: 31 damage and 31 Bleed (150% each), and C1's 2 Embryo. Open the Wound: 35 damage (167%), then 3 × 31.
+    expect: { enemyHp: [600 - 31 - 35 - 93], resources: { embryo: 0 } },
     check: ({ state }) => {
       const cards = [...state.piles.draw, ...state.piles.hand, ...state.piles.discard].map((c) => c.card);
       expect([cards.includes('virelle.open-the-wound'), cards.includes('virelle.open-the-wound-c3')]).toEqual([false, true]);
@@ -66,9 +67,9 @@ describe('Virelle', () => {
     enemies: [BIG],
     setup: { hand: [], gauges: { virelle: 100 } },
     play: [{ ultimate: 'virelle' }],
-    // 150% of Attack 7 (C2) a hit, 10, and 17% of it in Bleed, 1.
-    expect: { enemyHp: [BIG_HP - 7 * 10] },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 7]]]),
+    // 150% of Attack 21 (C2) a hit, 31, and 17% of it in Bleed, 3.
+    expect: { enemyHp: [BIG_HP - 7 * 31] },
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 7 * 3]]]),
   });
 
   scenario('C4: Transcended, Thousand Cuts hits 9 times', {
@@ -77,9 +78,9 @@ describe('Virelle', () => {
     enemies: [BIG],
     setup: { hand: ['virelle.thorn-spur-bloom'], gauges: { virelle: 65 } },
     play: [{ card: 'virelle.thorn-spur-bloom' }, { ultimate: 'virelle' }],
-    // Thorn-Spur Bloom's Bleed is 150% of Attack 7: 10.
-    expect: { enemyHp: [BIG_HP - 9 * 10] },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 10 + 9]]]),
+    // Thorn-Spur Bloom's Bleed is 150% of Attack 21: 31.
+    expect: { enemyHp: [BIG_HP - 9 * 31] },
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 31 + 9 * 3]]]),
   });
 
   scenario('C5: Bleed on enemies deals its damage at end of turn and keeps every stack', {
@@ -88,9 +89,9 @@ describe('Virelle', () => {
     enemies: [BIG, BIG],
     setup: { hand: ['virelle.suture-cut', 'virelle.thorn-spur-bloom'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.thorn-spur-bloom' }, { endTurn: true }, { endTurn: true }],
-    // Suture Cut 10 damage (Attack 7, C2); Bleed 20 and 10 (10 from each card) tick twice each, staying put.
-    expect: { enemyHp: [BIG_HP - 10 - 20 - 20, BIG_HP - 10 - 10] },
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 20]], [['bleed', 10]]]),
+    // Suture Cut 31 damage (Attack 21, C2); Bleed 62 and 31 (31 from each card) tick twice each, staying put.
+    expect: { enemyHp: [BIG_HP - 31 - 62 - 62, BIG_HP - 31 - 31] },
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 62]], [['bleed', 31]]]),
   });
 
   scenario('C4, for comparison: Bleed still loses a stack each tick', {
@@ -99,7 +100,7 @@ describe('Virelle', () => {
     enemies: [BIG],
     setup: { hand: ['virelle.suture-cut'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { endTurn: true }],
-    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 9]]]),
+    check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 30]]]),
   });
 });
 
@@ -109,8 +110,8 @@ describe('Isadora', () => {
     dupes: { isadora: 1 },
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 1 } },
     play: [{ card: 'isadora.ecstatic-spin' }],
-    // Damage per hit starts at 4, and Rapt (40% of Attack 5) answers once the card has resolved, as at C0.
-    expect: { resources: { potency: 6 }, enemyHp: [60 - 4 - 4] },
+    // Damage per hit starts at 12, and Rapt (40% of Attack 15) answers once the card has resolved, as at C0.
+    expect: { resources: { potency: 18 }, enemyHp: [600 - 12 - 12] },
   });
 
   scenario('C3: Ecstatic Spin costs 3', {
@@ -126,7 +127,7 @@ describe('Isadora', () => {
     dupes: { isadora: 4 },
     setup: { hand: [], gauges: { isadora: 100 } },
     play: [{ ultimate: 'isadora' }, { endTurn: true }],
-    expect: { resources: { tentacles: 2 }, enemyHp: [60 - 2 * 4 * 2] },
+    expect: { resources: { tentacles: 2 }, enemyHp: [600 - 2 * 12 * 2] },
   });
 
   scenario('C4: Transcended, the 2 Tentacles come before its volley, which hits twice', {
@@ -135,8 +136,8 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.the-veil-torn'], gauges: { isadora: 65 } },
     play: [{ card: 'isadora.the-veil-torn' }, { ultimate: 'isadora' }],
-    // The Veil Torn: 3 Tentacles and a volley at 4.2 a hit (12), then Rapt's 40% of Attack 6 makes it 6.6. The ultimate: 2 more, then 5 × 6 twice.
-    expect: { resources: { tentacles: 5 }, enemyHp: [BIG_HP - 12 - 60] },
+    // The Veil Torn: 3 Tentacles and a volley at 12.6 a hit (36), then Rapt's 40% of Attack 18 makes it 19.8. The ultimate: 2 more, then 5 × 19 twice.
+    expect: { resources: { tentacles: 5 }, enemyHp: [BIG_HP - 36 - 190] },
   });
 
   scenario('C5: at the end of each turn, Tentacles attack twice', {
@@ -144,7 +145,8 @@ describe('Isadora', () => {
     dupes: { isadora: 5 },
     setup: { hand: [], resources: { tentacles: 2 } },
     play: [{ endTurn: true }],
-    expect: { enemyHp: [60 - 2 * 4 * 2], resources: { potency: 4.2 } },
+    expect: { enemyHp: [600 - 2 * 12 * 2] },
+    check: ({ state }) => expect(state.resources['potency']).toBeCloseTo(12.6),
   });
 
   scenario('C4, for comparison: once', {
@@ -152,7 +154,7 @@ describe('Isadora', () => {
     dupes: { isadora: 4 },
     setup: { hand: [], resources: { tentacles: 2 } },
     play: [{ endTurn: true }],
-    expect: { enemyHp: [60 - 2 * 4] },
+    expect: { enemyHp: [600 - 2 * 12] },
   });
 });
 
@@ -165,14 +167,14 @@ describe('Kibane', () => {
     expect: { gauges: { kibane: 15 } },
   });
 
-  // At C2's Attack 6.
+  // At C2's Attack 18: 18 × (0.8 + 2.4 × 3).
   scenario('C3: Foxfire Rite deals 80% of her Attack plus 240% per Essence', {
     party: BANNER,
     dupes: { kibane: 3 },
     setup: { hand: ['kibane.foxfire-rite-c3'], resources: { essence: 3 } },
     play: [{ card: 'kibane.foxfire-rite-c3', target: 0 }],
-    expect: { enemyHp: [60 - 48] },
-    check: ({ plays }) => expect(describeCardLive(plays[0]!.before.piles.hand[0]!, plays[0]!.before, registry, { keywords: false })).toBe('Deal 48 damage.'),
+    expect: { enemyHp: [600 - 144] },
+    check: ({ plays }) => expect(describeCardLive(plays[0]!.before.piles.hand[0]!, plays[0]!.before, registry, { keywords: false })).toBe('Deal 144 damage.'),
   });
 
   scenario("C4: Kyubi's Judgement deals 200% of her Attack plus 200% per Essence consumed to every enemy", {
@@ -181,8 +183,8 @@ describe('Kibane', () => {
     enemies: [BIG, BIG],
     setup: { hand: [], resources: { essence: 5 }, gauges: { kibane: 100 } },
     play: [{ ultimate: 'kibane' }],
-    // (2 + 2 × 5) × Attack 6.
-    expect: { enemyHp: [BIG_HP - 72, BIG_HP - 72], resources: { essence: 0 } },
+    // (2 + 2 × 5) × Attack 18.
+    expect: { enemyHp: [BIG_HP - 216, BIG_HP - 216], resources: { essence: 0 } },
   });
 
   scenario('C4: Transcended, 200% plus 280% per Essence consumed', {
@@ -191,7 +193,7 @@ describe('Kibane', () => {
     enemies: [BIG],
     setup: { hand: ['kibane.the-ninth-tail'], resources: { essence: 2 }, gauges: { kibane: 65 } },
     play: [{ card: 'kibane.the-ninth-tail' }, { ultimate: 'kibane' }],
-    expect: { enemyHp: [BIG_HP - (2 + 2.8 * 5) * 6] },
+    expect: { enemyHp: [BIG_HP - (2 + 2.8 * 5) * 18] },
   });
 
   scenario("C5: after Kyubi's Judgement, half the Essence consumed comes back, rounded down", {
@@ -200,7 +202,7 @@ describe('Kibane', () => {
     enemies: [BIG],
     setup: { hand: [], resources: { essence: 5 }, gauges: { kibane: 100 } },
     play: [{ ultimate: 'kibane' }],
-    expect: { enemyHp: [BIG_HP - 72], resources: { essence: 2 } },
+    expect: { enemyHp: [BIG_HP - 216], resources: { essence: 2 } },
   });
 });
 
