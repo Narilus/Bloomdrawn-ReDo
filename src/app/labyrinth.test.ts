@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { registry } from '../content/registry.ts';
 import type { Board, TileKind } from '../game/board.ts';
 import { hexKey, neighbours, parseHex } from '../game/hex.ts';
-import { findStranding, generateBoard, M3_LABYRINTH } from '../game/labyrinth.ts';
+import { DEPTH_MAX } from '../game/depth.ts';
+import { findStranding, generateBoard, M3_LABYRINTH, poolsAt } from '../game/labyrinth.ts';
 import { parseMotif } from '../game/motif.ts';
+import { battleArt } from '../stage/art.ts';
 
 // The M3 board with the real motifs (src/content/motifs/). Here because the game layer may not
 // import content.
@@ -74,6 +76,30 @@ describe('the M3 Labyrinth', () => {
       }
       const elites = Object.values(board.tiles).filter((t) => t.kind === 'elite').map((t) => t.content);
       expect(new Set(elites).size).toBe(elites.length);
+    }
+  });
+
+  it('every depth draws at least four fights, two elites and a Boss, each of its tier, and every enemy in them has a sprite', () => {
+    /** The enemies an encounter fields: its own, its Fruiting form's, and whatever they summon. */
+    const fielded = (id: string): string[] => {
+      const encounter = registry.encounters[id]!;
+      const ids = [...encounter.enemies.map((e) => (typeof e === 'string' ? e : e.enemy)), ...(encounter.fruiting ? fielded(encounter.fruiting) : [])];
+      const summoned = ids.flatMap((enemy) => {
+        const def = registry.enemies[enemy]!;
+        const intents = [...(def.intents ?? []), ...(def.phases ?? []).flatMap((p) => [p.rouse, ...p.intents])];
+        return intents.flatMap((i) => i.effects).flatMap((call) => ('enemy' in call && call.op === 'summon' ? [String(call.enemy)] : []));
+      });
+      return [...ids, ...summoned];
+    };
+    for (let depth = 1; depth <= DEPTH_MAX; depth++) {
+      const pools = poolsAt(M3_LABYRINTH.bands, depth);
+      expect([pools.fight.length >= 4, pools.elite.length >= 2, pools.boss.length >= 1], `Depth ${depth}`).toEqual([true, true, true]);
+      for (const tier of ['fight', 'elite', 'boss'] as const) {
+        for (const id of pools[tier]) {
+          expect(registry.encounters[id]?.tier, `${id} at Depth ${depth}`).toBe(tier === 'fight' ? 'normal' : tier);
+          for (const enemy of fielded(id)) expect(battleArt[enemy], `${enemy}'s sprite`).toBeDefined();
+        }
+      }
     }
   });
 

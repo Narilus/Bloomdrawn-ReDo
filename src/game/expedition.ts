@@ -23,7 +23,7 @@ import {
 } from '../engine/index.ts';
 import { BLOOM_NODES, bloomNodeDue, bloomTick, reached, spawnBloomNode, stageOf, type BloomStage } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
-import { generateBoard, M3_LABYRINTH, type LabyrinthDef } from './labyrinth.ts';
+import { generateBoard, M3_LABYRINTH, poolsAt, type LabyrinthDef } from './labyrinth.ts';
 
 // A run through the Labyrinth (docs/notes/m3-labyrinth.md, m4-run.md): the party walks the board,
 // fights where it stops on a fight, and wins at the Boss. Party HP, ultimate gauges, relics and the
@@ -176,7 +176,7 @@ export function startExpedition(
     ...(Object.keys(levels).length > 0 && { levels }),
     ...(Object.keys(ascensions).length > 0 && { ascensions }),
     ...(depth > 1 && { depth }),
-    board: generateBoard(seed, def.board, motifs),
+    board: generateBoard(seed, def.board, motifs, depth),
     phase: 'map',
     hp: null,
     gauges: party.map(() => 0),
@@ -249,7 +249,7 @@ function sow(exp: Expedition, steps: number, def: ExpeditionDef): void {
     exp.bloomDue = due;
     return;
   }
-  const board = spawnBloomNode(exp.board, exp.rng, 'bloom', { fight: def.board.encounters.fight, symptoms: def.board.symptoms });
+  const board = spawnBloomNode(exp.board, exp.rng, 'bloom', { fight: poolsAt(def.board.bands, exp.depth).fight, symptoms: def.board.symptoms });
   if (board) exp.board = board;
   exp.bloomDue = board ? bloomNodeDue(exp.rng, 'bloom') : 0;
 }
@@ -661,7 +661,7 @@ const titleCase = (word: string) => word.charAt(0).toUpperCase() + word.slice(1)
 
 /** One Bloom clock tick, and what the new count does to the board. */
 function tick(exp: Expedition, def: ExpeditionDef): void {
-  exp.board = bloomTick(exp.board, exp.clock, exp.rng, 'bloom', def.board.encounters);
+  exp.board = bloomTick(exp.board, exp.clock, exp.rng, 'bloom', poolsAt(def.board.bands, exp.depth));
   exp.clock += 1;
 }
 

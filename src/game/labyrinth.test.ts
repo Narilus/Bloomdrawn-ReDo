@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { MotifDef } from '../engine/index.ts';
 import { createBoard, type Tile } from './board.ts';
 import { hexKey } from './hex.ts';
-import { findStranding, generateBoard, type LabyrinthDef } from './labyrinth.ts';
+import { findStranding, generateBoard, poolsAt, type LabyrinthDef } from './labyrinth.ts';
 import { parseMotif, rotate } from './motif.ts';
 
 const row = (...kinds: Tile['kind'][]) => Object.fromEntries(kinds.map((kind, q) => [hexKey({ q, r: 0 }), { kind }]));
@@ -58,7 +58,7 @@ describe('generating a board', () => {
   const def: LabyrinthDef = {
     route: [['start'], ['middle'], ['end']],
     sides: [['nook']],
-    encounters: { fight: ['f'], elite: [], boss: ['b'] },
+    bands: [{ fight: ['f'], elite: [], boss: ['b'] }],
     events: [],
     symptoms: [],
   };
@@ -74,5 +74,34 @@ describe('generating a board', () => {
 
   it('refuses motifs that can only strand the player', () => {
     expect(() => generateBoard(7, { ...def, route: [['start'], ['trap'], ['end']] }, motifs)).toThrow(/No valid board/);
+  });
+});
+
+describe('pools by depth band', () => {
+  const band = (n: number) => ({ fight: [`f${n}`], elite: [`e${n}`], boss: [`b${n}`] });
+  const bands = [band(1), band(2), band(3)];
+
+  it('a depth draws from its own band and the one before', () => {
+    expect(poolsAt(bands, 1)).toEqual(band(1));
+    expect(poolsAt(bands, 10)).toEqual(band(1));
+    expect(poolsAt(bands, 11)).toEqual({ fight: ['f1', 'f2'], elite: ['e1', 'e2'], boss: ['b1', 'b2'] });
+    expect(poolsAt(bands, 23)).toEqual({ fight: ['f2', 'f3'], elite: ['e2', 'e3'], boss: ['b2', 'b3'] });
+  });
+
+  it('a depth past the last band draws as the last', () => {
+    expect(poolsAt(bands, 50)).toEqual(poolsAt(bands, 30));
+    expect(poolsAt([band(1)], 37)).toEqual(band(1));
+  });
+
+  it('the board fills its fights from the depth\'s pools', () => {
+    const motifs: Record<string, MotifDef> = {
+      start: { id: 'start', place: 'start', rows: ['E o X'] },
+      middle: { id: 'middle', place: 'route', rows: ['E F . X'] },
+      end: { id: 'end', place: 'end', rows: ['E . B'] },
+    };
+    const def: LabyrinthDef = { route: [['start'], ['middle'], ['end']], sides: [], bands, events: [], symptoms: [] };
+    const contents = (depth: number) => Object.values(generateBoard(7, def, motifs, depth).tiles).flatMap((t) => (t.content ? [t.content] : []));
+    expect(contents(1).sort()).toEqual(['b1', 'f1']);
+    expect(contents(25).every((id) => /[23]$/.test(id))).toBe(true);
   });
 });

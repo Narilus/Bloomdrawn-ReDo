@@ -623,7 +623,7 @@ describe('Bloom nodes', () => {
       expect(q, `seed ${seed}`).toBeGreaterThan(5);
       expect(q).toBeLessThanOrEqual(8);
       const tile = sown.board.tiles[node!]!;
-      expect(M3_EXPEDITION.board.encounters.fight).toContain(tile.content);
+      expect(M3_EXPEDITION.board.bands[0]!.fight).toContain(tile.content);
       expect(M3_EXPEDITION.board.symptoms).toContain(tile.card);
     }
     // Nothing ahead but the Boss: it goes behind.

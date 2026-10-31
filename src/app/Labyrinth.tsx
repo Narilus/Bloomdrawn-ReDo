@@ -67,7 +67,7 @@ const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.
 function defFromUrl(): ExpeditionDef {
   const encounters = (params().get('encounters')?.split(',') ?? []).filter((id) => registry.encounters[id]);
   if (encounters.length === 0) return M3_EXPEDITION;
-  return { ...M3_EXPEDITION, board: { ...M3_EXPEDITION.board, encounters: { fight: encounters, elite: encounters, boss: encounters } } };
+  return { ...M3_EXPEDITION, board: { ...M3_EXPEDITION.board, bands: [{ fight: encounters, elite: encounters, boss: encounters }] } };
 }
 export const DEF = defFromUrl();
 const SEED = Number(params().get('seed')) || undefined;

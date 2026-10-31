@@ -1,5 +1,6 @@
 import { createStreams, nextInt, shuffleInPlace, type MotifDef, type Streams } from '../engine/index.ts';
 import { createBoard, type Board, type Tile, type TileKind } from './board.ts';
+import { DEPTH_BAND } from './depth.ts';
 import { hexKey, neighbours, parseHex, type Hex } from './hex.ts';
 import { parseMotif, rotate, type ParsedMotif, type Role } from './motif.ts';
 
@@ -17,12 +18,29 @@ export interface LabyrinthDef {
   route: string[][];
   /** Side motifs, each drawn from its pool and hung off a free socket. */
   sides: string[][];
-  /** Encounters for each fight role; a pool is drawn without repeats while it lasts. */
-  encounters: { fight: string[]; elite: string[]; boss: string[] };
+  /**
+   * The encounters each band of ten depths adds, from Depth 1 (docs/notes/bestiary.md; owner, 31 Oct).
+   * A depth draws from its own band and the one before; a depth past the last band draws as the last.
+   */
+  bands: Pools[];
   /** Events for event tiles, drawn the same way. */
   events: string[];
   /** Symptom cards for Symptom tiles, and for Events and Bloom nodes that offer one. */
   symptoms: string[];
+}
+
+/** Encounters for each fight role; a pool is drawn without repeats while it lasts. */
+export interface Pools {
+  fight: string[];
+  elite: string[];
+  boss: string[];
+}
+
+/** The pools a run at this depth draws from: its band's and the band before's. */
+export function poolsAt(bands: readonly Pools[], depth = 1): Pools {
+  const band = Math.min(bands.length, Math.ceil(Math.max(1, depth) / DEPTH_BAND));
+  const used = bands.slice(Math.max(0, band - 2), band);
+  return { fight: used.flatMap((b) => b.fight), elite: used.flatMap((b) => b.elite), boss: used.flatMap((b) => b.boss) };
 }
 
 const MAX_ATTEMPTS = 200;
@@ -47,7 +65,7 @@ const KIND_OF: Readonly<Record<Role, TileKind>> = {
 };
 
 /** Builds a board from the seed. Throws if no valid board turns up, which means the motifs need fixing. */
-export function generateBoard(seed: number, def: LabyrinthDef, motifs: Readonly<Record<string, MotifDef>>): Board {
+export function generateBoard(seed: number, def: LabyrinthDef, motifs: Readonly<Record<string, MotifDef>>, depth = 1): Board {
   const rng = createStreams(seed, BOARD_STREAMS);
   const parsed = new Map<string, ParsedMotif>();
   const motif = (id: string) => {
@@ -61,7 +79,7 @@ export function generateBoard(seed: number, def: LabyrinthDef, motifs: Readonly<
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const roles = layOut(def, motif, rng);
     if (!roles) continue;
-    const board = createBoard(fill(roles, def, rng), '0,0');
+    const board = createBoard(fill(roles, def, poolsAt(def.bands, depth), rng), '0,0');
     if (!findStranding(board)) return board;
   }
   throw new Error(`No valid board in ${MAX_ATTEMPTS} attempts from seed ${seed}.`);
@@ -126,11 +144,11 @@ function tryPlace(m: ParsedMotif, at: Hex, turns: number, placed: Map<string, Ro
 }
 
 /** Turns roles into tiles, filling fights, elites, the Boss and Events from their pools, and each Symptom with its card. */
-function fill(roles: Map<string, Role>, def: LabyrinthDef, rng: Streams<BoardStream>): Record<string, Tile> {
+function fill(roles: Map<string, Role>, def: LabyrinthDef, encounters: Pools, rng: Streams<BoardStream>): Record<string, Tile> {
   const draws: Partial<Record<Role, () => string | undefined>> = {
-    fight: drawer(def.encounters.fight, rng),
-    elite: drawer(def.encounters.elite, rng),
-    boss: drawer(def.encounters.boss, rng),
+    fight: drawer(encounters.fight, rng),
+    elite: drawer(encounters.elite, rng),
+    boss: drawer(encounters.boss, rng),
     event: drawer(def.events, rng),
   };
   const symptoms = drawer(def.symptoms, rng);
@@ -222,11 +240,13 @@ function reaches(from: string, to: string, open: (key: string) => boolean): bool
 export const M3_LABYRINTH: LabyrinthDef = {
   route: [['motif.start-gate'], ['motif.fork-elite', 'motif.fork-elite-event'], ['motif.temptation-loop'], ['motif.boss-approach']],
   sides: [['motif.elite-branch'], ['motif.camp-nook'], ['motif.event-alcove'], ['motif.grove-fight', 'motif.grove-stall']],
-  encounters: {
-    fight: ['encounter.hound', 'encounter.roots-and-smoke', 'encounter.pods-and-lantern', 'encounter.two-hounds'],
-    elite: ['encounter.thorn-wall', 'encounter.hound-mother'],
-    boss: ['encounter.hollow-abbess'],
-  },
+  bands: [
+    {
+      fight: ['encounter.hound', 'encounter.roots-and-smoke', 'encounter.pods-and-lantern', 'encounter.two-hounds'],
+      elite: ['encounter.thorn-wall', 'encounter.hound-mother'],
+      boss: ['encounter.hollow-abbess'],
+    },
+  ],
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
   symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],
 };
