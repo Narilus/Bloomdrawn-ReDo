@@ -240,7 +240,7 @@ export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
       className={`enemy-plate plaque${aimed ? ' aimed' : ''}${enemy.hp <= 0 ? ' defeated' : ''}${compact ? ' compact' : ''}`}
       style={{ left: home.x - width / 2, top: home.y + 22, width }}
     >
-      {intent && <Intent name={intent.name} previews={previewIntent(state, id, registry)} skips={skipping(enemy.statuses)} />}
+      {intent && <Intent name={intent.name} previews={previewIntent(state, id, registry)} skips={skipping(enemy.statuses)} source={id} state={state} />}
       <span className="enemy-level">Lv {state.enemyLevel ?? 1}</span>
       <div className="bar-label">
         <span>{def?.name}</span>
@@ -310,7 +310,7 @@ const skipping = (statuses: readonly { status: string }[]) => {
 };
 
 /** An enemy's shown intent: its name, then an icon and exact number for each thing it will do, or that it will skip. */
-function Intent({ name, previews, skips }: { name: string; previews: Preview[]; skips?: string | undefined }) {
+function Intent({ name, previews, skips, source, state }: { name: string; previews: Preview[]; skips?: string | undefined; source: string; state: CombatState }) {
   if (skips) {
     return (
       <div className="intent skipped" aria-label={`Intent: ${name}, skipped (${skips})`}>
@@ -320,21 +320,31 @@ function Intent({ name, previews, skips }: { name: string; previews: Preview[]; 
   }
   // Shield for every enemy shows once, marked "all".
   const shields = previews.filter((p) => p.op === 'gainShield');
-  const parts = previews.flatMap((p): { icon?: string | undefined; amount?: number | undefined; words: string; all?: boolean }[] => {
+  // What lands on another enemy names it; what lands on the enemy itself says so.
+  const onto = (target: string | undefined) => {
+    if (target === source) return 'itself';
+    const other = state.enemies.find((e) => e.id === target);
+    return other && registry.enemies[other.enemy]?.name;
+  };
+  const parts = previews.flatMap((p): { icon?: string | undefined; amount?: number | undefined; words: string; all?: boolean; to?: string | undefined }[] => {
     if (p.op === 'damage') return [{ icon: 'attack', amount: p.amount, words: `${p.amount} damage` }];
     if (p.op === 'gainShield') {
       if (p !== shields[0]) return [];
       return shields.length > 1
         ? [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield to every enemy`, all: true }]
-        : [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield` }];
+        : p.target === source
+          ? [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield` }]
+          : [{ icon: 'shield', amount: p.amount, words: `${p.amount} Shield to ${onto(p.target)}`, to: onto(p.target) }];
     }
     if (p.op === 'heal') return [{ icon: 'heal', amount: p.amount, words: `heals an ally ${p.amount}` }];
     if (p.op === 'summon') return [{ icon: 'summon', amount: p.amount, words: `summons ${p.amount}` }];
     if (p.op === 'clearStatuses') return [{ words: 'clears its statuses' }];
     if (p.op === 'applyStatus') {
       const icon = registry.statuses[p.status ?? '']?.icon;
-      return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}` }];
+      const self = p.target === source ? 'itself' : undefined;
+      return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}${self ? ' on itself' : ''}`, to: self }];
     }
+    if (p.op === 'drawFewer') return [{ words: `you draw ${p.amount} fewer next turn` }];
     return [];
   });
   const attacks = previews.some((p) => p.op === 'damage');
@@ -346,6 +356,7 @@ function Intent({ name, previews, skips }: { name: string; previews: Preview[]; 
           {hasIcon(p.icon) ? <Icon name={p.icon} /> : p.words}
           {hasIcon(p.icon) && p.amount}
           {p.all && <small> all</small>}
+          {p.to && <small> to {p.to}</small>}
         </span>
       ))}
     </div>
