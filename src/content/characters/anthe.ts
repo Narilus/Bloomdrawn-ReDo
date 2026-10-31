@@ -6,18 +6,18 @@ import { card, character } from '../define.ts';
 
 export const strike = card({
   id: 'anthe.strike', name: 'Strike', owner: 'anthe', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(mul(3, stat('attack')))],
 });
 
 export const defense = card({
   id: 'anthe.defense', name: 'Defense', owner: 'anthe', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2, stat('defense')))],
 });
 
 export const votiveCandle = card({
   id: 'anthe.votive-candle', name: 'Votive Candle', owner: 'anthe', slot: 'flavourA', cost: 5, target: 'chosenEnemy',
   keywords: ['ritual'],
-  effects: [damage(add(8, mul(6, resource('essence'))))],
+  effects: [damage(mul(stat('attack'), add(2.67, mul(2, resource('essence')))))],
 });
 
 export const gildedThread = card({
@@ -42,7 +42,7 @@ export const ashOffering = card({
 export const longVigil = card({
   id: 'anthe.long-vigil', name: 'Long Vigil', owner: 'anthe', reward: true, cost: 6, target: 'allEnemies',
   keywords: ['ritual'],
-  effects: [damage(add(10, mul(6, resource('essence'))), { target: 'allEnemies' })],
+  effects: [damage(mul(stat('attack'), add(3.34, mul(2, resource('essence')))), { target: 'allEnemies' })],
 });
 
 export const anthe = character({

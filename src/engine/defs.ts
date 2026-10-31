@@ -306,8 +306,13 @@ export interface ResourceDef {
   id: string;
   /** Display name, e.g. "damage per hit". */
   name: string;
-  /** Value at combat start; 0 if absent. */
-  start?: number;
+  /** Value at combat start, worked out once from fielded stats; 0 if absent. */
+  start?: Formula;
+  /**
+   * A stored damage amount (Rapture's potency), not a count: kept exact as it is gained, shown and
+   * dealt rounded down (docs/notes/m6-scaling.md, 4.11). A count is always whole.
+   */
+  amount?: true;
 }
 
 /**

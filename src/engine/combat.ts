@@ -1,7 +1,7 @@
 import type { CardDef, EnemyEntry, OpCall, Registry } from './defs.ts';
 import { characterOf } from './dupes.ts';
 import type { EngineEvent } from './events.ts';
-import { cardKeywords, hasKeyword } from './formula.ts';
+import { cardKeywords, evaluate, hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
@@ -141,11 +141,12 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     enemySlots: Math.min(ENEMY_SLOTS_MAX, Math.max(enemies.length, enemies.length + summons)),
     relics,
     piles: { draw: deck, hand: [], discard: [], graveyard: [] },
-    resources: startingResources(characters.map((c) => c.domain), registry),
+    resources: {},
     rng: createStreams(setup.seed, COMBAT_STREAMS),
     nextUid: uid,
   };
   Object.assign(state, scaling);
+  state.resources = startingResources(state, characters.map((c) => c.domain), registry);
   shuffleInPlace(state.piles.draw, state.rng, 'shuffle');
 
   const before = vitalsOf(state);
@@ -173,11 +174,14 @@ function summonCapacity(registry: Registry, enemy: string): number {
   return Math.max(0, ...calls.filter((c) => c.op === 'summon').map((c) => Number(c.max ?? 0)));
 }
 
-/** Pooled resources of the Domains present, at their starting values. */
-function startingResources(domains: string[], registry: Registry): Record<string, number> {
+/** Pooled resources of the Domains present, at their starting values, read from the party as fielded. */
+function startingResources(state: CombatState, domains: string[], registry: Registry): Record<string, number> {
   const resources: Record<string, number> = {};
   for (const id of new Set(domains)) {
-    for (const r of registry.domains[id]?.resources ?? []) resources[r.id] = r.start ?? 0;
+    for (const r of registry.domains[id]?.resources ?? []) {
+      const start = r.start === undefined ? 0 : evaluate(r.start, state, { source: PARTY }, registry);
+      resources[r.id] = r.amount ? start : Math.floor(start);
+    }
   }
   return resources;
 }

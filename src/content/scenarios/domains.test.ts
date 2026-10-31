@@ -18,9 +18,11 @@ function run(state: CombatState, command: Command) {
 const endTurn: Command = { type: 'endTurn' };
 
 describe('Rapture', () => {
-  it('starts damage per hit at 3 only when a Rapture character is in the party', () => {
-    // Agathe's First Hymn adds the 1 Tentacle; the Domain starts it at 0.
-    expect(begin(['agathe', 'maelia']).resources).toMatchObject({ tentacles: 1, potency: 3 });
+  it("starts damage per hit at 80% of the party's average Attack, only when a Rapture character is in the party", () => {
+    // Agathe's First Hymn adds the 1 Tentacle; the Domain starts it at 0. Attack 4 and 3 average 3.5: 2.8 a hit.
+    const pair = begin(['agathe', 'maelia']).resources;
+    expect([pair['tentacles'], pair['potency']]).toEqual([1, expect.closeTo(2.8)]);
+    expect(begin(['agathe', 'maelia', 'anthe', 'leonora']).resources['potency']).toBe(3);
     expect(begin(['maelia', 'leonora']).resources['potency']).toBeUndefined();
   });
 

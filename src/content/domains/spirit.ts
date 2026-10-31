@@ -1,4 +1,4 @@
-import { add, changeCost, gainShield, mul, resource } from '../../engine/index.ts';
+import { add, changeCost, gainShield, mul, resource, stat } from '../../engine/index.ts';
 import { card, domain } from '../define.ts';
 
 // Rituals Retain (the engine keeps them at cleanup); each cleanup they are held through makes them 1 cheaper, to 0.
@@ -16,5 +16,6 @@ export const spirit = domain({
 export const quietPrayer = card({
   id: 'spirit.quiet-prayer', name: 'Quiet Prayer', domain: 'spirit', reward: true, cost: 4, target: 'self',
   keywords: ['ritual'],
-  effects: [gainShield(add(8, mul(2, resource('essence'))))],
+  // Ratios from Anthe, the Domain's starter (Defense 5): 8 + 2 × Essence at level 1.
+  effects: [gainShield(mul(stat('defense'), add(1.6, mul(0.4, resource('essence')))))],
 });

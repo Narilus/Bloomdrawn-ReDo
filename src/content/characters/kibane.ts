@@ -6,18 +6,18 @@ import { c2, card, character, variant } from '../define.ts';
 
 export const strike = card({
   id: 'kibane.strike', name: 'Strike', owner: 'kibane', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(mul(2.2, stat('attack')))],
 });
 
 export const defense = card({
   id: 'kibane.defense', name: 'Defense', owner: 'kibane', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2.67, stat('defense')))],
 });
 
 export const foxfireRite = card({
   id: 'kibane.foxfire-rite', name: 'Foxfire Rite', owner: 'kibane', slot: 'flavourA', cost: 5, target: 'chosenEnemy',
   keywords: ['ritual'],
-  effects: [damage(add(4, mul(10, resource('essence'))))],
+  effects: [damage(mul(stat('attack'), add(0.8, mul(2, resource('essence')))))],
 });
 
 export const shrineBell = card({
@@ -29,7 +29,7 @@ export const shrineBell = card({
 export const foxfireWisp = card({
   id: 'kibane.foxfire-wisp', name: 'Foxfire Wisp', owner: 'kibane', generated: true, cost: 3, target: 'chosenEnemy',
   keywords: ['ritual', 'exhaust'],
-  effects: [damage(mul(6, resource('essence')))],
+  effects: [damage(mul(1.2, stat('attack'), resource('essence')))],
 });
 
 export const theNinthTail = card({
@@ -48,26 +48,27 @@ export const foxLantern = card({
 
 export const gauntletRake = card({
   id: 'kibane.gauntlet-rake', name: 'Gauntlet Rake', owner: 'kibane', reward: true, cost: 2, target: 'chosenEnemy',
-  effects: [damage(add(5, stat('attack'))), gainResource('essence', 1)],
+  effects: [damage(mul(2, stat('attack'))), gainResource('essence', 1)],
 });
 
 // Spirit's one exception: it spends the shared Essence, Anthe's included. Hits every enemy (owner, 25 Oct).
 // At C5 half the Essence consumed, rounded down, comes back.
+// Damage is 200% of her Attack plus `each` × her Attack per Essence consumed.
 const judgement = (each: number, refund = false) => [
   ifConsume('essence', resource('essence'), [
-    damage(add(10, mul(each, consumed())), { target: 'allEnemies' }),
+    damage(add(mul(2, stat('attack')), mul(mul(each, stat('attack')), consumed())), { target: 'allEnemies' }),
     ...(refund ? [gainResource('essence', mul(0.5, consumed()))] : []),
   ]),
 ];
 const judgementText = (refund = false) =>
   'Consume all Essence. Deal {effects.0.branch.0.amount.add.0} + {effects.0.branch.0.amount.add.1.mul.0} × Essence consumed damage to all enemies.' +
   (refund ? ' Gain back half the Essence consumed, rounded down.' : '');
-// C4 deals +2 per Essence consumed, Transcended too.
+// 160% of Attack per Essence (240% Transcended); C4 adds 40% (+2 at Attack 5), Transcended too.
 const kyubi = (bonus: number, refund = false) => ({
   name: "Kyubi's Judgement",
   text: judgementText(refund),
-  effects: judgement(8 + bonus, refund),
-  transcended: { text: judgementText(refund), effects: judgement(12 + bonus, refund) },
+  effects: judgement(1.6 + bonus, refund),
+  transcended: { text: judgementText(refund), effects: judgement(2.4 + bonus, refund) },
 });
 
 // Foxfire at C0 charges 10 per Ritual played, at C1 15.
@@ -81,7 +82,7 @@ const foxfire = (charge: number) => ({
 });
 
 // C3: more damage per Essence. Placeholder 12 × (the draft's 5 to 6, a fifth more, on today's 10); the owner sets it.
-export const foxfireRiteC3 = variant(foxfireRite, 3, { effects: [damage(add(4, mul(12, resource('essence'))))] });
+export const foxfireRiteC3 = variant(foxfireRite, 3, { effects: [damage(mul(stat('attack'), add(0.8, mul(2.4, resource('essence')))))] });
 
 const STATS = { hp: 50, attack: 5, defense: 3 };
 
@@ -96,7 +97,7 @@ export const kibane = character({
     { text: 'Foxfire charges 15.', passive: foxfire(15) },
     c2(STATS),
     { text: 'Foxfire Rite deals 12 × Essence.', cards: { [foxfireRite.id]: foxfireRiteC3.id } },
-    { text: "Kyubi's Judgement deals +2 per Essence consumed.", ultimate: kyubi(2) },
-    { text: "After Kyubi's Judgement, gain back half the Essence consumed, rounded down.", ultimate: kyubi(2, true) },
+    { text: "Kyubi's Judgement deals +2 per Essence consumed.", ultimate: kyubi(0.4) },
+    { text: "After Kyubi's Judgement, gain back half the Essence consumed, rounded down.", ultimate: kyubi(0.4, true) },
   ],
 });

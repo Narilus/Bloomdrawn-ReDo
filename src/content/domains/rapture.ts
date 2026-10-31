@@ -1,15 +1,17 @@
-import { add, gainResource, gainShield, resource, stat, volley } from '../../engine/index.ts';
+import { gainResource, gainShield, mul, partyStat, resource, stat, volley } from '../../engine/index.ts';
 import { card, domain } from '../define.ts';
 
 /** Every Tentacle hits once for the damage per hit. Mid-turn volleys use the same call and consume nothing. */
 export const tentacleVolley = () => volley(resource('tentacles'), resource('potency'));
 
-// Damage per hit starts at 3; raises to it last the whole combat, so Tentacle damage ramps.
+// Damage per hit starts from the party's Attack; raises to it last the whole combat, so Tentacle damage ramps.
 export const rapture = domain({
   id: 'rapture', name: 'Rapture', material: 'material.rapture',
   resources: [
     { id: 'tentacles', name: 'Tentacles' },
-    { id: 'potency', name: 'damage per hit', start: 3 },
+    // A stored damage amount (owner, 31 Oct): it starts at 80% of the party's average Attack (3 for
+    // the starters at level 1), and each gain is a share of its card owner's Attack as it resolves.
+    { id: 'potency', name: 'damage per hit', start: mul(0.8, partyStat('attack')), amount: true },
   ],
   triggers: [{ on: 'turnEnd', do: [tentacleVolley()] }],
   counter: {
@@ -21,6 +23,7 @@ export const rapture = domain({
 // The Domain's generic card reward (docs/notes/m4-run.md): any Rapture member may own it. Numbers are placeholders.
 export const chalkCircle = card({
   id: 'rapture.chalk-circle', name: 'Chalk Circle', domain: 'rapture', reward: true, cost: 1, target: 'self',
-  effects: [gainResource('tentacles', 1), gainShield(add(4, stat('defense')))],
+  // Shield as a ratio from Agathe, the Domain's starter (Defense 4): 8 at level 1.
+  effects: [gainResource('tentacles', 1), gainShield(mul(2, stat('defense')))],
   text: 'Gain {effects.0.amount} Tentacle. Gain {effects.1.amount} Shield.',
 });

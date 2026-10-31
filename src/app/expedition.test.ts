@@ -306,9 +306,10 @@ describe('card rewards', () => {
     expect([exp.dupes, exp.levels, exp.ascensions]).toEqual([{ virelle: 2 }, { virelle: 21 }, { virelle: 2 }]);
     const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
     expect(combat.members.map((m) => [m.dupes, m.level, m.ascensions])).toEqual([[2, 21, 2], [undefined, undefined, undefined], [undefined, undefined, undefined], [undefined, undefined, undefined]]);
-    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: C2's 50 HP becomes 190, its Attack 7 becomes 38.
+    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: C2's 50 HP becomes 190, its Attack 7 becomes 38,
+    // so Thorn Spur's 150% of Attack is 57.
     expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([190 + 50 + 50 + 55, 190 + 50 + 50 + 55]);
-    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 41 damage twice.');
+    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 57 damage twice.');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('levels');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('ascensions');
   });

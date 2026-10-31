@@ -1,4 +1,4 @@
-import { add, applyStatus, damage, draw, gainResource, gainShield, stat, transcend } from '../../engine/index.ts';
+import { applyStatus, damage, draw, gainResource, gainShield, mul, stat, transcend } from '../../engine/index.ts';
 import { c2, card, character, variant } from '../define.ts';
 import { tentacleVolley } from '../domains/rapture.ts';
 import { danceOfBells } from '../statuses/dance.ts';
@@ -7,17 +7,17 @@ import { danceOfBells } from '../statuses/dance.ts';
 
 export const strike = card({
   id: 'isadora.strike', name: 'Strike', owner: 'isadora', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(mul(2.2, stat('attack')))],
 });
 
 export const defense = card({
   id: 'isadora.defense', name: 'Defense', owner: 'isadora', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2.67, stat('defense')))],
 });
 
 export const ankleBells = card({
   id: 'isadora.ankle-bells', name: 'Ankle Bells', owner: 'isadora', slot: 'flavourA', cost: 2, target: 'none',
-  effects: [gainResource('tentacles', 2), gainResource('potency', 1)],
+  effects: [gainResource('tentacles', 2), gainResource('potency', mul(0.2, stat('attack')))],
   text: 'Gain {effects.0.amount} Tentacles. Tentacles deal +{effects.1.amount} damage for the rest of combat.',
 });
 
@@ -38,13 +38,13 @@ export const theVeilTorn = card({
 
 export const petalRibbon = card({
   id: 'isadora.petal-ribbon', name: 'Petal Ribbon', owner: 'isadora', reward: true, cost: 1, target: 'none',
-  effects: [gainResource('potency', 1), draw(1)],
+  effects: [gainResource('potency', mul(0.2, stat('attack'))), draw(1)],
   text: 'Tentacles deal +{effects.0.amount} damage for the rest of combat. Draw {effects.1.count} card.',
 });
 
 export const ribbonLash = card({
   id: 'isadora.ribbon-lash', name: 'Ribbon Lash', owner: 'isadora', reward: true, cost: 2, target: 'chosenEnemy',
-  effects: [damage(add(3, stat('attack'))), tentacleVolley()],
+  effects: [damage(mul(1.6, stat('attack'))), tentacleVolley()],
   text: 'Deal {effects.0.amount} damage. Trigger a volley.',
 });
 
@@ -55,7 +55,7 @@ const rapt = (potency: number, capstone = false) => ({
     'The first time each turn a card triggers a volley, Tentacles deal +{triggers.0.do.0.amount} damage for the rest of combat.' +
     (capstone ? ' At the end of each turn, Tentacles attack twice.' : ''),
   triggers: [
-    { on: 'volleyFired' as const, filter: { fromCard: true as const }, once: 'turn' as const, do: [gainResource('potency', potency)] },
+    { on: 'volleyFired' as const, filter: { fromCard: true as const }, once: 'turn' as const, do: [gainResource('potency', mul(0.2 * potency, stat('attack')))] },
     // A second end-of-turn attack beside the Domain's own, choosing its targets afresh.
     ...(capstone ? [{ on: 'turnEnd' as const, do: [tentacleVolley()] }] : []),
   ],

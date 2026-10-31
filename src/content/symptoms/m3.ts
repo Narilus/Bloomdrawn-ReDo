@@ -1,4 +1,4 @@
-import { applyStatus, chargeUltimate, damage, draw, drawFewer, gainMana, loseHp, percentOf } from '../../engine/index.ts';
+import { applyStatus, chargeUltimate, damage, draw, drawFewer, gainMana, loseHp, mul, percentOf, stat } from '../../engine/index.ts';
 import { card } from '../define.ts';
 import { poison } from '../statuses/poison.ts';
 import { weak } from '../statuses/weak.ts';
@@ -15,7 +15,8 @@ export const feveredPulse = card({
 
 export const sweetRot = card({
   id: 'symptom.sweet-rot', name: 'Sweet Rot', cost: 1, target: 'chosenEnemy',
-  effects: [damage(14), applyStatus(poison, percentOf(1, 'maxHp'), 'allEnemies'), applyStatus(poison, percentOf(1, 'maxHp'), 'self')],
+  // The front member plays it: 350% of her Attack, 14 for Agathe at the front at level 1.
+  effects: [damage(mul(3.5, stat('attack'))), applyStatus(poison, percentOf(1, 'maxHp'), 'allEnemies'), applyStatus(poison, percentOf(1, 'maxHp'), 'self')],
   text: "Deal {effects.0.amount} damage. Every enemy and the party gain {effects.1.stacks} Poison ({effects.1.stacks.percent}% of the party's max HP).",
 });
 

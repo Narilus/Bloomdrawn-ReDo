@@ -25,7 +25,9 @@ export type Formula =
   | { turn: true }
   | { consumed: true }
   /** A share of the party's current or max HP, so costs scale with a levelled team (owner, 19 Oct). */
-  | { percent: number; of: PartyHp };
+  | { percent: number; of: PartyHp }
+  /** The party's average of a stat, from fielded stats (Rapture's starting potency). */
+  | { partyStat: StatName };
 
 export type PartyHp = 'hp' | 'maxHp';
 
@@ -48,6 +50,7 @@ export const turn = (): Formula => ({ turn: true });
 export const consumed = (): Formula => ({ consumed: true });
 /** `percent`% of the party's current (`hp`) or max HP, before rounding down. */
 export const percentOf = (percent: number, of: PartyHp): Formula => ({ percent, of });
+export const partyStat = (name: StatName): Formula => ({ partyStat: name });
 export const shareOf = (f: { percent: number; of: PartyHp }, party: Record<PartyHp, number>): number => (party[f.of] * f.percent) / 100;
 
 export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
@@ -67,6 +70,7 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
     z.strictObject({ turn: z.literal(true) }),
     z.strictObject({ consumed: z.literal(true) }),
     z.strictObject({ percent: z.number().positive(), of: z.enum(['hp', 'maxHp']) }),
+    z.strictObject({ partyStat: z.enum(['hp', 'attack', 'defense']) }),
   ]),
 );
 
@@ -94,6 +98,10 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   if ('playedThisTurn' in f) return (state.playedThisTurn ?? []).filter((id) => registry.cards[id]?.slot === f.playedThisTurn).length;
   if ('turn' in f) return state.turn;
   if ('percent' in f) return shareOf(f, state.party);
+  if ('partyStat' in f) {
+    const stats = state.members.map((m) => characterOf(m, registry)?.stats[f.partyStat] ?? 0);
+    return stats.reduce((a, b) => a + b, 0) / Math.max(1, stats.length);
+  }
   return ctx.consumed ?? 0;
 }
 
@@ -126,5 +134,6 @@ export function formulaText(f: Formula): string {
   if ('playedThisTurn' in f) return `${f.playedThisTurn === 'strike' ? 'Strikes' : f.playedThisTurn === 'defense' ? 'Defenses' : `${titleCase(f.playedThisTurn)} cards`} played this turn`;
   if ('turn' in f) return 'the turn number';
   if ('percent' in f) return `${f.percent}% of the party's ${f.of === 'hp' ? 'current' : 'max'} HP`;
+  if ('partyStat' in f) return `the party's average ${titleCase(f.partyStat === 'hp' ? 'HP' : f.partyStat)}`;
   return 'the amount consumed';
 }

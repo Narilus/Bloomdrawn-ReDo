@@ -1,4 +1,4 @@
-import { applyStatus, chargeUltimate, draw, gainMana, gainResource, gte, handCount, loseHp, turn, when } from '../../engine/index.ts';
+import { applyStatus, chargeUltimate, draw, gainMana, gainResource, gte, handCount, loseHp, percentOf, turn, when } from '../../engine/index.ts';
 import { relic } from '../define.ts';
 import { tentacleVolley } from '../domains/rapture.ts';
 import { vulnerable } from '../statuses/vulnerable.ts';
@@ -43,6 +43,7 @@ export const choirBell = relic({
 
 export const bloomingCoin = relic({
   id: 'relic.blooming-coin', name: 'Blooming Coin', tier: 'cursed',
-  text: '+1 Mana every turn. At turn start, the party takes 3 damage.',
-  triggers: [{ on: 'turnStart', do: [gainMana(1), loseHp(3, { target: 'party' })] }],
+  // A share of max HP, so it keeps costing at depth (3 for the starters at level 1).
+  text: '+1 Mana every turn. At turn start, the party loses 1.5% of its max HP.',
+  triggers: [{ on: 'turnStart', do: [gainMana(1), loseHp(percentOf(1.5, 'maxHp'), { target: 'party' })] }],
 });

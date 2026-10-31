@@ -1,4 +1,4 @@
-import { add, applyStatus, damage, resource, stat } from '../../engine/index.ts';
+import { applyStatus, damage, mul, resource, stat } from '../../engine/index.ts';
 import { card, domain } from '../define.ts';
 import { bleed } from '../statuses/bleed.ts';
 
@@ -15,5 +15,6 @@ export const flesh = domain({
 // The Domain's generic card reward (docs/notes/m4-run.md): any Flesh member may own it. Numbers are placeholders.
 export const graftingKnife = card({
   id: 'flesh.grafting-knife', name: 'Grafting Knife', domain: 'flesh', reward: true, cost: 1, target: 'chosenEnemy',
-  effects: [damage(add(4, stat('attack'))), applyStatus(bleed, 9)],
+  // Ratios from Maelia, the Domain's starter (Attack 3): 7 damage and 9 Bleed at level 1.
+  effects: [damage(mul(2.34, stat('attack'))), applyStatus(bleed, mul(3, stat('attack')))],
 });

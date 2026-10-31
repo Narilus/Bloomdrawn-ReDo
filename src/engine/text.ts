@@ -81,25 +81,44 @@ export function showFor(state: CombatState, owner: EntityId, registry: Registry,
   };
 }
 
+/** A formula as a number plus multiples of what the fight decides: `10 + 6 × Essence` is { n: 10, terms: [['Essence', 6]] }. */
+interface Linear {
+  n: number;
+  terms: [string, number][];
+}
+
 /**
  * Numbers for a character outside combat, as a card reward shows them: a formula that reads only
- * numbers and her stats shows its value; anything that depends on the fight shows as written.
+ * numbers and her stats shows its value, and one that also depends on the fight shows her numbers
+ * with the rest as written, so 267% of Attack 3 plus 200% of it per Essence reads `8 + 6 × Essence`.
  * Outside a fight no card has been played this turn, so a count of cards played is 0.
  */
 export function showStats(stats: CharacterDef['stats'], mark?: TextOptions['mark']): ShowAmount {
-  const value = (f: Formula): number | undefined => {
-    if (typeof f === 'number') return f;
-    if ('stat' in f) return stats[f.stat];
-    if ('playedThisTurn' in f) return 0;
-    const terms = 'add' in f ? f.add : 'mul' in f ? f.mul : undefined;
-    const values = terms?.map(value);
-    if (!values || values.some((v) => v === undefined)) return undefined;
-    return 'add' in f ? values.reduce((a, b) => a! + b!, 0) : values.reduce((a, b) => a! * b!, 1);
+  const linear = (f: Formula): Linear | undefined => {
+    if (typeof f === 'number') return { n: f, terms: [] };
+    if ('stat' in f) return { n: stats[f.stat], terms: [] };
+    if ('playedThisTurn' in f) return { n: 0, terms: [] };
+    if ('add' in f) {
+      const parts = f.add.map(linear);
+      if (parts.some((p) => !p)) return undefined;
+      return { n: parts.reduce((a, p) => a + p!.n, 0), terms: parts.flatMap((p) => p!.terms) };
+    }
+    if ('mul' in f) {
+      const parts = f.mul.map(linear);
+      // Only one factor may depend on the fight; a product of two is shown as written.
+      if (parts.some((p) => !p) || parts.filter((p) => p!.terms.length > 0).length > 1) return undefined;
+      const k = parts.filter((p) => p!.terms.length === 0).reduce((a, p) => a * p!.n, 1);
+      const open = parts.find((p) => p!.terms.length > 0);
+      return open ? { n: open.n * k, terms: open.terms.map(([t, c]) => [t, c * k]) } : { n: k, terms: [] };
+    }
+    return { n: 0, terms: [[formulaText(f), 1]] };
   };
+  const num = (x: number) => String(Math.floor(x + 1e-9));
   return (f, kind) => {
-    const v = value(f);
-    if (v === undefined) return formulaText(f);
-    const text = String(Math.floor(v));
+    const v = linear(f);
+    if (!v) return formulaText(f);
+    const parts = [...(v.n !== 0 || v.terms.length === 0 ? [num(v.n)] : []), ...v.terms.map(([t, c]) => (Math.abs(c - 1) < 1e-9 ? t : `${num(c)} × ${t}`))];
+    const text = parts.join(' + ');
     return mark ? mark(text, kind === 'stacks' ? undefined : kind) : text;
   };
 }

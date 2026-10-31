@@ -1,4 +1,4 @@
-import { add, damage, draw, gainResource, gainShield, gte, resource, stat, transcend, when } from '../../engine/index.ts';
+import { damage, draw, gainResource, gainShield, gte, mul, resource, stat, transcend, when } from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 import { tentacleVolley } from '../domains/rapture.ts';
 
@@ -6,12 +6,12 @@ import { tentacleVolley } from '../domains/rapture.ts';
 
 export const strike = card({
   id: 'agathe.strike', name: 'Strike', owner: 'agathe', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(mul(2.5, stat('attack')))],
 });
 
 export const defense = card({
   id: 'agathe.defense', name: 'Defense', owner: 'agathe', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2.25, stat('defense')))],
 });
 
 export const callTheChoir = card({
@@ -22,14 +22,14 @@ export const callTheChoir = card({
 
 export const censerRite = card({
   id: 'agathe.censer-rite', name: 'Censer Rite', owner: 'agathe', slot: 'flavourB', cost: 3, target: 'allEnemies',
-  effects: [gainResource('potency', 2), tentacleVolley()],
+  effects: [gainResource('potency', mul(0.5, stat('attack'))), tentacleVolley()],
   text: 'Tentacles deal +{effects.0.amount} damage for the rest of combat. Trigger a volley.',
 });
 
 export const theChoirAnswers = card({
   id: 'agathe.the-choir-answers', name: 'The Choir Answers', owner: 'agathe', slot: 'transcend', cost: 4, target: 'none',
   keywords: ['exhaust'], charge: 35,
-  effects: [gainResource('tentacles', 2), gainResource('potency', 1), transcend()],
+  effects: [gainResource('tentacles', 2), gainResource('potency', mul(0.25, stat('attack'))), transcend()],
   text: 'Gain {effects.0.amount} Tentacles. Tentacles deal +{effects.1.amount} damage for the rest of combat. Transcend.',
 });
 
@@ -42,7 +42,7 @@ export const hymnalProcession = card({
 
 export const thuribleSwing = card({
   id: 'agathe.thurible-swing', name: 'Thurible Swing', owner: 'agathe', reward: true, cost: 1, target: 'chosenEnemy',
-  effects: [damage(add(4, stat('attack'))), when(gte(resource('tentacles'), 4), [tentacleVolley()])],
+  effects: [damage(mul(2, stat('attack'))), when(gte(resource('tentacles'), 4), [tentacleVolley()])],
   text: 'Deal {effects.0.amount} damage. If you have {effects.1.condition.gte.1} or more Tentacles, trigger a volley.',
 });
 

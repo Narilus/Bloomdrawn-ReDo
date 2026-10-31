@@ -114,7 +114,7 @@ A run party is exactly four unique characters. Each brings her stats, five perso
 
 ### What a character contributes
 
-- **Stats:** HP, Attack, Defense. HP adds to the shared pool; Attack and Defense scale her own cards.
+- **Stats:** HP, Attack, Defense, Crit Rate and Crit Damage. HP adds to the shared pool. Her cards' damage, Shield and the Bleed and Poison she applies are ratios of her Attack or Defense (Strike is 200%–300% of Attack), and heals a share of the party's max HP, so every source of a stat feeds every card (owner, 31 Oct; `docs/notes/m6-scaling.md`). Rapture's damage per hit starts at 80% of the party's average Attack and each gain is a share of the card owner's Attack as it is played.
 - **Role:** how her stats grow, fixed per character: Attacker (Virelle, Isadora, Kibane), Support (Maelia, Leonora, Hester), Hybrid (Agathe, Anthe) or Sentinel (none yet) (owner, 31 Oct; `docs/notes/m6-scaling.md`).
 - **Five personal cards:** one copy each of Strike, Defense, Transcend, Flavour A and Flavour B (cost bands in Combat).
 - **Passive:** always labelled as combat-scoped or run-scoped.

@@ -37,7 +37,7 @@ describe('Agathe', () => {
     expect: { resources: { tentacles: 1 + 3 }, mana: 4 },
   });
 
-  scenario('Thurible Swing deals 4 + Attack, and with 4 Tentacles triggers a volley', {
+  scenario('Thurible Swing deals 200% of Attack, and with 4 Tentacles triggers a volley', {
     setup: { hand: ['agathe.thurible-swing'], resources: { tentacles: 4 } },
     play: [{ card: 'agathe.thurible-swing', target: 0 }],
     // 4 + 4 Attack = 8; then 4 Tentacles × 3 = 12.
@@ -58,7 +58,7 @@ describe('Anthe', () => {
     expect: { resources: { essence: 2 }, mana: 5 },
   });
 
-  scenario('Long Vigil is a Ritual that deals 10 + 6 × Essence to every enemy', {
+  scenario('Long Vigil is a Ritual that deals 334% of Attack plus 200% per Essence (10 + 6 × Essence) to every enemy', {
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['anthe.long-vigil'], resources: { essence: 2 } },
     play: [{ card: 'anthe.long-vigil' }],
@@ -84,21 +84,21 @@ describe('Leonora', () => {
 });
 
 describe("the Domains' generic cards, played by the member they went to", () => {
-  scenario("Grafting Knife deals 4 + its owner's Attack and applies 9 Bleed", {
+  scenario("Grafting Knife deals 234% of its owner's Attack and applies 300% of it in Bleed", {
     setup: { hand: [{ card: 'flesh.grafting-knife', owner: 'agathe' }] },
     play: [{ card: 'flesh.grafting-knife', target: 0 }],
-    // Agathe's Attack is 4, so 8 (Maelia's 3 would make 7).
-    expect: { enemyHp: [60 - 8] },
-    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.bleed 9']]),
+    // Agathe's Attack is 4, so 9 and 12 (Maelia's 3, the ratios' starting point, makes 7 and 9).
+    expect: { enemyHp: [60 - 9] },
+    check: ({ state }) => expect(statusesOf(state)).toEqual([['status.bleed 12']]),
   });
 
-  scenario("Chalk Circle gains 1 Tentacle and 4 + its owner's Defense Shield", {
+  scenario("Chalk Circle gains 1 Tentacle and 200% of its owner's Defense in Shield", {
     setup: { hand: [{ card: 'rapture.chalk-circle', owner: 'agathe' }] },
     play: [{ card: 'rapture.chalk-circle' }],
     expect: { resources: { tentacles: 1 + 1 }, partyShield: 4 + 4 },
   });
 
-  scenario('Quiet Prayer is a Ritual that gains 8 + 2 × Essence Shield', {
+  scenario('Quiet Prayer is a Ritual that gains 160% of Defense plus 40% per Essence (8 + 2 × Essence) in Shield', {
     setup: { hand: [{ card: 'spirit.quiet-prayer', owner: 'anthe' }], resources: { essence: 3 } },
     play: [{ card: 'spirit.quiet-prayer' }],
     expect: { partyShield: 8 + 6, mana: 2 },

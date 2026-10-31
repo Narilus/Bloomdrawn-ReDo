@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { applyStatus, damage, gainShield, ifConsume } from '../engine/index.ts';
-import { card, character, domain, status, variant } from './define.ts';
+import { applyStatus, damage, gainShield, heal, ifConsume, loseHp, mul, percentOf, stacks, stat } from '../engine/index.ts';
+import { card, character, domain, enemy, relic, status, variant } from './define.ts';
 import { registry, validateContent } from './registry.ts';
 import { CHARACTER_BANNER } from './banners.ts';
 import { ITEM_NAMES } from './items.ts';
 import { STARTERS } from './roster.ts';
 
 // A valid character needs one card in each of the five slots.
-const strike = card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'strike', cost: 1, target: 'chosenEnemy', effects: [damage(6)] });
+const strike = card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'strike', cost: 1, target: 'chosenEnemy', effects: [damage(mul(2, stat('attack')))] });
 const slotted = (slot: 'defense' | 'transcend' | 'flavourA' | 'flavourB', cost: number) =>
-  card({ id: `test.${slot.toLowerCase()}`, name: 'X', owner: 'tester', slot, cost, target: 'none', effects: [gainShield(1)] });
+  card({ id: `test.${slot.toLowerCase()}`, name: 'X', owner: 'tester', slot, cost, target: 'none', effects: [gainShield(stat('defense'))] });
 const kit = { strike, defense: slotted('defense', 1), transcend: slotted('transcend', 3), flavourA: slotted('flavourA', 2), flavourB: slotted('flavourB', 2) };
 const tester = character({ id: 'tester', name: 'Tester', domain: 'flesh', role: 'hybrid', stats: { hp: 10, attack: 1, defense: 1 }, cards: Object.values(kit) });
 const testerModule = { ...kit, tester };
@@ -56,7 +56,7 @@ describe('content registry', () => {
   });
 
   it("the party's own cards (Symptoms) have no owner, so no personal slot", () => {
-    const loose = card({ id: 'test.loose', name: 'X', cost: 0, target: 'none', effects: [gainShield(1)] });
+    const loose = card({ id: 'test.loose', name: 'X', cost: 0, target: 'none', effects: [gainShield(stat('defense'))] });
     const slottedLoose = card({ ...loose, id: 'test.slotted-loose', slot: 'strike', cost: 1 });
     expect(errorsFor({ loose, slottedLoose })).toEqual([
       'src/content/cards/broken.ts › test.slotted-loose: a card without an owner has no personal slot and is not generated',
@@ -64,14 +64,14 @@ describe('content registry', () => {
   });
 
   it("card rewards: a character's own sit outside her five cards; a Domain's generic card has a Domain and no owner", () => {
-    const own = card({ id: 'test.own', name: 'X', owner: 'tester', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
-    const generic = card({ id: 'test.generic', name: 'X', domain: 'flesh', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    const own = card({ id: 'test.own', name: 'X', owner: 'tester', reward: true, cost: 1, target: 'none', effects: [gainShield(stat('defense'))] });
+    const generic = card({ id: 'test.generic', name: 'X', domain: 'flesh', reward: true, cost: 1, target: 'none', effects: [gainShield(stat('defense'))] });
     expect(errorsFor({ own, generic })).toEqual([]);
     const slotted = card({ ...own, id: 'test.slotted', slot: 'flavourA', cost: 2 });
-    const owned = card({ id: 'test.owned', name: 'X', domain: 'flesh', owner: 'tester', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
-    const unrewarded = card({ id: 'test.unrewarded', name: 'X', domain: 'flesh', cost: 1, target: 'none', effects: [gainShield(1)] });
-    const nowhere = card({ id: 'test.nowhere', name: 'X', domain: 'tides', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
-    const loose = card({ id: 'test.loose', name: 'X', reward: true, cost: 1, target: 'none', effects: [gainShield(1)] });
+    const owned = card({ id: 'test.owned', name: 'X', domain: 'flesh', owner: 'tester', reward: true, cost: 1, target: 'none', effects: [gainShield(stat('defense'))] });
+    const unrewarded = card({ id: 'test.unrewarded', name: 'X', domain: 'flesh', cost: 1, target: 'none', effects: [gainShield(stat('defense'))] });
+    const nowhere = card({ id: 'test.nowhere', name: 'X', domain: 'tides', reward: true, cost: 1, target: 'none', effects: [gainShield(stat('defense'))] });
+    const loose = card({ id: 'test.loose', name: 'X', reward: true, cost: 1, target: 'none', effects: [gainShield(stat('defense'))] });
     expect(errorsFor({ slotted, owned, unrewarded, nowhere, loose })).toEqual([
       'src/content/cards/broken.ts › test.slotted: a card reward has no personal slot and is not generated',
       "src/content/cards/broken.ts › test.owned: a Domain's generic card has no owner or personal slot and is not generated",
@@ -111,7 +111,7 @@ describe('content registry', () => {
   it('a card pointing at a missing status fails with its file and ID', () => {
     const broken = card({
       id: 'test.broken', name: 'X', owner: 'tester', cost: 1, target: 'chosenEnemy',
-      effects: [damage(1), applyStatus({ id: 'status.missing' }, 2)],
+      effects: [damage(stat('attack')), applyStatus({ id: 'status.missing' }, 2)],
     });
     expect(errorsFor({ broken })).toContain(
       'src/content/cards/broken.ts › test.broken: effects[1]: unknown status "status.missing"',
@@ -126,6 +126,32 @@ describe('content registry', () => {
     expect(errorsFor({ nested }).join('\n')).toMatch(/test\.nested: effects\[0\]\.branch\[0\]: unknown status "status\.nope"/);
   });
 
+  // Stats are the multiplier (docs/notes/m6-scaling.md, 4.1; owner, 31 Oct).
+  it("party content's damage, Shield, damage stacks and heals must read a stat; a bare number fails with its file and ID", () => {
+    const bleed = status({ id: 'status.bleed', stacking: 'add', triggers: [{ on: 'statusTick', do: [loseHp(stacks('status.bleed'))] }] });
+    const weak = status({ id: 'status.weak', stacking: 'add', lasts: 'ownTurns' });
+    const flat = card({
+      id: 'test.flat', name: 'X', owner: 'tester', cost: 1, target: 'chosenEnemy',
+      effects: [damage(6), gainShield(5), applyStatus(bleed, 6), heal(3), applyStatus(weak, 1)],
+    });
+    const charm = relic({ id: 'relic.charm', name: 'Charm', tier: 'common', text: 'X', triggers: [{ on: 'turnStart', do: [gainShield(4)] }] });
+    // Enemies scale by level instead, and turn-count statuses (Weak) are counts, not damage.
+    const biter = enemy({ id: 'enemy.biter', name: 'Biter', hp: 10, intents: [{ id: 'bite', name: 'Bite', effects: [damage(5, { target: 'party' }), applyStatus(bleed, 3)] }] });
+    const errors = errorsFor({ bleed, weak, flat, charm, biter });
+    expect(errors.filter((e) => /must be a (ratio|share)/.test(e))).toEqual([
+      'src/content/cards/broken.ts › test.flat: effects[0]: damage must be a ratio of a stat, not a bare number',
+      'src/content/cards/broken.ts › test.flat: effects[1]: gainShield must be a ratio of a stat, not a bare number',
+      'src/content/cards/broken.ts › test.flat: effects[2]: status.bleed stacks must be a ratio of a stat, not a bare number',
+      "src/content/cards/broken.ts › test.flat: effects[3]: heal must be a share of the party's max HP",
+      'src/content/cards/broken.ts › relic.charm: triggers[0].do[0]: gainShield must be a ratio of a stat, not a bare number',
+    ]);
+    const ratios = card({
+      id: 'test.ratios', name: 'X', owner: 'tester', cost: 1, target: 'chosenEnemy',
+      effects: [damage(mul(2, stat('attack'))), gainShield(stat('defense')), applyStatus(bleed, mul(1.5, stat('attack'))), heal(percentOf(2, 'maxHp'))],
+    });
+    expect(errorsFor({ bleed, ratios }).filter((e) => /must be a (ratio|share)/.test(e))).toEqual([]);
+  });
+
   it('accepts a status that exists', () => {
     const bleed = status({ id: 'status.bleed', stacking: 'add' });
     const ok = card({ id: 'test.ok', name: 'X', owner: 'tester', cost: 0, target: 'chosenEnemy', effects: [applyStatus(bleed, 1)] });
@@ -136,8 +162,8 @@ describe('content registry', () => {
     const errors = errorsFor({
       unknownOp: card({ id: 'test.a', name: 'X', owner: 'tester', cost: 1, target: 'none', effects: [{ op: 'explode' }] }),
       badArgs: card({ id: 'test.b', name: 'X', owner: 'tester', cost: 1, target: 'none', effects: [{ op: 'gainShield', amount: 'lots' }] }),
-      orphan: card({ id: 'test.c', name: 'X', owner: 'nobody', cost: 1, target: 'none', effects: [gainShield(1)] }),
-      pricey: card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'strike', cost: 3, target: 'none', effects: [gainShield(1)] }),
+      orphan: card({ id: 'test.c', name: 'X', owner: 'nobody', cost: 1, target: 'none', effects: [gainShield(stat('defense'))] }),
+      pricey: card({ id: 'test.strike', name: 'X', owner: 'tester', slot: 'strike', cost: 3, target: 'none', effects: [gainShield(stat('defense'))] }),
     }).join('\n');
     expect(errors).toMatch(/test\.a: effects\[0\]: unknown operation "explode"/);
     expect(errors).toMatch(/test\.b: effects\[0\]\.amount: /);
@@ -146,7 +172,7 @@ describe('content registry', () => {
   });
 
   it('reports a slot cost outside its band', () => {
-    const transcend = card({ id: 'test.t', name: 'X', owner: 'tester', slot: 'transcend', cost: 2, target: 'none', effects: [gainShield(1)] });
+    const transcend = card({ id: 'test.t', name: 'X', owner: 'tester', slot: 'transcend', cost: 2, target: 'none', effects: [gainShield(stat('defense'))] });
     const t = character({ id: 'tester', name: 'Tester', domain: 'flesh', role: 'hybrid', stats: { hp: 10, attack: 1, defense: 1 }, cards: [...Object.values(kit).filter((c) => c.slot !== 'transcend'), transcend] });
     const { transcend: _, ...rest } = kit;
     expect(validateContent({ './characters/t.ts': { ...rest, transcend, t }, './domains/flesh.ts': { flesh } }).errors).toEqual([
@@ -156,7 +182,7 @@ describe('content registry', () => {
 
   it('reports a text slot that does not point at a formula', () => {
     const texty = card({
-      id: 'test.texty', name: 'X', owner: 'tester', cost: 0, target: 'none', effects: [gainShield(1)],
+      id: 'test.texty', name: 'X', owner: 'tester', cost: 0, target: 'none', effects: [gainShield(stat('defense'))],
       text: 'Gain {effects.0.amount} Shield, {effects.0.op}.',
     });
     expect(errorsFor({ texty })).toContain('src/content/cards/broken.ts › test.texty: text: slot {effects.0.op} is not a formula');

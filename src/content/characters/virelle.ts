@@ -25,34 +25,34 @@ import { bleed } from '../statuses/bleed.ts';
 export const strike = card({
   id: 'virelle.strike', name: 'Strike', owner: 'virelle', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
   effects: [
-    damage(mul(add(6, stat('attack')), add(1, mul(0.1, playedThisTurn('strike'))))),
-    ifConsume('embryo', 1, [applyStatus(bleed, 6), createCard({ id: 'virelle.strike' }, { cost: 0, keywords: ['fleeting'] })]),
+    damage(mul(mul(2, stat('attack')), add(1, mul(0.1, playedThisTurn('strike'))))),
+    ifConsume('embryo', 1, [applyStatus(bleed, mul(1, stat('attack'))), createCard({ id: 'virelle.strike' }, { cost: 0, keywords: ['fleeting'] })]),
   ],
   text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} Bleed and add a free Fleeting copy to your hand.',
 });
 
 export const defense = card({
   id: 'virelle.defense', name: 'Defense', owner: 'virelle', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(3.5, stat('defense')))],
 });
 
 export const sutureCut = card({
   id: 'virelle.suture-cut', name: 'Suture Cut', owner: 'virelle', slot: 'flavourA', cost: 2, target: 'chosenEnemy',
-  effects: [damage(add(3, stat('attack'))), applyStatus(bleed, 9)],
+  effects: [damage(mul(1.5, stat('attack'))), applyStatus(bleed, mul(1.5, stat('attack')))],
   text: 'Deal {effects.0.amount} damage. Apply {effects.1.stacks} Bleed.',
 });
 
 // The detonation leaves the Bleed in place (owner, 25 Oct).
 export const openTheWound = card({
   id: 'virelle.open-the-wound', name: 'Open the Wound', owner: 'virelle', slot: 'flavourB', cost: 2, target: 'chosenEnemy',
-  effects: [damage(add(4, stat('attack'))), ifConsume('embryo', 2, [loseHp(mul(2, targetStacks(bleed)), { target: 'chosen' })])],
+  effects: [damage(mul(1.67, stat('attack'))), ifConsume('embryo', 2, [loseHp(mul(2, targetStacks(bleed)), { target: 'chosen' })])],
   text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: the enemy loses HP equal to twice its Bleed.',
 });
 
 export const thornSpurBloom = card({
   id: 'virelle.thorn-spur-bloom', name: 'Thorn-Spur Bloom', owner: 'virelle', slot: 'transcend', cost: 3, target: 'allEnemies',
   keywords: ['exhaust'], charge: 35,
-  effects: [applyStatus(bleed, 9, 'allEnemies'), gainResource('embryo', 2), transcend()],
+  effects: [applyStatus(bleed, mul(1.5, stat('attack')), 'allEnemies'), gainResource('embryo', 2), transcend()],
   text: 'Apply {effects.0.stacks} Bleed to all enemies. Gain {effects.1.amount} Embryo. Transcend.',
 });
 
@@ -60,16 +60,16 @@ export const thornSpurBloom = card({
 
 export const bloodletting = card({
   id: 'virelle.bloodletting', name: 'Bloodletting', owner: 'virelle', reward: true, cost: 1, target: 'chosenEnemy',
-  effects: [applyStatus(bleed, 12)],
+  effects: [applyStatus(bleed, mul(2, stat('attack')))],
 });
 
 export const thornSpur = card({
   id: 'virelle.thorn-spur', name: 'Thorn Spur', owner: 'virelle', reward: true, cost: 1, target: 'chosenEnemy',
-  effects: [repeat(2, [damage(add(3, stat('attack')))])],
+  effects: [repeat(2, [damage(mul(1.5, stat('attack')))])],
   text: 'Deal {effects.0.branch.0.amount} damage twice.',
 });
 
-const cuts = (times: number) => [repeat(times, [damage(add(3, stat('attack')), { target: 'allEnemies' }), applyStatus(bleed, 1, 'allEnemies')])];
+const cuts = (times: number) => [repeat(times, [damage(mul(1.5, stat('attack')), { target: 'allEnemies' }), applyStatus(bleed, mul(0.17, stat('attack')), 'allEnemies')])];
 const cutsText = 'Deal {effects.0.branch.0.amount} damage to all enemies {effects.0.times} times. Each hit applies {effects.0.branch.1.stacks} Bleed.';
 const thousandCuts = (times: number) => ({
   name: 'Thousand Cuts',
@@ -92,7 +92,7 @@ const openedVein = (embryo: number, capstone = false) => ({
 
 // C3: the detonation is three times the Bleed (docs/notes/banner-kits.md).
 export const openTheWoundC3 = variant(openTheWound, 3, {
-  effects: [damage(add(4, stat('attack'))), ifConsume('embryo', 2, [loseHp(mul(3, targetStacks(bleed)), { target: 'chosen' })])],
+  effects: [damage(mul(1.67, stat('attack'))), ifConsume('embryo', 2, [loseHp(mul(3, targetStacks(bleed)), { target: 'chosen' })])],
   text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: the enemy loses HP equal to three times its Bleed.',
 });
 

@@ -22,6 +22,20 @@ export function landingStatus(bearer: Bearer, status: string, registry: Registry
   return bearer.resistsControl && def?.resistedAs ? def.resistedAs : status;
 }
 
+/** Whether a formula reads anything that passes `test`, anywhere inside it. */
+export const formulaReads = (f: unknown, test: (term: object) => boolean): boolean =>
+  typeof f === 'object' && f !== null && (test(f) || Object.values(f).some((v) => (Array.isArray(v) ? v.some((t) => formulaReads(t, test)) : formulaReads(v, test))));
+
+/**
+ * Whether a status's stacks are damage (Bleed, Poison: its own triggers lose HP or deal damage by its
+ * stacks), rather than a count of turns (Weak, Vulnerable, Stun). Damage stacks scale with stats.
+ */
+export function stacksAreDamage(def: StatusDef | undefined): boolean {
+  if (!def) return false;
+  const own = (term: object) => 'stacks' in term && term.stacks === def.id;
+  return !!def.triggers?.some((t) => t.do.some((c) => (c.op === 'loseHp' || c.op === 'damage') && formulaReads(c.amount, own)));
+}
+
 export function stacksOf(statuses: readonly StatusStack[], status: string): number {
   return statuses.find((s) => s.status === status)?.stacks ?? 0;
 }

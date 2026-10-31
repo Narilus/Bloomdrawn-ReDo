@@ -496,7 +496,10 @@ export function symptomText(exp: Expedition, card: string, registry: Registry): 
   const def = registry.cards[card];
   if (!def) return card;
   const party = { hp: exp.hp ?? expeditionMaxHp(exp, registry), maxHp: expeditionMaxHp(exp, registry) };
-  return describeCard(def, registry, (f) => (typeof f === 'object' && 'percent' in f ? String(Math.floor(shareOf(f, party))) : formulaText(f)));
+  // The front member plays it, so its stat numbers are hers.
+  const front = fieldedCharacter(exp.party[0] ?? '', registry, exp)?.stats;
+  const byStats = front ? showStats(front) : formulaText;
+  return describeCard(def, registry, (f, kind) => (typeof f === 'object' && 'percent' in f ? String(Math.floor(shareOf(f, party))) : byStats(f, kind)));
 }
 
 /** The Event the party is standing on, while it waits for a choice. */

@@ -155,8 +155,8 @@ Numbers are never calculated inside a card. Every damage, Shield, healing and co
 
 | Step | Applies | Examples |
 | --- | --- | --- |
-| 1. Base | The operation's formula | 6 + owner's Attack |
-| 2. Flat outgoing | Added amounts from the source side | +3 damage relic |
+| 1. Base | The operation's formula: in the party's content a ratio of a stat (`docs/notes/m6-scaling.md`) | 200% of owner's Attack |
+| 2. Flat outgoing | Added amounts from the source side; party bonuses are percentages instead, since flat ones vanish at depth | — |
 | 3. Outgoing multipliers | Source-side multipliers | Weak ×0.75 |
 | 4. Incoming multipliers | Target-side multipliers | Vulnerable ×1.5 |
 | 4½. Crit | A party `damage` hit that rolled a crit, × (1 + Crit Damage); never statuses, `loseHp`, heals, Shields or enemies (`src/engine/crit.ts`) | 150% |
@@ -170,12 +170,12 @@ A modifier is data: which value it touches, which step, a formula, a filter ("Fl
 Amounts are small typed expression trees, never strings and never `eval`:
 
 ```ts
-add(6, stat('attack'))                          // 6 + owner's Attack
-mul(resource('tentacles'), resource('potency')) // Tentacles × damage per hit
-mul(add(12, stat('attack')), add(1, mul(0.5, resource('essence'))))
+mul(2, stat('attack'))                                       // 200% of owner's Attack
+mul(stat('attack'), add(2.67, mul(2, resource('essence'))))  // 267% of Attack, plus 200% per Essence
+mul(0.8, partyStat('attack'))                                // 80% of the party's average Attack
 ```
 
-Formulas can read owner stats, party stats, Domain resources, status stacks (the source's, or the chosen target's with `targetStacks`), cards in hand (and those with a keyword, and their turns held), Mana spent this turn, cards of a kit slot played earlier this turn (`playedThisTurn('strike')`), turn number, a percentage of the party's current or max HP (`percentOf`, for costs that scale), and the amount just consumed. Anything outside that list is a compile error.
+In character, card and relic content, damage, Shield and the stacks of a damage status (Bleed, Poison) are ratios of the owner's Attack or Defense, and heals a share of the party's max HP, with no flat part; content validation fails a bare number with its file and ID. Enemies are exempt: they scale by level. Formulas can read owner stats, the party's average of a stat (`partyStat`), Domain resources, status stacks (the source's, or the chosen target's with `targetStacks`), cards in hand (and those with a keyword, and their turns held), Mana spent this turn, cards of a kit slot played earlier this turn (`playedThisTurn('strike')`), turn number, a percentage of the party's current or max HP (`percentOf`, for costs that scale), and the amount just consumed. Anything outside that list is a compile error.
 
 ## Everything else is a composition
 

@@ -6,7 +6,9 @@ import { scenario, type ScenarioPlay } from '../testing/scenario.ts';
 // The banner four (docs/notes/banner-kits.md, reviewed by the owner 25 Oct), one scenario or more
 // per card, passive, ultimate, Transcend and reward card. The party is one per Domain: Virelle
 // (Attack 6, Defense 2), Isadora (5, 3), Kibane (5, 3) and Hester (4, 4). Nobody starts with a
-// Tentacle, so the end-of-turn volley does nothing until Isadora makes some.
+// Tentacle, so the end-of-turn volley does nothing until Isadora makes some. Card numbers are ratios
+// of the owner's stats (docs/notes/m6-scaling.md); damage per hit starts at 80% of the party's average
+// Attack, 4 for these four, and each gain is a share of its card owner's Attack (Isadora's 20%: 1).
 const BANNER = ['virelle', 'isadora', 'kibane', 'hester'];
 const DUMMY = 'enemy.training-dummy';
 const BIG = 'enemy.practice-dummy';
@@ -104,7 +106,7 @@ describe('Virelle', () => {
     },
   });
 
-  scenario('Suture Cut deals 3 + Attack and applies 9 Bleed; Opened Vein gains 1 Embryo', {
+  scenario('Suture Cut deals 150% of Attack and applies 150% of it in Bleed (9 and 9); Opened Vein gains 1 Embryo', {
     party: BANNER,
     setup: { hand: ['virelle.suture-cut'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }],
@@ -163,7 +165,7 @@ describe('Virelle', () => {
     },
   });
 
-  scenario('Thousand Cuts hits every enemy 5 times for 3 + Attack, each hit 1 Bleed; preview equals result', {
+  scenario('Thousand Cuts hits every enemy 5 times for 150% of Attack, each hit 17% of it in Bleed (9 and 1); preview equals result', {
     party: BANNER,
     enemies: [DUMMY, DUMMY],
     setup: { hand: [], gauges: { virelle: 100 } },
@@ -193,7 +195,7 @@ describe('Virelle', () => {
     check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 12]]]),
   });
 
-  scenario('Thorn Spur deals 3 + Attack twice', {
+  scenario('Thorn Spur deals 150% of Attack twice', {
     party: BANNER,
     setup: { hand: ['virelle.thorn-spur'] },
     play: [{ card: 'virelle.thorn-spur', target: 0 }],
@@ -207,14 +209,14 @@ describe('Isadora', () => {
     party: BANNER,
     setup: { hand: ['isadora.ankle-bells'] },
     play: [{ card: 'isadora.ankle-bells' }],
-    expect: { resources: { tentacles: 2, potency: 4 }, mana: 4 },
+    expect: { resources: { tentacles: 2, potency: 5 }, mana: 4 },
   });
 
   scenario('Ecstatic Spin volleys twice; Rapt adds +1 per hit after', {
     party: BANNER,
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 3 } },
     play: [{ card: 'isadora.ecstatic-spin' }],
-    expect: { enemyHp: [60 - 2 * 9], resources: { tentacles: 3, potency: 4 }, mana: 2 },
+    expect: { enemyHp: [60 - 2 * 12], resources: { tentacles: 3, potency: 5 }, mana: 2 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 
@@ -223,21 +225,22 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.ribbon-lash', 'isadora.ecstatic-spin'], resources: { tentacles: 2 } },
     play: [{ card: 'isadora.ribbon-lash', target: 0 }, { card: 'isadora.ecstatic-spin' }, { endTurn: true }],
-    expect: { resources: { potency: 4 } },
+    expect: { resources: { potency: 5 } },
   });
 
   scenario('Rapt counts any member\'s card volley, Censer Rite\'s too', {
     party: ['agathe', 'isadora', 'maelia', 'leonora'],
     setup: { hand: ['agathe.censer-rite'] },
     play: [{ card: 'agathe.censer-rite' }],
-    expect: { resources: { potency: 3 + 2 + 1 } },
+    // A start of 80% of the party's average Attack (4.25), then 50% of Agathe's 4, then Rapt's 20% of Isadora's 5.
+    expect: { resources: { potency: 3.4 + 2 + 1 } },
   });
 
   scenario('The Veil Torn: 3 Tentacles, a volley, and Transcend', {
     party: BANNER,
     setup: { hand: ['isadora.the-veil-torn'] },
     play: [{ card: 'isadora.the-veil-torn' }],
-    expect: { enemyHp: [60 - 9], resources: { tentacles: 3, potency: 4 }, gauges: { isadora: 35 }, mana: 2 },
+    expect: { enemyHp: [60 - 12], resources: { tentacles: 3, potency: 5 }, gauges: { isadora: 35 }, mana: 2 },
     check: ({ state }) => expect(transcended(state, 'isadora')).toBe(true),
   });
 
@@ -246,8 +249,8 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 2 }, gauges: { isadora: 100 } },
     play: [{ ultimate: 'isadora' }, { card: 'isadora.ecstatic-spin' }, { endTurn: true }],
-    // Spin: 2 volleys × 2 passes × 2 hits × 3. End of turn: 2 passes × 2 hits × 4 (after Rapt).
-    expect: { enemyHp: [9999 - 24 - 16] },
+    // Spin: 2 volleys × 2 passes × 2 hits × 4. End of turn: 2 passes × 2 hits × 5 (after Rapt).
+    expect: { enemyHp: [9999 - 32 - 20] },
     check: ({ state, plays }) => {
       expect(plays[1]?.after.party.statuses.map((s) => s.status)).toEqual(['status.dance-of-bells']);
       expect(state.party.statuses).toEqual([]);
@@ -270,28 +273,28 @@ describe('Isadora', () => {
     enemies: [BIG],
     setup: { hand: ['isadora.the-veil-torn'], gauges: { isadora: 65 } },
     play: [{ card: 'isadora.the-veil-torn' }, { ultimate: 'isadora' }],
-    // Veil Torn: 3 hits of 3. Then 2 passes of 3 hits of 4 (after Rapt).
-    expect: { enemyHp: [9999 - 9 - 24] },
+    // Veil Torn: 3 hits of 4. Then 2 passes of 3 hits of 5 (after Rapt).
+    expect: { enemyHp: [9999 - 12 - 30] },
   });
 
   scenario('Petal Ribbon: +1 damage per hit, draw 1', {
     party: BANNER,
     setup: { hand: ['isadora.petal-ribbon'] },
     play: [{ card: 'isadora.petal-ribbon' }],
-    expect: { resources: { potency: 4 }, handSize: 1, mana: 5 },
+    expect: { resources: { potency: 5 }, handSize: 1, mana: 5 },
   });
 
-  scenario('Ribbon Lash: 3 + Attack, then a volley', {
+  scenario('Ribbon Lash: 160% of Attack, then a volley', {
     party: BANNER,
     setup: { hand: ['isadora.ribbon-lash'], resources: { tentacles: 2 } },
     play: [{ card: 'isadora.ribbon-lash', target: 0 }],
-    expect: { enemyHp: [60 - 8 - 6], mana: 4 },
+    expect: { enemyHp: [60 - 8 - 8], mana: 4 },
     check: ({ plays }) => previewMatchesResult(plays[0] as ScenarioPlay),
   });
 });
 
 describe('Kibane', () => {
-  scenario('Foxfire Rite deals 4 + 10 × Essence, and a Ritual played charges Kibane by 10', {
+  scenario('Foxfire Rite deals 80% of Attack plus 200% per Essence (4 + 10 × Essence), and a Ritual played charges Kibane by 10', {
     party: BANNER,
     setup: { hand: ['kibane.foxfire-rite'], resources: { essence: 4 } },
     play: [{ card: 'kibane.foxfire-rite', target: 0 }],
@@ -371,7 +374,7 @@ describe('Kibane', () => {
     expect: { resources: { essence: 1 }, handSize: 1, mana: 5 },
   });
 
-  scenario('Gauntlet Rake: 5 + Attack, 1 Essence', {
+  scenario('Gauntlet Rake: 200% of Attack, 1 Essence', {
     party: BANNER,
     setup: { hand: ['kibane.gauntlet-rake'] },
     play: [{ card: 'kibane.gauntlet-rake', target: 0 }],
@@ -466,7 +469,7 @@ describe('Hester', () => {
     check: ({ plays }) => expect(marks(plays[0]!.after)).toEqual([[['vulnerable', 2]]]),
   });
 
-  scenario('Tangle Line: 4 + Defense Shield, 1 Weak on every enemy', {
+  scenario('Tangle Line: 200% of Defense in Shield, 1 Weak on every enemy', {
     party: BANNER,
     enemies: [DUMMY, DUMMY],
     setup: { hand: ['hester.tangle-line'] },

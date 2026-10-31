@@ -8,8 +8,9 @@ describe('the character page', () => {
   it("shows a character's passive and ultimate with the numbers her stats fix", () => {
     expect(describeCharacter(registry.characters.maelia!)).toEqual({
       passive: 'The first time each turn a card gains Embryo, gain 1 more.',
-      ultimate: 'Consume all Embryo. The party heals 3 and gains 4 Shield per Embryo consumed.',
-      transcended: 'Consume all Embryo. The party heals 3 and gains 4 Shield per Embryo consumed, and every enemy gains Poison equal to the Embryo consumed.',
+      // The heal is a share of the party's max HP (m6-scaling.md, 4.8), which only a fight knows: 3 for the starters.
+      ultimate: "Consume all Embryo. For each Embryo consumed, heal 1.43% of the party's max HP and gain 4 Shield.",
+      transcended: "Consume all Embryo. For each Embryo consumed, heal 1.43% of the party's max HP and gain 4 Shield, and every enemy gains 1 Poison.",
     });
   });
 });

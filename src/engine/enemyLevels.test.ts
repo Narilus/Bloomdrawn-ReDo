@@ -6,6 +6,9 @@ import { damage } from './ops/damage.ts';
 import { gainShield } from './ops/gainShield.ts';
 import { heal } from './ops/heal.ts';
 import { summon } from './ops/summon.ts';
+import { applyStatus } from './ops/applyStatus.ts';
+import { loseHp } from './ops/loseHp.ts';
+import { stacks } from './formula.ts';
 import { previewCard, previewIntent } from './preview.ts';
 import { STARTERS, withCardInHand, withCards } from './testing/fixtures.ts';
 
@@ -36,6 +39,12 @@ const registry: Registry = {
         { id: 'call', name: 'Call', effects: [summon({ id: 'test.dummy' }, 1, 1)] },
       ],
     },
+    'test.blighter': {
+      id: 'test.blighter',
+      name: 'Blighter',
+      hp: 400,
+      intents: [{ id: 'blight', name: 'Blight', effects: [applyStatus({ id: 'test.rot' }, 10), applyStatus({ id: 'test.slow' }, 2)] }],
+    },
     'test.barred': {
       id: 'test.barred',
       name: 'Barred',
@@ -44,6 +53,11 @@ const registry: Registry = {
       phases: [{ name: 'Second bar', hp: 200, rouse: { id: 'rouse', name: 'Rouse', effects: [] }, intents: [{ id: 'wait', name: 'Wait', effects: [] }] }],
     },
   },
+};
+registry.statuses = {
+  ...registry.statuses,
+  'test.rot': { id: 'test.rot', stacking: 'add', triggers: [{ on: 'statusTick', filter: { target: 'self' }, do: [loseHp(stacks('test.rot'))] }] },
+  'test.slow': { id: 'test.slow', stacking: 'add', lasts: 'ownTurns' },
 };
 const start = (setup: { enemyLevel?: number; enemyScale?: number } = {}, enemies: Parameters<typeof startCombat>[0]['enemies'] = ['test.biter', { enemy: 'test.frail', hp: 10 }]) =>
   startCombat({ seed: 1, party: STARTERS, enemies, ...setup }, registry).state;
@@ -89,6 +103,13 @@ describe('enemy levels', () => {
     const mending = endTurn(state);
     const hurt = { ...mending, enemies: mending.enemies.map((e) => ({ ...e, hp: 100 })) };
     expect(previewIntent(hurt, hurt.enemies[0]!.id, registry).find((p) => p.op === 'heal')?.amount).toBe(112);
+  });
+
+  it('the damage stacks an enemy applies follow its damage curve, and turn counts stay as written', () => {
+    const state = start({ enemyLevel: 40 }, ['test.blighter']);
+    const shown = previewIntent(state, state.enemies[0]!.id, registry).filter((p) => p.op === 'applyStatus');
+    // 10 × 1.979 is 19.79: 19.
+    expect(shown.map((p) => [p.status, p.amount])).toEqual([['test.rot', 19], ['test.slow', 2]]);
   });
 
   it("leaves the party's damage alone", () => {

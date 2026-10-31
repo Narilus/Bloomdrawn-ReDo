@@ -1,4 +1,4 @@
-import { add, applyStatus, damage, draw, gainShield, stat, transcend } from '../../engine/index.ts';
+import { applyStatus, damage, draw, gainShield, mul, stat, transcend } from '../../engine/index.ts';
 import { c2, card, character, variant } from '../define.ts';
 import { delay, stun } from '../statuses/control.ts';
 import { vulnerable } from '../statuses/vulnerable.ts';
@@ -9,12 +9,12 @@ import { weak } from '../statuses/weak.ts';
 
 export const strike = card({
   id: 'hester.strike', name: 'Strike', owner: 'hester', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(mul(2.5, stat('attack')))],
 });
 
 export const defense = card({
   id: 'hester.defense', name: 'Defense', owner: 'hester', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2.25, stat('defense')))],
 });
 
 export const weightedNet = card({
@@ -45,7 +45,7 @@ export const pitfall = card({
 
 export const tangleLine = card({
   id: 'hester.tangle-line', name: 'Tangle Line', owner: 'hester', reward: true, cost: 1, target: 'allEnemies',
-  effects: [gainShield(add(4, stat('defense'))), applyStatus(weak, 1, 'allEnemies')],
+  effects: [gainShield(mul(2, stat('defense'))), applyStatus(weak, 1, 'allEnemies')],
   text: 'Gain {effects.0.amount} Shield. Apply {effects.1.stacks} Weak to all enemies.',
 });
 

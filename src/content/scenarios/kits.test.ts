@@ -98,7 +98,7 @@ describe('Agathe', () => {
 });
 
 describe('Anthe', () => {
-  scenario('Votive Candle deals 8 + 6 × Essence', {
+  scenario('Votive Candle deals 267% of Attack plus 200% per Essence (8 + 6 × Essence)', {
     setup: { hand: ['anthe.votive-candle'], resources: { essence: 4 } },
     play: [{ card: 'anthe.votive-candle', target: 0 }],
     expect: { enemyHp: [60 - 32], mana: 1 },

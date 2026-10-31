@@ -1,5 +1,4 @@
 import {
-  add,
   applyStatus,
   chargeUltimate,
   consumed,
@@ -10,6 +9,7 @@ import {
   heal,
   ifConsume,
   mul,
+  percentOf,
   repeatNext,
   resource,
   stat,
@@ -23,18 +23,18 @@ import { poison } from '../statuses/poison.ts';
 
 export const strike = card({
   id: 'maelia.strike', name: 'Strike', owner: 'maelia', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack'))), ifConsume('embryo', 1, [applyStatus(poison, 4)])],
+  effects: [damage(mul(3, stat('attack'))), ifConsume('embryo', 1, [applyStatus(poison, mul(1.34, stat('attack')))])],
   text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} Poison.',
 });
 
 export const defense = card({
   id: 'maelia.defense', name: 'Defense', owner: 'maelia', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2, stat('defense')))],
 });
 
 export const swollenPod = card({
   id: 'maelia.swollen-pod', name: 'Swollen Pod', owner: 'maelia', slot: 'flavourA', cost: 2, target: 'allEnemies',
-  effects: [gainResource('embryo', 3), applyStatus(poison, 8, 'allEnemies')],
+  effects: [gainResource('embryo', 3), applyStatus(poison, mul(2.67, stat('attack')), 'allEnemies')],
   text: 'Gain {effects.0.amount} Embryo. Apply {effects.1.stacks} Poison to all enemies.',
 });
 
@@ -66,7 +66,7 @@ export const nursingBud = card({
 
 export const pollenDrift = card({
   id: 'maelia.pollen-drift', name: 'Pollen Drift', owner: 'maelia', reward: true, cost: 2, target: 'allEnemies',
-  effects: [applyStatus(poison, 12, 'allEnemies'), ifConsume('embryo', 2, [applyStatus(poison, 12, 'allEnemies')])],
+  effects: [applyStatus(poison, mul(4, stat('attack')), 'allEnemies'), ifConsume('embryo', 2, [applyStatus(poison, mul(4, stat('attack')), 'allEnemies')])],
   text: 'Apply {effects.0.stacks} Poison to all enemies. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} more.',
 });
 
@@ -82,15 +82,15 @@ export const maelia = character({
   },
   ultimate: {
     name: 'Birthing Bloom',
-    text: 'Consume all Embryo. The party heals {effects.0.branch.0.amount.mul.0} and gains {effects.0.branch.1.amount.mul.0} Shield per Embryo consumed.',
-    effects: [ifConsume('embryo', resource('embryo'), [heal(mul(3, consumed())), gainShield(mul(4, consumed()))])],
+    text: 'Consume all Embryo. For each Embryo consumed, heal {effects.0.branch.0.amount.mul.0} and gain {effects.0.branch.1.amount.mul.0} Shield.',
+    effects: [ifConsume('embryo', resource('embryo'), [heal(mul(percentOf(1.43, 'maxHp'), consumed())), gainShield(mul(mul(0.8, stat('defense')), consumed()))])],
     transcended: {
-      text: 'Consume all Embryo. The party heals {effects.0.branch.0.amount.mul.0} and gains {effects.0.branch.1.amount.mul.0} Shield per Embryo consumed, and every enemy gains Poison equal to the Embryo consumed.',
+      text: 'Consume all Embryo. For each Embryo consumed, heal {effects.0.branch.0.amount.mul.0} and gain {effects.0.branch.1.amount.mul.0} Shield, and every enemy gains {effects.0.branch.2.stacks.mul.0} Poison.',
       effects: [
         ifConsume('embryo', resource('embryo'), [
-          heal(mul(3, consumed())),
-          gainShield(mul(4, consumed())),
-          applyStatus(poison, consumed(), 'allEnemies'),
+          heal(mul(percentOf(1.43, 'maxHp'), consumed())),
+          gainShield(mul(mul(0.8, stat('defense')), consumed())),
+          applyStatus(poison, mul(mul(0.34, stat('attack')), consumed()), 'allEnemies'),
         ]),
       ],
     },

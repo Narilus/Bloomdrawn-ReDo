@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { getOp, slotAt, templateSlots, type CardSlot, type Hooks, type OpCall, type Registry } from '../engine/index.ts';
+import { formulaReads, getOp, slotAt, stacksAreDamage, templateSlots, type CardSlot, type Hooks, type OpCall, type Registry } from '../engine/index.ts';
 import { KINDS, schemas, type Kind } from './schema.ts';
 
 /** The folders content lives in. registry.ts globs these; tools outside Vite (tools/lab) walk them. */
@@ -66,11 +66,28 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
 
   const reg = registry as unknown as Registry;
   const where = (kind: Kind, defId: string) => fileOf.get(`${kind}:${defId}`) ?? '?';
+  /**
+   * Stats are the multiplier (docs/notes/m6-scaling.md, 4.1; owner, 31 Oct): in the party's content,
+   * damage and Shield read a stat, stacks of a damage status read a stat (or a share of the party's max
+   * HP), and heals read the party's max HP. A bare number would stop growing with her. Enemies scale by level instead.
+   */
+  const readsStat = (f: unknown) => formulaReads(f, (t) => 'stat' in t || 'partyStat' in t);
+  const readsMaxHp = (f: unknown) => formulaReads(f, (t) => 'percent' in t && 'of' in t && t.of === 'maxHp');
+  const ratioProblem = (call: OpCall): string | undefined => {
+    if ((call.op === 'damage' || call.op === 'gainShield') && !readsStat(call.amount)) return `${call.op} must be a ratio of a stat, not a bare number`;
+    if (call.op === 'applyStatus' && stacksAreDamage(reg.statuses[String(call.status)]) && !readsStat(call.stacks) && !readsMaxHp(call.stacks)) {
+      return `${String(call.status)} stacks must be a ratio of a stat, not a bare number`;
+    }
+    if (call.op === 'heal' && !readsMaxHp(call.amount)) return "heal must be a share of the party's max HP";
+    return undefined;
+  };
   const checkCalls = (kind: Kind, defId: string, calls: readonly OpCall[], at: string) => {
     calls.forEach((call, i) => {
       const path = `${at}[${i}]`;
       const op = getOp(reg, call.op);
       if (!op) return fail(where(kind, defId), defId, `${path}: unknown operation "${call.op}"`);
+      const ratio = kind === 'card' || kind === 'character' || kind === 'relic' ? ratioProblem(call) : undefined;
+      if (ratio) fail(where(kind, defId), defId, `${path}: ${ratio}`);
       const args = op.args.safeParse(call);
       if (!args.success) {
         for (const issue of args.error.issues) fail(where(kind, defId), defId, `${path}.${pathOf(issue)}${issue.message}`);

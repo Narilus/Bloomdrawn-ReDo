@@ -1,4 +1,4 @@
-import { add, applyStatus, changeCost, damage, draw, gainMana, gainShield, manaDebt, manaSpent, stat, transcend } from '../../engine/index.ts';
+import { applyStatus, changeCost, damage, draw, gainMana, gainShield, manaDebt, manaSpent, mul, stat, transcend } from '../../engine/index.ts';
 import { card, character } from '../define.ts';
 import { vulnerable } from '../statuses/vulnerable.ts';
 import { weak } from '../statuses/weak.ts';
@@ -7,12 +7,12 @@ import { weak } from '../statuses/weak.ts';
 
 export const strike = card({
   id: 'leonora.strike', name: 'Strike', owner: 'leonora', slot: 'strike', cost: 1, target: 'chosenEnemy', charge: 10,
-  effects: [damage(add(6, stat('attack')))],
+  effects: [damage(mul(2.2, stat('attack')))],
 });
 
 export const defense = card({
   id: 'leonora.defense', name: 'Defense', owner: 'leonora', slot: 'defense', cost: 1, target: 'self', charge: 10,
-  effects: [gainShield(add(5, stat('defense')))],
+  effects: [gainShield(mul(2.67, stat('defense')))],
 });
 
 export const promissoryNote = card({

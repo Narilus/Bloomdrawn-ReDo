@@ -5,6 +5,7 @@ import { enemyLevelScale } from './levels.ts';
 import type { OpContext } from './operation.ts';
 import { isImmune } from './phases.ts';
 import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
+import { stacksAreDamage } from './statuses.ts';
 
 /** The numbers modifiers change through the pipeline (`volleys` counts passes instead). */
 export type PipelineValue = 'damage' | 'shield' | 'stacks' | 'stackLoss';
@@ -45,7 +46,8 @@ export function pipeline(
   if (value === 'damage' && state.enemyScale && fromEnemy) amount *= (100 + state.enemyScale) / 100;
   if (fromEnemy && state.enemyLevel) {
     const level = enemyLevelScale(state.enemyLevel);
-    if (value === 'damage') amount *= level.damage / 1000;
+    // Damage stacks an enemy applies (Bleed, Poison) follow its damage curve; turn counts don't scale.
+    if (value === 'damage' || (value === 'stacks' && stacksAreDamage(registry.statuses[status ?? '']))) amount *= level.damage / 1000;
     if (value === 'shield') amount *= level.hp / 1000;
   }
   // A rousing enemy takes no damage (DESIGN.md "Bosses").

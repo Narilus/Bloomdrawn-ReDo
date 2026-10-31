@@ -168,7 +168,7 @@ export const schemas = {
     kind: z.literal('domain'),
     id,
     name: z.string().min(1),
-    resources: z.array(z.strictObject({ id, name: z.string().min(1), start: z.int().min(0).optional() })),
+    resources: z.array(z.strictObject({ id, name: z.string().min(1), start: formulaSchema.optional(), amount: z.literal(true).optional() })),
     anyTeam: z.literal(true).optional(),
     material: id.optional(),
     triggers: hooks.triggers,
