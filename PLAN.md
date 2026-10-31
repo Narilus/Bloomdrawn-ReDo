@@ -362,6 +362,8 @@ More normal enemies, elites and bosses, more of them opening deeper, drafted in 
 
 _Drafted 31 Oct in `docs/notes/bestiary.md`, for the owner's answers: five bands of ten depths, each adding three normal enemies, two elites and a Boss (band 1 adds a crow flock), with seven questions._
 
+_Revised 31 Oct after the owner's direction (`docs/notes/bestiary-direction.md`): bands 2–4 are the Thicket, the Lost Expedition and the Calyx, one rung further into the Bloom each. An enemy sprite stem in DESIGN.md (`--stem enemy`) briefs creatures. Band 2's options are generated for the owner's pick; then its enemies, scenario tests and fights are built._
+
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.

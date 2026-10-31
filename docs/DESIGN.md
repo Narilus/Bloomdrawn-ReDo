@@ -257,12 +257,17 @@ Enemies are things the Bloom has taken, fought in three tiers, and they visibly 
 
 Encounters mix five roles so that reading intents matters: **attacker**, **defender**, **buffer**, **debuffer** and **summoner**. A summoned enemy joins the turn order next round unless its summon says otherwise.
 
+- **No enemy damage ignores Shield** (owner, 31 Oct). Shield is the party's only universal defence, so every enemy hit, elites, Bosses and Trial bosses included, can be blocked.
+- **A countdown Burst is a choice, never a tax** (owner, 31 Oct). An enemy may destroy itself with a Burst only if its intent shows the Burst coming a turn ahead, Shield blocks it, it stays near half the party's HP or less, and killing the enemy first cancels it. No enemy explodes or deals damage on death.
+
 ### Who they are
 
 - Wildlife, livestock and villagers of the region.
 - Members of earlier expeditions, still in their packs, lanterns and survey coats.
 - Bloom cultists: Rapture's dark mirror, in robes with censers.
 - Plants that move: root-mats, pod-throwers, petal-walls.
+
+Deeper is further into the Bloom (owner, 31 Oct): Depths 1–10 are creatures and people the Bloom has taken; 11–20, hybrids of two or three animals with the joins visible; 21–30, people and their gear remade into single bodies; 31–40, the Bloom's own creatures, with no single host; 41–50, its source. A deeper design is never less transformed than a shallower one, and detail and glow rise with depth.
 
 ### Bloom-stage overlays
 
@@ -427,6 +432,10 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 **Battle sprite stem**, used instead of the prompt stem for battle sprites, which are side-view battlers in HD pixel style. The brief gives the facing (party right, enemies left), and the art tool adds the background line:
 
 > High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy, anime-influenced face. One full-body figure in a three-quarter view, feet visible, centred, with empty margin on every side. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. Antique gold filigree accents. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+**Enemy sprite stem**, used instead of the battle sprite stem for enemies from Depth 11 down, which are creatures more than people (owner, 31 Oct: busy inside, clear outside; show the seams; watch the hands). The brief gives the facing, the one beautiful element and any human remnant:
+
+> High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Limbs end in paws, hooves, talons, blades, tendrils or tools, never in human fingers unless the brief asks for one hand. No text, no letters, no logos, no floor, no cast shadow, no scenery.
 
 **Never in any prompt or image:** starfields, galaxies or nebulae; underwater scenes, fish, coral or shells; crystal sparkle; neon; glitch effects; fractals or mirrors; any text baked into the image (all words are added by the game).
 

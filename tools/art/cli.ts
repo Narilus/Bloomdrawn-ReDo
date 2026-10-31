@@ -12,8 +12,9 @@ import { composePrompt, promptProblems, stemFrom, type Background } from './prom
 const ROOT = join(import.meta.dirname, '..', '..');
 const CODEX_HOME = process.env.CODEX_HOME ?? join(homedir(), '.codex');
 const USAGE = `Usage:
-  npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>]
+  npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>] [--stem battle|enemy]
       Stem from DESIGN.md + art/briefs/<character>.txt -> art/raw/<character>/<character>-NN.png
+      (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down)
   npm run art -- cut <raw.png...>
       Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
@@ -29,13 +30,16 @@ async function main() {
       bg: { type: 'string', default: 'transparent' },
       ref: { type: 'string' },
       height: { type: 'string', default: '400' },
+      stem: { type: 'string', default: 'battle' },
     },
   });
   const [command, ...rest] = positionals;
   if (command === 'gen' && rest[0]) {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
-    await generate(rest[0], Number(values.n), background, values.ref);
+    const stem = STEMS[values.stem as keyof typeof STEMS];
+    if (!stem) throw new Error('--stem must be battle or enemy');
+    await generate(rest[0], Number(values.n), background, stem, values.ref);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
   } else if (command === 'pick' && rest[0]) {
@@ -48,9 +52,12 @@ async function main() {
   }
 }
 
-async function generate(character: string, count: number, background: Background, reference?: string) {
+/** The DESIGN.md stem each `--stem` names. */
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem' } as const;
+
+async function generate(character: string, count: number, background: Background, label: string, reference?: string) {
   if (count < 1 || count > 4) throw new Error('--n must be 1 to 4');
-  const stem = stemFrom(readFileSync(join(ROOT, 'docs/DESIGN.md'), 'utf8'), 'Battle sprite stem');
+  const stem = stemFrom(readFileSync(join(ROOT, 'docs/DESIGN.md'), 'utf8'), label);
   const brief = readFileSync(join(ROOT, 'art/briefs', `${character}.txt`), 'utf8');
   const prompt = composePrompt({ stem, brief, background, styleReference: reference !== undefined });
   const problems = promptProblems(prompt, background);

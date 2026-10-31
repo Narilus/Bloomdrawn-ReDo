@@ -5,8 +5,8 @@ import { composePrompt, promptProblems, stemFrom, STYLE_REFERENCE } from './prom
 const design = readFileSync(new URL('../../docs/DESIGN.md', import.meta.url), 'utf8');
 
 describe('prompts', () => {
-  it('reads both stems from DESIGN.md, and neither breaks a rule', () => {
-    for (const label of ['Prompt stem', 'Battle sprite stem']) {
+  it('reads every stem from DESIGN.md, and none breaks a rule', () => {
+    for (const label of ['Prompt stem', 'Battle sprite stem', 'Enemy sprite stem']) {
       const stem = stemFrom(design, label);
       expect(stem.length).toBeGreaterThan(100);
       expect(promptProblems(stem, 'blue')).toEqual([]);
