@@ -22,16 +22,35 @@ Status: **answered by the owner, 31 Oct** (his answers are in his `docs/notes/m6
 
 ## The depth model (31 Oct, `npm run lab:depth`)
 
-The lab fights a practice dummy with four parties (the starters, and Flesh, Rapture and Spirit pairs with Leonora and Hester) at each level, for 40 seeds of 6 turns.
+**Decided (owner, 31 Oct):** stats are the multiplier (`docs/notes/m6-scaling.md`), replacing options A and B. Card numbers are ratios of stats, stats grow ×5 to ×9 by role, and crit joins the party's stats. The first model, before that change, found a level 40 party dealt only 13% more than level 1.
 
-| Party level | 1 | 10 | 20 | 30 | 40 |
-|---|---:|---:|---:|---:|---:|
-| Party HP | 205 | 251 (122%) | 302 (147%) | 354 (173%) | 406 (198%) |
-| Damage per turn | 117 | 120 (102%) | 125 (107%) | 127 (109%) | 132 (113%) |
+**Proposed enemy curves, for the owner to see before they go in.** Run after the change, over the lab's four parties, 20 seeds. The engine's current curve is a placeholder until the owner agrees these.
+- **Average build:** party at the depth's level (40 at most), every ascension due, C0, no ultimates.
+- **Strong build:** C2, ultimates fired. The Domain pairs stand in for single-Domain teams, since each Domain has two characters.
+- **Enemy HP (and Shield, heals)** follows the Average build's damage. **Enemy damage** follows its HP. Each is a share of level 1, so level-1 enemies stay as they are.
+- **The fit:** HP is 1 + 0.129 × (level − 1) + 0.889 × ascensions due (the steps land at 10, 20 and 30). Damage is 1 + 0.114 × (level − 1) + 0.639 × ascensions due.
+- **Past 40:** enemies climb until a Strong build at 50 meets what an Average build meets at 40. HP rises 9.3% of level 40's a level and damage 0.4%.
 
-**Levels barely raise damage.** Attack is a small flat add on a few cards (Strike is 6 + Attack: 9 at level 1, 12 at 40). Most damage comes from flat numbers, Domain resources and statuses, which levels don't touch. Even with Attack weighed three times in every card and growth doubled to 5% a level, a level 40 party deals only 54% more.
+| Depth | Party HP (Avg / Strong) | Damage a turn, 6 turns (Avg / Strong) | Normal fight HP | Elite HP | Boss HP | Normal dmg a turn | Elite dmg a turn | Boss dmg a turn (biggest hit) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 205 / 214 | 110 / 202 | 185 | 300 | 1,000 | 12 | 7 | 16 (44) |
+| 10 | 547 / 569 | 324 / 632 | 563 | 915 | 3,052 | 32 | 19 | 43 (117) |
+| 20 | 912 / 948 | 571 / 1,087 | 965 | 1,570 | 5,232 | 54 | 31 | 71 (196) |
+| 30 | 1,277 / 1,327 | 818 / 1,576 | 1,368 | 2,224 | 7,413 | 76 | 44 | 100 (274) |
+| 40 | 1,513 / 1,571 | 970 / 1,869 | 1,606 | 2,612 | 8,705 | 90 | 52 | 118 (325) |
+| 50 | 1,513 / 1,571 | 970 / 1,869 | 3,096 | 5,033 | 16,778 | 93 | 54 | 123 (337) |
 
-**Decided (owner, 31 Oct): neither A nor B.** `docs/notes/m6-scaling.md` makes stats the multiplier: card numbers are ratios of stats, stats grow ×5 to ×9 by role, and crit joins the party's stats. The enemy curves will be refit from it, against turns-to-kill and threat targets, and shown to the owner before they're committed. The engine's current curve is a placeholder until then.
+| Depth | Normal: turns (Avg / Strong) | threat a turn | Elite: turns | threat | Boss: turns | threat (biggest hit) |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1–40 | 3.6–3.8 / 2.2–2.3 | 6% | 2.7–2.8 / 1.4–1.5 | 3% | 5.3–5.6 / 3.3–3.5 | 8% (21%) |
+| 50 | 7.1 / 4.2 | 6% | 5.2 / 2.7 | 4% | 10.3 / 6.4 | 8% (22%) |
+
+**Where this differs from the owner's targets and anchors:**
+- **The curves hold Depth 1's shape at every depth, and Depth 1 misses the targets.** Normal fights take 3.6 turns (target 2–3). Elites take 2.7 (target 5–6) and the Boss 5.4 (target 10–12). Threat is 6%, 3% and 8% (21% on the Boss's biggest hit) a turn, against targets of 15–25%, 25–35% and 40–60%. Meeting the targets needs level-1 enemies retuned: elites and the Boss about twice the HP, normal fights about 0.7×, and enemy damage three to eight times. The note keeps level-1 enemies as they are, so this is the owner's call.
+- **The threat figures are a floor.** They count only intents' plain damage, not statuses, summons (the Hound Mother's whelps) or Bleed and Poison.
+- **Party HP at 40 is about 1,500 ("well over 1,000").** Damage a turn is about 1,000 for an Average build and 1,900 for a Strong one. Weapons, relics and crit builds should carry strong teams into the thousands.
+- **Elites at 40 are about 2,600 HP and the Boss 8,700.** The anchors are 10,000–20,000 and 100,000+. Reaching them needs higher enemy HP at level 1 (the turns targets point the same way) or the ×10 rebase (m6-scaling.md, 4.3).
+- **Past 40, damage hardly climbs** (+0.4% a level). A C2 Strong build has barely more HP than an Average one. Enemy damage past 40 may want its own rate, such as HP's.
 
 **Rewards:** a won run of 6 fights, 2 elites and the Boss pays 3,600 EXP and 1,100 Ducats at Depth 1. Levelling one character from 1 to 40 is 78,000 EXP, which is 22 such runs at Depth 1. With a multiplier of 1 + 0.25 × (depth − 1) (×3.25 at Depth 10, ×10.75 at 40, ×13.25 at 50), about one won run levels one character through a band of ten at that band's depths. That is about 3.5 runs from 1 to 40 while raising the depth. Ducats run about 1.2–1.4 runs a band in the middle bands, because the ascension costs come on top.
 

@@ -1,33 +1,35 @@
-// The depth model (docs/notes/m6-depth.md, "Depth tiers"; owner, 31 Oct): what a party at each level
-// can take and deal, the enemy scaling that keeps a depth as hard as its level, and the reward
-// multiplier that keeps levelling to 40 to a bounded number of runs. A measuring tool, not a test.
-// Run `npm run lab:depth -- [--seeds 40] [--turns 6] [--attack 1]`. Characters grow by role
-// (`statsAt`), with every ascension due made; `--attack` weighs Attack more in every card formula,
-// on a copy of the content; the game is unchanged.
+// The depth model (docs/notes/m6-scaling.md, 4.10; owner, 31 Oct): what an Average and a Strong
+// build deal and can take at each level, the enemy curves that keep a depth's turns-to-kill and threat
+// where they are at Depth 1, and the reward multiplier (docs/notes/m6-depth.md). A measuring tool, not a test.
+// Run `npm run lab:depth -- [--seeds 20] [--fights 6] [--elites 2]`.
+//
+// - Average build: every member at the depth's level (40 at most) with every ascension due made, C0,
+//   no ultimates, the lab's simple player, averaged over the four parties.
+// - Strong build: the same at C2 with ultimates fired. A single-Domain team needs four of a Domain and
+//   the game has two each, so the three Domain pairs stand in for it.
+// - Enemy HP (with Shield and heals) follows the Average build's damage, and enemy damage its HP, each
+//   as a share of level 1, so level-1 enemies stay as they are. Past 40 enemies climb until a Strong
+//   build at Depth 50 meets what an Average build meets at 40.
 import { parseArgs } from 'node:util';
-import { statsAt, type CardDef, type Formula, type Registry } from '../../src/engine/index.ts';
-import { ASCENSIONS, expToNext, MAX_LEVEL, moneyToNext } from '../../src/game/levels.ts';
+import { statsAt, withDupes, type EnemyDef, type Registry } from '../../src/engine/index.ts';
 import { M3_EXPEDITION } from '../../src/game/expedition.ts';
+import { ASCENSIONS, expToNext, MAX_LEVEL, moneyToNext } from '../../src/game/levels.ts';
 import { fight, mean, type Setup } from './play.ts';
 import { loadRegistry } from './registry.ts';
 
 const { values } = parseArgs({
   options: {
-    seeds: { type: 'string', default: '40' },
-    turns: { type: 'string', default: '6' },
-    attack: { type: 'string', default: '1' },
+    seeds: { type: 'string', default: '20' },
     fights: { type: 'string', default: '6' },
     elites: { type: 'string', default: '2' },
   },
 });
 const SEEDS = Number(values.seeds);
-const TURNS = Number(values.turns);
-const ATTACK = Number(values.attack);
 /** A won run's fights: normal fights and elites, then the Boss. */
 const FIGHTS = Number(values.fights);
 const ELITES = Number(values.elites);
-const LEVELS = [1, 5, 10, 15, 20, 25, 30, 35, 40];
 const DEPTH_MAX = 50;
+const SHOWN = [1, 10, 20, 30, 40, 50];
 
 const PARTIES: Omit<Setup, 'ultimates'>[] = [
   { name: 'Starters', party: ['agathe', 'maelia', 'anthe', 'leonora'] },
@@ -35,74 +37,133 @@ const PARTIES: Omit<Setup, 'ultimates'>[] = [
   { name: 'Rapture', party: ['agathe', 'isadora', 'leonora', 'hester'] },
   { name: 'Spirit', party: ['anthe', 'kibane', 'leonora', 'hester'] },
 ];
+const STRONG = PARTIES.slice(1);
 
-/** Every `k × Attack` term in a formula weighed `by` more: `attack` alone becomes `by × attack`. */
-function weighAttack(f: Formula, by: number): Formula {
-  if (typeof f !== 'object') return f;
-  if ('stat' in f && f.stat === 'attack') return { mul: [by, f] };
-  if ('add' in f) return { add: f.add.map((t) => weighAttack(t, by)) };
-  if ('mul' in f) return f.mul.some((t) => typeof t === 'object' && 'stat' in t) ? { mul: [by, ...f.mul] } : { mul: f.mul.map((t) => weighAttack(t, by)) };
-  return f;
-}
-const weighCalls = (calls: CardDef['effects'], by: number): CardDef['effects'] =>
-  calls.map((c) => ({ ...c, ...(c.amount !== undefined ? { amount: weighAttack(c.amount as Formula, by) } : {}), ...(Array.isArray(c.branch) ? { branch: weighCalls(c.branch as CardDef['effects'], by) } : {}) }));
-
-/** Ascensions due at a level: those whose gate is below it. */
-const ascensionsAt = (level: number) => ASCENSIONS.filter((a) => a.at < level).length;
-const grown = (registry: Registry, id: string, level: number) => {
-  const c = registry.characters[id]!;
-  return statsAt(c.stats, c.role, level, ascensionsAt(level));
-};
+/** The owner's targets (m6-scaling.md, 4.10): turns an Average build takes, and an unkilled tier's damage a turn as a share of party HP. */
+const TIERS = { normal: { window: 3 }, elite: { window: 6 }, boss: { window: 12 } } as const;
+type Tier = keyof typeof TIERS;
+const TIER_LIST = Object.keys(TIERS) as Tier[];
 
 const content = await loadRegistry();
-const weighed: Registry = ATTACK === 1 ? content : { ...content, cards: Object.fromEntries(Object.entries(content.cards).map(([id, c]) => [id, { ...c, effects: weighCalls(c.effects, ATTACK) }])) };
+// A dummy nothing can kill, so long windows at high levels count every hit.
+const registry: Registry = { ...content, enemies: { ...content.enemies, 'enemy.practice-dummy': { ...content.enemies['enemy.practice-dummy']!, hp: 1e9 } } };
 
-// 1. The party at each level: HP pool, a Defense card's Shield, and damage per turn over a fight.
-interface Row {
-  level: number;
-  hp: number;
-  shield: number;
-  damage: number;
+/** Ascensions due at a level: every gate at or below it is made. */
+const ascensionsAt = (level: number) => ASCENSIONS.filter((a) => a.at <= level).length;
+const partyLevel = (depth: number) => Math.min(depth, MAX_LEVEL);
+
+function partyHp(parties: Omit<Setup, 'ultimates'>[], level: number, dupes: number): number {
+  return mean(
+    parties.map((p) =>
+      p.party.reduce((n, id) => {
+        const c = withDupes(registry.characters[id]!, dupes);
+        return n + statsAt(c.stats, c.role, level, ascensionsAt(level)).hp;
+      }, 0),
+    ),
+  );
 }
-const rows: Row[] = LEVELS.map((level) => {
-  const registry = weighed;
-  const hp = mean(PARTIES.map((p) => p.party.reduce((n, id) => n + grown(registry, id, level).hp, 0)));
-  const shield = mean(PARTIES.flatMap((p) => p.party.map((id) => 5 + grown(registry, id, level).defense)));
-  const damage = mean(
-    PARTIES.map((p) => {
-      const fights = Array.from({ length: SEEDS }, (_, i) => fight(i + 1, { ...p, ultimates: true }, registry, { turns: TURNS, enemies: 1, level, ascensions: ascensionsAt(level) }));
-      return mean(fights.map((f) => f.perTurn.reduce((a, b) => a + b, 0) / TURNS));
+
+function dpt(parties: Omit<Setup, 'ultimates'>[], level: number, opts: { turns: number; enemies: number; ultimates: boolean; dupes: number }): number {
+  return mean(
+    parties.map((p) => {
+      const fights = Array.from({ length: SEEDS }, (_, i) =>
+        fight(i + 1, { ...p, ultimates: opts.ultimates }, registry, { turns: opts.turns, enemies: opts.enemies, level, ascensions: ascensionsAt(level), dupes: opts.dupes }),
+      );
+      return mean(fights.map((f) => f.perTurn.reduce((a, b) => a + b, 0) / opts.turns));
     }),
   );
-  return { level, hp, shield, damage };
+}
+
+// Level-1 enemies by tier, from the content: HP (every bar) and damage a turn (the mean of its
+// intents' damage to the party), summed over a fight's enemies and averaged over its encounters.
+type Call = { op: string; amount?: unknown; times?: unknown; branch?: unknown };
+const intentDamage = (calls: readonly Call[]): number =>
+  calls.reduce((n, c) => {
+    if (c.op === 'damage' && typeof c.amount === 'number') return n + c.amount;
+    if (c.op === 'repeat' && Array.isArray(c.branch)) return n + Number(c.times ?? 1) * intentDamage(c.branch as Call[]);
+    return n;
+  }, 0);
+function enemyNumbers(e: EnemyDef) {
+  const intents = [...(e.intents ?? []), ...(e.phases ?? []).flatMap((p) => p.intents)];
+  const hits = intents.map((i) => intentDamage(i.effects as Call[]));
+  return { hp: e.hp + (e.phases ?? []).reduce((n, p) => n + p.hp, 0), perTurn: mean(hits), biggest: Math.max(0, ...hits) };
+}
+function tierAtLevel1(tier: Tier) {
+  const list = Object.values(registry.encounters)
+    .filter((en) => en.tier === tier && en.id !== 'encounter.training' && !en.id.endsWith('full-bloom'))
+    .map((en) => {
+      const all = en.enemies.map((entry) => {
+        const n = enemyNumbers(registry.enemies[typeof entry === 'string' ? entry : entry.enemy]!);
+        return typeof entry === 'string' ? n : { ...n, hp: entry.hp };
+      });
+      return { count: all.length, hp: all.reduce((n, x) => n + x.hp, 0), perTurn: all.reduce((n, x) => n + x.perTurn, 0), biggest: Math.max(...all.map((x) => x.biggest)) };
+    });
+  return { count: Math.round(mean(list.map((x) => x.count))), hp: mean(list.map((x) => x.hp)), perTurn: mean(list.map((x) => x.perTurn)), biggest: mean(list.map((x) => x.biggest)) };
+}
+const level1 = Object.fromEntries(TIER_LIST.map((t) => [t, tierAtLevel1(t)])) as Record<Tier, ReturnType<typeof tierAtLevel1>>;
+
+// The Average build at every level 1 to 40, and the Strong build where it's shown.
+const levels = Array.from({ length: MAX_LEVEL }, (_, i) => i + 1);
+const build = (parties: Omit<Setup, 'ultimates'>[], level: number, strong: boolean) => ({
+  hp: partyHp(parties, level, strong ? 2 : 0),
+  dpt: Object.fromEntries(TIER_LIST.map((t) => [t, dpt(parties, level, { turns: TIERS[t].window, enemies: level1[t].count, ultimates: strong, dupes: strong ? 2 : 0 })])) as Record<Tier, number>,
 });
-const first = rows[0]!;
-const pct = (n: number) => `${Math.round(n * 100)}%`;
+const average = levels.map((level) => build(PARTIES, level, false));
+const strongBuilds = new Map(SHOWN.map((d) => partyLevel(d)).map((level) => [level, build(STRONG, level, true)]));
 
-console.log(`\n## The party by level\n`);
-console.log(`Growth by role, every ascension due made${ATTACK === 1 ? '' : `, Attack weighed ×${ATTACK} in cards`}. Means over ${PARTIES.map((p) => p.name).join(', ')}; damage is per turn over ${TURNS} turns, ${SEEDS} seeds, against one dummy.\n`);
-console.log('| Level | Party HP | vs L1 | Defense Shield | vs L1 | Damage per turn | vs L1 |');
-console.log('|---:|---:|---:|---:|---:|---:|---:|');
-for (const r of rows) console.log(`| ${r.level} | ${Math.round(r.hp)} | ${pct(r.hp / first.hp)} | ${r.shield.toFixed(1)} | ${pct(r.shield / first.shield)} | ${Math.round(r.damage)} | ${pct(r.damage / first.damage)} |`);
-
-// 2. Enemies: HP follows the party's damage and damage follows its HP, so a depth at the party's
-// level lasts as long and hurts as much as Depth 1 at level 1. Fitted as straight lines to 40;
-// past 40 the party stops growing, and enemies go on by CHALLENGE a level, compounding.
-const CHALLENGE = 0.04;
-const slope = (ys: number[]) => {
-  // Least squares through (1, 1): y − 1 = a (level − 1).
-  const xs = rows.map((r) => r.level - 1);
-  return xs.reduce((n, x, i) => n + x * (ys[i]! - 1), 0) / xs.reduce((n, x) => n + x * x, 0);
+// Fit curve(L) = 1 + a (L − 1) + b × ascensions due, least squares over levels 1 to 40: HP from the
+// Average build's elite-window damage, damage from its HP.
+function fit(ys: number[]): { a: number; b: number } {
+  const xs = levels.map((l) => [l - 1, ascensionsAt(l)] as const);
+  const r = ys.map((y) => y - 1);
+  const sxx = xs.reduce((n, [x]) => n + x * x, 0);
+  const sxs = xs.reduce((n, [x, s]) => n + x * s, 0);
+  const sss = xs.reduce((n, [, s]) => n + s * s, 0);
+  const sxy = xs.reduce((n, [x], i) => n + x * r[i]!, 0);
+  const ssy = xs.reduce((n, [, s], i) => n + s * r[i]!, 0);
+  const det = sxx * sss - sxs * sxs;
+  return { a: (sxy * sss - ssy * sxs) / det, b: (sxx * ssy - sxs * sxy) / det };
+}
+const first = average[0]!;
+const top = average[MAX_LEVEL - 1]!;
+const strongTop = strongBuilds.get(MAX_LEVEL)!;
+const hpFit = fit(average.map((r) => r.dpt.elite / first.dpt.elite));
+const dmgFit = fit(average.map((r) => r.hp / first.hp));
+const pastHp = (strongTop.dpt.elite / top.dpt.elite - 1) / (DEPTH_MAX - MAX_LEVEL);
+const pastDmg = (strongTop.hp / top.hp - 1) / (DEPTH_MAX - MAX_LEVEL);
+const curve = (f: { a: number; b: number }, past: number, depth: number) => {
+  const on = 1 + f.a * (Math.min(depth, MAX_LEVEL) - 1) + f.b * ascensionsAt(Math.min(depth, MAX_LEVEL));
+  return on * (1 + past * Math.max(0, depth - MAX_LEVEL));
 };
-const hpSlope = slope(rows.map((r) => r.damage / first.damage));
-const damageSlope = slope(rows.map((r) => r.hp / first.hp));
-const curve = (a: number, level: number) => (1 + a * (Math.min(level, MAX_LEVEL) - 1)) * (1 + CHALLENGE) ** Math.max(0, level - MAX_LEVEL);
 
-console.log(`\n## Enemies by level\n`);
-console.log(`Fitted: enemy HP +${(hpSlope * 100).toFixed(2)}% of level 1 per level (the party's damage), enemy damage +${(damageSlope * 100).toFixed(2)}% per level (the party's HP); past ${MAX_LEVEL}, both +${CHALLENGE * 100}% a level, compounding.\n`);
-console.log('| Enemy level | HP | Damage |');
-console.log('|---:|---:|---:|');
-for (const level of [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) console.log(`| ${level} | ×${curve(hpSlope, level).toFixed(2)} | ×${curve(damageSlope, level).toFixed(2)} |`);
+const round = (n: number) => Math.round(n).toLocaleString('en-GB');
+const pct = (n: number) => `${Math.round(n)}%`;
+console.log(`\n## The depth model (${SEEDS} seeds)\n`);
+console.log(
+  `Level-1 enemies from the content: a normal fight ${round(level1.normal.hp)} HP over ${level1.normal.count} enemies, dealing ${round(level1.normal.perTurn)} a turn; an elite ${round(level1.elite.hp)} HP, ${round(level1.elite.perTurn)} a turn; the Boss ${round(level1.boss.hp)} HP, ${round(level1.boss.perTurn)} a turn (biggest hit ${round(level1.boss.biggest)}).\n`,
+);
+console.log(
+  `Fitted (share of level 1): HP 1 + ${hpFit.a.toFixed(4)} × (level − 1) + ${hpFit.b.toFixed(3)} × ascensions due; damage 1 + ${dmgFit.a.toFixed(4)} × (level − 1) + ${dmgFit.b.toFixed(3)} × ascensions due. Past 40, HP +${(pastHp * 100).toFixed(1)}% and damage +${(pastDmg * 100).toFixed(1)}% of level 40's a level.\n`,
+);
+const header = ['Depth', 'Party HP (Avg / Strong)', 'Damage a turn, elite window (Avg / Strong)', 'Normal fight HP', 'Elite HP', 'Boss HP', 'Normal dmg a turn', 'Elite dmg a turn', 'Boss dmg a turn (biggest)', 'HP ×', 'Dmg ×'];
+console.log(`| ${header.join(' | ')} |`);
+console.log(`|${header.map((_, i) => (i === 0 ? '---' : '---:')).join('|')}|`);
+const rows = SHOWN.map((depth) => ({ depth, avg: average[partyLevel(depth) - 1]!, strong: strongBuilds.get(partyLevel(depth))!, hpX: curve(hpFit, pastHp, depth), dmgX: curve(dmgFit, pastDmg, depth) }));
+for (const { depth, avg, strong, hpX, dmgX } of rows) {
+  console.log(
+    `| ${depth} | ${round(avg.hp)} / ${round(strong.hp)} | ${round(avg.dpt.elite)} / ${round(strong.dpt.elite)} | ${round(level1.normal.hp * hpX)} | ${round(level1.elite.hp * hpX)} | ${round(level1.boss.hp * hpX)} | ${round(level1.normal.perTurn * dmgX)} | ${round(level1.elite.perTurn * dmgX)} | ${round(level1.boss.perTurn * dmgX)} (${round(level1.boss.biggest * dmgX)}) | ×${hpX.toFixed(2)} | ×${dmgX.toFixed(2)} |`,
+  );
+}
+console.log(`\n### Against the targets\n`);
+const head2 = ['Depth', 'Normal: turns (Avg / Strong)', 'threat', 'Elite: turns', 'threat', 'Boss: turns', 'threat (biggest hit)'];
+console.log(`| ${head2.join(' | ')} |`);
+console.log(`|${head2.map((_, i) => (i === 0 ? '---' : '---:')).join('|')}|`);
+for (const { depth, avg, strong, hpX, dmgX } of rows) {
+  const turns = (t: Tier) => `${((level1[t].hp * hpX) / avg.dpt[t]).toFixed(1)} / ${((level1[t].hp * hpX) / strong.dpt[t]).toFixed(1)}`;
+  const threat = (t: Tier) => pct((100 * level1[t].perTurn * dmgX) / avg.hp);
+  console.log(`| ${depth} | ${turns('normal')} | ${threat('normal')} | ${turns('elite')} | ${threat('elite')} | ${turns('boss')} | ${threat('boss')} (${pct((100 * level1.boss.biggest * dmgX) / avg.hp)}) |`);
+}
+console.log(`\nTargets: normal 2–3 turns (Strong about 1), 15–25% a turn; elite 5–6 (2–3), 25–35%; Boss 10–12 (4–5), 40–60% on big hits.`);
 
 // 3. Rewards: what each band of ten levels costs one character, what a won run pays at Depth 1,
 // and a multiplier rising with depth so that about one won run (no Fruiting) levels one character

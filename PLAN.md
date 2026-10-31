@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.3 waits on the owner's choice of how levels make characters stronger; M6.5 The bestiary next
+**Current task:** M6.3: the owner reviews the fitted enemy curves (`docs/notes/m6-depth.md`, "The depth model")
 
 ## Milestones
 
@@ -343,6 +343,8 @@ Enemies have a level that scales their HP and damage, shown as a small tag. `npm
 - the owner has seen and agreed the curves.
 
 _In progress 31 Oct. Combat state carries the enemies' level (`enemyLevel`, absent at 1), and an enemy's HP (encounter overrides, summons and later bars included), Shield and heals follow one curve and its damage another (`src/engine/levels.ts`), before the Bloom scale's percent. Enemy plates show "Lv N". Dev test fights take `?enemyLevel=N`. `npm run lab:depth` (`tools/lab/depth.ts`, sharing the lab's player in `tools/lab/play.ts`) models the party by level, the enemy curves and the reward multiplier. Its finding, that levels barely raise damage, and the choice it leaves are in `docs/notes/m6-depth.md`, "The depth model"; the curves in the engine are placeholders until the owner chooses. Tests: `src/engine/enemyLevels.test.ts`, `e2e/boot.spec.ts`._
+
+_31 Oct, scaling (owner; `docs/notes/m6-scaling.md`): stats are the multiplier. Done: role growth with ascension steps, round-once pipeline, crit for the party, card numbers as stat ratios with a validation guard rail, Rapture's potency as a stored amount, enemy-applied Bleed and Poison on the damage curve. `npm run lab:depth` now models Average and Strong builds and fits the enemy curves; the proposed curves and where they miss the targets are in `docs/notes/m6-depth.md`, "The depth model". They go into the engine once the owner has seen them; then he plays a level-1 run and a level-40 party at Depth 40._
 
 ### M6.4 Depth tiers
 Party select chooses a depth. A new profile's first run is at Depth 1, then 1–10 open; winning Depth 10 opens 11–20, and so on to 50. The run fields enemies at its depth's level and banks rewards at its multiplier.
