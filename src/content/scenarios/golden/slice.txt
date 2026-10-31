@@ -223,8 +223,8 @@ handDrawn
   handDrawn
 > playCard leonora.strike
   cardPlayed src=m3 tgt=e20 card=c15
-  damageDealt src=m3 tgt=e20 amt=11
-  damageTaken src=m3 tgt=e20 amt=11
+  damageDealt src=m3 tgt=e20 amt=16 crit
+  damageTaken src=m3 tgt=e20 amt=16 crit
   ultimateCharged src=m3 tgt=m3 amt=10
 > playCard maelia.defense
   cardPlayed src=m1 card=c6
@@ -253,9 +253,6 @@ handDrawn
   damageDealt src=m0 tgt=e20 amt=6
   damageTaken src=m0 tgt=e20 amt=6
   damageDealt src=m0 tgt=e20 amt=6
-  damageTaken src=m0 tgt=e20 amt=6
-  statusTick tgt=e20
-  damageDealt src=e20 tgt=e20 status.poison amt=8
   combatEnd victory
 
 final: {"turn":5,"outcome":"victory","party":{"hp":205,"maxHp":210,"shield":18,"statuses":[]},"enemies":[0],"resources":{"tentacles":6,"potency":6,"embryo":0,"essence":4},"gauges":[55,0,0,45]}

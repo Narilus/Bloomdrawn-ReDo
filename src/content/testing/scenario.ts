@@ -11,6 +11,7 @@ import {
   type Preview,
   type Registry,
   type RunCard,
+  type Stats,
 } from '../../engine/index.ts';
 import { registry as gameRegistry } from '../registry.ts';
 
@@ -26,6 +27,8 @@ export interface ScenarioSpec {
   ascensions?: Record<string, number>;
   enemies?: string[];
   seed?: number;
+  /** Let the party crit at its real rates; otherwise no hit crits, so numbers are exact. */
+  crit?: boolean;
   setup?: {
     /**
      * Card IDs to hold, in order. They come out of the deck when present; otherwise new copies are
@@ -65,9 +68,17 @@ export interface ScenarioRun {
   plays: ScenarioPlay[];
 }
 
+/** The content with every character's crit chance at 0, at every dupe level, so a scenario's numbers are exact. */
+export function withoutCrit(registry: Registry): Registry {
+  const off = <T extends { stats?: Stats }>(x: T): T => (x.stats ? { ...x, stats: { ...x.stats, critRate: 0 } } : x);
+  const characters = Object.fromEntries(Object.entries(registry.characters).map(([id, c]) => [id, { ...off(c), ...(c.dupes && { dupes: c.dupes.map(off) }) }]));
+  return { ...registry, characters };
+}
+
 /** Sets up a combat as described, plays the cards in order and records each preview and result. */
-export function runScenario(spec: ScenarioSpec, registry: Registry = gameRegistry): ScenarioRun {
+export function runScenario(spec: ScenarioSpec, content: Registry = gameRegistry): ScenarioRun {
   const party = spec.party ?? STARTER_PARTY;
+  const registry = spec.crit ? content : withoutCrit(content);
   let state = startCombat(
     {
       seed: spec.seed ?? 1,

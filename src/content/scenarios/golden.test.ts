@@ -23,7 +23,7 @@ function policy(state: CombatState): Command {
 }
 
 const line = (e: EngineEvent) =>
-  [e.type, e.source && `src=${e.source}`, e.target && `tgt=${e.target}`, e.card && `card=${e.card}`, e.resource, e.status, e.amount !== undefined && `amt=${e.amount}`, e.absorbed ? `abs=${e.absorbed}` : '', e.outcome]
+  [e.type, e.source && `src=${e.source}`, e.target && `tgt=${e.target}`, e.card && `card=${e.card}`, e.resource, e.status, e.amount !== undefined && `amt=${e.amount}`, e.absorbed ? `abs=${e.absorbed}` : '', e.crit && 'crit', e.outcome]
     .filter(Boolean)
     .join(' ');
 

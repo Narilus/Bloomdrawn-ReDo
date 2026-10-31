@@ -37,6 +37,8 @@ export interface Preview {
   amount?: number;
   /** Damage that Shield would absorb. */
   absorbed?: number;
+  /** A party damage hit's amount if it crits, and the chance it does, in percent. */
+  crit?: { amount: number; rate: number };
   resource?: string;
   status?: string;
   /** Control flow: whether the branch would resolve, and what it would do. */

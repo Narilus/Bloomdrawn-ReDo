@@ -2416,6 +2416,24 @@ kbd {
   gap: 28px;
 }
 
+/* A raised card's crit line (m6-scaling.md, 4.6): what its first hit deals on a crit, and the chance. */
+.card-crit {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  padding: 3px 12px;
+  border: 1px solid rgba(245, 201, 78, 0.8);
+  border-radius: 8px;
+  background: rgba(30, 21, 25, 0.92);
+  color: #f5c94e;
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* The run's depth (M6.4): a stepper, what the depth means, and how to open deeper ones. */
 .depth-chooser {
   display: grid;

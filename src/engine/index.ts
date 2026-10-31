@@ -1,4 +1,5 @@
 export * from './combat.ts';
+export * from './crit.ts';
 export * from './dupes.ts';
 export * from './levels.ts';
 export { vitalsOf, type Vitals } from './state.ts';

@@ -64,6 +64,10 @@ There are no extra turns or bonus action phases. Effects can refund Mana, draw, 
 
 The party shares one HP pool, equal to the sum of the four characters' Max HP. Current HP carries between fights; Shield does not. A shared bar shows incoming damage from all visible intents, marked Safe when Shield covers it and with a skull when it is lethal.
 
+### Crit
+
+Every character has Crit Rate (5%) and Crit Damage (+50%, so a crit deals 150%); Attackers gain more at each ascension. Only the party's damage hits crit, each hit rolled on its own, Tentacle volleys and ultimates included. Status ticks, HP loss (detonations), heals and Shields never crit, so status builds are the predictable way to deal damage. **An enemy never crits**: intents are exact. A card shows its normal number; raised, it shows its crit number and chance. Crits pop larger, in gold, with "!" (owner, 31 Oct; `docs/notes/m6-scaling.md`).
+
 ### Launch statuses
 
 | Status | Effect |

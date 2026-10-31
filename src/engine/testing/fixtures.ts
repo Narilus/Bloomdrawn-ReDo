@@ -63,7 +63,8 @@ const character = (id: string, triggers?: TriggerDef[]): CharacterDef => ({
   id,
   name: id,
   domain: 'test',
-  stats: { hp: 20, attack: 3, defense: 2 },
+  // No crit, so fixture fights are exact; crit has its own tests (`crit.test.ts`).
+  stats: { hp: 20, attack: 3, defense: 2, critRate: 0 },
   cards: fiveCards(id).map((c) => c.id),
   ...(triggers ? { passive: { triggers } } : {}),
 });

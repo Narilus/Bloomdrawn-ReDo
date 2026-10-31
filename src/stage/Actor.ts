@@ -97,8 +97,8 @@ export class Actor {
     );
   }
 
-  /** Floats a number or word up from above the actor's head. */
-  popup(text: string, colour: string, delay = 0, size = 54): void {
+  /** Floats a number or word up from above the actor's head; `punch` is how far it swells as it appears. */
+  popup(text: string, colour: string, delay = 0, size = 54, punch = 1.15): void {
     const label = new Text({
       text,
       style: {
@@ -127,7 +127,7 @@ export class Actor {
       if (!label.destroyed) label.destroy();
       this.popups = Math.max(0, this.popups - 1);
     });
-    this.track(animate(label.scale, { x: [0.6, 1.15, 1], y: [0.6, 1.15, 1] }, { duration: 0.3, delay }));
+    this.track(animate(label.scale, { x: [0.6, punch, 1], y: [0.6, punch, 1] }, { duration: 0.3, delay }));
   }
 
   /** Hides the actor and its shadow at once (an enemy already defeated). */

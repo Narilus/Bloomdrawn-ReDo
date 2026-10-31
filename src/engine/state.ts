@@ -10,7 +10,7 @@ export const GAUGE_MAX = 100;
 /** The most enemies a fight can hold at once, summons included. */
 export const ENEMY_SLOTS_MAX = 4;
 
-export const COMBAT_STREAMS = ['shuffle', 'targeting', 'intents'] as const;
+export const COMBAT_STREAMS = ['shuffle', 'targeting', 'intents', 'crit'] as const;
 export type CombatStream = (typeof COMBAT_STREAMS)[number];
 
 /** Instance IDs inside one combat: `m0`–`m3` party members, `e*` enemies, `r*` relics, `c*` cards. */

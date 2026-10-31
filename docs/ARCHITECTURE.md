@@ -159,6 +159,7 @@ Numbers are never calculated inside a card. Every damage, Shield, healing and co
 | 2. Flat outgoing | Added amounts from the source side | +3 damage relic |
 | 3. Outgoing multipliers | Source-side multipliers | Weak ×0.75 |
 | 4. Incoming multipliers | Target-side multipliers | Vulnerable ×1.5 |
+| 4½. Crit | A party `damage` hit that rolled a crit, × (1 + Crit Damage); never statuses, `loseHp`, heals, Shields or enemies (`src/engine/crit.ts`) | 150% |
 | 5. Shield | Absorbs damage unless the hit ignores Shield | — |
 | 6. Floor | Every step is exact; round down once, at the end, never below 0 (`docs/notes/m6-scaling.md`, 4.7) | 12 × 1.15 × 1.5 = 20.7 → 20 |
 
@@ -203,7 +204,7 @@ The same state, content version and commands always produce the same result. Tha
 
 - **State is plain data.** Combat, run and profile state are JSON-serialisable objects with no class instances, functions or references to content objects (only IDs).
 - **Transitions are pure.** `apply(state, command, registry)` returns a new state and events, or a rejection with the old state untouched. It also returns the HP and Shield after each event (`vitals`), so the HUD's bars move as each hit lands on the battlefield. An operation that lands several hits in one go (a volley) returns the vitals after each of its events, and victory and defeat are judged on them, so a fight won partway through a volley ends on the killing hit with every earlier death recorded.
-- **Named random streams.** A small seeded generator, with separate streams stored in state: shuffle, targeting and enemy intents per combat; map layout, map content, rewards and shops per run; gacha per banner family. Adding a random call in one stream never shifts another.
+- **Named random streams.** A small seeded generator, with separate streams stored in state: shuffle, targeting, enemy intents and crit per combat (previews never roll crit); map layout, map content, rewards and shops per run; gacha per banner family. Adding a random call in one stream never shifts another.
 - **No ambient inputs.** The engine never reads the clock, `Math.random` or the screen. Cosmetic randomness (idle offsets, particles) uses its own stream in the presentation layer.
 
 ### Saves

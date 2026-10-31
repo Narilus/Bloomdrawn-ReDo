@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { OpCall, Registry } from '../defs.ts';
 import type { EngineEvent } from '../events.ts';
 import { evaluate, formulaSchema, type Formula } from '../formula.ts';
+import { rollCrit } from '../crit.ts';
 import { pipeline, volleyPasses } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
 import { fall } from '../phases.ts';
@@ -24,7 +25,7 @@ const lowest = (state: CombatState): Enemy | undefined =>
   state.enemies.filter((e) => isAlive(e) && !e.rousing).reduce<Enemy | undefined>((best, e) => (!best || e.hp < best.hp ? e : best), undefined);
 
 /** Every hit lands in turn; the HP and Shield after each event go with it, so bars and the end check follow the hits. */
-function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Registry): { events: EngineEvent[]; vitals: Vitals[] } {
+function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Registry, rolls: boolean): { events: EngineEvent[]; vitals: Vitals[] } {
   const events: EngineEvent[] = [];
   const vitals: Vitals[] = [];
   const push = (...landed: EngineEvent[]) => {
@@ -42,7 +43,9 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
   for (let i = 0; i < hits * passes; i++) {
     let target = lowest(draft);
     if (!target) break;
-    let remaining = pipeline('damage', args.damage, draft, ctx, registry, target.id);
+    // Each hit rolls its own crit; a preview never rolls.
+    const roll = rolls ? rollCrit(draft, ctx, registry) : { mul: 1, crit: false };
+    let remaining = pipeline('damage', args.damage, draft, ctx, registry, target.id, undefined, roll.mul);
     // A hit always lands on its target, even for 0; only excess beyond a kill moves on.
     do {
       const absorbed = Math.min(target.shield, remaining);
@@ -51,6 +54,7 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
       target.hp -= hpLoss;
       remaining -= absorbed + hpLoss;
       const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: target.id, amount: absorbed + hpLoss, absorbed, via: 'volley' };
+      if (roll.crit) base.crit = true;
       // A bar breaks with the hit that empties it, so no event shows a Boss with bars left at 0 HP.
       const fell = isAlive(target) ? undefined : fall(draft, target, ctx.source, registry);
       push(base, { ...base, type: 'damageTaken' });
@@ -65,9 +69,9 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
 
 export const volleyOp: Operation<VolleyArgs> = {
   args: z.strictObject({ op: z.literal('volley'), hits: formulaSchema, damage: formulaSchema }),
-  resolve: (draft, args, ctx, registry) => fire(draft, args, ctx, registry),
+  resolve: (draft, args, ctx, registry) => fire(draft, args, ctx, registry, true),
   preview(state, args, ctx, registry) {
-    return fire(structuredClone(state), args, ctx, registry)
+    return fire(structuredClone(state), args, ctx, registry, false)
       .events.filter((e) => e.type === 'damageDealt')
       .map((e): Preview => ({ op: 'volley', target: e.target as string, amount: e.amount as number, absorbed: e.absorbed as number }));
   },

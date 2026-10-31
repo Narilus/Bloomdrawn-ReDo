@@ -10,6 +10,8 @@ const COLOURS = {
   damage: '#F6E6DC',
   shield: '#D6B8E8',
   tentacle: '#E8A0A8',
+  // A crit: warm gold, larger, with "!" so it never rests on colour alone (m6-scaling.md, 4.6).
+  crit: '#F5C94E',
   heal: '#F2C4C4',
   ultimate: '#D6B8E8',
   status: '#E8DCCB',
@@ -178,7 +180,8 @@ export class Battlefield {
             if (event.status) {
               const name = statusName(event.status);
               target.popup(`${hpLoss} ${name}`, STATUS_COLOURS[name] ?? COLOURS.status, impact, 40);
-            } else target.popup(String(hpLoss), volley ? COLOURS.tentacle : COLOURS.damage, impact, volley ? 44 : 54);
+            } else if (event.crit) target.popup(`${hpLoss}!`, COLOURS.crit, impact, volley ? 58 : 74, 1.45);
+            else target.popup(String(hpLoss), volley ? COLOURS.tentacle : COLOURS.damage, impact, volley ? 44 : 54);
           }
           break;
         }

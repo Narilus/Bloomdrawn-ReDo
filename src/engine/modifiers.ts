@@ -30,6 +30,8 @@ export function pipeline(
   registry: Registry,
   target?: EntityId,
   status?: string,
+  /** A crit's multiplier for a party damage hit, after the incoming multipliers and before Shield. */
+  crit = 1,
 ): number {
   const applies = (m: ModifierDef) => m.value === value && (m.status === undefined || m.status === status);
   const outgoing = modifiersOf(state, registry, ctx.source).filter(applies);
@@ -52,7 +54,7 @@ export function pipeline(
     const incoming = modifiersOf(state, registry, target).filter(applies);
     amount = scale(amount, incoming.filter((m) => m.step === 'incomingMul'));
   }
-  return floorAmount(amount);
+  return floorAmount(amount * crit);
 }
 
 /** How many times each volley fires: once, plus any `volleys` modifiers on the source's side (Dance of Bells). */

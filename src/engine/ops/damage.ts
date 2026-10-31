@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { OpCall } from '../defs.ts';
 import type { EngineEvent } from '../events.ts';
 import { formulaSchema, type Formula } from '../formula.ts';
+import { critChance, rollCrit } from '../crit.ts';
 import { pipeline } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
 import { fall } from '../phases.ts';
@@ -40,11 +41,11 @@ function pool(state: CombatState, target: EntityId): { hp: number; shield: numbe
   return enemy && isAlive(enemy) ? enemy : undefined;
 }
 
-/** Shared by resolve and preview: pipeline steps 1–4, then Shield (step 5). */
-function compute(state: CombatState, args: DamageArgs, ctx: OpContext, registry: Registry, target: EntityId): Hit | undefined {
+/** Shared by resolve and preview: pipeline steps 1–4, a crit's multiplier if it crit, then Shield (step 5). */
+function compute(state: CombatState, args: DamageArgs, ctx: OpContext, registry: Registry, target: EntityId, crit = 1): Hit | undefined {
   const hit = pool(state, target);
   if (!hit) return undefined;
-  const amount = pipeline('damage', args.amount, state, ctx, registry, target);
+  const amount = pipeline('damage', args.amount, state, ctx, registry, target, undefined, crit);
   const absorbed = args.ignoresShield ? 0 : Math.min(hit.shield, amount);
   return { target, amount, absorbed };
 }
@@ -54,7 +55,9 @@ function land(draft: CombatState, args: DamageArgs, ctx: OpContext, registry: Re
   const events: EngineEvent[] = [];
   const vitals: Vitals[] = [];
   for (const target of targetsOf(draft, args, ctx)) {
-    const hit = compute(draft, args, ctx, registry, target);
+    if (!pool(draft, target)) continue;
+    const roll = rollCrit(draft, ctx, registry);
+    const hit = compute(draft, args, ctx, registry, target, roll.mul);
     if (!hit) continue;
     const victim = pool(draft, hit.target) as { hp: number; shield: number };
     victim.shield -= hit.absorbed;
@@ -62,6 +65,7 @@ function land(draft: CombatState, args: DamageArgs, ctx: OpContext, registry: Re
 
     const base: EngineEvent = { type: 'damageDealt', source: ctx.source, target: hit.target, amount: hit.amount, absorbed: hit.absorbed };
     if (ctx.owner !== undefined) base.owner = ctx.owner;
+    if (roll.crit) base.crit = true;
     const landed: EngineEvent[] = [base, { ...base, type: 'damageTaken' }];
     const enemy = draft.enemies.find((e) => e.id === hit.target);
     if (enemy && enemy.hp <= 0) landed.push(fall(draft, enemy, ctx.source, registry));
@@ -85,7 +89,10 @@ export const damageOp: Operation<DamageArgs> = {
   preview(state, args, ctx, registry) {
     return targetsOf(state, args, ctx).flatMap((target) => {
       const hit = compute(state, args, ctx, registry, target);
-      return hit ? [{ op: 'damage', ...hit } satisfies Preview] : [];
+      if (!hit) return [];
+      const chance = critChance(state, ctx, registry);
+      const crit = chance && chance.rate > 0 ? { amount: compute(state, args, ctx, registry, target, 1 + chance.damage / 100)!.amount, rate: chance.rate } : undefined;
+      return [{ op: 'damage', ...hit, ...(crit && { crit }) } satisfies Preview];
     });
   },
   describe(args, show) {

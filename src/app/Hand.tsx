@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useEffectEvent, useState } from 'react';
-import { isAlive, validate, type CombatState, type EntityId, type Registry } from '../engine/index.ts';
+import { isAlive, previewCard, validate, type CombatState, type EntityId, type Preview, type Registry } from '../engine/index.ts';
 import { enemyBox, enemyHeight, enemyHome, PLAY_LINE, type Point } from '../stage/layout.ts';
 import { CardView } from './CardView.tsx';
 import { AIM_ORIGIN, AIM_POSE, CARD_H, CARD_W, fanPose, type Pose } from './fan.ts';
@@ -36,6 +36,19 @@ interface Props {
 }
 
 const IDLE: Mode = { kind: 'idle' };
+
+const flatten = (previews: Preview[]): Preview[] => previews.flatMap((p) => [p, ...(p.resolves === false ? [] : flatten(p.branch ?? []))]);
+
+/**
+ * What a card's first damage hit deals on a crit and the chance of one, from the engine's preview
+ * against the enemy aimed at, or the first living one (m6-scaling.md, 4.6). Nothing for a card that can't crit.
+ */
+function critLine(state: CombatState, uid: EntityId, target: EntityId | null, registry: Registry): string | undefined {
+  const at = target ?? state.enemies.find(isAlive)?.id;
+  const previews = previewCard(state, { type: 'playCard', card: uid, ...(at ? { target: at } : {}) }, registry) ?? previewCard(state, { type: 'playCard', card: uid }, registry);
+  const crit = flatten(previews ?? []).find((p) => p.op === 'damage' && p.crit)?.crit;
+  return crit ? `Crit: ${crit.amount} (${Number(crit.rate.toFixed(1))}%)` : undefined;
+}
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 const DRAG_START = 8;
 
@@ -188,6 +201,8 @@ export function Hand({ state, registry, onPlay, onAim }: Props) {
         <AnimatePresence>
           {hand.map((card, index) => {
             const { pose, instant } = poseOf(card.uid, index);
+            const raised = index === fanHover || armed(card.uid);
+            const crit = raised ? critLine(state, card.uid, mode.kind === 'aim' ? mode.target : null, registry) : undefined;
             return (
               <motion.div
                 key={card.uid}
@@ -216,6 +231,7 @@ export function Hand({ state, registry, onPlay, onAim }: Props) {
                   keyHint={KEYS[index]}
                   highlight={armed(card.uid)}
                 />
+                {crit && <div className="card-crit">{crit}</div>}
               </motion.div>
             );
           })}

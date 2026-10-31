@@ -57,6 +57,8 @@ export interface EngineEvent {
   amount?: number;
   /** Damage absorbed by Shield; HP lost is amount − absorbed. */
   absorbed?: number;
+  /** A party hit that crit. */
+  crit?: boolean;
   /** Card instance UID: the card played, or the card resolving when the event was raised. */
   card?: EntityId;
   /** For `cardPlayed`: the card's definition ID. */
