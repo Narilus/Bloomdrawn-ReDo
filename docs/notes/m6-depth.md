@@ -20,6 +20,25 @@ Status: **answered by the owner, 31 Oct** (his answers are in his `docs/notes/m6
 - **No power-band wording.** Players compare the enemies' levels with their own.
 - **Monster variety:** a much larger pool of normal enemies, elites and bosses, more of it opening deeper. They're drafted in `docs/notes/bestiary.md` for the owner's approval, with new art.
 
+## The depth model (31 Oct, `npm run lab:depth`)
+
+The lab fights a practice dummy with four parties (the starters, and Flesh, Rapture and Spirit pairs with Leonora and Hester) at each level, for 40 seeds of 6 turns.
+
+| Party level | 1 | 10 | 20 | 30 | 40 |
+|---|---:|---:|---:|---:|---:|
+| Party HP | 205 | 251 (122%) | 302 (147%) | 354 (173%) | 406 (198%) |
+| Damage per turn | 117 | 120 (102%) | 125 (107%) | 127 (109%) | 132 (113%) |
+
+**Levels barely raise damage.** Attack is a small flat add on a few cards (Strike is 6 + Attack: 9 at level 1, 12 at 40). Most damage comes from flat numbers, Domain resources and statuses, which levels don't touch. Even with Attack weighed three times in every card and growth doubled to 5% a level, a level 40 party deals only 54% more.
+
+So the enemy curve that keeps a depth as hard as its level has enemy HP +0.32% of level 1 a level (×1.13 at 40) and damage +2.51% a level (×1.98 at 40), matching the party's damage and HP. Past 40, both rise 3% of level 40's a level (×1.30 more at 50). **This is in the engine as a placeholder.** It means a depth's enemies hit harder but hardly last longer, and depth mostly changes rewards and which enemies appear.
+
+**For the owner to decide: how should levels make characters stronger?**
+- **A. As now.** Levels add flat Attack and Defense; enemies follow the curve above.
+- **B. A level multiplies everything a character does.** Damage and Shield from her cards and statuses are multiplied by her growth (×1.98 at 40 at 2.5% a level). Card numbers on screen grow with it. Enemy HP and damage would then both roughly double by level 40, and depth reads as real scaling. **My recommendation:** it is one engine step, and the growth rate stays one number to tune.
+
+**Rewards:** a won run of 6 fights, 2 elites and the Boss pays 3,600 EXP and 1,100 Ducats at Depth 1. Levelling one character from 1 to 40 is 78,000 EXP, which is 22 such runs at Depth 1. With a multiplier of 1 + 0.25 × (depth − 1) (×3.25 at Depth 10, ×10.75 at 40, ×13.25 at 50), about one won run levels one character through a band of ten at that band's depths. That is about 3.5 runs from 1 to 40 while raising the depth. Ducats run about 1.2–1.4 runs a band in the middle bands, because the ascension costs come on top.
+
 ## Trials
 
 - **One new boss per Domain**, heavily thematic, which really looks like a boss. All new art.

@@ -27,6 +27,18 @@ test('a test fight boots into combat', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test('enemies show their level, and a level 40 Hound has its HP at that level (M6.3)', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.goto('/?enemies=enemy.bloom-rib-hound,enemy.pod-thrower&enemyLevel=40');
+  await expect(page.locator('.enemy-level')).toHaveText(['Lv 40', 'Lv 40']);
+  // 225 HP at level 40: × 1.125.
+  await expect(page.locator('.enemy-plate').first().locator('.bar-label strong')).toHaveText('253 / 253');
+  await page.waitForTimeout(1000);
+  await page.screenshot({ path: 'test-results/screenshots/combat-level-40.png' });
+  expect(errors).toEqual([]);
+});
+
 test('the M1 fight plays one full turn', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));

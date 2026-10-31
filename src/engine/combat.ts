@@ -6,7 +6,7 @@ import type { OpContext } from './operation.ts';
 import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
 import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution } from './resolve.ts';
-import { allIntents, intentOf, intentsOf, scaledHp } from './phases.ts';
+import { allIntents, enemyMaxHp, intentOf, intentsOf } from './phases.ts';
 import { takeStacks } from './statuses.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
@@ -60,6 +60,8 @@ export interface CombatSetup {
   levels?: number[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
+  /** Every enemy's level, scaling its HP and damage (`enemyLevelScale`); default 1. */
+  enemyLevel?: number;
   /** The cards the run has gained, dealt in after the personal cards. */
   deck?: RunCard[];
 }
@@ -106,10 +108,12 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     if (slot < 0) throw new Error(`"${card}" belongs to ${owner}, who is not in the party`);
     deck.push({ uid: next('c'), card, owner: `m${slot}` });
   }
+  const enemyLevel = Math.floor(setup.enemyLevel ?? 1);
+  const scaling = { ...(setup.enemyScale ? { enemyScale: setup.enemyScale } : {}), ...(enemyLevel > 1 ? { enemyLevel } : {}) };
   const enemies = setup.enemies.map((entry, slot) => {
     const id = typeof entry === 'string' ? entry : entry.enemy;
     lookup(registry.enemies, id, 'enemy');
-    return newEnemy(registry, id, next('e'), slot, setup.enemyScale ?? 0, typeof entry === 'string' ? undefined : entry.hp);
+    return newEnemy(registry, id, next('e'), slot, scaling, typeof entry === 'string' ? undefined : entry.hp);
   });
   const summons = enemies.reduce((n, e) => n + summonCapacity(registry, e.enemy), 0);
   const relics = (setup.relics ?? []).map((id) => {
@@ -137,7 +141,7 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     rng: createStreams(setup.seed, COMBAT_STREAMS),
     nextUid: uid,
   };
-  if (setup.enemyScale) state.enemyScale = setup.enemyScale;
+  Object.assign(state, scaling);
   shuffleInPlace(state.piles.draw, state.rng, 'shuffle');
 
   const before = vitalsOf(state);
@@ -148,10 +152,10 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
   return { state: rc.state, events: rc.events, vitals: rc.vitals, before };
 }
 
-/** A fresh enemy at full HP (or an encounter's HP), raised by the fight's enemy scale, showing its first intent. */
-export function newEnemy(registry: Registry, enemy: string, id: EntityId, slot: number, scale: number, hp?: number): Enemy {
+/** A fresh enemy at full HP (or an encounter's HP), at the fight's enemy level and scale, showing its first intent. */
+export function newEnemy(registry: Registry, enemy: string, id: EntityId, slot: number, scaling: Pick<CombatState, 'enemyScale' | 'enemyLevel'>, hp?: number): Enemy {
   const def = registry.enemies[enemy];
-  const max = scaledHp(hp ?? def?.hp ?? 1, scale);
+  const max = enemyMaxHp(hp ?? def?.hp ?? 1, scaling);
   return {
     id, enemy, slot, hp: max, maxHp: max, shield: 0, statuses: [],
     ...(def?.intents?.length ? { intent: 0 } : {}),

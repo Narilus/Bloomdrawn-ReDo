@@ -120,6 +120,8 @@ export interface CombatState {
   nextUid: number;
   /** Percent added to enemies' max HP and outgoing damage for this fight (the run's Bloom stage). Absent means 0. */
   enemyScale?: number;
+  /** Every enemy's level (a depth's, or a Trial's); absent is level 1. */
+  enemyLevel?: number;
 }
 
 export const isAlive = (enemy: Enemy): boolean => enemy.hp > 0;

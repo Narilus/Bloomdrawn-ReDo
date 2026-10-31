@@ -461,6 +461,21 @@ body,
   margin-left: auto;
 }
 
+/* An enemy's level (M6.3): a small tag on the plate's top edge, so it takes no room from the name. */
+.enemy-level {
+  position: absolute;
+  top: -12px;
+  right: 12px;
+  padding: 1px 8px;
+  border: 1px solid rgba(184, 149, 90, 0.8);
+  border-radius: 6px;
+  background: var(--aubergine);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--antique-gold);
+}
+
 .bar {
   position: relative;
   height: 14px;

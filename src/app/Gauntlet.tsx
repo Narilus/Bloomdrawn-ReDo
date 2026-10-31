@@ -13,7 +13,8 @@ const ids = (key: string) => params().get(key)?.split(',').filter(Boolean) ?? []
 /**
  * Dev builds only (a first piece of the content lab):
  * - `?fights=encounter,...` replaces the gauntlet's encounters, one per fight;
- * - `?enemies=id,...` and `?relics=id,...` play a single test fight instead, gauges at 70.
+ * - `?enemies=id,...` and `?relics=id,...` play a single test fight instead, gauges at 70;
+ *   `?enemyLevel=N` (1 to 50) sets its enemies' level.
  */
 function gauntletFromUrl(): GauntletDef {
   const fights = ids('fights').filter((id) => registry.encounters[id]);
@@ -24,7 +25,8 @@ function testFightFromUrl(): CombatSetup | null {
   const enemies = ids('enemies').filter((id) => registry.enemies[id]);
   const relics = ids('relics').filter((id) => registry.relics[id]);
   if (enemies.length === 0 && relics.length === 0) return null;
-  return { seed: 1, party: PARTY, enemies: enemies.length > 0 ? enemies : ['enemy.bloom-rib-hound'], relics, gauges: PARTY.map(() => 70) };
+  const enemyLevel = Math.min(50, Math.max(1, Math.floor(Number(params().get('enemyLevel')) || 1)));
+  return { seed: 1, party: PARTY, enemies: enemies.length > 0 ? enemies : ['enemy.bloom-rib-hound'], relics, gauges: PARTY.map(() => 70), ...(enemyLevel > 1 ? { enemyLevel } : {}) };
 }
 
 const GAUNTLET = gauntletFromUrl();

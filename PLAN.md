@@ -342,6 +342,8 @@ Enemies have a level that scales their HP and damage, shown as a small tag. `npm
 - tests prove HP, intent damage and previews at a level;
 - the owner has seen and agreed the curves.
 
+_In progress 31 Oct. Combat state carries the enemies' level (`enemyLevel`, absent at 1), and an enemy's HP (encounter overrides, summons and later bars included), Shield and heals follow one curve and its damage another (`src/engine/levels.ts`), before the Bloom scale's percent. Enemy plates show "Lv N". Dev test fights take `?enemyLevel=N`. `npm run lab:depth` (`tools/lab/depth.ts`, sharing the lab's player in `tools/lab/play.ts`) models the party by level, the enemy curves and the reward multiplier. Its finding, that levels barely raise damage, and the choice it leaves are in `docs/notes/m6-depth.md`, "The depth model"; the curves in the engine are placeholders until the owner chooses. Tests: `src/engine/enemyLevels.test.ts`, `e2e/boot.spec.ts`._
+
 ### M6.4 Depth tiers
 Party select chooses a depth. A new profile's first run is at Depth 1, then 1–10 open; winning Depth 10 opens 11–20, and so on to 50. The run fields enemies at its depth's level and banks rewards at its multiplier.
 **Done when:** tests prove the unlocks, the enemy levels in a run, and the banked multiplier; a run save keeps its depth; e2e starts a run at a chosen depth.

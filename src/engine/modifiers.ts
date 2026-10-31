@@ -1,6 +1,7 @@
 import type { ModifierDef, Registry } from './defs.ts';
 import { characterOf } from './dupes.ts';
 import { evaluate, type Formula } from './formula.ts';
+import { byLevel, enemyLevelScale } from './levels.ts';
 import type { OpContext } from './operation.ts';
 import { isImmune } from './phases.ts';
 import { PARTY, type CombatState, type EntityId, type StatusStack } from './state.ts';
@@ -10,7 +11,7 @@ export type PipelineValue = 'damage' | 'shield' | 'stacks' | 'stackLoss';
 
 /**
  * The one modifier pipeline. Steps: base formula, flat outgoing, outgoing multipliers (an enemy's
- * damage includes the fight's enemy scale), incoming multipliers (damage with a target only). Rounds down at every step and never
+ * damage includes the fight's enemy scale, and its damage and Shield its level), incoming multipliers (damage with a target only). Rounds down at every step and never
  * goes below 0. Shield absorption is the damage operation's step 5. `status` picks out the
  * modifiers for one status's stacks.
  */
@@ -32,8 +33,14 @@ export function pipeline(
   let amount = Math.floor(evaluate(base, state, ctx, registry));
   amount += Math.floor(sum(outgoing.filter((m) => m.step === 'flat')));
   amount = scale(amount, outgoing.filter((m) => m.step === 'outgoingMul'));
-  if (value === 'damage' && state.enemyScale && state.enemies.some((e) => e.id === ctx.source)) {
+  const fromEnemy = state.enemies.some((e) => e.id === ctx.source);
+  if (value === 'damage' && state.enemyScale && fromEnemy) {
     amount = Math.floor((amount * (100 + state.enemyScale)) / 100);
+  }
+  if (fromEnemy && state.enemyLevel) {
+    const level = enemyLevelScale(state.enemyLevel);
+    if (value === 'damage') amount = byLevel(amount, level.damage);
+    if (value === 'shield') amount = byLevel(amount, level.hp);
   }
   // A rousing enemy takes no damage (DESIGN.md "Bosses").
   if (value === 'damage' && isImmune(state, target)) return 0;

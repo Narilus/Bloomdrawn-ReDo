@@ -1,5 +1,6 @@
 import type { EnemyDef, IntentDef, Registry } from './defs.ts';
 import type { EngineEvent } from './events.ts';
+import { byLevel, enemyLevelScale } from './levels.ts';
 import type { CombatState, Enemy, EntityId } from './state.ts';
 
 // Enemies with several HP bars (DESIGN.md "Bosses"). Each later bar is a phase with its own
@@ -8,6 +9,10 @@ import type { CombatState, Enemy, EntityId } from './state.ts';
 
 /** An enemy's max HP for a bar, raised by the fight's enemy scale. */
 export const scaledHp = (hp: number, scale: number): number => Math.floor((hp * (100 + scale)) / 100);
+
+/** An enemy's max HP for a bar at the fight's enemy level, then raised by its enemy scale. */
+export const enemyMaxHp = (hp: number, state: Pick<CombatState, 'enemyScale' | 'enemyLevel'>): number =>
+  scaledHp(byLevel(hp, enemyLevelScale(state.enemyLevel).hp), state.enemyScale ?? 0);
 
 /** The intents an enemy cycles through in its current phase. */
 export function intentsOf(enemy: Enemy, registry: Registry): readonly IntentDef[] {
@@ -42,7 +47,7 @@ export function fall(draft: CombatState, enemy: Enemy, source: EntityId | undefi
   if (source !== undefined) event.source = source;
   if (!next) return event;
   enemy.phase = (enemy.phase ?? 0) + 1;
-  enemy.hp = enemy.maxHp = scaledHp(next.hp, draft.enemyScale ?? 0);
+  enemy.hp = enemy.maxHp = enemyMaxHp(next.hp, draft);
   enemy.shield = 0;
   enemy.rousing = true;
   return event;

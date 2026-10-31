@@ -241,6 +241,7 @@ export function EnemyPlate({ id, state, vitals, aimed, previews }: PlateProps) {
       style={{ left: home.x - width / 2, top: home.y + 22, width }}
     >
       {intent && <Intent name={intent.name} previews={previewIntent(state, id, registry)} skips={skipping(enemy.statuses)} />}
+      <span className="enemy-level">Lv {state.enemyLevel ?? 1}</span>
       <div className="bar-label">
         <span>{def?.name}</span>
         <strong>
