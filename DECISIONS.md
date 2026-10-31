@@ -161,6 +161,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Ascension reward (owner, 30 Oct): each ascension (at 10, 20 and 30) gives 1 pull. M5.5 signed off; the small per-level growth means Attack and Defense don't rise every level, and balance waits for a later pass.
 - Ascension pop-up (owner, 30 Oct): the pull an ascension gives is announced in a pop-up, not only in the page's note. M5.5 signed off with it.
 
+- M5 signed off (owner, 31 Oct): M5.6, the collection playtest, passed; M6 Depth and polish is next.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

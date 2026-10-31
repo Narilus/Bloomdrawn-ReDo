@@ -1,7 +1,7 @@
 # PLAN
 
-**Current milestone:** M5 Collection (M4 signed off 25 Oct)
-**Current task:** M5.3 The gacha: built; the owner tries the banner (and M5.2's enemy tuning alongside)
+**Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
+**Current task:** the owner answers the M6 questions (`docs/notes/m6-depth.md`); then M6.1 Depth tiers
 
 ## Milestones
 
@@ -314,8 +314,21 @@ Ducats and Faint, Clear and Vivid Memories. Level up on the character page spend
 
 _Built 29 Oct, with the owner's placeholder numbers (DECISIONS.md). Each level past 1 adds 2.5% of base HP, Attack and Defense, rounded (`src/engine/levels.ts`); a member's level is in combat state beside her dupe level, absent at level 1. The next level costs 100 × the level in EXP and 20 × it in Ducats; Memories pay smallest first, and a bigger one's excess comes back as smaller ones. At 10, 20 and 30 a character must ascend (1, 2, 3 of her Domain's material, now `DomainDef.material`, and 1,000, 3,000, 6,000 Ducats) to level on (`src/game/levels.ts`). The character page shows her level and what is banked, with Level up, To level N (as far as can be paid for) and Ascend; the Roster tags each level. A run keeps the party's levels from when it began, as it does dupes. A won run banks per normal fight 1 Faint Memory and 50 Ducats, per elite 1 Clear and 150, and for the Boss 1 Vivid and 500, all doubled at Fruiting, plus one random material, never doubled; a defeat or abandon banks the elite share, 3 at most; the result screen lists each. A sixth preset costs 500 Ducats and each after it 250 more. Each ascension gives 1 Purified Bloom, announced in a pop-up on the character page (owner, 30 Oct, at sign-off). Profile save v7. Dev builds take `?level=N`. Later, deeper and harder runs multiply Memories and Ducats (owner, 29 Oct). Tests: `src/engine/levels.test.ts`, `src/game/levels.test.ts` (costs, refunds, gates, ascension), `src/content/scenarios/levels.test.ts` (previews equal results at level), banking in `src/app/expedition.test.ts`, presets in `src/game/profile.test.ts`, the v7 save in `src/save/profile.test.ts`, `src/app/saves.test.ts`, and `e2e/party.spec.ts`._
 
-### M5.6 Collection (owner playtest)
+### M5.6 Collection (owner playtest) ✅ (signed off by the owner 31 Oct)
 **Done when:** the owner pulls, builds up a character and takes a party of his choosing through a run, and signs off.
+
+## M6 tasks
+
+Proposed in `docs/notes/m6-depth.md`, with the questions each needs answered first. Tasks get "done when" lines once the owner has answered.
+
+- M6.1 Depth tiers: a depth chosen before a run; enemies and rewards scale with it; the next depth opens on a win.
+- M6.2 Trials: per-Domain boss fights in tiers, the main source of ascension materials.
+- M6.3 Profile level: earned from play; caps character growth.
+- M6.4 Accessibility: text size, reduced motion and animation speed settings; keyword tooltips; keyboard and screen-reader pass.
+- M6.5 Weapons: drafted for approval in their own note, then built with their banner.
+- M6.6 Profile Shop: Pollen buys specific characters' dupes.
+- M6.7 Audio; M6.8 Art pass; M6.9 Balance.
+- M6.10 The owner's playtest.
 
 ## Notes
 - Numbers in fixture content are placeholders; tuning happens in M1–M2 with the owner.
