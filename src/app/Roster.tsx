@@ -4,6 +4,7 @@ import { registry } from '../content/registry.ts';
 import { describeCharacter, type CardDef } from '../engine/index.ts';
 import { fieldedCharacter, runCardText, type Growth } from '../game/expedition.ts';
 import { affordableLevels, ascend, ascensionCost, ASCENSIONS, ASCENSION_PULLS, ascensionsOf, levelCap, levelCost, levelOf, MAX_LEVEL, MEMORIES, type GrowthResult } from '../game/levels.ts';
+import { DEPTH_BAND, DEPTH_MAX, rewardMultiplier } from '../game/depth.ts';
 import { BLOOM, PARTY_SIZE, partyProblem, plural, type Profile, placeInTeam, quickTeam, removeFromTeam, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
 import { battleArt } from '../stage/art.ts';
 import { CardFace, markNumber } from './CardView.tsx';
@@ -59,8 +60,45 @@ interface PartySelectProps {
   onBuy: () => Promise<void>;
   /** Called with every change, to save the presets. */
   onChange: (teams: Team[], team: number) => void;
-  onStart: (party: string[]) => void;
+  /** The depth it opens on, and the deepest open. */
+  depth: number;
+  depthOpen: number;
+  /** Called with every depth chosen, to save it. */
+  onDepth: (depth: number) => void;
+  onStart: (party: string[], depth: number) => void;
   onBack: () => void;
+}
+
+/**
+ * The run's depth (docs/notes/m6-depth.md, "Depth tiers"): its enemies' level and what it multiplies
+ * Memories and Ducats by, both the game's, and how to open deeper ones.
+ */
+function DepthChooser({ depth, open, onChange }: { depth: number; open: number; onChange: (depth: number) => void }) {
+  const next = open < DEPTH_MAX ? `Win Depth ${open} to open ${open + 1}–${Math.min(DEPTH_MAX, open + DEPTH_BAND)}.` : 'Every depth is open.';
+  return (
+    <div className="depth-chooser" role="group" aria-label="Depth">
+      <span className="depth-label">Depth</span>
+      <button className="depth-step" aria-label="Shallower" disabled={depth <= 1} onClick={() => onChange(depth - 1)}>
+        −
+      </button>
+      <input
+        className="depth-value"
+        type="number"
+        aria-label="Depth chosen"
+        min={1}
+        max={open}
+        value={depth}
+        onChange={(e) => onChange(Math.floor(Number(e.target.value)) || 1)}
+      />
+      <button className="depth-step" aria-label="Deeper" disabled={depth >= open} onClick={() => onChange(depth + 1)}>
+        +
+      </button>
+      <span className="depth-info">
+        Enemies <strong>Lv {depth}</strong> · Memories and Ducats <strong>×{Number(rewardMultiplier(depth).toFixed(2))}</strong>
+      </span>
+      <span className="depth-next">{open === 1 ? 'The first expedition is at Depth 1.' : next}</span>
+    </div>
+  );
 }
 
 /** Which picker is open: one place's, or quick select with the characters clicked so far. */
@@ -71,7 +109,13 @@ type Picking = { kind: 'place'; place: number } | { kind: 'quick'; picked: strin
  * A place opens the character list: a character goes in, or swaps with the place she was in. Quick
  * select fills all four in the order clicked.
  */
-export function PartySelect({ owned, teams: initialTeams, team: initialTeam, money, presetCost, onBuy, onChange, onStart, onBack }: PartySelectProps) {
+export function PartySelect({ owned, teams: initialTeams, team: initialTeam, money, presetCost, onBuy, onChange, depth: initialDepth, depthOpen, onDepth, onStart, onBack }: PartySelectProps) {
+  const [depth, setDepth] = useState(Math.min(Math.max(1, initialDepth), depthOpen));
+  const changeDepth = (to: number) => {
+    const next = Math.min(Math.max(1, to), depthOpen);
+    setDepth(next);
+    onDepth(next);
+  };
   const [teams, setTeams] = useState<Team[]>(() => initialTeams.map((t) => ({ ...t, members: [...t.members] })));
   const [team, setTeam] = useState(Math.min(initialTeam, initialTeams.length - 1));
   const [picking, setPicking] = useState<Picking>(null);
@@ -165,6 +209,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
         <p className="roster-hint" role="status">
           {problem ?? 'Ready.'}
         </p>
+        <DepthChooser depth={depth} open={depthOpen} onChange={changeDepth} />
         <div className="panel-buttons">
           <button className="ghost" onClick={onBack}>
             Back
@@ -172,7 +217,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
           <button className="ghost" onClick={() => setPicking({ kind: 'quick', picked: [] })}>
             Quick select
           </button>
-          <button className="end-turn" disabled={problem !== undefined} onClick={() => onStart(current.members as string[])}>
+          <button className="end-turn" disabled={problem !== undefined} onClick={() => onStart(current.members as string[], depth)}>
             Start expedition
           </button>
         </div>

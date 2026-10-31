@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.3 Enemy levels and the model
+**Current task:** M6.3 waits on the owner's choice of how levels make characters stronger; M6.5 The bestiary next
 
 ## Milestones
 
@@ -347,6 +347,8 @@ _In progress 31 Oct. Combat state carries the enemies' level (`enemyLevel`, abse
 ### M6.4 Depth tiers
 Party select chooses a depth. A new profile's first run is at Depth 1, then 1–10 open; winning Depth 10 opens 11–20, and so on to 50. The run fields enemies at its depth's level and banks rewards at its multiplier.
 **Done when:** tests prove the unlocks, the enemy levels in a run, and the banked multiplier; a run save keeps its depth; e2e starts a run at a chosen depth.
+
+_Built 31 Oct. Party select has a Depth stepper showing the enemies' level and the Memories and Ducats multiplier, both the game's, and how to open more (`src/game/depth.ts`): a new profile has only Depth 1, any run opens 1–10, and winning Depth 10, 20, 30 or 40 opens the next ten. The profile keeps the depth chosen and the deepest won (save v8), and the run in progress's depth, so a run whose save is lost banks its share at that depth. A run's fights, the Boss included, field enemies at its depth's level; the map and the fight label show the depth. Banking multiplies a won run's Memories and Ducats, or a lost run's share, by 1 + 0.25 × (depth − 1), each rounded down, with a line saying so; Blooms and the material are unchanged (placeholder, from the model). Tests: `src/game/depth.test.ts`, the multiplier and enemy level in `src/app/expedition.test.ts`, `src/app/saves.test.ts`, the v8 save in `src/save/profile.test.ts`, `e2e/party.spec.ts`._
 
 ### M6.5 The bestiary
 More normal enemies, elites and bosses, more of them opening deeper, drafted in `docs/notes/bestiary.md` for the owner's approval, with art he picks.

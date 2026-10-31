@@ -77,6 +77,19 @@ describe('the profile save', () => {
     expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: NEW_PROFILE, savedSchemaVersion: 6 });
   });
 
+  it('keeps the depth chosen and the deepest won, and a v7 profile (M5.5) reads with no depth won (M6.4)', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, runs: 3, depth: 12, deepest: 10, run: { id: 'run-1', elites: 1, depth: 12 } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 7, contentVersion: 1, data: { ...NEW_PROFILE, runs: 2 } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, runs: 2 }, savedSchemaVersion: 7 });
+    const saves = createSaveStore(memoryAdapter(), 1);
+    for (const bad of [{ depth: 0 }, { depth: 51 }, { deepest: 51 }, { run: { id: 'r', elites: 0, depth: 1 } }]) {
+      await expect(saves.write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     for (const bad of [

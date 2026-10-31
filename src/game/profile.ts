@@ -1,4 +1,5 @@
 import { reached } from './bloom.ts';
+import { rewardMultiplier } from './depth.ts';
 import type { Expedition, ExpeditionDef } from './expedition.ts';
 import type { Gacha } from './gacha.ts';
 
@@ -27,6 +28,10 @@ export interface Profile {
   teams?: Team[];
   /** The preset party select opens on: the one the player last chose. */
   team?: number;
+  /** The depth chosen for the next run (`depth.ts`); absent is Depth 1. */
+  depth?: number;
+  /** The deepest depth a run has been won at; it opens the bands of depths beyond (owner, 31 Oct). */
+  deepest?: number;
   /**
    * The run in progress: its ID and its banking tally, kept here as it changes so a run whose own
    * save can't be read can still bank its share (owner, 24 Oct).
@@ -37,6 +42,8 @@ export interface Profile {
 export interface ActiveRun {
   id: string;
   elites: number;
+  /** The run's depth, for banking its share if its save is lost; absent is Depth 1. */
+  depth?: number;
 }
 
 /** A new profile starts with 10 Purified Blooms (owner, 25 Oct). */
@@ -125,6 +132,8 @@ export interface Banked {
   pulls: number;
   items?: Record<string, number>;
   lines: string[];
+  /** A won run's depth past 1, which may open deeper ones. */
+  won?: number;
 }
 
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -135,7 +144,7 @@ export const BLOOM = 'Purified Bloom';
 export type ItemText = (id: string, n: number) => string;
 
 type Items = Readonly<Record<string, number>>;
-const times = (items: Items, n: number): Record<string, number> => Object.fromEntries(Object.entries(items).map(([id, k]) => [id, k * n]));
+const times = (items: Items, n: number): Record<string, number> => Object.fromEntries(Object.entries(items).map(([id, k]) => [id, Math.floor(k * n)]));
 function sum(...all: Items[]): Record<string, number> {
   const out: Record<string, number> = {};
   for (const items of all) for (const [id, n] of Object.entries(items)) if (n > 0) out[id] = (out[id] ?? 0) + n;
@@ -150,37 +159,46 @@ const gains = (pulls: number, items: Items, name: ItemText) =>
  * elite, all multiplied if the Boss fell at Fruiting (her fight never ticks the clock, so the run's
  * clock is the one she was fought at), and the Boss's material, never multiplied. A defeat or abandon
  * banks per elite beaten, up to a cap, and nothing else: a run quit before any progress banks nothing
- * (owner, 24 Oct; Memories and Ducats, 29 Oct). Later, deeper or harder runs will multiply the
- * Memories and Ducats by a percentage (owner, 29 Oct).
+ * (owner, 24 Oct; Memories and Ducats, 29 Oct). A run's depth multiplies its Memories and Ducats, a
+ * won run's or a lost one's (owner, 29 and 31 Oct), rounding each down; the material and the Blooms
+ * stay as they are.
  */
 export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef, name: ItemText): Banked {
   const { win, fruiting, items } = def.banking;
-  if (end !== 'won') return lossBanking(exp.elites, def, name);
+  const depth = exp.depth ?? 1;
+  if (end !== 'won') return lossBanking(exp.elites, def, name, depth);
   const fights = exp.fights ?? 0;
   const lines = [`The Boss beaten: ${gains(win, items.boss, name)}`];
   if (fights > 0) lines.push(`${plural(fights, 'fight')} won: ${gains(0, times(items.fight, fights), name)}`);
   if (exp.elites > 0) lines.push(`${plural(exp.elites, 'elite')} beaten: ${gains(0, times(items.elite, exp.elites), name)}`);
   const n = reached(exp.clock, 'fruiting') ? fruiting : 1;
   if (n > 1) lines.push(`The Boss at Fruiting: ×${n}`);
-  const earned = times(sum(items.boss, times(items.fight, fights), times(items.elite, exp.elites)), n);
+  const deeper = depthLine(depth);
+  if (deeper) lines.push(deeper);
+  const earned = times(times(sum(items.boss, times(items.fight, fights), times(items.elite, exp.elites)), n), rewardMultiplier(depth));
   if (exp.material) lines.push(`The Boss's material: ${name(exp.material, 1)}`);
-  return { pulls: win * n, items: sum(earned, exp.material ? { [exp.material]: 1 } : {}), lines };
+  return { pulls: win * n, items: sum(earned, exp.material ? { [exp.material]: 1 } : {}), lines, ...(depth > 1 && { won: depth }) };
 }
 
-/** What a run that didn't win banks: its share for the elites it beat, up to the cap. */
-export function lossBanking(elites: number, def: ExpeditionDef, name: ItemText): Banked {
+/** "Depth 12: Memories and Ducats ×3.75", or nothing at Depth 1. */
+const depthLine = (depth: number) => (depth > 1 ? `Depth ${depth}: Memories and Ducats ×${Number(rewardMultiplier(depth).toFixed(2))}` : undefined);
+
+/** What a run that didn't win banks: its share for the elites it beat, up to the cap, at its depth. */
+export function lossBanking(elites: number, def: ExpeditionDef, name: ItemText, depth = 1): Banked {
   const { perElite, elitesMax, items } = def.banking;
   if (elites === 0) return { pulls: 0, lines: ['No elites beaten: nothing banked'] };
   const counted = Math.min(elites, elitesMax);
   const pulls = counted * perElite;
-  const banked = times(items.elite, counted);
+  const banked = times(times(items.elite, counted), rewardMultiplier(depth));
   const capped = elites > elitesMax ? ` (${elitesMax} at most)` : '';
-  return { pulls, items: banked, lines: [`${plural(elites, 'elite')} beaten: ${gains(pulls, banked, name)}${capped}`] };
+  const deeper = depthLine(depth);
+  return { pulls, items: banked, lines: [`${plural(elites, 'elite')} beaten: ${gains(pulls, banked, name)}${capped}`, ...(deeper ? [deeper] : [])] };
 }
 
 /** The profile after a run ends: what it banked added, the run counted and no longer in progress. */
 export function bank(profile: Profile, banked: Banked): Profile {
   const { run: _ended, ...rest } = profile;
   const items = banked.items && Object.keys(banked.items).length > 0 ? { items: sum(profile.items ?? {}, banked.items) } : {};
-  return { ...rest, ...items, pulls: profile.pulls + banked.pulls, runs: profile.runs + 1 };
+  const deepest = banked.won !== undefined && banked.won > (profile.deepest ?? 0) ? { deepest: banked.won } : {};
+  return { ...rest, ...items, ...deepest, pulls: profile.pulls + banked.pulls, runs: profile.runs + 1 };
 }

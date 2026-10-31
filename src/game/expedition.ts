@@ -115,6 +115,8 @@ export interface Expedition {
    */
   dupes?: Record<string, number>;
   levels?: Record<string, number>;
+  /** The run's depth (`depth.ts`): its enemies' level and its rewards' multiplier. Absent is Depth 1. */
+  depth?: number;
   board: Board;
   /**
    * map: choosing where to walk. tile: stopped on a Shop, Camp, Event, Symptom or Bloom node.
@@ -160,6 +162,7 @@ export function startExpedition(
   def: ExpeditionDef,
   motifs: Readonly<Record<string, MotifDef>>,
   growth: Growth = {},
+  depth = 1,
 ): Expedition {
   const of = (table: Growth['dupes'], above: number) => Object.fromEntries(party.filter((id) => (table?.[id] ?? 0) > above).map((id) => [id, table![id]!]));
   const dupes = of(growth.dupes, 0);
@@ -168,6 +171,7 @@ export function startExpedition(
     party,
     ...(Object.keys(dupes).length > 0 && { dupes }),
     ...(Object.keys(levels).length > 0 && { levels }),
+    ...(depth > 1 && { depth }),
     board: generateBoard(seed, def.board, motifs),
     phase: 'map',
     hp: null,
@@ -273,6 +277,7 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
   if (exp.deck.length > 0) setup.deck = exp.deck;
   if (exp.dupes) setup.dupes = exp.party.map((id) => exp.dupes?.[id] ?? 0);
   if (exp.levels) setup.levels = exp.party.map((id) => exp.levels?.[id] ?? 1);
+  if (exp.depth && exp.depth > 1) setup.enemyLevel = exp.depth;
   const scale = boss ? 0 : stageOf(exp.clock).enemyScale;
   if (scale > 0) setup.enemyScale = scale;
   return setup;

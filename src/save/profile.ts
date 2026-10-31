@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEPTH_MAX } from '../game/depth.ts';
 import { ASCENSIONS, levelCap, MAX_LEVEL } from '../game/levels.ts';
 import { emptyTeam, PARTY_SIZE, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
 import type { SaveKind } from './store.ts';
@@ -37,7 +38,9 @@ const profileSchema = z.strictObject({
   gacha: z.strictObject({ stream: z.int().nonnegative(), pity: z.record(id, count), losses: z.record(id, count), history: z.array(pullRecord) }).optional(),
   teams: z.array(z.strictObject({ name: z.string().min(1).max(TEAM_NAME_LENGTH), members: z.array(id.nullable()).length(PARTY_SIZE) })).min(1).optional(),
   team: z.int().nonnegative().optional(),
-  run: z.strictObject({ id, elites: z.int().nonnegative() }).optional(),
+  depth: z.int().min(1).max(DEPTH_MAX).optional(),
+  deepest: z.int().min(1).max(DEPTH_MAX).optional(),
+  run: z.strictObject({ id, elites: z.int().nonnegative(), depth: z.int().min(2).max(DEPTH_MAX).optional() }).optional(),
 });
 
 /**
@@ -47,7 +50,7 @@ const profileSchema = z.strictObject({
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 7,
+  schemaVersion: 8,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -82,6 +85,8 @@ export const profileSave: SaveKind<Profile> = {
     },
     // v7 added levels and ascensions (M5.5); every character in a v6 profile is level 1.
     6: (data) => data,
+    // v8 added depths (M6.4): every v7 run was at Depth 1, and none has been won deeper.
+    7: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;

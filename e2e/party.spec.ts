@@ -151,3 +151,40 @@ test('a character levels up and ascends on her page, and party select buys a pre
   await page.screenshot({ path: 'test-results/screenshots/party-buy-preset.png' });
   expect(errors).toEqual([]);
 });
+
+test('party select chooses a depth from those open, and the run fields enemies at its level (M6.4)', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  // A new profile: only Depth 1.
+  await page.goto('/?encounters=encounter.training');
+  await page.getByRole('button', { name: 'Expedition' }).click();
+  const depth = page.getByRole('group', { name: 'Depth' });
+  await expect(depth.getByRole('spinbutton', { name: 'Depth chosen' })).toHaveValue('1');
+  await expect(depth.getByRole('button', { name: 'Deeper' })).toBeDisabled();
+  await expect(depth).toContainText('The first expedition is at Depth 1.');
+
+  // Depth 10 won: 1 to 20 open.
+  const data = { pulls: 0, runs: 3, owned: [], deepest: 10 };
+  const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 8, contentVersion: 1, data } } });
+  await page.getByRole('button', { name: 'Back' }).click();
+  await importSave(page, saveFile(backup));
+  await page.getByRole('button', { name: 'Expedition' }).click();
+  await expect(depth).toContainText('Win Depth 20 to open 21–30.');
+  await depth.getByRole('spinbutton', { name: 'Depth chosen' }).fill('25');
+  await expect(depth.getByRole('spinbutton', { name: 'Depth chosen' })).toHaveValue('20');
+  await depth.getByRole('button', { name: 'Shallower' }).click();
+  await expect(depth).toContainText('Enemies Lv 19 · Memories and Ducats ×5.5');
+  await page.screenshot({ path: 'test-results/screenshots/party-depth.png' });
+  await page.getByRole('button', { name: 'Start expedition' }).click();
+  await expect(page.locator('.map-depth')).toHaveText('Depth 19');
+  await page.locator('[data-tile="2,0"]').click();
+  await expect(page.locator('.enemy-level').first()).toHaveText('Lv 19');
+  await expect(page.locator('.turn')).toContainText('Depth 19');
+
+  // The depth chosen is kept for the next run.
+  await page.reload();
+  await page.getByRole('button', { name: 'New expedition' }).click();
+  await page.getByRole('button', { name: 'Abandon it' }).click();
+  await expect(depth.getByRole('spinbutton', { name: 'Depth chosen' })).toHaveValue('19');
+  expect(errors).toEqual([]);
+});

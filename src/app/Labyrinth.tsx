@@ -75,9 +75,9 @@ const FIRST_CLOCK = Number(params().get('clock')) || 0;
 const FIRST_OBOLS = Number(params().get('obols')) || 0;
 
 /** A new run for this party, front first, at its dupe levels and levels, on a random board (or `?seed`'s), with its own ID for the profile to track. */
-export function newRun(party: readonly string[], growth: Growth = {}): RunSave {
+export function newRun(party: readonly string[], growth: Growth = {}, depth = 1): RunSave {
   const seed = SEED ?? Math.floor(Math.random() * 2 ** 31);
-  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs, growth), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
+  const exp = { ...startExpedition(seed, [...party], DEF, registry.motifs, growth, depth), clock: FIRST_CLOCK, obols: FIRST_OBOLS };
   return { id: crypto.randomUUID(), seed, exp };
 }
 
@@ -166,7 +166,8 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
   if (exp.phase === 'fight' && !walking) {
     // Only the fight the run was saved in resumes; any later one starts fresh.
     const resumed = initial.combat && initial.exp.fightSeed === exp.fightSeed ? initial.combat : undefined;
-    const label = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : tile?.kind === 'bloom' ? 'Bloom node' : 'Labyrinth';
+    const kind = tile?.kind === 'boss' ? 'Boss' : tile?.kind === 'elite' ? 'Elite' : tile?.kind === 'bloom' ? 'Bloom node' : 'Labyrinth';
+    const label = `Depth ${exp.depth ?? 1} · ${kind}`;
     return (
       <Combat
         key={`${seed}:${exp.fightSeed}`}
@@ -185,6 +186,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
       <RelicBar relics={exp.relics} />
       <BloomClock clock={exp.clock} />
       <div className="map-obols plaque" aria-label="Obols">
+        <span className="map-depth">Depth {exp.depth ?? 1}</span>
         <span>Obols</span>
         <strong>{exp.obols}</strong>
       </div>

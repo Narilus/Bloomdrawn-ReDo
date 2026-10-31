@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
+import { depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
 import { MAX_LEVEL } from '../game/levels.ts';
 import { ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
@@ -57,8 +58,8 @@ export function Game() {
     void load();
   });
 
-  const startNew = async (party: readonly string[], growth: Growth) => {
-    const save = newRun(party, growth);
+  const startNew = async (party: readonly string[], growth: Growth, depth: number) => {
+    const save = newRun(party, growth, depth);
     await saves.start(save);
     setScreen({ kind: 'run', save });
   };
@@ -92,7 +93,10 @@ export function Game() {
           if (result.ok) setScreen({ kind: 'party', profile: result.profile });
         }}
         onChange={(teams, team) => void saves.teams(teams, team)}
-        onStart={(party) => void startNew(party, growthOf(screen.profile))}
+        depth={depthOf(screen.profile)}
+        depthOpen={depthOpen(screen.profile)}
+        onDepth={(depth) => void saves.depth(depth)}
+        onStart={(party, depth) => void startNew(party, growthOf(screen.profile), depth)}
         onBack={toTitle}
       />
     );

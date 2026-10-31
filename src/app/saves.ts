@@ -4,9 +4,10 @@ import { CONTENT_VERSION } from '../content/version.ts';
 import { missingContent } from '../game/check.ts';
 import type { ExpeditionDef } from '../game/expedition.ts';
 import type { BannerDef } from '../engine/index.ts';
+import { chooseDepth } from '../game/depth.ts';
 import { chooseFocus, pull } from '../game/gacha.ts';
 import { ascend, levelUp } from '../game/levels.ts';
-import { bank, buyPreset, lossBanking, NEW_PROFILE, type Banked, type Profile, type Team } from '../game/profile.ts';
+import { bank, buyPreset, lossBanking, NEW_PROFILE, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
 import { runSave, type RunSave } from '../save/run.ts';
@@ -20,6 +21,9 @@ export const RUN_SAVE = runSave((save) => {
   const missing = missingContent(save.exp, save.combat, registry);
   if (missing) throw new Error(`the game no longer has ${missing}`);
 });
+
+/** The profile's record of a run in progress: its ID, banking tally and depth (Depth 1 left out). */
+const activeRun = (save: RunSave): ActiveRun => ({ id: save.id, elites: save.exp.elites, ...((save.exp.depth ?? 1) > 1 && { depth: save.exp.depth }) });
 
 /** What the title screen needs: the profile, the run to continue, and why a run had to end, if one did. */
 export interface Boot {
@@ -50,7 +54,7 @@ export function createSaves(adapter: SaveAdapter) {
         // The banking tally lives in the profile too, so it survives a run save that can't be read.
         const profile = await readProfile();
         if (profile.run?.id === save.id && profile.run.elites !== save.exp.elites) {
-          await store.write(profileSave, { ...profile, run: { id: save.id, elites: save.exp.elites } });
+          await store.write(profileSave, { ...profile, run: activeRun(save) });
         }
       }
     } finally {
@@ -98,7 +102,7 @@ export function createSaves(adapter: SaveAdapter) {
             : save!.data.id !== profile.run.id
               ? 'its save belongs to another run'
               : 'it was saved by a different version of the game';
-        const banked = lossBanking(profile.run.elites, def, itemCount);
+        const banked = lossBanking(profile.run.elites, def, itemCount, profile.run.depth);
         const after = bank(profile, banked);
         await store.write(profileSave, after);
         await store.remove(RUN_SAVE);
@@ -109,7 +113,7 @@ export function createSaves(adapter: SaveAdapter) {
     start: (save: RunSave) =>
       enqueue(async () => {
         const profile = await readProfile();
-        await store.write(profileSave, { ...profile, run: { id: save.id, elites: save.exp.elites } });
+        await store.write(profileSave, { ...profile, run: activeRun(save) });
         await store.write(RUN_SAVE, save);
       }),
 
@@ -152,6 +156,9 @@ export function createSaves(adapter: SaveAdapter) {
 
     /** Ascends a character at her level cap; a refusal writes nothing. */
     ascend: (character: string) => enqueue(async () => keep(ascend(await readProfile(), character, registry))),
+
+    /** Keeps the depth chosen for the next run; a depth not open is refused and writes nothing. */
+    depth: (depth: number) => enqueue(async () => keep(chooseDepth(await readProfile(), depth))),
 
     /** Buys one more team preset with Ducats; a refusal writes nothing. */
     buyPreset: (owned: readonly string[]) => enqueue(async () => keep(buyPreset(await readProfile(), owned))),

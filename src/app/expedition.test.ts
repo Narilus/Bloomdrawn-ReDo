@@ -463,6 +463,37 @@ describe('banking', () => {
     expect([exp.elites, exp.fights]).toEqual([0, 1]);
   });
 
+  // M6.4 (owner, 29 and 31 Oct): a run's depth multiplies its Memories and Ducats.
+  it("at a depth, a run's Memories and Ducats are multiplied, each rounded down, but not its Blooms or material", () => {
+    const won = { ...play([HOUND, ELITE, HOUND, ELITE, BOSS], 'victory'), depth: 12 };
+    // Depth 12 is ×3.75: 1 Vivid, 2 Faint, 2 Clear and 900 Ducats become 3, 7, 7 and 3,375.
+    expect(banked(won)).toEqual({
+      pulls: 5,
+      items: { 'memory.vivid': 3, 'memory.faint': 7, 'memory.clear': 7, money: 3375, [won.material!]: 1 },
+      lines: [
+        'The Boss beaten: 5 Purified Blooms, 1 Vivid Memory, 500 Ducats',
+        '2 fights won: 2 Faint Memories, 100 Ducats',
+        '2 elites beaten: 2 Clear Memories, 300 Ducats',
+        'Depth 12: Memories and Ducats ×3.75',
+        `The Boss's material: ${itemCount(won.material!, 1)}`,
+      ],
+      won: 12,
+    });
+    expect(banked({ ...play([ELITE, ELITE, HOUND], 'defeat'), depth: 12 })).toEqual({
+      pulls: 2,
+      items: { 'memory.clear': 7, money: 1125 },
+      lines: ['2 elites beaten: 2 Purified Blooms, 7 Clear Memories, 1,125 Ducats', 'Depth 12: Memories and Ducats ×3.75'],
+    });
+  });
+
+  it("a run's fights field enemies at its depth's level", () => {
+    const deep = { ...on({ kind: 'entrance' }, HOUND), depth: 12 };
+    expect(expeditionFight(go(deep, '1,0').at(-1)!, registry).enemyLevel).toBe(12);
+    expect(expeditionFight(go(on({ kind: 'entrance' }, HOUND), '1,0').at(-1)!, registry).enemyLevel).toBeUndefined();
+    expect(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs, {}, 12).depth).toBe(12);
+    expect(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs, {}, 1).depth).toBeUndefined();
+  });
+
   it('banking adds the pulls and items to the profile and counts the run', () => {
     // A new profile starts with 10.
     const win = play([BOSS], 'victory');
@@ -470,6 +501,16 @@ describe('banking', () => {
     expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [], items: { 'memory.vivid': 1, money: 500, [win.material!]: 1 } });
     expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ ...once, runs: 2 });
     expect(bank(once, banked(play([ELITE, HOUND], 'defeat'))).items).toEqual({ 'memory.vivid': 1, 'memory.clear': 1, money: 650, [win.material!]: 1 });
+  });
+
+  it('a win records the deepest depth won, and a shallower win or a loss leaves it', () => {
+    const at = (depth: number, last: 'victory' | 'defeat' = 'victory') => banked({ ...play([BOSS], last), depth });
+    const ten = bank(NEW_PROFILE, at(10));
+    expect(ten.deepest).toBe(10);
+    expect(bank(ten, at(4)).deepest).toBe(10);
+    expect(bank(ten, at(14, 'defeat')).deepest).toBe(10);
+    expect(bank(ten, at(14)).deepest).toBe(14);
+    expect(bank(NEW_PROFILE, at(1)).deepest).toBeUndefined();
   });
 });
 

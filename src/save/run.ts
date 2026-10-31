@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { CombatState } from '../engine/index.ts';
+import { DEPTH_MAX } from '../game/depth.ts';
 import type { Expedition } from '../game/expedition.ts';
 import type { SaveKind } from './store.ts';
 
@@ -23,6 +24,7 @@ const runSchema = z.strictObject({
     party: ids,
     dupes: z.record(z.string(), z.int().min(1).max(5)).optional(),
     levels: z.record(z.string(), z.int().min(2).max(40)).optional(),
+    depth: z.int().min(2).max(DEPTH_MAX).optional(),
     fights: z.int().nonnegative().optional(),
     material: z.string().optional(),
     phase: z.enum(['map', 'tile', 'fight', 'reward', 'outcome', 'won', 'lost']),

@@ -56,6 +56,29 @@ describe('saves', () => {
     expect((await saves.boot(M3_EXPEDITION)).ended?.reason).toMatch(/dupes/);
   });
 
+  it('a run at a depth resumes at it, and one whose save is lost banks its share at that depth (M6.4)', async () => {
+    const { saves, adapter } = setup();
+    const save: RunSave = { id: 'run-1', seed: 4, exp: startExpedition(4, PARTY, M3_EXPEDITION, registry.motifs, {}, 12) };
+    await saves.start(save);
+    await saves.save({ ...save, exp: { ...save.exp, elites: 2 } });
+    expect((await saves.boot(M3_EXPEDITION)).run?.exp.depth).toBe(12);
+    expect((await saves.profile()).run).toEqual({ id: 'run-1', elites: 2, depth: 12 });
+    adapter.data.set('run:current', 'not json');
+    adapter.data.set('run:previous', 'not json');
+    const boot = await saves.boot(M3_EXPEDITION);
+    expect(boot.ended?.banked).toEqual(lossBanking(2, M3_EXPEDITION, itemCount, 12));
+    // Depth 12 is ×3.75: 2 Clear Memories and 300 Ducats become 7 and 1,125.
+    expect(boot.profile.items).toEqual({ 'memory.clear': 7, money: 1125 });
+  });
+
+  it('a depth is kept for the next run only if it is open (M6.4)', async () => {
+    const { saves } = setup();
+    expect(await saves.depth(2)).toEqual({ ok: false, reason: 'The first expedition is at Depth 1.' });
+    await saves.end({ pulls: 0, lines: [] });
+    expect(await saves.depth(9)).toMatchObject({ ok: true, profile: { depth: 9 } });
+    expect((await saves.profile()).depth).toBe(9);
+  });
+
   it("the profile keeps the run's elite tally as it changes", async () => {
     const { saves, store } = setup();
     const save = run();
