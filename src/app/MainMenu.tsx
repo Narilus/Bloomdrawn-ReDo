@@ -39,12 +39,13 @@ interface MenuProps {
   onNew: (saved: RunSave | null) => Promise<void>;
   onRoster: () => void;
   onBanner: () => void;
+  onInventory: () => void;
   onOptions: () => void;
 }
 
 type Open = 'expedition' | 'banners' | null;
 
-export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner, onOptions }: MenuProps) {
+export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner, onInventory, onOptions }: MenuProps) {
   const { profile, run, ended } = boot;
   // A saved run opens the menu on Continue.
   const [open, setOpen] = useState<Open>(run ? 'expedition' : null);
@@ -102,8 +103,8 @@ export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner
               </button>
             </div>
           )}
-          <button className="menu-item" disabled>
-            Inventory <small>soon</small>
+          <button className="menu-item" onClick={onInventory}>
+            Inventory
           </button>
           <button className="menu-item" onClick={onOptions}>
             Options

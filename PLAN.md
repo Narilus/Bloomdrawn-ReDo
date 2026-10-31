@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.1 Main menu and Options
+**Current task:** M6.3 Enemy levels and the model
 
 ## Milestones
 
@@ -332,6 +332,8 @@ _Built 31 Oct. The title screen is now the main menu (`src/app/MainMenu.tsx`): t
 ### M6.2 Inventory
 Items carry tags; the inventory lists what the profile holds in a tab per tag.
 **Done when:** content validation proves every item has a tag, and e2e opens each tab.
+
+_Built 31 Oct. Each item (`src/content/items.ts`) has a tag (currency, memory or material), an icon and a line on what it is for. The Inventory (`src/app/Inventory.tsx`) has All, Currencies, Memories and Materials tabs; every item shows, dimmed at 0, with Purified Blooms among the currencies, and the chosen one's details beside the grid. Weapons get a tab with weapons. Tests: `src/app/items.test.ts` (every item the game uses is defined, tagged, drawn and described), `e2e/menu.spec.ts`._
 
 ### M6.3 Enemy levels and the model
 Enemies have a level that scales their HP and damage, shown as a small tag. `npm run lab` models party HP and damage output at levels 1–40 and enemy HP and damage at 1–50, and the Memories and Ducats needed to reach 40 against a per-depth reward multiplier. The owner sees the curves before they're final.

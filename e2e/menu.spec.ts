@@ -51,3 +51,32 @@ test('the main menu opens each screen, and Reset needs the box ticked and RESET 
   await expect(page.locator('.roster-tile')).toHaveCount(4);
   expect(errors).toEqual([]);
 });
+
+test('the inventory lists every item in a tab per kind, and shows what a chosen one is for (M6.2)', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  const data = { pulls: 4, runs: 1, owned: [], items: { money: 2100, pollen: 12, 'memory.clear': 3, 'material.spirit': 2 } };
+  const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 7, contentVersion: 1, data } } });
+  await page.goto('/');
+  await importSave(page, saveFile(backup));
+  await page.getByRole('button', { name: 'Inventory' }).click();
+  const tiles = page.locator('.inventory-item');
+  await expect(tiles).toHaveCount(10);
+  await expect(page.getByRole('button', { name: 'Purified Blooms: 4' })).toHaveAttribute('aria-pressed', 'true');
+  await page.screenshot({ path: 'test-results/screenshots/inventory.png' });
+  await page.getByRole('tab', { name: 'Currencies' }).click();
+  await expect(page.locator('.inventory-name')).toHaveText(['Purified Blooms', 'Ducats', 'Pollen']);
+  await page.getByRole('tab', { name: 'Memories' }).click();
+  await expect(page.locator('.inventory-name')).toHaveText(['Faint Memory', 'Clear Memory', 'Vivid Memory']);
+  await page.getByRole('tab', { name: 'Materials' }).click();
+  await expect(tiles).toHaveCount(4);
+  await page.getByRole('button', { name: 'Spirit Shard: 2' }).click();
+  const detail = page.getByRole('complementary', { name: 'Item' });
+  await expect(detail.locator('h3')).toHaveText('Spirit Shard');
+  await expect(detail).toContainText('Held: 2');
+  await expect(detail).toContainText('Ascends a Spirit character at level 10, 20 or 30.');
+  await page.screenshot({ path: 'test-results/screenshots/inventory-materials.png' });
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('navigation', { name: 'Main menu' })).toBeVisible();
+  expect(errors).toEqual([]);
+});

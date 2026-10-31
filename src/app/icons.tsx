@@ -130,6 +130,36 @@ const PATHS: Record<string, React.ReactNode> = {
       <circle cx="12" cy="12" r="2.6" fill="var(--icon-cut, #2e1e2a)" stroke="none" />
     </>
   ),
+  // A Memory: an oval locket on a loop of chain, a pressed petal set in its face.
+  memory: (
+    <>
+      <path d="M9 3.5a3 3 0 0 1 6 0" fill="none" strokeWidth="1.6" strokeLinecap="round" />
+      <ellipse cx="12" cy="13.5" rx="7" ry="8" fill="none" strokeWidth="2" />
+      <path d="M12 9c2 1.8 2 5 0 8-2-3-2-6.2 0-8z" stroke="none" />
+    </>
+  ),
+  // A Flesh Sac: a round pouch pinched shut at the top, veins across it.
+  sac: (
+    <>
+      <path d="M9.5 4.5h5l-1 2.6c4 1.2 6.5 4.4 6.5 8.1 0 4-3.6 6.3-8 6.3s-8-2.3-8-6.3c0-3.7 2.5-6.9 6.5-8.1z" stroke="none" />
+      <path d="M8 13.5c1.4.4 2.4 1.6 2.6 3.4M15.5 11.5c-1 1.2-1.2 2.8-.6 4.6M12 14.5c.6 1.6 2 2.4 3.6 2.4" fill="none" stroke="var(--icon-cut, #2e1e2a)" strokeWidth="1.2" strokeLinecap="round" />
+    </>
+  ),
+  // A Spirit Shard: a tall splinter of candle-bone, split down its length.
+  shard: (
+    <>
+      <path d="M12 2l4.5 7-1.5 12.5h-6L7.5 9z" stroke="none" />
+      <path d="M12 2.5v19" fill="none" stroke="var(--icon-cut, #2e1e2a)" strokeWidth="1.1" />
+    </>
+  ),
+  // An Unbound Badge: a round pin-badge hung from a forked ribbon.
+  badge: (
+    <>
+      <path d="M8.5 2.5h7l-1.5 7h-4z" stroke="none" />
+      <circle cx="12" cy="15" r="6.5" stroke="none" />
+      <circle cx="12" cy="15" r="3.6" fill="none" stroke="var(--icon-cut, #2e1e2a)" strokeWidth="1.3" />
+    </>
+  ),
   // Two arrows chasing each other round a circle: switch.
   switch: (
     <>
