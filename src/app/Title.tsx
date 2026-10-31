@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
-import { depthOf, depthOpen } from '../game/depth.ts';
+import { DEPTH_MAX, depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
 import { ASCENSIONS, MAX_LEVEL } from '../game/levels.ts';
 import { ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
@@ -36,6 +36,8 @@ const devNumber = (name: string, max: number) =>
 const DEV_DUPES = devNumber('dupes', 5);
 /** Dev builds only: `?level=N` (2 to 40) puts every character at level N, with the ascensions it needed, on the roster and in new runs. Nothing is saved. */
 const DEV_LEVEL = devNumber('level', MAX_LEVEL);
+/** Dev builds only: `?depths=all` opens every depth in party select, to try deep runs. Nothing is saved. */
+const DEV_ALL_DEPTHS = import.meta.env.DEV && new URLSearchParams(window.location.search).get('depths') === 'all';
 /** The profile's dupe levels, levels and ascensions, or `?dupes`'s and `?level`'s. */
 const growthOf = (profile: Profile): Growth => ({
   dupes: DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes,
@@ -95,8 +97,8 @@ export function Game() {
           if (result.ok) setScreen({ kind: 'party', profile: result.profile });
         }}
         onChange={(teams, team) => void saves.teams(teams, team)}
-        depth={depthOf(screen.profile)}
-        depthOpen={depthOpen(screen.profile)}
+        depth={DEV_ALL_DEPTHS ? (screen.profile.depth ?? 1) : depthOf(screen.profile)}
+        depthOpen={DEV_ALL_DEPTHS ? DEPTH_MAX : depthOpen(screen.profile)}
         onDepth={(depth) => void saves.depth(depth)}
         onStart={(party, depth) => void startNew(party, growthOf(screen.profile), depth)}
         onBack={toTitle}
