@@ -11,12 +11,12 @@ import type { Boot } from './saves.ts';
 // Banners, Inventory, Options and Exit down the left, the chosen team's front character on the
 // right, and Ducats and Purified Blooms top right. Expedition and Banners open a sub-menu in place.
 
-/** Ducats and Purified Blooms as icons and numbers, each named in a tooltip. */
-export function Currencies({ profile }: { profile: Profile }) {
+/** Ducats and Purified Blooms (or just one) as icons and numbers, each named in a tooltip, top right. */
+export function Currencies({ profile, only }: { profile: Profile; only?: 'ducat' | 'bloom' }) {
   const counts = [
     { icon: 'ducat', name: 'Ducats', n: profile.items?.money ?? 0 },
     { icon: 'bloom', name: `${BLOOM}s`, n: profile.pulls },
-  ];
+  ].filter((c) => !only || c.icon === only);
   return (
     <div className="currencies">
       {counts.map(({ icon, name, n }) => (

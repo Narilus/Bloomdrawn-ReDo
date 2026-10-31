@@ -2837,24 +2837,6 @@ kbd {
   color: var(--blush);
 }
 
-.banner-blooms {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  padding: 8px 22px;
-  border: 1px solid rgba(184, 149, 90, 0.7);
-  border-radius: 12px;
-  background: rgba(30, 21, 25, 0.6);
-  font-family: var(--serif);
-  font-size: 26px;
-}
-
-.banner-blooms strong {
-  font-size: 40px;
-  color: var(--antique-gold);
-}
-
 /* The Focus: name and standing on the left, the art tall in the middle. */
 .banner-stage {
   position: relative;

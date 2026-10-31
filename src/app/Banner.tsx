@@ -20,6 +20,7 @@ import {
 } from '../game/gacha.ts';
 import { BLOOM, plural, type Profile } from '../game/profile.ts';
 import { Icon } from './icons.tsx';
+import { Currencies } from './MainMenu.tsx';
 import { Art } from './Roster.tsx';
 
 // The banner screen (docs/notes/m5-collection.md, "The gacha"; owner, 29 Oct): the Focus large,
@@ -119,10 +120,8 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
     <div className={`banner-screen domain-${def?.domain ?? ''}`}>
       <header className="banner-header">
         <h2>{banner.name} banner</h2>
-        <p className="banner-blooms">
-          {BLOOM}s <strong>{profile.pulls}</strong>
-        </p>
       </header>
+      <Currencies profile={profile} only="bloom" />
 
       <section className="banner-stage">
         {focus && def ? (

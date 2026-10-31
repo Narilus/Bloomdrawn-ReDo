@@ -25,7 +25,8 @@ test('chooses a Focus, pulls once and ten times, and sees the results and the hi
   // No Focus yet: no pulling.
   await expect(page.locator('.banner-no-focus')).toContainText('Choose a Focus');
   await expect(page.getByRole('button', { name: /Pull 1\b/ })).toBeDisabled();
-  await expect(page.locator('.banner-blooms strong')).toHaveText('11');
+  await expect(page.locator('.currency-bloom strong')).toHaveText('11');
+  await expect(page.locator('.currency-bloom')).toHaveAttribute('data-tip', 'Purified Blooms');
   await expect(page.locator('.banner-pity')).toContainText('SSR guaranteed within 30 pulls');
 
   await page.getByRole('button', { name: 'Switch' }).click();
@@ -49,13 +50,13 @@ test('chooses a Focus, pulls once and ten times, and sees the results and the hi
   await page.getByRole('button', { name: /Pull 1\b/ }).click();
   await expect(dialog(page, 'Results').locator('.banner-result')).toHaveCount(1);
   await close(page, 'Results');
-  await expect(page.locator('.banner-blooms strong')).toHaveText('10');
+  await expect(page.locator('.currency-bloom strong')).toHaveText('10');
 
   await page.getByRole('button', { name: /Pull 10\b/ }).click();
   await expect(dialog(page, 'Results').locator('.banner-result')).toHaveCount(10);
   await page.screenshot({ path: 'test-results/screenshots/banner-results.png' });
   await close(page, 'Results');
-  await expect(page.locator('.banner-blooms strong')).toHaveText('0');
+  await expect(page.locator('.currency-bloom strong')).toHaveText('0');
   await expect(page.getByRole('button', { name: /Pull 1\b/ })).toBeDisabled();
   await expect(page.getByRole('button', { name: /Pull 10\b/ })).toBeDisabled();
 
