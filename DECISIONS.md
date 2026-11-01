@@ -186,6 +186,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Enemy heals (owner, 1 Nov): only hurt allies count for Suture's rule, and every enemy heal uses it: the Lantern Surveyor's Tend, the Leader's Graft (Shield with the heal) and the Gardener's Tend and Graft.
 
+- Band 4's art (owner, 1 Nov): Pollinator 01, Gardener 01, Stilt-Grazer 01, Seed-Bladder 02, Weaver 03, Pollen Queen 03, Crowned Pistil 02. Every option is kept; the owner says this band worked very well.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

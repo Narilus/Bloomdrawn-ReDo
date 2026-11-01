@@ -372,6 +372,8 @@ _Band 3 built 1 Nov: the owner's picks in `src/assets/battle/`, its enemies in `
 
 _Band 4's briefs are in `art/briefs/` and its options in `art/raw/`, for the owner's pick (sheets: `art/cut/band4-*-sheet.png`)._
 
+_Band 4 built 1 Nov: the owner's picks in `src/assets/battle/`, its enemies in `src/content/enemies/` and its fights in `src/content/encounters/calyx.ts`, opening at Depth 31. The wide Pollinator stands small beside the Queen and the Pistil. Tests: `src/content/scenarios/calyx.test.ts`. Next: band 5, the source: briefs, then options for the owner's pick._
+
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.

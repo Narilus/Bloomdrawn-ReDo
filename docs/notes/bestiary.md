@@ -85,15 +85,27 @@ Looks: `bestiary-direction.md` 4.3. This is the busiest band in the game.
 
 | Enemy | Tier, role | HP | Intents | Size |
 |---|---|---|---|---|
-| Pollinator | Normal, debuffer | 50 | Pollen Cloud, party 4 Poison + 2 Weak; Sting 30. Beside the Queen, it also has Attend: 25 Shield to the Queen. | large (normal beside the Queen) |
+| Pollinator | Normal, debuffer | 50 | Pollen Cloud, party 4 Poison + 2 Weak; Sting 30. Beside the Queen, it also has Attend: 25 Shield to the Queen. | large (small beside the Queen or the Pistil) |
 | Gardener | Normal, buffer | 55 | Tend, heals 12, and Graft, 15 Shield, both by Suture's rule; Prune 32 | large |
-| Stilt-Grazer | Normal, attacker | 150 | Trample 60; Graze 30 | large |
+| Stilt-Grazer | Normal, attacker | 125 | Trample 60; Graze 30 | large |
 | Seed-Bladder | Normal, summoner | 70 | Drop, a Seedling (max 2); Burst Spores, party 6 Poison | large |
 | **The Weaver** | Elite: thin hand | 850 | Bind, you draw 1 fewer next turn; Lash 50; Bind; Reel In 95. Resists control. | large |
-| **The Pollen Queen**, with two Pollinators | Elite: kill order | 650; Pollinators 90 | Queen: Crush 70; Royal Jelly, heals itself 50. Resists control. | Queen large |
-| **The Crowned Pistil** | Boss | 1,100, then 1,100 | *First bar:* Pollen Fall, party 6 Poison + 2 Weak; Stamen Lash 60; Call the Pollinators, 2. *Rouse:* the Petals Part. *Second bar:* Close the Bud, 60 Shield; Open 110; Stamen Lash 28 ×3; Pollen Fall. *Full Bloom, second bar:* Close the Bud; Open 120; Call the Pollinators; Stamen Lash 28 ×4. | huge |
+| **The Pollen Queen**, with two Pollinators | Elite: kill order | 450; Pollinators 90 | Queen: Crush 70; Royal Jelly, heals itself 50. Resists control. | Queen large |
+| **The Crowned Pistil** | Boss | 1,100, then 1,100 | *First bar:* Pollen Fall, party 6 Poison + 2 Weak; Stamen Lash 60; Call the Pollinators, 2. *Rouse:* the Petals Part. *Second bar (Parted):* Close the Bud, 60 Shield; Open 100; Stamen Lash 28 ×3; Pollen Fall. *Full Bloom, second bar:* Close the Bud; Open 110; Call the Pollinators; Stamen Lash 28 ×4. | huge |
 
 **Fights:** the Stilt-Grazer alone; Pollinator and Gardener; Seed-Bladder and Pollinator; Stilt-Grazer and Gardener; two Pollinators.
+
+_Built 1 Nov._ The lab plays them at Depth 40 (Average build):
+- normal fights take 2.5–3.1 turns;
+- elites take 5.2 (Weaver) and 5.9 (Queen);
+- the Crowned Pistil takes 11.2, with her worst turn at 57% of party HP.
+
+To get there:
+- **Stilt-Grazer:** 150 HP to 125. Its fight with the Gardener still takes 3.1, because most parties win on turn 3 and one takes a fourth; lower HP barely moves it.
+- **The Queen:** 650 to 450. While her Pollinators live, Royal Jelly heals back what the party deals her, and their Weak slows it, so her HP counts only after they fall.
+- **The Pistil:** Open went from 110 to 100, and Full Bloom's from 120 to 110. Party Poison never wears off, and in this band it builds through her fight, so Open plus the Poison tick came to 62%.
+
+The Pollinator art is wide. Beside a larger anchor it stands small, as the Bee Knots do beside the Bear, so it keeps clear of the party and the screen edge; the size difference also tells the Queen from her attendants. Size belongs to an enemy, so there are three Pollinators: the plain one (large), the Queen's attendant (small, 90, with Attend) and the Pistil's (small, 50). Attend goes to the ally with the most max HP, itself included, so with the Queen dead both attendants Shield the first of them.
 
 ## Band 5, Depths 41–50: the source
 
@@ -154,3 +166,4 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 2. **The Tent-Walker's flap-mouth** stays. It suggests anatomy without being explicit, the teeth on 01 help, and the band carries content warnings. The owner will keep an eye on it.
 3. **Suture** tends a hurt Boss or summoner first (the Leader, the Tent-Walker), then the ally missing the largest share of its HP (the crew left after the Boss dies), and herself last. Only hurt allies count, so a whole Boss is passed over.
 4. **Every enemy heal uses Suture's rule:** the Lantern Surveyor's Tend, the Leader's Graft (its Shield goes with the heal) and the Gardener's Tend and Graft.
+5. **Band 4's art:** Pollinator 01, Gardener 01, Stilt-Grazer 01, Seed-Bladder 02, Weaver 03, Pollen Queen 03, Crowned Pistil 02. Every option is kept in `art/raw/`.

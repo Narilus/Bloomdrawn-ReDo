@@ -36,6 +36,13 @@ import fieldSurgeonBattle from '../assets/battle/field-surgeon.png';
 import packPorterBattle from '../assets/battle/pack-porter.png';
 import quartermasterBattle from '../assets/battle/quartermaster.png';
 import tentWalkerBattle from '../assets/battle/tent-walker.png';
+import crownedPistilBattle from '../assets/battle/crowned-pistil.png';
+import gardenerBattle from '../assets/battle/gardener.png';
+import pollenQueenBattle from '../assets/battle/pollen-queen.png';
+import pollinatorBattle from '../assets/battle/pollinator.png';
+import seedBladderBattle from '../assets/battle/seed-bladder.png';
+import stiltGrazerBattle from '../assets/battle/stilt-grazer.png';
+import weaverBattle from '../assets/battle/weaver.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -80,6 +87,17 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.cocooned-scout': cocoonedScoutBattle,
   'enemy.expedition-leader': expeditionLeaderBattle,
   'enemy.expedition-leader-full-bloom': expeditionLeaderBattle,
+  // Band 4, the Calyx.
+  'enemy.pollinator': pollinatorBattle,
+  'enemy.attending-pollinator': pollinatorBattle,
+  'enemy.flanking-pollinator': pollinatorBattle,
+  'enemy.gardener': gardenerBattle,
+  'enemy.stilt-grazer': stiltGrazerBattle,
+  'enemy.seed-bladder': seedBladderBattle,
+  'enemy.weaver': weaverBattle,
+  'enemy.pollen-queen': pollenQueenBattle,
+  'enemy.crowned-pistil': crownedPistilBattle,
+  'enemy.crowned-pistil-full-bloom': crownedPistilBattle,
 };
 
 export const portraitArt: Readonly<Record<string, string>> = {

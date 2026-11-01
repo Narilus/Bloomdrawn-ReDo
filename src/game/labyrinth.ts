@@ -262,6 +262,17 @@ export const M3_LABYRINTH: LabyrinthDef = {
       elite: ['encounter.quartermaster', 'encounter.cocooned-scout'],
       boss: ['encounter.expedition-leader'],
     },
+    {
+      fight: [
+        'encounter.stilt-grazer',
+        'encounter.pollinator-and-gardener',
+        'encounter.bladder-and-pollinator',
+        'encounter.grazer-and-gardener',
+        'encounter.two-pollinators',
+      ],
+      elite: ['encounter.weaver', 'encounter.pollen-queen'],
+      boss: ['encounter.crowned-pistil'],
+    },
   ],
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
   symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],
