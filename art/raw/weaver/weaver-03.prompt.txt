@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a194d2-a8ce-7ff0-b164-15e7e8d29420
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: the whole creature turned toward the left edge of the image. A creature whose body is a single open blush flower, with eight long jointed ivory arms spread around it, each ending in a hooked bone tip. Strung between the arm tips behind it is a section of web made of pale root thread, with a few beads of pink sap and a few caught petals held in the web. The most beautiful part is the open flower body. Ivory, raw pink and blush palette, no human features.
+
+Background: fully transparent.

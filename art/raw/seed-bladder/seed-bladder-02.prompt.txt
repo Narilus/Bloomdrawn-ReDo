@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a194d3-778c-7881-a353-93fcae33a855
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: the whole creature turned toward the left edge of the image. A swollen bladder of thin blush skin veined with raw pink, hanging heavy like a ripe fruit from the end of a thick root-stalk that arches up out of the ground and over. Dark seeds press against the inside of the skin, which stays opaque and glows faintly pink along its veins. Thick tendrils at the stalk's base grip the ground as roots. The most beautiful part is the glowing veins of the bladder. Blush, dark seeds and raw pink palette, no human features.
+
+Background: fully transparent.

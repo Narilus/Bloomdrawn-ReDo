@@ -370,6 +370,8 @@ _Band 2 and the stage overlap signed off 1 Nov. Cocoon built: `status.cocooned` 
 
 _Band 3 built 1 Nov: the owner's picks in `src/assets/battle/`, its enemies in `src/content/enemies/` and its fights in `src/content/encounters/lost-expedition.ts`, opening at Depth 21. An enemy's summon room is now the most one intent brings, adding each summon in it (Call the Crew). Tests: `src/content/scenarios/lost-expedition.test.ts`. Next: band 4, the Calyx: briefs, then options for the owner's pick._
 
+_Band 4's briefs are in `art/briefs/` and its options in `art/raw/`, for the owner's pick (sheets: `art/cut/band4-*-sheet.png`)._
+
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.
