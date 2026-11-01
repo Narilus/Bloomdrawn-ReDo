@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a1955f-23ab-77a0-bcb3-baacbf74eb9f
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: the whole creature turned toward the left edge of the image. A huge red deer stag, larger than a horse, remade by grafting: its antlers are thorned rose branches in full bloom, its shoulders and flanks are opened along stitched seams into rows of blush skin petals, and pale rose stems are grafted into its hide with black sutures and root-wrapped joints. Skin petals open down its throat, glowing soft pink. Its legs end in dark hooves wrapped in roots. The most beautiful part is the crown of blooming rose antlers. Russet hide, rose, blush, thorn green and soft pink glow palette, no human features.
+
+Background: fully transparent.
