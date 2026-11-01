@@ -384,6 +384,8 @@ _Band 5 signed off 1 Nov. The Heart-Buds stay at 60 HP (DECISIONS.md); the Heart
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.
 
+_Built 1 Nov: `src/game/profileLevel.ts` (sources, curve, claims), the gates on `ASCENSIONS` in `src/game/levels.ts`, the SSR Selector in `src/game/gacha.ts` (`useSelector`), banking's `play` record for EXP and stats, the badge in `MainMenu.tsx` and the page in `src/app/Profile.tsx`. The numbers are placeholders (docs/notes/m6-depth.md). Tests: `src/game/profileLevel.test.ts`, `src/game/levels.test.ts`, `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/profile.spec.ts`. Next: the owner reviews the numbers and the page; then M6.7._
+
 ### M6.7 Trials
 A new boss per Domain, with art. Five tiers at levels 10–50, each paying its Domain's material (1, 2, 3, 3, 6) and first clears 1 Purified Bloom (3 for Tier 5). Winning a tier opens the next.
 **Done when:** each boss has scenario tests, tests prove pay, first clears and unlocking, and the owner has approved the bosses and their art.

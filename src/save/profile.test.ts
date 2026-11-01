@@ -90,6 +90,20 @@ describe('the profile save', () => {
     }
   });
 
+  it('keeps profile EXP, claims and stats, and a v8 profile (M6.4) reads at profile level 1 with nothing counted (M6.6)', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, exp: 500, claimed: 4, stats: { won: 2, lost: 1, fights: 9, elites: 3, bosses: 2 }, run: { id: 'run-1', elites: 1, fights: 2 } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 8, contentVersion: 1, data: { ...NEW_PROFILE, runs: 2 } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, runs: 2 }, savedSchemaVersion: 8 });
+    const saves = createSaveStore(memoryAdapter(), 1);
+    // 500 EXP is profile level 5: a claim past it, a claim of level 1 (which gives none), negative counts and no fights are refused.
+    for (const bad of [{ exp: 500, claimed: 6 }, { claimed: 1 }, { exp: -1 }, { stats: { won: -1 } }, { run: { id: 'r', elites: 0, fights: 0 } }]) {
+      await expect(saves.write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     for (const bad of [

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { CHARACTER_BANNER } from '../content/banners.ts';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
@@ -12,11 +13,12 @@ import { DEF, Labyrinth, newRun } from './Labyrinth.tsx';
 import { Inventory } from './Inventory.tsx';
 import { MainMenu } from './MainMenu.tsx';
 import { Options } from './Options.tsx';
+import { ProfilePage } from './Profile.tsx';
 import { PartySelect, Roster } from './Roster.tsx';
 import { browserSaves, type Boot } from './saves.ts';
 
 // The game's screens (docs/notes/m4-run.md, "Save and resume"; m5-collection.md; m6-depth.md): the
-// main menu, and the run, party select, roster, banner, inventory and options it leads to.
+// main menu, and the run, party select, roster, banner, inventory, options and profile page it leads to.
 
 type Screen =
   | { kind: 'loading' }
@@ -26,6 +28,7 @@ type Screen =
   | { kind: 'banner'; profile: Profile }
   | { kind: 'inventory'; profile: Profile }
   | { kind: 'options'; profile: Profile }
+  | { kind: 'profile'; profile: Profile }
   | { kind: 'run'; save: RunSave };
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
@@ -135,6 +138,9 @@ export function Game() {
     );
   }
   if (screen.kind === 'inventory') return <Inventory profile={screen.profile} onBack={toTitle} />;
+  if (screen.kind === 'profile') {
+    return <ProfilePage profile={screen.profile} onClaim={saves.claim} onSelect={(id) => saves.select(CHARACTER_BANNER, id)} onBack={toTitle} />;
+  }
   if (screen.kind === 'options') {
     return (
       <Options
@@ -174,6 +180,7 @@ export function Game() {
       onBanner={() => setScreen({ kind: 'banner', profile })}
       onInventory={() => setScreen({ kind: 'inventory', profile })}
       onOptions={() => setScreen({ kind: 'options', profile })}
+      onProfile={() => setScreen({ kind: 'profile', profile })}
     />
   );
 }

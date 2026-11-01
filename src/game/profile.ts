@@ -2,6 +2,7 @@ import { reached } from './bloom.ts';
 import { rewardMultiplier } from './depth.ts';
 import type { Expedition, ExpeditionDef } from './expedition.ts';
 import type { Gacha } from './gacha.ts';
+import { gainExp } from './profileLevel.ts';
 
 // The player's profile, kept across runs (docs/notes/m4-run.md, "Banking"; m5-collection.md): banked
 // pulls (Purified Blooms on screen), a run count, the characters gained, items and the gacha. Pure, like the run.
@@ -32,6 +33,12 @@ export interface Profile {
   depth?: number;
   /** The deepest depth a run has been won at; it opens the bands of depths beyond (owner, 31 Oct). */
   deepest?: number;
+  /** Profile EXP earned by play (`profileLevel.ts`); absent is none, level 1. */
+  exp?: number;
+  /** The highest profile level whose reward has been claimed; absent is 1, which gives none. */
+  claimed?: number;
+  /** What the profile page shows, counted from M6.6 on. */
+  stats?: ProfileStats;
   /**
    * The run in progress: its ID and its banking tally, kept here as it changes so a run whose own
    * save can't be read can still bank its share (owner, 24 Oct).
@@ -39,9 +46,21 @@ export interface Profile {
   run?: ActiveRun;
 }
 
+/** Runs won and lost (abandoned counts as lost), and fights won by tier. Absent counts are 0. */
+export interface ProfileStats {
+  won?: number;
+  lost?: number;
+  fights?: number;
+  elites?: number;
+  bosses?: number;
+  trials?: number;
+}
+
 export interface ActiveRun {
   id: string;
   elites: number;
+  /** Normal fights won, for the profile's EXP and stats if the run's save is lost; absent is none. */
+  fights?: number;
   /** The run's depth, for banking its share if its save is lost; absent is Depth 1. */
   depth?: number;
 }
@@ -134,6 +153,8 @@ export interface Banked {
   lines: string[];
   /** A won run's depth past 1, which may open deeper ones. */
   won?: number;
+  /** What the run played, for profile EXP and stats: how it ended and the fights it won by tier. */
+  play?: { end: RunEnd; fights: number; elites: number; bosses: number };
 }
 
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -166,7 +187,7 @@ const gains = (pulls: number, items: Items, name: ItemText) =>
 export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef, name: ItemText): Banked {
   const { win, fruiting, items } = def.banking;
   const depth = exp.depth ?? 1;
-  if (end !== 'won') return lossBanking(exp.elites, def, name, depth);
+  if (end !== 'won') return { ...lossBanking(exp.elites, def, name, depth), play: { end, fights: exp.fights ?? 0, elites: exp.elites, bosses: 0 } };
   const fights = exp.fights ?? 0;
   const lines = [`The Boss beaten: ${gains(win, items.boss, name)}`];
   if (fights > 0) lines.push(`${plural(fights, 'fight')} won: ${gains(0, times(items.fight, fights), name)}`);
@@ -177,7 +198,13 @@ export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef, nam
   if (deeper) lines.push(deeper);
   const earned = times(times(sum(items.boss, times(items.fight, fights), times(items.elite, exp.elites)), n), rewardMultiplier(depth));
   if (exp.material) lines.push(`The Boss's material: ${name(exp.material, 1)}`);
-  return { pulls: win * n, items: sum(earned, exp.material ? { [exp.material]: 1 } : {}), lines, ...(depth > 1 && { won: depth }) };
+  return {
+    pulls: win * n,
+    items: sum(earned, exp.material ? { [exp.material]: 1 } : {}),
+    lines,
+    ...(depth > 1 && { won: depth }),
+    play: { end, fights, elites: exp.elites, bosses: 1 },
+  };
 }
 
 /** "Depth 12: Memories and Ducats ×3.75", or nothing at Depth 1. */
@@ -195,10 +222,24 @@ export function lossBanking(elites: number, def: ExpeditionDef, name: ItemText, 
   return { pulls, items: banked, lines: [`${plural(elites, 'elite')} beaten: ${gains(pulls, banked, name)}${capped}`, ...(deeper ? [deeper] : [])] };
 }
 
-/** The profile after a run ends: what it banked added, the run counted and no longer in progress. */
+/**
+ * The profile after a run ends: what it banked added, the run counted and no longer in progress,
+ * and what it played added to the profile's EXP and stats.
+ */
 export function bank(profile: Profile, banked: Banked): Profile {
   const { run: _ended, ...rest } = profile;
   const items = banked.items && Object.keys(banked.items).length > 0 ? { items: sum(profile.items ?? {}, banked.items) } : {};
   const deepest = banked.won !== undefined && banked.won > (profile.deepest ?? 0) ? { deepest: banked.won } : {};
-  return { ...rest, ...items, ...deepest, pulls: profile.pulls + banked.pulls, runs: profile.runs + 1 };
+  const after: Profile = { ...rest, ...items, ...deepest, pulls: profile.pulls + banked.pulls, runs: profile.runs + 1 };
+  const play = banked.play;
+  if (!play) return after;
+  const stats = { ...profile.stats };
+  const add = (key: keyof ProfileStats, n: number) => {
+    if (n > 0) stats[key] = (stats[key] ?? 0) + n;
+  };
+  add(play.end === 'won' ? 'won' : 'lost', 1);
+  add('fights', play.fights);
+  add('elites', play.elites);
+  add('bosses', play.bosses);
+  return gainExp(gainExp(gainExp({ ...after, stats }, 'fight', play.fights), 'elite', play.elites), 'boss', play.bosses);
 }

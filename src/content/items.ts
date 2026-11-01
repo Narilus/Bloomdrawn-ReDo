@@ -2,10 +2,10 @@
 // a tag that files each under an inventory tab (owner, 31 Oct), an icon key and what each is for.
 // Code keeps plain IDs; only the screens use the names.
 
-export type ItemTag = 'currency' | 'memory' | 'material';
+export type ItemTag = 'currency' | 'memory' | 'material' | 'special';
 
 /** Inventory tabs in order, by tag. */
-export const ITEM_TAGS: Record<ItemTag, string> = { currency: 'Currencies', memory: 'Memories', material: 'Materials' };
+export const ITEM_TAGS: Record<ItemTag, string> = { currency: 'Currencies', memory: 'Memories', material: 'Materials', special: 'Special' };
 
 export interface ItemDef {
   name: string;
@@ -26,6 +26,10 @@ export const ITEMS: Record<string, ItemDef> = {
   'material.rapture': { name: 'Rapture Tendril', plural: 'Rapture Tendrils', tag: 'material', icon: 'tentacle', text: 'Ascends a Rapture character at level 10, 20 or 30.' },
   'material.spirit': { name: 'Spirit Shard', plural: 'Spirit Shards', tag: 'material', icon: 'shard', text: 'Ascends a Spirit character at level 10, 20 or 30.' },
   'material.unbound': { name: 'Unbound Badge', plural: 'Unbound Badges', tag: 'material', icon: 'badge', text: 'Ascends an Unbound character at level 10, 20 or 30.' },
+  'selector.ssr': {
+    name: 'SSR Selector', plural: 'SSR Selectors', tag: 'special', icon: 'summon',
+    text: 'An SSR character of your choice from the banner, as a pulled copy. Pity is untouched. Profile levels 25 and 50 give one; use it on the profile page.',
+  },
 };
 
 export const ITEM_NAMES: Record<string, string> = Object.fromEntries(Object.entries(ITEMS).map(([id, item]) => [id, item.name]));

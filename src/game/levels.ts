@@ -1,5 +1,6 @@
 import type { Registry } from '../engine/index.ts';
 import type { Profile } from './profile.ts';
+import { profileLevelOf } from './profileLevel.ts';
 
 // Levels, Memories and ascension (docs/DESIGN.md, "RPG layer"; docs/notes/m5-collection.md; owner,
 // 29 Oct, placeholders). Levels 1 to 40. The next level costs 100 × the current level in EXP and
@@ -16,11 +17,14 @@ export const MEMORIES: readonly { item: string; exp: number }[] = [
   { item: 'memory.clear', exp: 500 },
   { item: 'memory.vivid', exp: 2000 },
 ];
-/** The ascensions in order: the level each gates, and its cost in the Domain's material and in Ducats. */
-export const ASCENSIONS: readonly { at: number; materials: number; money: number }[] = [
-  { at: 10, materials: 1, money: 1000 },
-  { at: 20, materials: 2, money: 3000 },
-  { at: 30, materials: 3, money: 6000 },
+/**
+ * The ascensions in order: the level each gates, its cost in the Domain's material and in Ducats,
+ * and the profile level it needs (owner, 31 Oct).
+ */
+export const ASCENSIONS: readonly { at: number; materials: number; money: number; profile: number }[] = [
+  { at: 10, materials: 1, money: 1000, profile: 5 },
+  { at: 20, materials: 2, money: 3000, profile: 10 },
+  { at: 30, materials: 3, money: 6000, profile: 15 },
 ];
 /** Purified Blooms (pulls) each ascension gives. */
 export const ASCENSION_PULLS = 1;
@@ -133,6 +137,8 @@ export function ascend(profile: Profile, id: string, registry: Registry): Growth
   if (!cost) return { ok: false, reason: ascensions >= ASCENSIONS.length ? 'Every ascension is made.' : 'Her Domain has no ascension material.' };
   const level = levelOf(profile, id);
   if (level < levelCap(ascensions)) return { ok: false, reason: `Ascension needs level ${levelCap(ascensions)}.` };
+  const gate = ASCENSIONS[ascensions]!.profile;
+  if (profileLevelOf(profile.exp) < gate) return { ok: false, reason: `Ascension at level ${levelCap(ascensions)} needs profile level ${gate}.` };
   const before = profile.items ?? {};
   const short = Object.entries(cost).find(([item, n]) => (before[item] ?? 0) < n);
   if (short) return { ok: false, reason: 'This needs more than the profile has.' };

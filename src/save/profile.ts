@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { DEPTH_MAX } from '../game/depth.ts';
 import { ASCENSIONS, levelCap, MAX_LEVEL } from '../game/levels.ts';
+import { PROFILE_MAX, profileLevelOf } from '../game/profileLevel.ts';
 import { emptyTeam, PARTY_SIZE, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
 import type { SaveKind } from './store.ts';
 
@@ -40,17 +41,20 @@ const profileSchema = z.strictObject({
   team: z.int().nonnegative().optional(),
   depth: z.int().min(1).max(DEPTH_MAX).optional(),
   deepest: z.int().min(1).max(DEPTH_MAX).optional(),
-  run: z.strictObject({ id, elites: z.int().nonnegative(), depth: z.int().min(2).max(DEPTH_MAX).optional() }).optional(),
+  exp: count.optional(),
+  claimed: z.int().min(2).max(PROFILE_MAX).optional(),
+  stats: z.strictObject({ won: count, lost: count, fights: count, elites: count, bosses: count, trials: count }).partial().optional(),
+  run: z.strictObject({ id, elites: z.int().nonnegative(), fights: z.int().positive().optional(), depth: z.int().min(2).max(DEPTH_MAX).optional() }).optional(),
 });
 
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
  * gained and their dupes, levels and ascensions, items, the Focus and the gacha, the team presets and
- * the run in progress's tally.
+ * the run in progress's tally, and profile EXP, claims and stats.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 8,
+  schemaVersion: 9,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -87,6 +91,8 @@ export const profileSave: SaveKind<Profile> = {
     6: (data) => data,
     // v8 added depths (M6.4): every v7 run was at Depth 1, and none has been won deeper.
     7: (data) => data,
+    // v9 added profile EXP, claims and stats (M6.6): a v8 profile is level 1 with nothing counted.
+    8: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;
@@ -94,6 +100,7 @@ export const profileSave: SaveKind<Profile> = {
     for (const [character, ascensions] of Object.entries(profile.ascensions ?? {})) {
       if ((profile.levels?.[character] ?? 1) < levelCap(ascensions - 1)) throw new Error(`${character} ascended below level ${levelCap(ascensions - 1)}`);
     }
+    if ((profile.claimed ?? 1) > profileLevelOf(profile.exp)) throw new Error(`profile level ${profile.claimed} claimed before it was reached`);
     for (const [character, level] of Object.entries(profile.levels ?? {})) {
       if (level > levelCap(profile.ascensions?.[character] ?? 0)) throw new Error(`${character} is past level ${levelCap(profile.ascensions?.[character] ?? 0)} without ascending`);
     }

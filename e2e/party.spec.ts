@@ -107,8 +107,9 @@ test("a character's dupe level shows on the roster, and the page shows her at it
 test('a character levels up and ascends on her page, and party select buys a preset with Ducats (M5.5)', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
-  const data = { pulls: 0, runs: 0, owned: [], items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 } };
-  const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 7, contentVersion: 1, data } } });
+  // 500 profile EXP is profile level 5, which the first ascension needs (M6.6).
+  const data = { pulls: 0, runs: 0, owned: [], items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 }, exp: 500 };
+  const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 9, contentVersion: 1, data } } });
   await page.goto('/');
   await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Roster' }).click();

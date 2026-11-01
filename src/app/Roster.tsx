@@ -364,6 +364,8 @@ function Growing({
     return `${cost.exp.toLocaleString('en-GB')} EXP, ${itemCount('money', cost.money)}`;
   };
   const ascension = ascensionCost(profile, id, registry);
+  // At a cap with an ascension left: whether it can be made now, or why not (a profile level, the cost).
+  const ascending = ascension && level >= cap ? ascend(profile, id, registry) : undefined;
   return (
     <section className="character-growth" aria-label="Level">
       <h3>
@@ -387,13 +389,13 @@ function Growing({
             )}
           </>
         ) : (
-          <button className="end-turn" disabled={busy || !ascension || !ascend(profile, id, registry).ok} onClick={() => act(() => onAscend(id), () => 'Ascended.')}>
+          <button className="end-turn" disabled={busy || !ascension || !ascending?.ok} onClick={() => act(() => onAscend(id), () => 'Ascended.')}>
             Ascend <small>{ascension ? `${itemsText(ascension)} · gives ${plural(ASCENSION_PULLS, BLOOM)}` : ''}</small>
           </button>
         )}
       </div>
       <p className="character-note" role="status">
-        {note ?? (level < cap && most < 1 && level < MAX_LEVEL ? `The next level needs ${priced(1)}.` : '')}
+        {note ?? (level < cap && most < 1 && level < MAX_LEVEL ? `The next level needs ${priced(1)}.` : ascending && !ascending.ok ? ascending.reason : '')}
       </p>
     </section>
   );

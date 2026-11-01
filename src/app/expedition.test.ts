@@ -417,6 +417,7 @@ describe('banking', () => {
       pulls: 5,
       items: { 'memory.vivid': 1, money: 500, [alone.material!]: 1 },
       lines: ['The Boss beaten: 5 Purified Blooms, 1 Vivid Memory, 500 Ducats', `The Boss's material: ${itemCount(alone.material!, 1)}`],
+      play: { end: 'won', fights: 0, elites: 0, bosses: 1 },
     });
     const past = play([HOUND, ELITE, HOUND, ELITE, BOSS], 'victory');
     expect([past.phase, past.elites, past.fights]).toEqual(['won', 2, 2]);
@@ -429,6 +430,7 @@ describe('banking', () => {
         '2 elites beaten: 2 Clear Memories, 300 Ducats',
         `The Boss's material: ${itemCount(past.material!, 1)}`,
       ],
+      play: { end: 'won', fights: 2, elites: 2, bosses: 1 },
     });
   });
 
@@ -438,25 +440,31 @@ describe('banking', () => {
       pulls: 10,
       items: { 'memory.vivid': 2, money: 1000, [exp.material!]: 1 },
       lines: ['The Boss beaten: 5 Purified Blooms, 1 Vivid Memory, 500 Ducats', 'The Boss at Fruiting: ×2', `The Boss's material: ${itemCount(exp.material!, 1)}`],
+      play: { end: 'won', fights: 0, elites: 0, bosses: 1 },
     });
     // Fruiting reached by fights on the way counts too: the Boss's own fight never ticks the clock.
     expect(banked(play([ELITE, BOSS], 'victory', 11))).toMatchObject({ pulls: 10, items: { 'memory.vivid': 2, 'memory.clear': 2, money: 1300 } });
   });
 
   it('a defeat banks 1 pull, 1 Clear Memory and 150 Ducats per elite beaten, 3 at most, and no material', () => {
-    expect(banked(play([HOUND], 'defeat'))).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
-    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, items: { 'memory.clear': 1, money: 150 }, lines: ['1 elite beaten: 1 Purified Bloom, 1 Clear Memory, 150 Ducats'] });
-    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, items: { 'memory.clear': 2, money: 300 }, lines: ['2 elites beaten: 2 Purified Blooms, 2 Clear Memories, 300 Ducats'] });
+    expect(banked(play([HOUND], 'defeat'))).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'], play: { end: 'lost', fights: 0, elites: 0, bosses: 0 } });
+    expect(banked(play([ELITE, HOUND], 'defeat'))).toEqual({ pulls: 1, items: { 'memory.clear': 1, money: 150 }, lines: ['1 elite beaten: 1 Purified Bloom, 1 Clear Memory, 150 Ducats'], play: { end: 'lost', fights: 0, elites: 1, bosses: 0 } });
+    expect(banked(play([ELITE, ELITE, BOSS], 'defeat'))).toEqual({ pulls: 2, items: { 'memory.clear': 2, money: 300 }, lines: ['2 elites beaten: 2 Purified Blooms, 2 Clear Memories, 300 Ducats'], play: { end: 'lost', fights: 0, elites: 2, bosses: 0 } });
     expect(banked(play([ELITE, ELITE, ELITE, ELITE, HOUND], 'defeat'))).toEqual({
       pulls: 3,
       items: { 'memory.clear': 3, money: 450 },
       lines: ['4 elites beaten: 3 Purified Blooms, 3 Clear Memories, 450 Ducats (3 at most)'],
+      play: { end: 'lost', fights: 0, elites: 4, bosses: 0 },
     });
     expect(play([ELITE, ELITE, BOSS], 'defeat').material).toBeUndefined();
   });
 
   it('an abandoned run banks like a defeat, so a run quit before any progress banks nothing', () => {
-    expect(banked(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs), 'abandoned')).toEqual({ pulls: 0, lines: ['No elites beaten: nothing banked'] });
+    expect(banked(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs), 'abandoned')).toEqual({
+      pulls: 0,
+      lines: ['No elites beaten: nothing banked'],
+      play: { end: 'abandoned', fights: 0, elites: 0, bosses: 0 },
+    });
     expect(banked(play([HOUND, HOUND], 'victory'), 'abandoned').pulls).toBe(0);
     expect(banked(play([ELITE, HOUND], 'victory'), 'abandoned')).toMatchObject({ pulls: 1, items: { 'memory.clear': 1, money: 150 } });
   });
@@ -481,11 +489,13 @@ describe('banking', () => {
         `The Boss's material: ${itemCount(won.material!, 1)}`,
       ],
       won: 12,
+      play: { end: 'won', fights: 2, elites: 2, bosses: 1 },
     });
     expect(banked({ ...play([ELITE, ELITE, HOUND], 'defeat'), depth: 12 })).toEqual({
       pulls: 2,
       items: { 'memory.clear': 7, money: 1125 },
       lines: ['2 elites beaten: 2 Purified Blooms, 7 Clear Memories, 1,125 Ducats', 'Depth 12: Memories and Ducats ×3.75'],
+      play: { end: 'lost', fights: 0, elites: 2, bosses: 0 },
     });
   });
 
@@ -497,12 +507,12 @@ describe('banking', () => {
     expect(startExpedition(1, PARTY, M3_EXPEDITION, registry.motifs, {}, 1).depth).toBeUndefined();
   });
 
-  it('banking adds the pulls and items to the profile and counts the run', () => {
-    // A new profile starts with 10.
+  it('banking adds the pulls and items to the profile and counts the run, with its profile EXP and stats', () => {
+    // A new profile starts with 10. The Boss gives 100 profile EXP (M6.6).
     const win = play([BOSS], 'victory');
     const once = bank(NEW_PROFILE, banked(win));
-    expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [], items: { 'memory.vivid': 1, money: 500, [win.material!]: 1 } });
-    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ ...once, runs: 2 });
+    expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [], items: { 'memory.vivid': 1, money: 500, [win.material!]: 1 }, exp: 100, stats: { won: 1, bosses: 1 } });
+    expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ ...once, runs: 2, stats: { won: 1, lost: 1, bosses: 1 } });
     expect(bank(once, banked(play([ELITE, HOUND], 'defeat'))).items).toEqual({ 'memory.vivid': 1, 'memory.clear': 1, money: 650, [win.material!]: 1 });
   });
 

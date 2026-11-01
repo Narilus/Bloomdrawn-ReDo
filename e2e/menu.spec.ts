@@ -61,7 +61,8 @@ test('the inventory lists every item in a tab per kind, and shows what a chosen 
   await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Inventory' }).click();
   const tiles = page.locator('.inventory-item');
-  await expect(tiles).toHaveCount(10);
+  // Ten items and the SSR Selector (M6.6).
+  await expect(tiles).toHaveCount(11);
   await expect(page.getByRole('button', { name: 'Purified Blooms: 4' })).toHaveAttribute('aria-pressed', 'true');
   await page.screenshot({ path: 'test-results/screenshots/inventory.png' });
   await page.getByRole('tab', { name: 'Currencies' }).click();
@@ -76,6 +77,8 @@ test('the inventory lists every item in a tab per kind, and shows what a chosen 
   await expect(detail).toContainText('Held: 2');
   await expect(detail).toContainText('Ascends a Spirit character at level 10, 20 or 30.');
   await page.screenshot({ path: 'test-results/screenshots/inventory-materials.png' });
+  await page.getByRole('tab', { name: 'Special' }).click();
+  await expect(page.locator('.inventory-name')).toHaveText(['SSR Selector']);
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(page.getByRole('navigation', { name: 'Main menu' })).toBeVisible();
   expect(errors).toEqual([]);

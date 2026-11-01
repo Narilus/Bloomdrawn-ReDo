@@ -73,6 +73,13 @@ Real encounters, the Average build at the depth's level (`npm run lab:depth`):
 - **Levels 25 and 50 give an SSR selector:** an item that gives a chosen SSR, outside pity. My reading: a character from the banner pool, taken like a pulled copy (a dupe if owned).
 - My reading: ascensions made before profile level existed stay made. Profile stats count from M6 on.
 
+_Built 1 Nov (M6.6), in `src/game/profileLevel.ts`; the numbers are placeholders for the owner:_
+- **Sources:** a fight won 10, an elite 30, a Boss 100, a Trial won 50, a Trial tier's first clear 200, an SSR pulled 50. A run's fights and elites count whether it is won or lost (the run's tally in the profile keeps them if its save is lost); the Boss counts once, at Fruiting too. The SSR Selector is no pull and gives none. Trials give theirs from M6.7.
+- **Curve:** level 1 to 2 costs 100, and each level a tenth more, rounded to 10. A won run of five fights, two elites and its Boss gives 210, so level 5 takes 3 such runs, 10 takes 7, 15 takes 14, 25 takes 43 and 50 about 500.
+- **Claims:** one Claim takes every level waiting, a Bloom each and a Selector at 25 and 50. The badge shows a pip with the number waiting.
+- **Stats:** runs won and lost (an abandoned run is lost), fights won, elites, Bosses and Trials beaten, counting fights won by tier, not single enemies (my reading).
+- **The Selector:** chosen from the character banner's pool on the profile page; it lands as a pulled copy would.
+
 ## Weapons
 
 - **A weapon gives stats** (Attack, Defense or HP) **and one passive line,** like a small relic that belongs to its character. **Signature SSR weapons** boost their owner's kit. **SR and R weapons** are generic, one set per Domain. Each is drafted in `docs/notes/weapons.md` for approval.

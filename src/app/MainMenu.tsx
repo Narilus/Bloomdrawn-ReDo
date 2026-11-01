@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { itemCount } from '../content/items.ts';
-import { BLOOM, runBanking, type Profile } from '../game/profile.ts';
+import { BLOOM, plural, runBanking, type Profile } from '../game/profile.ts';
+import { levelProgress, unclaimed } from '../game/profileLevel.ts';
 import type { RunSave } from '../save/run.ts';
 import { Icon } from './icons.tsx';
 import { Banking, DEF } from './Labyrinth.tsx';
@@ -9,7 +10,7 @@ import type { Boot } from './saves.ts';
 
 // The main menu (docs/notes/m6-depth.md, "Main menu"; owner, 31 Oct): Expedition, Trials, Roster,
 // Banners, Inventory, Options and Exit down the left, the chosen team's front character on the
-// right, and Ducats and Purified Blooms top right. Expedition and Banners open a sub-menu in place.
+// right, Ducats and Purified Blooms top right, and the profile level badge top left (M6.6). Expedition and Banners open a sub-menu in place.
 
 /** Ducats and Purified Blooms (or just one) as icons and numbers, each named in a tooltip, top right. */
 export function Currencies({ profile, only }: { profile: Profile; only?: 'ducat' | 'bloom' }) {
@@ -30,6 +31,27 @@ export function Currencies({ profile, only }: { profile: Profile; only?: 'ducat'
   );
 }
 
+/** The profile level as a ring of progress toward the next, with a pip while a reward waits. Top left of the main menu. */
+export function ProfileBadge({ profile, onOpen }: { profile: Profile; onOpen: () => void }) {
+  const { level, into, need } = levelProgress(profile.exp);
+  const waiting = unclaimed(profile).length;
+  const share = need === 0 ? 1 : into / need;
+  return (
+    <button
+      className="profile-badge"
+      onClick={onOpen}
+      aria-label={`Profile level ${level}${waiting > 0 ? `, ${plural(waiting, 'reward')} to claim` : ''}`}
+      style={{ '--progress': `${share * 360}deg` } as React.CSSProperties}
+    >
+      <span className="profile-ring">
+        <strong>{level}</strong>
+      </span>
+      <span className="profile-badge-label">Profile</span>
+      {waiting > 0 && <em className="profile-pip">{waiting}</em>}
+    </button>
+  );
+}
+
 interface MenuProps {
   boot: Boot;
   /** The character shown beside the menu: the front of the chosen team. */
@@ -41,11 +63,12 @@ interface MenuProps {
   onBanner: () => void;
   onInventory: () => void;
   onOptions: () => void;
+  onProfile: () => void;
 }
 
 type Open = 'expedition' | 'banners' | null;
 
-export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner, onInventory, onOptions }: MenuProps) {
+export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner, onInventory, onOptions, onProfile }: MenuProps) {
   const { profile, run, ended } = boot;
   // A saved run opens the menu on Continue.
   const [open, setOpen] = useState<Open>(run ? 'expedition' : null);
@@ -68,6 +91,7 @@ export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner
     <div className="main-menu">
       {featured && <Art id={featured} className="menu-art" />}
       <Currencies profile={profile} />
+      <ProfileBadge profile={profile} onOpen={onProfile} />
       <div className="menu-column">
         <h1>Bloomdrawn</h1>
         <nav className="menu-list" aria-label="Main menu">

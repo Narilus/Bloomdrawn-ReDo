@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Registry } from '../engine/index.ts';
 import { affordableLevels, ascend, ascensionCost, expToNext, levelCap, levelCost, levelUp, MAX_LEVEL, moneyToNext, payExp } from './levels.ts';
 import { NEW_PROFILE, type Profile } from './profile.ts';
+import { expToReach } from './profileLevel.ts';
 
 // Levels, Memories and ascension (owner, 29 Oct, placeholders): the next level costs 100 × the
 // current level in EXP and 20 × it in Ducats; Faint, Clear and Vivid Memories are 100, 500 and 2,000
@@ -12,7 +13,8 @@ const C = 'memory.clear';
 const V = 'memory.vivid';
 const MAT = 'material.test';
 const registry = { characters: { ana: { domain: 'test' } }, domains: { test: { material: MAT } } } as unknown as Registry;
-const withItems = (items: Record<string, number>, extra: Partial<Profile> = {}): Profile => ({ ...NEW_PROFILE, items, ...extra });
+/** A profile at profile level 15, past every ascension's gate (M6.6), so these tests see only levels and costs. */
+const withItems = (items: Record<string, number>, extra: Partial<Profile> = {}): Profile => ({ ...NEW_PROFILE, exp: expToReach(15), items, ...extra });
 
 describe('the cost of a level', () => {
   it('is 100 × the current level in EXP and 20 × it in Ducats; level 1 to 40 is 78,000 EXP', () => {
@@ -115,6 +117,18 @@ describe('ascension', () => {
     }
     expect(pulls).toEqual([start, start + 1, start + 2, start + 3]);
     expect(ascend(at(9), 'ana', registry)).toMatchObject({ ok: false });
+  });
+
+  it('the ascensions at 10, 20 and 30 need profile level 5, 10 and 15 (owner, 31 Oct)', () => {
+    for (const [ascensions, gate] of [[0, 5], [1, 10], [2, 15]] as const) {
+      const level = (ascensions + 1) * 10;
+      const below = { ...at(level, ascensions), exp: expToReach(gate) - 1 };
+      expect(ascend(below, 'ana', registry)).toEqual({ ok: false, reason: `Ascension at level ${level} needs profile level ${gate}.` });
+      expect(ascend({ ...below, exp: expToReach(gate) }, 'ana', registry).ok).toBe(true);
+    }
+    // A new profile, at profile level 1, can't make the first.
+    const { exp: _none, ...fresh } = at(10);
+    expect(ascend(fresh, 'ana', registry)).toMatchObject({ ok: false, reason: 'Ascension at level 10 needs profile level 5.' });
   });
 
   it('needs her level cap, the material and the Ducats, and refuses otherwise', () => {

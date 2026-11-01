@@ -1,5 +1,6 @@
 import { createStreams, nextFloat, nextInt, type BannerDef } from '../engine/index.ts';
 import { BLOOM, plural, type Profile } from './profile.ts';
+import { gainExp, SSR_SELECTOR } from './profileLevel.ts';
 
 // The gacha (docs/DESIGN.md, "Gacha"; docs/notes/m5-collection.md): SSR 3%, SR 15%, R 82%, a flat
 // rate until hard pity at pull 30, and at least one SR in a ten-pull. One Purified Bloom per pull.
@@ -123,15 +124,7 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
         character = focus;
         losses = 0;
       }
-      if (!owned.includes(character)) {
-        owned.push(character);
-        dupe = 'new';
-      } else if ((dupes[character] ?? 0) < MAX_DUPES) {
-        dupe = dupes[character] = (dupes[character] ?? 0) + 1;
-      } else {
-        dupe = 'overflow';
-        got.pollen! += POLLEN_PER_OVERFLOW;
-      }
+      dupe = gainCopy(character, owned, dupes, got);
     } else if (rarity === 'sr') {
       got[banner.sr.one[nextInt(rng, 'gacha', banner.sr.one.length)]!] = banner.sr.amount;
     } else {
@@ -166,5 +159,40 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
     losses: { ...profile.gacha?.losses, [banner.pity]: losses },
     history,
   };
-  return { ok: true, profile: { ...profile, pulls: blooms, owned, items, dupes, gacha }, records };
+  // Each SSR pulled gives profile EXP (owner, 31 Oct).
+  const after = gainExp({ ...profile, pulls: blooms, owned, items, dupes, gacha }, 'ssr', records.filter((r) => r.rarity === 'ssr').length);
+  return { ok: true, profile: after, records };
+}
+
+/**
+ * A copy of an SSR character joins the profile: new, a dupe level up to C5, or past C5 Pollen into
+ * `items`. Changes the tables it is given and says which.
+ */
+export function gainCopy(character: string, owned: string[], dupes: Record<string, number>, items: Record<string, number>): 'new' | 'overflow' | number {
+  if (!owned.includes(character)) {
+    owned.push(character);
+    return 'new';
+  }
+  if ((dupes[character] ?? 0) < MAX_DUPES) return (dupes[character] = (dupes[character] ?? 0) + 1);
+  items.pollen = (items.pollen ?? 0) + POLLEN_PER_OVERFLOW;
+  return 'overflow';
+}
+
+export type SelectResult = { ok: true; profile: Profile; dupe: 'new' | 'overflow' | number; pollen: number } | { ok: false; reason: string };
+
+/**
+ * Spends an SSR selector (profile levels 25 and 50) on a character from the banner's pool, gained as
+ * a pulled copy would be: new, a dupe level, or Pollen past C5. Pity, 50/50 losses and pull history
+ * are untouched (owner, 31 Oct), and it is no pull, so it gives no profile EXP.
+ */
+export function useSelector(profile: Profile, banner: BannerDef, character: string): SelectResult {
+  const held = profile.items?.[SSR_SELECTOR] ?? 0;
+  if (held === 0) return { ok: false, reason: 'No SSR selector to use.' };
+  if (!banner.pool.includes(character)) return { ok: false, reason: 'Choose a character from the banner.' };
+  const { [SSR_SELECTOR]: _spent, ...rest } = profile.items ?? {};
+  const items: Record<string, number> = held > 1 ? { ...rest, [SSR_SELECTOR]: held - 1 } : rest;
+  const owned = [...profile.owned];
+  const dupes = { ...profile.dupes };
+  const dupe = gainCopy(character, owned, dupes, items);
+  return { ok: true, profile: { ...profile, owned, dupes, items }, dupe, pollen: dupe === 'overflow' ? POLLEN_PER_OVERFLOW : 0 };
 }

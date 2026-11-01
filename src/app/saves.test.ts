@@ -66,7 +66,7 @@ describe('saves', () => {
     adapter.data.set('run:current', 'not json');
     adapter.data.set('run:previous', 'not json');
     const boot = await saves.boot(M3_EXPEDITION);
-    expect(boot.ended?.banked).toEqual(lossBanking(2, M3_EXPEDITION, itemCount, 12));
+    expect(boot.ended?.banked).toEqual({ ...lossBanking(2, M3_EXPEDITION, itemCount, 12), play: { end: 'abandoned', fights: 0, elites: 2, bosses: 0 } });
     // Depth 12 is ×3.75: 2 Clear Memories and 300 Ducats become 7 and 1,125.
     expect(boot.profile.items).toEqual({ 'memory.clear': 7, money: 1125 });
   });
@@ -99,7 +99,8 @@ describe('saves', () => {
 
   it('levelling, ascending and buying a preset keep the profile they leave; a refusal writes nothing (M5.5)', async () => {
     const { saves, store } = setup();
-    await saves.end({ pulls: 0, items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 }, lines: [] });
+    // Five Bosses' profile EXP (500) reach profile level 5, which the first ascension needs (M6.6).
+    await saves.end({ pulls: 0, items: { 'memory.vivid': 3, 'material.flesh': 1, money: 3000 }, lines: [], play: { end: 'won', fights: 0, elites: 0, bosses: 5 } });
     expect(await saves.levelUp('maelia', 10)).toEqual({ ok: false, reason: 'Level 10 needs an ascension first.' });
     const levelled = await saves.levelUp('maelia', 9);
     if (!levelled.ok) throw new Error(levelled.reason);
@@ -143,6 +144,17 @@ describe('saves', () => {
     expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 5, runs: 1, owned: [] }, run: null });
   });
 
+  it("the profile's tally keeps the run's normal fights won too, so a lost save still gives their profile EXP (M6.6)", async () => {
+    const { saves, adapter } = setup();
+    const save = run();
+    await saves.start(save);
+    await saves.save({ ...save, exp: { ...save.exp, fights: 3 } });
+    expect((await saves.profile()).run).toEqual({ id: save.id, elites: 0, fights: 3 });
+    adapter.data.set('run:current', 'not json');
+    adapter.data.set('run:previous', 'not json');
+    expect((await saves.boot(M3_EXPEDITION)).profile).toMatchObject({ exp: 30, stats: { lost: 1, fights: 3 } });
+  });
+
   it("an unreadable run ends as abandoned and banks its share from the profile's tally, once", async () => {
     const { saves, adapter } = setup();
     const save = run();
@@ -151,13 +163,15 @@ describe('saves', () => {
     adapter.data.set('run:current', '{"format":"bloomdrawn-save","kind":"ru');
     adapter.data.set('run:previous', 'not json');
     const boot = await saves.boot(M3_EXPEDITION);
+    // The tally's two elites also give profile EXP (30 each) and count in the stats as a lost run (M6.6).
+    const after = { pulls: 10 + 2, runs: 1, owned: [], items: { 'memory.clear': 2, money: 300 }, exp: 60, stats: { lost: 1, elites: 2 } };
     expect(boot).toEqual({
-      profile: { pulls: 10 + 2, runs: 1, owned: [], items: { 'memory.clear': 2, money: 300 } },
+      profile: after,
       run: null,
-      ended: { reason: 'The save is not valid JSON.', banked: lossBanking(2, M3_EXPEDITION, itemCount) },
+      ended: { reason: 'The save is not valid JSON.', banked: { ...lossBanking(2, M3_EXPEDITION, itemCount), play: { end: 'abandoned', fights: 0, elites: 2, bosses: 0 } } },
     });
     expect(adapter.data.has('run:current')).toBe(false);
-    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: { pulls: 10 + 2, runs: 1, owned: [], items: { 'memory.clear': 2, money: 300 } }, run: null });
+    expect(await saves.boot(M3_EXPEDITION)).toEqual({ profile: after, run: null });
   });
 
   it('a run naming content the game no longer has, or saved with other content, ends as abandoned', async () => {
