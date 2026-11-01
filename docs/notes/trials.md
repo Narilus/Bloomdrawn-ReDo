@@ -1,0 +1,47 @@
+# Trials: the four bosses (M6.7)
+
+Status: **proposed 1 Nov, for the owner's approval.** The rules are his (m6-direction.md B; m6-depth.md "Trials"). The bosses, their names and movesets below are drafts. Numbers are level-1 placeholders that scale with the tier's level like every enemy's, fitted later by the lab. Briefs are in `art/briefs/`, and options in `art/raw/` (sheets: `art/cut/trial-*-sheet.png`).
+
+## How a Trial runs (settled)
+
+- Main menu → Trials → a Domain → a tier that is open → party select → one fight against the boss at the tier's level, with no map.
+- Tiers at levels 10, 20, 30, 40 and 50. A win pays the Domain's material (1, 2, 3, 3, 6). A first clear gives 1 Purified Bloom (Tier 5: 3) and opens the next tier. A defeat pays nothing. Attempts are unlimited.
+- A win gives 50 profile EXP, and a first clear 200 more. Built in `src/game/trials.ts`.
+
+## The bosses
+
+Each mirrors its Domain's engine against the party and tests one thing. All are huge, resist control and have two bars. Every one uses rules the game already has unless marked **new**.
+
+### Flesh: The Grand Anatomist
+*Look:* a towering surgeon-saint in a blood-pink gown and stitched ivory apron, six grafted arms fanned out like a halo, each holding a brass tool. She cradles a glowing seed pod of embryo buds. *Tests:* build and burst. Her Gestation is shown on her badge, and the payoff is telegraphed a turn ahead.
+
+- **Consultation** (1,100): Incision 30 and party 6 Bleed; Gestate, she gains 2 Gestation; Suture, she heals 40 and gains 30 Shield.
+- *Rouse:* Scrub In.
+- **The Theatre** (1,100): Gestate (3); Incision; Gestate (3); Delivery, 30 per Gestation, which it then spends (the intent shows the total).
+
+### Rapture: The Veiled Hierophant
+*Look:* a towering cult high priest in bruise-violet vestments, a lace veil hiding all but his smile, candles on his shoulders and a swinging censer. Flesh tentacles rise from the chalk circles beneath him. *Tests:* count × damage, Rapture's two axes. His Tentacles are small adds, so killing them cuts the count, and his Sermon raises the damage of every one.
+
+- **Vespers** (1,000): Raise a Limb, 1 Tentacle (40 HP; Lash 12 every turn; 3 at most); Sermon, every enemy gains 1 Fervour (+6 damage per hit, never wears off); Censer, party 2 Weak.
+- *Rouse:* The Veil Lifts (clears his own statuses; his Tentacles keep theirs).
+- **Compline** (1,000): Raise Two Limbs; Sermon (2 Fervour); Communion 70.
+
+### Spirit: The Kirin Oracle
+*Look:* a towering shrine oracle with a kirin's gold-leafed horn, pale gold scale patches and hooves under ash-grey robes. A fan of paper talismans with bells hangs behind her, inside a halo of pale gold flames. *Tests:* a delayed payoff. Her Rite is named a turn ahead and grows with every talisman left standing, so kill them or race her.
+
+- **Invocation** (1,000): Hang Talismans, 2 small Talismans (35 HP; Chant: the Oracle gains 1 Sanctity); Hoof Strike 50; Kindle, which names the Rite next turn; The Rite, 40 + 20 per Sanctity, then her Sanctity is spent.
+- *Rouse:* The Horn Unveiled.
+- **Ascension** (1,000): Hang Talismans; Tranquil Ward, 60 Shield; Kindle; The Rite.
+
+### Unbound: The Ringmaster
+*Look:* a towering grinning ringmaster in an oxblood tailcoat and gold-banded top hat, a closed blush bud at his ruff. He cracks a whip, with two carved marionette dancers dangling from gold strings on his fingers. *Tests:* economy. He takes your cards and your Mana, the Unbound trade turned on you, while his marionettes Shield him.
+
+- **The Overture** (1,000): Whip Crack 45 and party 2 Vulnerable; Sleight of Hand, party draws 2 fewer next turn; Raise the Marionettes, 2 Marionettes (50 HP; Dance 20; Bow, 20 Shield to the Ringmaster).
+- *Rouse:* The Main Act.
+- **The Main Act** (1,000): Toll the House, party takes 2 Mana debt; Whip Crack; Knife-Thrower 15 ×5; Grand Finale 110.
+
+## Open questions
+
+1. The four bosses: their looks, names and movesets.
+2. **Tiers:** does each tier keep the same moveset at a higher level (the draft), or do higher tiers add something, such as a third bar at Tier 5?
+3. **Party at a Trial:** any four owned characters, chosen from the team presets as for an expedition (the draft)?

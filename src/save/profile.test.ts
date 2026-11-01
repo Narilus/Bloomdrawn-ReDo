@@ -104,6 +104,18 @@ describe('the profile save', () => {
     }
   });
 
+  it('keeps the Trial tiers won by Domain, and a v9 profile (M6.6) has won none (M6.7)', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, trials: { flesh: 2, spirit: 5 } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 9, contentVersion: 1, data: { ...NEW_PROFILE, exp: 40 } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, exp: 40 }, savedSchemaVersion: 9 });
+    for (const bad of [{ trials: { flesh: 0 } }, { trials: { flesh: 6 } }]) {
+      await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     for (const bad of [

@@ -37,6 +37,8 @@ export interface Profile {
   exp?: number;
   /** The highest profile level whose reward has been claimed; absent is 1, which gives none. */
   claimed?: number;
+  /** The highest Trial tier won, by Domain (`trials.ts`); absent is none. */
+  trials?: Record<string, number>;
   /** What the profile page shows, counted from M6.6 on. */
   stats?: ProfileStats;
   /**

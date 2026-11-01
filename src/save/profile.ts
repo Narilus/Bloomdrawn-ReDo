@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { DEPTH_MAX } from '../game/depth.ts';
 import { ASCENSIONS, levelCap, MAX_LEVEL } from '../game/levels.ts';
 import { PROFILE_MAX, profileLevelOf } from '../game/profileLevel.ts';
+import { TRIAL_TIERS } from '../game/trials.ts';
 import { emptyTeam, PARTY_SIZE, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
 import type { SaveKind } from './store.ts';
 
@@ -41,6 +42,7 @@ const profileSchema = z.strictObject({
   team: z.int().nonnegative().optional(),
   depth: z.int().min(1).max(DEPTH_MAX).optional(),
   deepest: z.int().min(1).max(DEPTH_MAX).optional(),
+  trials: z.record(id, z.int().min(1).max(TRIAL_TIERS.length)).optional(),
   exp: count.optional(),
   claimed: z.int().min(2).max(PROFILE_MAX).optional(),
   stats: z.strictObject({ won: count, lost: count, fights: count, elites: count, bosses: count, trials: count }).partial().optional(),
@@ -50,11 +52,11 @@ const profileSchema = z.strictObject({
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
  * gained and their dupes, levels and ascensions, items, the Focus and the gacha, the team presets and
- * the run in progress's tally, and profile EXP, claims and stats.
+ * the run in progress's tally, profile EXP, claims and stats, and the Trial tiers won.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 9,
+  schemaVersion: 10,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -93,6 +95,8 @@ export const profileSave: SaveKind<Profile> = {
     7: (data) => data,
     // v9 added profile EXP, claims and stats (M6.6): a v8 profile is level 1 with nothing counted.
     8: (data) => data,
+    // v10 added Trials (M6.7): a v9 profile has won none.
+    9: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;
