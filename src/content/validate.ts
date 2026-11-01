@@ -103,6 +103,9 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       if (call.op === 'summon' && typeof call.enemy === 'string' && !reg.enemies[call.enemy]) {
         fail(where(kind, defId), defId, `${path}: unknown enemy "${call.enemy}"`);
       }
+      if (call.op === 'summon' && typeof call.stagger === 'string' && !reg.statuses[call.stagger]) {
+        fail(where(kind, defId), defId, `${path}: unknown status "${call.stagger}"`);
+      }
       if (op.children) checkCalls(kind, defId, op.children(call), `${path}.branch`);
     });
   };
@@ -213,6 +216,7 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
     for (const entry of en.enemies) {
       const id = typeof entry === 'string' ? entry : entry.enemy;
       if (!reg.enemies[id]) fail(where('encounter', en.id), en.id, `enemy "${id}" does not exist`);
+      if (typeof entry !== 'string' && entry.status !== undefined && !reg.statuses[entry.status]) fail(where('encounter', en.id), en.id, `status "${entry.status}" does not exist`);
     }
     if (en.fruiting !== undefined && !reg.encounters[en.fruiting]) fail(where('encounter', en.id), en.id, `fruiting encounter "${en.fruiting}" does not exist`);
   }

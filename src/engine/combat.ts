@@ -7,7 +7,7 @@ import { drawCards } from './piles.ts';
 import { getOp } from './ops/index.ts';
 import { createResolution, drain, emit, enqueue, isOver, ROOT, type Resolution } from './resolve.ts';
 import { allIntents, enemyMaxHp, intentOf, intentsOf } from './phases.ts';
-import { takeStacks } from './statuses.ts';
+import { addStacks, landingStatus, takeStacks } from './statuses.ts';
 import { createStreams, shuffleInPlace } from './rng.ts';
 import {
   BASE_MANA,
@@ -117,7 +117,14 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
   const enemies = setup.enemies.map((entry, slot) => {
     const id = typeof entry === 'string' ? entry : entry.enemy;
     lookup(registry.enemies, id, 'enemy');
-    return newEnemy(registry, id, next('e'), slot, scaling, typeof entry === 'string' ? undefined : entry.hp);
+    if (typeof entry === 'string') return newEnemy(registry, id, next('e'), slot, scaling);
+    const enemy = newEnemy(registry, id, next('e'), slot, scaling, entry.hp);
+    if (entry.status !== undefined) {
+      const resistsControl = !!registry.enemies[id]?.traits?.includes('resistsControl');
+      const def = lookup(registry.statuses, landingStatus({ id: enemy.id, statuses: enemy.statuses, resistsControl }, entry.status, registry), 'status');
+      addStacks(enemy.statuses, def, 1);
+    }
+    return enemy;
   });
   const summons = enemies.reduce((n, e) => n + summonCapacity(registry, e.enemy), 0);
   const relics = (setup.relics ?? []).map((id) => {

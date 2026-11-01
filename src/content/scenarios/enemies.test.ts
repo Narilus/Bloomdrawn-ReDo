@@ -10,6 +10,7 @@ import {
   type CombatState,
   type Command,
   type EnemyEntry,
+  type Preview,
   type Registry,
 } from '../../engine/index.ts';
 import { registry as gameRegistry } from '../registry.ts';
@@ -116,13 +117,16 @@ describe('Hound Mother (elite)', () => {
   });
 });
 
+/** Previews with the branches that would resolve (a repeat's hits) laid out in order. */
+const flatten = (previews: Preview[]): Preview[] => previews.flatMap((p) => [p, ...(p.resolves === false ? [] : flatten(p.branch ?? []))]);
+
 describe('every encounter', () => {
   it.each(Object.keys(gameRegistry.encounters))('%s: shown intent damage always equals damage dealt', (id) => {
     let state = fromEncounter(id);
     for (let turn = 0; turn < 8 && state.phase === 'player'; turn++) {
       state = healed(state);
       const shown = new Map(
-        living(state).map((e) => [e.id, previewIntent(state, e.id, registry).filter((p) => p.op === 'damage').map((p) => p.amount)]),
+        living(state).map((e) => [e.id, flatten(previewIntent(state, e.id, registry)).filter((p) => p.op === 'damage').map((p) => p.amount)]),
       );
       const { state: next, events } = run(state, endTurn);
       // An enemy the end-of-turn Tentacles kill never acts, so it deals nothing.

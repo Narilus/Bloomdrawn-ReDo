@@ -88,6 +88,14 @@ describe('pools by depth band', () => {
     expect(poolsAt(bands, 23)).toEqual({ fight: ['f2', 'f3'], elite: ['e2', 'e3'], boss: ['b2', 'b3'] });
   });
 
+  it("a band's last depth fights its finale, if it has one", () => {
+    const last = { ...band(3), finale: 'b3-final' };
+    expect(poolsAt([band(1), band(2), last], 30).boss).toEqual(['b3-final']);
+    expect(poolsAt([band(1), band(2), last], 29).boss).toEqual(['b2', 'b3']);
+    expect(poolsAt([band(1), { ...band(2), finale: 'b2-final' }, band(3)], 20).boss).toEqual(['b2-final']);
+    expect(poolsAt([band(1), band(2), last], 40).boss).toEqual(['b2', 'b3']);
+  });
+
   it('a depth past the last band draws as the last', () => {
     expect(poolsAt(bands, 50)).toEqual(poolsAt(bands, 30));
     expect(poolsAt([band(1)], 37)).toEqual(band(1));

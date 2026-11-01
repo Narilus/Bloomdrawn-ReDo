@@ -49,6 +49,8 @@ import petalHorrorBattle from '../assets/battle/petal-horror.png';
 import graftedStagBattle from '../assets/battle/grafted-stag.png';
 import seedMotherBattle from '../assets/battle/seed-mother.png';
 import motherRootBattle from '../assets/battle/mother-root.png';
+import openHeartedQueenBattle from '../assets/battle/open-hearted-queen.png';
+import heartBudBattle from '../assets/battle/heart-bud.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -113,6 +115,9 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.seed-mother': seedMotherBattle,
   'enemy.mother-root': motherRootBattle,
   'enemy.mother-root-full-bloom': motherRootBattle,
+  'enemy.open-hearted-queen': openHeartedQueenBattle,
+  'enemy.open-hearted-queen-full-bloom': openHeartedQueenBattle,
+  'enemy.heart-bud': heartBudBattle,
 };
 
 export const portraitArt: Readonly<Record<string, string>> = {

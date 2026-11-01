@@ -97,7 +97,7 @@ function tierAtLevel1(tier: Tier) {
     .map((en) => {
       const all = en.enemies.map((entry) => {
         const n = enemyNumbers(registry.enemies[typeof entry === 'string' ? entry : entry.enemy]!);
-        return typeof entry === 'string' ? n : { ...n, hp: entry.hp };
+        return typeof entry === 'string' || entry.hp === undefined ? n : { ...n, hp: entry.hp };
       });
       return { count: all.length, hp: all.reduce((n, x) => n + x.hp, 0), perTurn: all.reduce((n, x) => n + x.perTurn, 0), biggest: Math.max(...all.map((x) => x.biggest)) };
     });

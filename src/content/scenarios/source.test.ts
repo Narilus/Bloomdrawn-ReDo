@@ -132,11 +132,19 @@ describe('Garden Husk (countdown)', () => {
     const start = fromEncounter('encounter.two-husks-and-gardener');
     expect(start.enemies.map((e) => [e.enemy, e.maxHp])).toEqual([
       ['enemy.gardener', 55],
-      ['enemy.sown-husk', 75],
-      ['enemy.sown-husk', 75],
+      ['enemy.sown-husk', 55],
+      ['enemy.sown-husk', 55],
     ]);
     expect(registry.enemies['enemy.sown-husk']?.size).toBe('small');
     expect(fromEncounter('encounter.husk-and-petal-horror').enemies[0]!.maxHp).toBe(60);
+  });
+
+  it('two Husks together stagger: the second starts Delayed, so their Bursts land a turn apart', () => {
+    const start = fromEncounter('encounter.two-husks-and-gardener', NO_RAPTURE);
+    expect(start.enemies.map((e) => e.statuses.map((s) => s.status))).toEqual([[], [], ['status.delay']]);
+    expect(cycle(start, 4, 2).map(([name]) => name)).toEqual(['Harden', 'Harden', 'Ripen', 'Burst']);
+    const bursts = (s: CombatState) => living(s, 'enemy.sown-husk').length;
+    expect([2, 3, 4].map((n) => bursts(turns(start, n)))).toEqual([2, 1, 0]);
   });
 });
 
@@ -177,17 +185,23 @@ describe('The Seed-Mother (elite: a countdown)', () => {
       ['enemy.sown-husk', 1],
       ['enemy.sown-husk', 2],
     ]);
-    // With two still living there is no room, so the next Sow brings none; after their Bursts it sows again.
+    // With two still living there is no room, so the next Sow brings none; after their Bursts, the
+    // second a turn behind the first (owner, 1 Nov), it sows again.
     expect(shown(turns(start, 3))).toEqual(['Sow', []]);
-    expect(living(turns(start, 4), 'enemy.sown-husk')).toHaveLength(0);
+    expect(living(turns(start, 4), 'enemy.sown-husk')).toHaveLength(1);
+    expect(living(turns(start, 5), 'enemy.sown-husk')).toHaveLength(0);
     expect(living(turns(start, 7), 'enemy.sown-husk')).toHaveLength(2);
     expect(registry.enemies['enemy.seed-mother']?.traits).toContain('resistsControl');
   });
 
-  it('her Husks count down from the turn they are sown, and wither after their Burst', () => {
+  it('her Husks count down from the turn they are sown, the second a step behind, and wither after their Burst', () => {
     const sown = turns(fromEncounter('encounter.seed-mother', NO_RAPTURE), 1);
-    expect(cycle(sown, 3, 1).map(([name]) => name)).toEqual(['Harden', 'Ripen', 'Burst']);
-    expect(living(turns(sown, 3), 'enemy.sown-husk')).toHaveLength(0);
+    expect(cycle(sown, 3, 1)).toEqual([['Harden', ['gainShield 20 on itself']], ['Ripen', ['foretell Burst on itself']], ['Burst', ['damage 90', 'wither 75 on itself']]]);
+    // The second arrives Delayed: it skips its first Harden, so its Burst comes a turn after the first's.
+    expect(sown.enemies[2]!.statuses.map((s) => s.status)).toEqual(['status.delay']);
+    expect(cycle(sown, 4, 2)).toEqual([['Harden', []], ['Harden', ['gainShield 20 on itself']], ['Ripen', ['foretell Burst on itself']], ['Burst', ['damage 90', 'wither 75 on itself']]]);
+    expect(living(turns(sown, 3), 'enemy.sown-husk').map((e) => e.slot)).toEqual([2]);
+    expect(living(turns(sown, 4), 'enemy.sown-husk')).toHaveLength(0);
   });
 });
 
@@ -234,11 +248,87 @@ describe('The Mother Root (Boss)', () => {
       ['Petal Storm', ['damage 18', 'damage 18', 'damage 18', 'damage 18', 'damage 18']],
       ['Heartbloom', ['damage 100']],
     ]);
-    expect(living(turns(flowering, 1), 'enemy.sown-husk')).toHaveLength(2);
+    // Fruit's Husks stagger as the Seed-Mother's do.
+    expect(living(turns(flowering, 1), 'enemy.sown-husk').map((e) => e.statuses.map((x) => x.status))).toEqual([[], ['status.delay']]);
   });
 
   it('emptying her second bar wins the fight', () => {
     const flowering = turns(play(fromEncounter('encounter.mother-root', NO_RAPTURE), 'test.break').state, 1);
     expect(play(flowering, 'test.break').state.outcome).toBe('victory');
+  });
+});
+
+describe('The Open-Hearted Queen (Boss)', () => {
+  const vines = (state: CombatState) => state.enemies[0]!.statuses.find((s) => s.status === 'status.vines')?.stacks ?? 0;
+  /** Each hit The Vines would deal now, from its repeat's preview. */
+  const lash = (state: CombatState) => previewIntent(state, state.enemies[0]!.id, registry).find((p) => p.op === 'repeat')?.branch?.map((p) => p.amount);
+  const queen = () => fromEncounter('encounter.open-hearted-queen', NO_RAPTURE);
+
+  it('first bar: she starts with 2 Vines; Embrace, you draw 1 fewer and she grows a Vine; The Vines, 24 a Vine; Bear the Court, two Heart-Buds', () => {
+    const start = queen();
+    expect([start.enemySlots, start.enemies[0]!.maxHp, registry.enemies['enemy.open-hearted-queen']?.size]).toEqual([3, 1200, 'huge']);
+    expect(registry.enemies['enemy.open-hearted-queen']?.traits).toContain('resistsControl');
+    expect(vines(start)).toBe(2);
+    expect(cycle(start, 3)).toEqual([
+      ['Embrace', ['drawFewer 1', 'applyStatus status.vines 1 on itself']],
+      ['The Vines', ['repeat 3']],
+      ['Bear the Court', ['summon 2']],
+    ]);
+    expect(lash(turns(start, 1))).toEqual([24, 24, 24]);
+  });
+
+  it('her Vines grow every cycle, and The Vines hits once for each: what is not dealt with snowballs', () => {
+    const start = queen();
+    expect([1, 4, 7].map((n) => vines(turns(start, n)))).toEqual([3, 4, 5]);
+    expect(lash(turns(start, 7))).toEqual([24, 24, 24, 24, 24]);
+    const lashed = turns(start, 7);
+    const { events } = run({ ...lashed, party: { ...lashed.party, hp: lashed.party.maxHp } }, { type: 'endTurn' });
+    const dealt = events.filter((e) => e.type === 'damageDealt' && e.source === lashed.enemies[0]!.id).map((e) => e.amount);
+    expect(dealt).toEqual([24, 24, 24, 24, 24]);
+  });
+
+  it('her Heart-Buds come small to the side lanes, the second a step behind, so one Nourishes her while the other Beats', () => {
+    const born = turns(queen(), 3);
+    expect(living(born, 'enemy.heart-bud').map((e) => [e.slot, e.statuses.map((s) => s.status)])).toEqual([[1, []], [2, ['status.delay']]]);
+    expect([registry.enemies['enemy.heart-bud']?.hp, registry.enemies['enemy.heart-bud']?.size]).toEqual([60, 'small']);
+    expect(cycle(born, 3, 1).map(([name]) => name)).toEqual(['Nourish', 'Beat', 'Nourish']);
+    expect(cycle(born, 3, 2).map(([name]) => name)).toEqual(['Nourish', 'Nourish', 'Beat']);
+    // Nourish tends her first while she is hurt: up to 30, here the 20 she is missing.
+    const hurt = play(born, 'test.wound').state;
+    expect(shown(hurt, 1)).toEqual(['Nourish', [`heal 20 → enemy.open-hearted-queen`]]);
+    const beat = turns(born, 1);
+    expect(shown(beat, 1)).toEqual(['Beat', ['applyStatus status.bleed 6']]);
+  });
+
+  it('her Rouse clears her Vines; Unveiled at 1,200: Ecstasy grows 3; The Vines; Heartbeat, 10 Bleed; The Last Embrace 130', () => {
+    const grown = turns(queen(), 4);
+    const broken = play(grown, 'test.break').state;
+    expect(broken.enemies[0]).toMatchObject({ hp: 1200, phase: 1, rousing: true });
+    expect(shown(broken)).toEqual(['She Opens Her Arms', ['clearStatuses 1 on itself']]);
+    const unveiled = turns(broken, 1);
+    expect(vines(unveiled)).toBe(0);
+    expect(cycle(unveiled, 4)).toEqual([
+      ['Ecstasy', ['applyStatus status.vines 3 on itself']],
+      ['The Vines', ['repeat 3']],
+      ['Heartbeat', ['applyStatus status.bleed 10']],
+      ['The Last Embrace', ['damage 130']],
+    ]);
+    expect(lash(turns(unveiled, 5))).toEqual([24, 24, 24, 24, 24, 24]);
+  });
+
+  it('at Fruiting she is Full Bloom: Bear the Court; Ecstasy; The Vines; The Last Embrace 145', () => {
+    expect(registry.encounters['encounter.open-hearted-queen']?.fruiting).toBe('encounter.open-hearted-queen-full-bloom');
+    const bloomed = turns(play(fromEncounter('encounter.open-hearted-queen-full-bloom', NO_RAPTURE), 'test.break').state, 1);
+    expect(cycle(bloomed, 4)).toEqual([
+      ['Bear the Court', ['summon 2']],
+      ['Ecstasy', ['applyStatus status.vines 3 on itself']],
+      ['The Vines', ['repeat 3']],
+      ['The Last Embrace', ['damage 145']],
+    ]);
+  });
+
+  it('emptying her second bar wins the fight', () => {
+    const unveiled = turns(play(queen(), 'test.break').state, 1);
+    expect(play(unveiled, 'test.break').state.outcome).toBe('victory');
   });
 });

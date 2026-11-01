@@ -34,13 +34,17 @@ export interface Pools {
   fight: string[];
   elite: string[];
   boss: string[];
+  /** The one Boss of the band's last depth, instead of a draw (Depth 50's Open-Hearted Queen; owner, 1 Nov). */
+  finale?: string;
 }
 
-/** The pools a run at this depth draws from: its band's and the band before's. */
+/** The pools a run at this depth draws from: its band's and the band before's, or at a band's last depth its finale. */
 export function poolsAt(bands: readonly Pools[], depth = 1): Pools {
-  const band = Math.min(bands.length, Math.ceil(Math.max(1, depth) / DEPTH_BAND));
+  const at = Math.ceil(Math.max(1, depth) / DEPTH_BAND);
+  const band = Math.min(bands.length, at);
   const used = bands.slice(Math.max(0, band - 2), band);
-  return { fight: used.flatMap((b) => b.fight), elite: used.flatMap((b) => b.elite), boss: used.flatMap((b) => b.boss) };
+  const finale = at === band && depth % DEPTH_BAND === 0 ? bands[band - 1]?.finale : undefined;
+  return { fight: used.flatMap((b) => b.fight), elite: used.flatMap((b) => b.elite), boss: finale === undefined ? used.flatMap((b) => b.boss) : [finale] };
 }
 
 const MAX_ATTEMPTS = 200;
@@ -276,7 +280,8 @@ export const M3_LABYRINTH: LabyrinthDef = {
     {
       fight: ['encounter.blossom-devourer', 'encounter.husk-and-petal-horror', 'encounter.two-husks-and-gardener', 'encounter.devourer-and-petal-horror'],
       elite: ['encounter.grafted-stag', 'encounter.seed-mother'],
-      boss: ['encounter.mother-root'],
+      boss: ['encounter.mother-root', 'encounter.open-hearted-queen'],
+      finale: 'encounter.open-hearted-queen',
     },
   ],
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],

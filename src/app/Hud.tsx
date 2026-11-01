@@ -178,7 +178,7 @@ export function PartyBar({ state, vitals, previews }: { state: CombatState; vita
   const shieldGain = previews.filter((p) => p.op === 'gainShield' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
   // Everything the enemies' shown intents will do to the party, with the Shield it has now.
   const intents = state.phase === 'player' && !vitals ? state.enemies.flatMap((e) => previewIntent(state, e.id, registry)) : [];
-  const incoming = intents.filter((p) => p.op === 'damage' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
+  const incoming = flatten(intents).filter((p) => p.op === 'damage' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
   const loss = hpLoss(intents, 'party');
   const after = Math.max(0, hp - loss);
   return (
@@ -326,8 +326,15 @@ function Intent({ name, previews, skips, source, state }: { name: string; previe
     const other = state.enemies.find((e) => e.id === target);
     return other && registry.enemies[other.enemy]?.name;
   };
-  const parts = previews.flatMap((p): { icon?: string | undefined; amount?: number | undefined; words: string; all?: boolean; to?: string | undefined }[] => {
+  // `short`: what the field shows in place of the words, kept for the label (a long part would run under a neighbour's plate).
+  const parts = previews.flatMap((p): { icon?: string | undefined; amount?: number | undefined; times?: number; words: string; short?: string; all?: boolean; to?: string | undefined }[] => {
     if (p.op === 'damage') return [{ icon: 'attack', amount: p.amount, words: `${p.amount} damage` }];
+    // A repeat of one hit (The Vines) shows the hit and how many times.
+    if (p.op === 'repeat') {
+      const hits = (p.branch ?? []).filter((b) => b.op === 'damage');
+      if (hits.length === 0) return [{ words: 'no hits' }];
+      return [{ icon: 'attack', amount: hits[0]!.amount, times: hits.length, words: `${hits[0]!.amount} damage ${hits.length} times` }];
+    }
     if (p.op === 'gainShield') {
       if (p !== shields[0]) return [];
       return shields.length > 1
@@ -344,19 +351,20 @@ function Intent({ name, previews, skips, source, state }: { name: string; previe
       const self = p.target === source ? 'itself' : undefined;
       return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}${self ? ' on itself' : ''}`, to: self }];
     }
-    if (p.op === 'drawFewer') return [{ words: `you draw ${p.amount} fewer next turn` }];
+    if (p.op === 'drawFewer') return [{ words: `you draw ${p.amount} fewer next turn`, short: `−${p.amount} draw` }];
     if (p.op === 'foretell') return [{ words: `${p.name} next turn` }];
     if (p.op === 'wither') return [{ words: 'then withers' }];
     return [];
   });
-  const attacks = previews.some((p) => p.op === 'damage');
+  const attacks = flatten(previews).some((p) => p.op === 'damage');
   return (
     <div className={`intent${attacks ? ' attack' : ''}`} aria-label={`Intent: ${name}, ${parts.map((p) => p.words).join(', ')}`}>
       <b>{name}</b>
       {parts.map((p, i) => (
         <span key={i} className={`intent-part ${p.icon ?? ''}`}>
-          {hasIcon(p.icon) ? <Icon name={p.icon} /> : p.words}
+          {hasIcon(p.icon) ? <Icon name={p.icon} /> : (p.short ?? p.words)}
           {hasIcon(p.icon) && p.amount}
+          {p.times !== undefined && <small> ×{p.times}</small>}
           {p.all && <small> all</small>}
           {p.to && <small> to {p.to}</small>}
         </span>

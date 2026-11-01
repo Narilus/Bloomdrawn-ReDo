@@ -1,5 +1,6 @@
 import { applyStatus, clearStatuses, damage, summon, type IntentDef, type PhaseDef } from '../../engine/index.ts';
 import { enemy } from '../define.ts';
+import { delay } from '../statuses/control.ts';
 import { poison } from '../statuses/poison.ts';
 import { vulnerable } from '../statuses/vulnerable.ts';
 import { weak } from '../statuses/weak.ts';
@@ -35,7 +36,7 @@ export const motherRoot = motherRootOf('enemy.mother-root', {
 export const motherRootFullBloom = motherRootOf('enemy.mother-root-full-bloom', {
   name: 'Full Bloom', hp: 1150, rouse: opening,
   intents: [
-    { id: 'fruit', name: 'Fruit', effects: [summon(sownHusk, 2, 2)] },
+    { id: 'fruit', name: 'Fruit', effects: [summon(sownHusk, 2, 2, delay)] },
     { id: 'petal-storm', name: 'Petal Storm', effects: hits(18, 5) },
     { id: 'heartbloom', name: 'Heartbloom', effects: [damage(100, { target: 'party' })] },
   ],

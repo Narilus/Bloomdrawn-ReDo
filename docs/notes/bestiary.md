@@ -117,8 +117,10 @@ As first drafted. Its art is briefed after band 4's, with the owner's design pri
 | Garden Husk | Normal, countdown | 75 | Harden, 20 Shield; Ripen, "Bursts next turn"; Burst 90, then it withers |
 | Petal Horror | Normal, debuffer | 60 | Pollen Veil, party 2 Weak + 5 Poison; Tendril Lash 30; Spore-Fall, party 2 Vulnerable |
 | **The Grafted Stag** | Elite: racing statuses | 850 | Antler Gore 55 + 10 Bleed; Shed Petals, party 8 Poison; Bellow, party 2 Weak. Resists control. |
-| **The Seed-Mother** | Elite: a countdown | 700 | Sow, 2 Garden Husks (max 2); Root Slam 50; Nurture, 20 Shield to every enemy. Resists control. |
-| **The Mother Root** | Boss | 1,150, then 1,150 | *Beating:* Pulse, party 4 Poison; Root Spear 65; Grow, 1 Petal Horror (max 2). *Rouse:* Opening. *Flowering Heart:* Pollen Breath, party 2 Weak and 1 Vulnerable; Petal Storm 18 ×4; Heartbloom 90. *Full Bloom, second bar:* Fruit, 2 Garden Husks; Petal Storm 18 ×5; Heartbloom 100. |
+| **The Seed-Mother** | Elite: a countdown | 700 | Sow, 2 Garden Husks (max 2), the second a step behind; Root Slam 50; Nurture, 20 Shield to every enemy. Resists control. |
+| **The Mother Root** | Boss | 1,150, then 1,150 | *Beating:* Pulse, party 4 Poison; Root Spear 65; Grow, 1 Petal Horror (max 2). *Rouse:* Opening. *Flowering Heart:* Pollen Breath, party 2 Weak and 1 Vulnerable; Petal Storm 18 ×4; Heartbloom 90. *Full Bloom, second bar:* Fruit, 2 Garden Husks, the second a step behind; Petal Storm 18 ×5; Heartbloom 100. |
+| **The Open-Hearted Queen** | Boss; always the Boss at Depth 50 | 1,200, then 1,200 | Starts with 2 Vines. *Enthroned:* Embrace, party draws 1 fewer and she grows 1 Vine; The Vines, 24 per Vine; Bear the Court, 2 Heart-Buds, the second a step behind. *Rouse:* She Opens Her Arms (clears her Vines). *Unveiled:* Ecstasy, she grows 3 Vines; The Vines; Heartbeat, party 10 Bleed; The Last Embrace 130. *Full Bloom, second bar:* Bear the Court; Ecstasy; The Vines; The Last Embrace 145. Resists control. |
+| Heart-Bud | Her brood (small) | 60 | Nourish, heals 30 by Suture's rule; Beat, party 6 Bleed |
 
 **Fights:** the Devourer alone; Husk and Petal Horror; two Husks and a Gardener; Devourer and Petal Horror.
 
@@ -133,9 +135,11 @@ To get there:
 
 Sizes: the Husks the Seed-Mother sows, the Husks of "two Husks and a Gardener" and the Petal Horrors the Mother Root grows stand small (`enemy.sown-husk`, `enemy.grown-petal-horror`), so the anchor stands tallest. In the three-slot fight the Gardener anchors. **Ripen** names the next intent ("Burst next turn", the `foretell` op), and **Burst** ends with `wither`: the Husk loses all its HP, through its Shield. Killing it first cancels both.
 
-**Open:** two Husks sown together Burst on the same turn (the Seed-Mother's worst turn, 49%, is that). It stays under the ceiling at Depth 40; the owner decides whether the second should run a step behind.
+**Husks stagger** (owner, 1 Nov): two Husks that arrive together Burst a turn apart. The second comes Delayed: a summon's `stagger` status for the Seed-Mother's Sow and the Mother Root's Fruit, and an encounter entry's starting `status` in "two Husks and a Gardener". The Seed-Mother's worst turn falls from 49% to 30% (6.0 turns). "Two Husks and a Gardener" now runs 3.2 turns with its Husks at 55: the Delayed Husk lives to turn 4 unless it is killed, so less HP shortens the fight no further.
 
-**The second Boss** (owner, 1 Nov): the Mother Root alone isn't epic enough for Depth 50. A regal woman enthroned, grown into her throne, her heart open in her chest, vines arcing round her. Options in `art/raw/open-hearted-queen/`; her moveset is proposed to the owner before it's built.
+**The second Boss** (owner, 1 Nov): the Mother Root alone isn't epic enough for Depth 50. **The Open-Hearted Queen** is a regal woman enthroned, grown into her throne, her heart open in her chest, vines arcing round her (sprite 01; every option kept). She never strikes for herself. She welcomes you while her Vines and her brood do the work, a Rapture snowball turned on the party: her Vines only grow, so a fight left to run gets worse every cycle. Her Vines are a status on her badge (`status.vines`, the tentacle icon), and The Vines is a `repeat` of one hit per Vine, so the intent shows "24 ×N" and Incoming counts every hit. Breaking her first bar takes away the Vines it grew. Depths 41–49 draw their Boss from the Crowned Pistil, the Mother Root and the Queen, and Depth 50 is always the Queen (a band's `finale`). The Heart-Bud's sprite is option 01, standing in until the owner picks.
+
+_Built 1 Nov._ The lab at Depth 40 gives 11.3 turns, 12% of party HP a turn and a worst turn of 47%. As first drafted (The Vines 16 a hit, Ecstasy 2, Heartbeat 6, The Last Embrace 95 and 105, Heart-Buds of 40 HP with 4 Bleed), her worst turn was 30%: the buds fell the turn they came, and her second bar broke before her Vines grew back. So: The Vines 16 to 24; Ecstasy 2 to 3; Heartbeat 6 to 10; The Last Embrace 95 to 130, and Full Bloom's 105 to 145; Heart-Buds 40 to 60 HP, with Beat 4 to 6 Bleed.
 
 ## New abilities
 
@@ -184,3 +188,6 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 5. **Band 4's art:** Pollinator 01, Gardener 01, Stilt-Grazer 01, Seed-Bladder 02, Weaver 03, Pollen Queen 03, Crowned Pistil 02. Every option is kept in `art/raw/`.
 6. **Band 5's art:** Blossom Devourer 01, Garden Husk 01, Petal Horror 01, Grafted Stag 01, Seed-Mother 02, Mother Root 01. Every option is kept, with Mother Root 02 and 03 mirrored to face left. The Husk's and the Mother Root's seams read as seams.
 7. **Band 5 gets a second Boss,** an enthroned woman, because the Mother Root alone isn't epic enough for Depth 50.
+8. **The Open-Hearted Queen:** sprite 01, every option kept, moveset as proposed. Her Vines are a counter on her, not summoned sprites.
+9. **Husks stagger:** two that arrive together Burst a turn apart, and killing one cancels its Burst.
+10. **Depth 50 is always the Queen;** Depths 41–49 draw from the Pistil, the Mother Root and the Queen.

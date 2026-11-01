@@ -195,7 +195,7 @@ export interface PhaseDef {
   intents: IntentDef[];
 }
 
-/** A fight: which enemies, in slot order, with optional HP overrides for this encounter. */
+/** A fight: which enemies, in slot order, with optional HP overrides and starting statuses for this encounter. */
 export interface EncounterDef {
   id: string;
   tier: 'normal' | 'elite' | 'boss';
@@ -204,7 +204,8 @@ export interface EncounterDef {
   fruiting?: string;
 }
 
-export type EnemyEntry = string | { enemy: string; hp: number };
+/** `status`: it starts with one stack of this status (Delay: it acts a step behind). */
+export type EnemyEntry = string | { enemy: string; hp?: number; status?: string };
 
 /**
  * A hand-authored piece of the Labyrinth (DESIGN.md "Motifs"), drawn as rows of hex cells; the

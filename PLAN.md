@@ -376,6 +376,8 @@ _Band 4 built 1 Nov: the owner's picks in `src/assets/battle/`, its enemies in `
 
 _Band 5 built 1 Nov, but for its second Boss: the owner's picks in `src/assets/battle/`, its enemies in `src/content/enemies/` and its fights in `src/content/encounters/source.ts`, opening at Depth 41. Two new ops: `foretell` (Ripen) and `wither` (the Husk's Burst). Tests: `src/content/scenarios/source.test.ts`. Next: the second Boss, the enthroned queen: the owner picks her art and approves her moveset, then she's built beside the Mother Root._
 
+_Band 5's second Boss built 1 Nov: the Open-Hearted Queen (`src/content/enemies/open-hearted-queen.ts`) and her Heart-Buds, in the band's Boss pool beside the Mother Root, and always the Boss at Depth 50 (a band's `finale`, `poolsAt`). Her Vines are a status, and The Vines repeats a hit for each. Garden Husks that arrive together stagger: a summon's `stagger` status, and an encounter entry's starting `status`. Tests: `src/content/scenarios/source.test.ts`, `src/engine/ops/summon.test.ts`, the pools in `src/game/labyrinth.test.ts` and `src/app/labyrinth.test.ts`. Next: the owner plays band 5 and picks the Heart-Bud's sprite; then M6.6._
+
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.

@@ -103,6 +103,15 @@ describe('the M3 Labyrinth', () => {
     }
   });
 
+  it('Depths 41–49 draw their Boss from the Pistil, the Mother Root and the Queen; Depth 50 is always the Queen (owner, 1 Nov)', () => {
+    for (let depth = 41; depth <= 49; depth++) {
+      expect(poolsAt(M3_LABYRINTH.bands, depth).boss, `Depth ${depth}`).toEqual(['encounter.crowned-pistil', 'encounter.mother-root', 'encounter.open-hearted-queen']);
+    }
+    expect(poolsAt(M3_LABYRINTH.bands, 50).boss).toEqual(['encounter.open-hearted-queen']);
+    const board = generateBoard(11, M3_LABYRINTH, registry.motifs, 50);
+    expect(Object.values(board.tiles).filter((t) => t.kind === 'boss').map((t) => t.content)).toEqual(['encounter.open-hearted-queen']);
+  });
+
   it('fills Events without repeats from the pool, and gives each Symptom tile a Symptom card', () => {
     for (const board of boards) {
       const tiles = Object.values(board.tiles);

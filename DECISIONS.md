@@ -191,6 +191,9 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Band 5's art (owner, 1 Nov): Blossom Devourer 01, Garden Husk 01, Petal Horror 01, Grafted Stag 01, Seed-Mother 02, Mother Root 01. Every option is kept; Mother Root 02 and 03 are mirrored to face left. The Husk's split and the Mother Root's seam read as seams, not anatomy.
 
 - Band 5's Boss (owner, 1 Nov): the Mother Root isn't epic enough alone for Depth 50, so band 5 has two Bosses to draw from. The second is a regal woman enthroned and grown into her throne, her heart open as the Expedition Leader's is but grander, with vines arcing around her like Isadora's, a little of the embraced Flesh and Rapture look allowed.
+- The Open-Hearted Queen (owner, 1 Nov): sprite 01, every option kept; her moveset as proposed, a snowball of Vines that only grow. Her Vines are a counter on her badge, with the intent showing hits × damage.
+- Husks stagger (owner, 1 Nov): two Garden Husks that arrive together Burst a turn apart; killing one cancels its Burst.
+- Band 5's Bosses (owner, 1 Nov): Depths 41–49 draw from the Crowned Pistil, the Mother Root and the Open-Hearted Queen; Depth 50 is always the Queen.
 
 ## Open
 - Gear at launch or later (recommendation: later).

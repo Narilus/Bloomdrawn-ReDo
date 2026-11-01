@@ -162,7 +162,7 @@ export const schemas = {
     kind: z.literal('encounter'),
     id,
     tier: z.enum(['normal', 'elite', 'boss']),
-    enemies: z.array(z.union([id, z.strictObject({ enemy: id, hp: z.int().positive() })])).min(1).max(4),
+    enemies: z.array(z.union([id, z.strictObject({ enemy: id, hp: z.int().positive().optional(), status: id.optional() })])).min(1).max(4),
     fruiting: id.optional(),
   }),
   domain: z.strictObject({

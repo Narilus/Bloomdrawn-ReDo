@@ -600,6 +600,8 @@ body,
   font-size: 18px;
   font-weight: 700;
   white-space: nowrap;
+  /* Legible over pale sprite art (the Queen's gown). */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
 }
 
 .intent b {
