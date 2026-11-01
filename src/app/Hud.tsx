@@ -349,7 +349,8 @@ function Intent({ name, previews, skips, source, state }: { name: string; previe
     if (p.op === 'applyStatus') {
       const icon = registry.statuses[p.status ?? '']?.icon;
       const self = p.target === source ? 'itself' : undefined;
-      return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}${self ? ' on itself' : ''}`, to: self }];
+      // Without an icon the words show, and "to itself" follows them: say it once.
+      return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}${self ? ' on itself' : ''}`, short: `${p.amount} ${statusName(p.status ?? '')}`, to: self }];
     }
     if (p.op === 'drawFewer') return [{ words: `you draw ${p.amount} fewer next turn`, short: `−${p.amount} draw` }];
     if (p.op === 'foretell') return [{ words: `${p.name} next turn` }];

@@ -561,7 +561,14 @@ body,
 
 .enemy-plate .bar-label {
   font-size: 19px;
-  gap: 8px;
+  gap: 0 8px;
+  /* A long name (The Open-Hearted Queen) puts the HP on its own line, right-aligned, instead of past the plate's edge. */
+  flex-wrap: wrap;
+}
+
+.enemy-plate .bar-label span {
+  white-space: normal;
+  min-width: 0;
 }
 
 .enemy-plate .bar-label strong {
