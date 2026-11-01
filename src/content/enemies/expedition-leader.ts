@@ -11,7 +11,7 @@ import { packPorter } from './pack-porter.ts';
 const hits = (amount: number, times: number) => Array.from({ length: times }, () => damage(amount, { target: 'party' }));
 const theRouse: IntentDef = { id: 'he-opens-himself', name: 'He Opens Himself', effects: [clearStatuses()] };
 const callTheCrew: IntentDef = { id: 'call-the-crew', name: 'Call the Crew', effects: [summon(packPorter, 1, 1), summon(fieldSurgeon, 1, 1)] };
-const graft = (id: string): IntentDef => ({ id, name: 'Graft', effects: [gainShield(30, 'lowestAlly'), heal(20, 'lowestAlly')] });
+const graft = (id: string): IntentDef => ({ id, name: 'Graft', effects: [gainShield(30, 'leaderFirst'), heal(20, 'leaderFirst')] });
 
 const muster: IntentDef[] = [
   { id: 'bone-saw', name: 'Bone Saw', effects: [damage(60, { target: 'party' })] },

@@ -45,6 +45,20 @@ describe('gainShield', () => {
     expect(shields('largestAlly', state.enemies[1]!.id)).toEqual([6, 0, 0]);
   });
 
+  it('an enemy shields where its heal would go: a hurt ally first, by share of HP missing, else itself', () => {
+    const state = fixtureCombat(['test.dummy', 'test.dummy', 'test.dummy']);
+    const shields = () => {
+      const draft = structuredClone(state);
+      gainShieldOp.resolve(draft, gainShield(6, 'leaderFirst'), { source: state.enemies[0]!.id }, registry);
+      return draft.enemies.map((e) => e.shield);
+    };
+    expect(shields()).toEqual([6, 0, 0]);
+    state.enemies[0]!.hp = 5;
+    expect(shields()).toEqual([6, 0, 0]);
+    state.enemies[2]!.hp = 30;
+    expect(shields()).toEqual([0, 0, 6]);
+  });
+
   it('describes itself', () => {
     expect(gainShieldOp.describe(defend, formulaText, registry)).toBe('Gain 5 + Defense Shield');
   });

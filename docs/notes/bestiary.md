@@ -68,7 +68,7 @@ Looks and story: `bestiary-direction.md` 4.2. The Boss is the man who made his c
 | Tent-Walker | Normal, summoner | 90 | Open the Flap, a Seedling (max 2); Collapse 36 and 12 Shield | normal |
 | **The Quartermaster** | Elite: racing heals | 900 | Ration, heals itself 60; Cleaver 55; Ration; Strongbox, 40 Shield. Resists control. | large |
 | **The Cocooned Scout** | Elite: timing | 750 | Cocoon, takes no damage until its next action, though statuses still tick; Unfurl 70, and it is Vulnerable until its next action; Wing Cut 45; Moth Dust, party 2 Weak. Resists control. | large |
-| **The Expedition Leader** | Boss | 1,100, then 1,100 | *Muster:* Bone Saw 60; Survey, party 2 Vulnerable; Call the Crew, a Pack Porter and a Field Surgeon. *Rouse:* He Opens Himself. *Second bar (Opened):* Graft, the lowest-HP ally gains 30 Shield and heals 20; Needle Threads 24 ×3; The Last Incision 105. *Full Bloom, second bar:* Call the Crew; Graft; Graft; The Last Incision 115. | huge |
+| **The Expedition Leader** | Boss | 1,100, then 1,100 | *Muster:* Bone Saw 60; Survey, party 2 Vulnerable; Call the Crew, a Pack Porter and a Field Surgeon. *Rouse:* He Opens Himself. *Second bar (Opened):* Graft, 30 Shield and a heal of 20, both to where Suture's rule points; Needle Threads 24 ×3; The Last Incision 105. *Full Bloom, second bar:* Call the Crew; Graft; Graft; The Last Incision 115. | huge |
 
 **Fights:** Porter and Surgeon; Cartographer and Surgeon; the Tent-Walker alone; Porter and Cartographer; Tent-Walker and Surgeon.
 
@@ -86,7 +86,7 @@ Looks: `bestiary-direction.md` 4.3. This is the busiest band in the game.
 | Enemy | Tier, role | HP | Intents | Size |
 |---|---|---|---|---|
 | Pollinator | Normal, debuffer | 50 | Pollen Cloud, party 4 Poison + 2 Weak; Sting 30. Beside the Queen, it also has Attend: 25 Shield to the Queen. | large (normal beside the Queen) |
-| Gardener | Normal, buffer | 55 | Tend, heals the lowest-HP ally 12; Graft, 15 Shield to the lowest-HP ally; Prune 32 | large |
+| Gardener | Normal, buffer | 55 | Tend, heals 12, and Graft, 15 Shield, both by Suture's rule; Prune 32 | large |
 | Stilt-Grazer | Normal, attacker | 150 | Trample 60; Graze 30 | large |
 | Seed-Bladder | Normal, summoner | 70 | Drop, a Seedling (max 2); Burst Spores, party 6 Poison | large |
 | **The Weaver** | Elite: thin hand | 850 | Bind, you draw 1 fewer next turn; Lash 50; Bind; Reel In 95. Resists control. | large |
@@ -152,4 +152,5 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 
 1. **Band 3's art:** Pack Porter 02, Field Surgeon 01, Cartographer 02, Tent-Walker 01, Quartermaster 03, Cocooned Scout 01, Expedition Leader 01. Every option is kept in `art/raw/`.
 2. **The Tent-Walker's flap-mouth** stays. It suggests anatomy without being explicit, the teeth on 01 help, and the band carries content warnings. The owner will keep an eye on it.
-3. **Suture** tends a hurt Boss or summoner first (the Leader, the Tent-Walker), then the ally missing the largest share of its HP (the crew left after the Boss dies), and herself last.
+3. **Suture** tends a hurt Boss or summoner first (the Leader, the Tent-Walker), then the ally missing the largest share of its HP (the crew left after the Boss dies), and herself last. Only hurt allies count, so a whole Boss is passed over.
+4. **Every enemy heal uses Suture's rule:** the Lantern Surveyor's Tend, the Leader's Graft (its Shield goes with the heal) and the Gardener's Tend and Graft.

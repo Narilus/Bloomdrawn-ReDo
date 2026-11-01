@@ -76,11 +76,11 @@ describe('Pod-Thrower (summoner)', () => {
 });
 
 describe('Lantern Surveyor (buffer)', () => {
-  it('Tend heals the weakest ally 6, never past its maximum', () => {
+  it('Tend heals the most hurt ally 6, never past its maximum', () => {
     const state = begin(['enemy.root-mat', 'enemy.lantern-surveyor']);
     state.enemies[0]!.hp = 30;
     const { state: after, events } = run(state, endTurn);
-    // The Tentacle hit the Mat (lowest HP), then Tend healed it 6.
+    // The Tentacle hit the Mat (lowest HP), then Tend healed it 6: it is the hurt one.
     const tentacle = events.find((e) => e.type === 'damageDealt' && e.via === 'volley')?.amount ?? 0;
     expect(tentacle).toBeGreaterThan(0);
     expect(after.enemies[0]!.hp).toBe(30 - tentacle + 6);

@@ -4,8 +4,8 @@ import { evaluate, formulaSchema, type Formula } from '../formula.ts';
 import { enemyLevelScale } from '../levels.ts';
 import { floorAmount } from '../modifiers.ts';
 import type { Operation, OpContext } from '../operation.ts';
-import { allIntents } from '../phases.ts';
-import { isAlive, PARTY, type CombatState, type Enemy, type EntityId } from '../state.ts';
+import { leaderFirst } from '../allies.ts';
+import { isAlive, PARTY, type CombatState, type EntityId } from '../state.ts';
 
 type HealTarget = 'lowestAlly' | 'leaderFirst';
 const TARGETS = ['lowestAlly', 'leaderFirst'] as const;
@@ -15,24 +15,14 @@ export interface HealArgs extends OpCall {
   amount: Formula;
   /**
    * `lowestAlly`: an enemy heals the living enemy with the lowest HP (ties: earlier slot).
-   * `leaderFirst` (Suture; owner, 1 Nov): a hurt ally that leads, a Boss (it has HP bars) or a
-   * summoner; else the hurt ally missing the largest share of its HP; else itself. Among several,
-   * the largest share missing, then the earlier slot.
+   * `leaderFirst` (owner, 1 Nov): a hurt Boss or summoner; else the hurt ally missing the largest
+   * share of its HP; else itself (`allies.ts`).
    */
   target?: HealTarget;
 }
 
 /** Heals the source's side: the shared party pool, or the enemy itself. Never past max HP. */
 export const heal = (amount: Formula, target?: HealTarget): HealArgs => ({ op: 'heal', amount, ...(target ? { target } : {}) });
-
-const missing = (e: Enemy) => (e.maxHp - e.hp) / e.maxHp;
-const mostHurt = (enemies: Enemy[]) =>
-  [...enemies].sort((a, b) => a.slot - b.slot).reduce<Enemy | undefined>((best, e) => (!best || missing(e) > missing(best) ? e : best), undefined);
-
-function leads(enemy: Enemy, registry: Registry): boolean {
-  const def = registry.enemies[enemy.enemy];
-  return !!def?.phases?.length || allIntents(def).some((i) => i.effects.some((c) => c.op === 'summon'));
-}
 
 function poolOf(state: CombatState, args: HealArgs, ctx: OpContext, registry: Registry): { id: EntityId; pool: { hp: number; maxHp: number } } | undefined {
   if (state.members.some((m) => m.id === ctx.source)) return { id: PARTY, pool: state.party };
@@ -43,8 +33,7 @@ function poolOf(state: CombatState, args: HealArgs, ctx: OpContext, registry: Re
     return { id: lowest.id, pool: lowest };
   }
   if (args.target === 'leaderFirst') {
-    const hurt = state.enemies.filter((e) => isAlive(e) && e.id !== enemy.id && e.hp < e.maxHp);
-    const chosen = mostHurt(hurt.filter((e) => leads(e, registry))) ?? mostHurt(hurt) ?? enemy;
+    const chosen = leaderFirst(state, enemy, registry);
     return { id: chosen.id, pool: chosen };
   }
   return { id: enemy.id, pool: enemy };

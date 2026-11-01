@@ -184,6 +184,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Suture's target (owner, 1 Nov): a hurt Boss or summoner first, then the ally missing the largest share of its HP (for when the Boss is dead and the adds are left), then the Surgeon herself. The Stage layout for band 3 stands for now.
 
+- Enemy heals (owner, 1 Nov): only hurt allies count for Suture's rule, and every enemy heal uses it: the Lantern Surveyor's Tend, the Leader's Graft (Shield with the heal) and the Gardener's Tend and Graft.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

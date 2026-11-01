@@ -247,6 +247,14 @@ describe('The Expedition Leader (Boss)', () => {
     expect(shown(turns(broken, 4))).toEqual(['The Last Incision', ['damage 115']]);
   });
 
+  it('Graft goes where a heal goes (owner, 1 Nov): Shield and HP together to the hurt crew before himself', () => {
+    const called = turns(play(fromEncounter('encounter.expedition-leader-full-bloom', NO_RAPTURE), 'test.break').state, 2);
+    const porter = called.enemies.findIndex((e) => e.enemy === 'enemy.pack-porter');
+    expect(shown(called)[0]).toBe('Graft');
+    const hurt = play(play(called, 'test.wound', 0).state, 'test.wound', porter).state;
+    expect(shown(hurt)).toEqual(['Graft', ['gainShield 30 → enemy.pack-porter', 'heal 20 → enemy.pack-porter']]);
+  });
+
   it('emptying his second bar wins the fight', () => {
     const opened = turns(play(fromEncounter('encounter.expedition-leader', NO_RAPTURE), 'test.break').state, 1);
     expect(play(opened, 'test.break').state.outcome).toBe('victory');

@@ -6,7 +6,7 @@ import { enemy } from '../define.ts';
 export const lanternSurveyor = enemy({
   id: 'enemy.lantern-surveyor', name: 'Lantern Surveyor', hp: 47,
   intents: [
-    { id: 'tend', name: 'Tend', effects: [heal(6, 'lowestAlly')] },
+    { id: 'tend', name: 'Tend', effects: [heal(6, 'leaderFirst')] },
     { id: 'signal', name: 'Signal', effects: [gainShield(3, 'allies')] },
     { id: 'lantern-swing', name: 'Lantern Swing', effects: [damage(27, { target: 'party' })] },
   ],
