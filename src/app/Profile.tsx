@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { CHARACTER_BANNER } from '../content/banners.ts';
 import { registry } from '../content/registry.ts';
 import type { SelectResult } from '../game/gacha.ts';
+import { DEPTH_MAX } from '../game/depth.ts';
 import { ASCENSIONS } from '../game/levels.ts';
 import { BLOOM, plural, type Profile } from '../game/profile.ts';
-import { levelProgress, PROFILE_EXP, PROFILE_MAX, SELECTOR_LEVELS, unclaimed, type ClaimResult } from '../game/profileLevel.ts';
+import { depthExpMultiplier, levelProgress, PROFILE_EXP, PROFILE_EXP_PER_DEPTH, PROFILE_MAX, SELECTOR_LEVELS, unclaimed, type ClaimResult } from '../game/profileLevel.ts';
 import { Currencies } from './MainMenu.tsx';
 import { Art } from './Roster.tsx';
 
@@ -120,7 +121,10 @@ export function ProfilePage({ profile: initial, onClaim, onBack }: ProfilePagePr
                 ))}
               </tbody>
             </table>
-            <p>A lost or abandoned run still counts the fights and elites it won.</p>
+            <p>
+              A run's fights, elites and Boss give {Math.round(PROFILE_EXP_PER_DEPTH * 100)}% more EXP for each depth past 1 (×{depthExpMultiplier(DEPTH_MAX).toFixed(2)} at Depth {DEPTH_MAX}). A lost or
+              abandoned run still counts the fights and elites it won.
+            </p>
             <ul className="banner-rules">
               <li>Each level gives a {BLOOM}, claimed here with Claim.</li>
               <li>Levels {SELECTOR_LEVELS.join(' and ')} also give an SSR Selector: an SSR of your choice from the banner. Use it from your Inventory.</li>

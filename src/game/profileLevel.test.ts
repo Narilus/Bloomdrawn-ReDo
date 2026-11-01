@@ -4,6 +4,7 @@ import { HARD_PITY, POLLEN_PER_OVERFLOW, pull, useSelector } from './gacha.ts';
 import { NEW_PROFILE, type Profile } from './profile.ts';
 import {
   claimLevels,
+  depthExpMultiplier,
   expToNext,
   expToReach,
   gainExp,
@@ -11,6 +12,7 @@ import {
   PROFILE_EXP,
   PROFILE_MAX,
   profileLevelOf,
+  runExp,
   SSR_SELECTOR,
   unclaimed,
 } from './profileLevel.ts';
@@ -45,6 +47,26 @@ describe('profile EXP sources', () => {
     expect(PROFILE_EXP).toEqual({ fight: 10, elite: 30, boss: 100, trial: 50, firstTrial: 200, ssr: 50 });
     expect(gainExp(gainExp(NEW_PROFILE, 'fight', 3), 'firstTrial').exp).toBe(230);
     expect(gainExp(NEW_PROFILE, 'elite', 0)).toBe(NEW_PROFILE);
+  });
+
+  it("a run's depth multiplies its fights', elites' and Boss's EXP by 4% a depth past 1, rounded down (owner, 1 Nov)", () => {
+    expect([1, 2, 11, 26, 50].map((d) => Number(depthExpMultiplier(d).toFixed(2)))).toEqual([1, 1.04, 1.4, 2, 2.96]);
+    expect(runExp({ fights: 5, elites: 2, bosses: 1 })).toBe(210);
+    expect(runExp({ fights: 5, elites: 2, bosses: 1, depth: 50 })).toBe(621);
+    expect(runExp({ fights: 1, elites: 0, bosses: 0, depth: 2 })).toBe(10);
+  });
+
+  it('deeper runs shorten the climb to 50 without trivialising it, and leave the ascension gates about as near', () => {
+    // A player who climbs a depth every two won runs, then stays at Depth 50.
+    const runsTo = (level: number, perDepth = 2) => {
+      let exp = 0;
+      let runs = 0;
+      while (exp < expToReach(level)) exp += runExp({ fights: 5, elites: 2, bosses: 1, depth: Math.min(50, 1 + Math.floor(runs++ / perDepth)) });
+      return runs;
+    };
+    expect([5, 10, 15, 25, 50].map((l) => runsTo(l))).toEqual([3, 7, 13, 33, 204]);
+    // Only Depth 50 from the start still takes 171 won runs.
+    expect(Math.ceil(expToReach(PROFILE_MAX) / runExp({ fights: 5, elites: 2, bosses: 1, depth: 50 }))).toBe(171);
   });
 
   it('every SSR pulled gives 50; other pulls give none', () => {

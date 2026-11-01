@@ -109,7 +109,8 @@ export function createSaves(adapter: SaveAdapter) {
               ? 'its save belongs to another run'
               : 'it was saved by a different version of the game';
         const { elites, fights = 0 } = profile.run;
-        const banked: Banked = { ...lossBanking(elites, def, itemCount, profile.run.depth), play: { end: 'abandoned', fights, elites, bosses: 0 } };
+        const deep = profile.run.depth ? { depth: profile.run.depth } : {};
+        const banked: Banked = { ...lossBanking(elites, def, itemCount, profile.run.depth), play: { end: 'abandoned', fights, elites, bosses: 0, ...deep } };
         const after = bank(profile, banked);
         await store.write(profileSave, after);
         await store.remove(RUN_SAVE);

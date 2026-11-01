@@ -66,7 +66,7 @@ describe('saves', () => {
     adapter.data.set('run:current', 'not json');
     adapter.data.set('run:previous', 'not json');
     const boot = await saves.boot(M3_EXPEDITION);
-    expect(boot.ended?.banked).toEqual({ ...lossBanking(2, M3_EXPEDITION, itemCount, 12), play: { end: 'abandoned', fights: 0, elites: 2, bosses: 0 } });
+    expect(boot.ended?.banked).toEqual({ ...lossBanking(2, M3_EXPEDITION, itemCount, 12), play: { end: 'abandoned', fights: 0, elites: 2, bosses: 0, depth: 12 } });
     // Depth 12 is ×3.75: 2 Clear Memories and 300 Ducats become 7 and 1,125.
     expect(boot.profile.items).toEqual({ 'memory.clear': 7, money: 1125 });
   });

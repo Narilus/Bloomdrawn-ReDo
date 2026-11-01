@@ -32,6 +32,20 @@ export function levelProgress(exp = 0): { level: number; into: number; need: num
   return { level, into: exp - expToReach(level), need: expToNext(level) };
 }
 
+/**
+ * What a run's depth multiplies its fights', elites' and Boss's profile EXP by: 4% more for each depth
+ * past 1, ×2.96 at Depth 50 (owner, 1 Nov: deeper gives more without trivialising level 50). The
+ * early levels, which gate ascension, come about as fast as at Depth 1; level 50 takes about 200
+ * won runs climbing a depth every two to four, against about 500 at Depth 1. SSR pulls and Trials
+ * aren't multiplied.
+ */
+export const PROFILE_EXP_PER_DEPTH = 0.04;
+export const depthExpMultiplier = (depth = 1) => 1 + PROFILE_EXP_PER_DEPTH * (Math.max(1, depth) - 1);
+
+/** A run's profile EXP: its fights, elites and Boss at their EXP, times its depth's multiplier, rounded down. */
+export const runExp = (play: { fights: number; elites: number; bosses: number; depth?: number }) =>
+  Math.floor((play.fights * PROFILE_EXP.fight + play.elites * PROFILE_EXP.elite + play.bosses * PROFILE_EXP.boss) * depthExpMultiplier(play.depth));
+
 /** The profile with EXP for `count` of a source added. */
 export const gainExp = (profile: Profile, source: ExpSource, count = 1): Profile =>
   count > 0 ? { ...profile, exp: (profile.exp ?? 0) + PROFILE_EXP[source] * count } : profile;

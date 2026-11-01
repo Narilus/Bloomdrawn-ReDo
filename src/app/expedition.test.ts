@@ -489,13 +489,13 @@ describe('banking', () => {
         `The Boss's material: ${itemCount(won.material!, 1)}`,
       ],
       won: 12,
-      play: { end: 'won', fights: 2, elites: 2, bosses: 1 },
+      play: { end: 'won', fights: 2, elites: 2, bosses: 1, depth: 12 },
     });
     expect(banked({ ...play([ELITE, ELITE, HOUND], 'defeat'), depth: 12 })).toEqual({
       pulls: 2,
       items: { 'memory.clear': 7, money: 1125 },
       lines: ['2 elites beaten: 2 Purified Blooms, 7 Clear Memories, 1,125 Ducats', 'Depth 12: Memories and Ducats ×3.75'],
-      play: { end: 'lost', fights: 0, elites: 2, bosses: 0 },
+      play: { end: 'lost', fights: 0, elites: 2, bosses: 0, depth: 12 },
     });
   });
 
@@ -513,6 +513,8 @@ describe('banking', () => {
     const once = bank(NEW_PROFILE, banked(win));
     expect(once).toEqual({ pulls: 10 + 5, runs: 1, owned: [], items: { 'memory.vivid': 1, money: 500, [win.material!]: 1 }, exp: 100, stats: { won: 1, bosses: 1 } });
     expect(bank(once, banked(play([HOUND], 'defeat')))).toEqual({ ...once, runs: 2, stats: { won: 1, lost: 1, bosses: 1 } });
+    // At Depth 12 the run's profile EXP is ×1.44: 2 fights, 2 elites and the Boss, 180, give 259.
+    expect(bank(NEW_PROFILE, banked({ ...play([HOUND, ELITE, HOUND, ELITE, BOSS], 'victory'), depth: 12 })).exp).toBe(259);
     expect(bank(once, banked(play([ELITE, HOUND], 'defeat'))).items).toEqual({ 'memory.vivid': 1, 'memory.clear': 1, money: 650, [win.material!]: 1 });
   });
 

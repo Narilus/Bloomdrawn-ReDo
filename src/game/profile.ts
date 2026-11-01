@@ -2,7 +2,7 @@ import { reached } from './bloom.ts';
 import { rewardMultiplier } from './depth.ts';
 import type { Expedition, ExpeditionDef } from './expedition.ts';
 import type { Gacha } from './gacha.ts';
-import { gainExp } from './profileLevel.ts';
+import { runExp } from './profileLevel.ts';
 
 // The player's profile, kept across runs (docs/notes/m4-run.md, "Banking"; m5-collection.md): banked
 // pulls (Purified Blooms on screen), a run count, the characters gained, items and the gacha. Pure, like the run.
@@ -153,8 +153,8 @@ export interface Banked {
   lines: string[];
   /** A won run's depth past 1, which may open deeper ones. */
   won?: number;
-  /** What the run played, for profile EXP and stats: how it ended and the fights it won by tier. */
-  play?: { end: RunEnd; fights: number; elites: number; bosses: number };
+  /** What the run played, for profile EXP and stats: how it ended, the fights it won by tier, and its depth past 1. */
+  play?: { end: RunEnd; fights: number; elites: number; bosses: number; depth?: number };
 }
 
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -187,7 +187,8 @@ const gains = (pulls: number, items: Items, name: ItemText) =>
 export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef, name: ItemText): Banked {
   const { win, fruiting, items } = def.banking;
   const depth = exp.depth ?? 1;
-  if (end !== 'won') return { ...lossBanking(exp.elites, def, name, depth), play: { end, fights: exp.fights ?? 0, elites: exp.elites, bosses: 0 } };
+  const deep = depth > 1 ? { depth } : {};
+  if (end !== 'won') return { ...lossBanking(exp.elites, def, name, depth), play: { end, fights: exp.fights ?? 0, elites: exp.elites, bosses: 0, ...deep } };
   const fights = exp.fights ?? 0;
   const lines = [`The Boss beaten: ${gains(win, items.boss, name)}`];
   if (fights > 0) lines.push(`${plural(fights, 'fight')} won: ${gains(0, times(items.fight, fights), name)}`);
@@ -203,7 +204,7 @@ export function runBanking(exp: Expedition, end: RunEnd, def: ExpeditionDef, nam
     items: sum(earned, exp.material ? { [exp.material]: 1 } : {}),
     lines,
     ...(depth > 1 && { won: depth }),
-    play: { end, fights, elites: exp.elites, bosses: 1 },
+    play: { end, fights, elites: exp.elites, bosses: 1, ...deep },
   };
 }
 
@@ -241,5 +242,6 @@ export function bank(profile: Profile, banked: Banked): Profile {
   add('fights', play.fights);
   add('elites', play.elites);
   add('bosses', play.bosses);
-  return gainExp(gainExp(gainExp({ ...after, stats }, 'fight', play.fights), 'elite', play.elites), 'boss', play.bosses);
+  const gained = runExp(play);
+  return { ...after, stats, ...(gained > 0 && { exp: (profile.exp ?? 0) + gained }) };
 }

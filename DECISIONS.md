@@ -200,6 +200,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Heart-Bud sprite (owner, 1 Nov): option 01; the others are kept.
 - Profile page (owner, 1 Nov): how EXP is earned and other help sit behind a "?" on the page, not on it. SSR Selectors are used from the inventory, marked with a "!" while held, not from a third of the profile page.
 
+- Profile EXP and depth (owner, 1 Nov): deeper runs give more, without trivialising level 50; the model's curve is +4% a depth past 1 (×2.96 at Depth 50) on a run's fights, elites and Boss.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
