@@ -191,3 +191,4 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 8. **The Open-Hearted Queen:** sprite 01, every option kept, moveset as proposed. Her Vines are a counter on her, not summoned sprites.
 9. **Husks stagger:** two that arrive together Burst a turn apart, and killing one cancels its Burst.
 10. **Depth 50 is always the Queen;** Depths 41–49 draw from the Pistil, the Mother Root and the Queen.
+11. **Band 5 signed off.** Heart-Buds stay at 60 HP: at level 1 the starter team's Tentacles clear them the turn they come, but at Depth 50 they live 2–3 turns and heal her, and doubled they would stand about 5.

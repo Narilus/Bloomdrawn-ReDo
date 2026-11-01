@@ -195,6 +195,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Husks stagger (owner, 1 Nov): two Garden Husks that arrive together Burst a turn apart; killing one cancels its Burst.
 - Band 5's Bosses (owner, 1 Nov): Depths 41–49 draw from the Crowned Pistil, the Mother Root and the Open-Hearted Queen; Depth 50 is always the Queen.
 
+- Band 5 signed off (owner, 1 Nov). Heart-Buds stay at 60 HP: the starter team clears them the turn they come at level 1, but at Depth 50 (party level 40) they live 2–3 turns and heal her, which was the owner's condition for leaving them; doubled, they would stand about 5 turns there.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
