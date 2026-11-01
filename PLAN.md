@@ -390,6 +390,8 @@ _Built 1 Nov: `src/game/profileLevel.ts` (sources, curve, claims), the gates on 
 A new boss per Domain, with art. Five tiers at levels 10–50, each paying its Domain's material (1, 2, 3, 3, 6) and first clears 1 Purified Bloom (3 for Tier 5). Winning a tier opens the next.
 **Done when:** each boss has scenario tests, tests prove pay, first clears and unlocking, and the owner has approved the bosses and their art.
 
+_Started 1 Nov: Trials' rules in `src/game/trials.ts` (tiers, pay, first clears, unlocking, EXP and stats; tests in `src/game/trials.test.ts`). The four bosses are proposed in `docs/notes/trials.md`, briefs in `art/briefs/`, options in `art/raw/` (sheets: `art/cut/trial-*-sheet.png`). Next: the owner picks the art and approves the bosses; then they're built with the Trials screen._
+
 ### M6.8 Weapons
 Drafted in `docs/notes/weapons.md` for approval: signature SSR weapons, SR and R sets per Domain, stats and a passive, levelling and refining. Then equipping on the character page, SR and R pull results as weapons, and the weapon banner with its own pity.
 **Done when:** every weapon passive has a scenario test, tests prove the weapon banner's pity is its own and the new pull results, and e2e equips a weapon.
