@@ -28,7 +28,8 @@ const testCards = [
   card('test.cut', [damage(mul(10, stat('attack')))]),
   card('test.rot', [applyStatus({ id: 'status.poison' }, 20), applyStatus({ id: 'status.bleed' }, 10)]),
   card('test.break', [damage(mul(1000, stat('attack')))]),
-  card('test.wound', [loseHp(40, { target: 'chosen' })]),
+  card('test.wound', [loseHp(20, { target: 'chosen' })]),
+  card('test.deep-wound', [loseHp(40, { target: 'chosen' })]),
 ];
 const NO_RAPTURE = ['maelia', 'anthe', 'leonora', 'hester'];
 const registry: Registry = { ...gameRegistry, cards: { ...gameRegistry.cards, ...Object.fromEntries(testCards.map((c) => [c.id, c])) } };
@@ -84,14 +85,39 @@ describe('Pack Porter (defender)', () => {
 });
 
 describe('Field Surgeon (buffer)', () => {
-  it('Suture heals the lowest-HP ally 12; Lancet deals 22 and 5 Bleed', () => {
+  it('Suture heals the most hurt ally 12, by share of its HP; Lancet deals 22 and 5 Bleed', () => {
     const start = fromEncounter('encounter.porter-and-surgeon', NO_RAPTURE);
-    // Lowest HP, not most missing: the Porter must drop below the Surgeon's own 45.
+    // The Porter, 20 down, still has more HP than the Surgeon's own 45, but it is the one hurt.
     const hurt = play(start, 'test.wound', 0).state;
     expect(shown(hurt, 1)).toEqual(['Suture', ['heal 12 → enemy.pack-porter']]);
     const sutured = turns(hurt, 1);
     expect(hp(sutured, 0)).toBe(hp(hurt, 0) + 12);
     expect(shown(sutured, 1)).toEqual(['Lancet', ['damage 22', 'applyStatus status.bleed 5']]);
+  });
+
+  it('Suture tends a hurt summoner first, even when another ally is more hurt (owner, 1 Nov)', () => {
+    const start = fromEncounter('encounter.tent-walker-and-surgeon', NO_RAPTURE);
+    // The Tent-Walker loses 20 of 90; the Surgeon herself is far more hurt, but comes last.
+    const hurt = play(play(start, 'test.wound', 0).state, 'test.deep-wound', 1).state;
+    expect(shown(hurt, 1)).toEqual(['Suture', ['heal 12 → enemy.tent-walker']]);
+  });
+
+  it("in the Leader's crew, Suture tends the Leader first; with him dead, the most hurt of the rest, then herself", () => {
+    const called = turns(fromEncounter('encounter.expedition-leader', NO_RAPTURE), 3);
+    const surgeon = called.enemies.findIndex((e) => e.enemy === 'enemy.field-surgeon');
+    const porter = called.enemies.findIndex((e) => e.enemy === 'enemy.pack-porter');
+    const bothHurt = play(play(called, 'test.wound', 0).state, 'test.wound', porter).state;
+    expect(shown(bothHurt, surgeon)).toEqual(['Suture', ['heal 12 → enemy.expedition-leader']]);
+    // With the Leader dead (his HP set straight to 0), the hurt Porter; with the Porter whole, herself.
+    const withHp = (state: CombatState, hps: [number, number][]) => {
+      const next = structuredClone(state);
+      for (const [index, value] of hps) next.enemies[index]!.hp = value;
+      return next;
+    };
+    const leaderless = withHp(bothHurt, [[0, 0]]);
+    expect(shown(leaderless, surgeon)).toEqual(['Suture', ['heal 12 → enemy.pack-porter']]);
+    const porterWhole = withHp(leaderless, [[porter, leaderless.enemies[porter]!.maxHp], [surgeon, 20]]);
+    expect(shown(porterWhole, surgeon)).toEqual(['Suture', ['heal 12 on itself']]);
   });
 });
 

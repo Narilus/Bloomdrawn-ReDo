@@ -63,7 +63,7 @@ Looks and story: `bestiary-direction.md` 4.2. The Boss is the man who made his c
 | Enemy | Tier, role | HP | Intents | Size |
 |---|---|---|---|---|
 | Pack Porter | Normal, defender | 80 | Brace, 15 Shield; Shoulder the Load, 8 Shield to every enemy; Pack Swing 40 | large |
-| Field Surgeon | Normal, buffer | 45 | Suture, heals the lowest-HP ally 12; Lancet 22 + 5 Bleed | normal |
+| Field Surgeon | Normal, buffer | 45 | Suture, heals 12: a hurt Boss or summoner first, else the ally missing the largest share of its HP, else herself; Lancet 22 + 5 Bleed | normal |
 | Cartographer | Normal, debuffer | 50 | Survey, party 2 Vulnerable; Compass Point 30; Wrong Turn, you draw 1 fewer next turn | normal |
 | Tent-Walker | Normal, summoner | 90 | Open the Flap, a Seedling (max 2); Collapse 36 and 12 Shield | normal |
 | **The Quartermaster** | Elite: racing heals | 900 | Ration, heals itself 60; Cleaver 55; Ration; Strongbox, 40 Shield. Resists control. | large |
@@ -75,9 +75,9 @@ Looks and story: `bestiary-direction.md` 4.2. The Boss is the man who made his c
 _Built 1 Nov._ The lab plays them at Depth 20 (Average build):
 - normal fights take 2.3–3.0 turns;
 - elites take 5.8 (Scout) and 6.0 (Quartermaster);
-- the Expedition Leader takes 10.1, with his worst turn at 41% of party HP.
+- the Expedition Leader takes 10.4, with his worst turn at 43% of party HP (after Suture's new rule).
 
-To get there, the Leader's bars went from 1,050 to 1,100. The Tent-Walker went from 140 HP to 90, because with the Surgeon and two Seedlings its fight took 3.4 turns. The Tent-Walker's wide sprite stands at normal size, like band 2's wide ones. Call the Crew brings two different crew in one intent, so the engine now makes room for everything one intent summons. Suture heals the lowest-HP ally, so it often has nothing to heal: the Surgeon herself is the lowest until her partner drops below 45.
+To get there, the Leader's bars went from 1,050 to 1,100. The Tent-Walker went from 140 HP to 90, because with the Surgeon and two Seedlings its fight took 3.4 turns. The Tent-Walker's wide sprite stands at normal size, like band 2's wide ones. Call the Crew brings two different crew in one intent, so the engine now makes room for everything one intent summons. Suture first healed the lowest-HP ally, so it often had nothing to heal: the Surgeon herself was the lowest until her partner dropped below 45. The owner changed its rule (1 Nov): a hurt Boss or summoner first, then the ally missing the largest share of its HP, then herself.
 
 ## Band 4, Depths 31–40: the Calyx (made)
 
@@ -152,3 +152,4 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 
 1. **Band 3's art:** Pack Porter 02, Field Surgeon 01, Cartographer 02, Tent-Walker 01, Quartermaster 03, Cocooned Scout 01, Expedition Leader 01. Every option is kept in `art/raw/`.
 2. **The Tent-Walker's flap-mouth** stays. It suggests anatomy without being explicit, the teeth on 01 help, and the band carries content warnings. The owner will keep an eye on it.
+3. **Suture** tends a hurt Boss or summoner first (the Leader, the Tent-Walker), then the ally missing the largest share of its HP (the crew left after the Boss dies), and herself last.
