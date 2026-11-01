@@ -46,7 +46,7 @@ describe('Trials', () => {
   it('Tier 5 pays enough to ascend two characters at 30, and 3 Blooms the first time', () => {
     const four = [1, 2, 3, 4].reduce((p, tier) => win(p, tier).profile, NEW_PROFILE);
     const five = win(four, 5);
-    expect([five.material, five.pulls, five.profile.items?.[MAT]! - four.items?.[MAT]!]).toEqual([6, 3, 6]);
+    expect([five.material, five.pulls, (five.profile.items?.[MAT] ?? 0) - (four.items?.[MAT] ?? 0)]).toEqual([6, 3, 6]);
   });
 
   it('a defeat pays nothing and changes nothing', () => {
