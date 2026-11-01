@@ -113,14 +113,29 @@ As first drafted. Its art is briefed after band 4's, with the owner's design pri
 
 | Enemy | Tier, role | HP | Intents |
 |---|---|---|---|
-| Blossom Devourer | Normal, attacker | 150 | Gnash 50; Engulf 30, then heals itself 20 |
-| Garden Husk | Normal, countdown | 90 | Harden, 20 Shield; Ripen, "Bursts next turn"; Burst 90, then it withers |
-| Petal Horror | Normal, debuffer | 70 | Pollen Veil, party 2 Weak + 5 Poison; Tendril Lash 30; Spore-Fall, party 2 Vulnerable |
+| Blossom Devourer | Normal, attacker | 120 | Gnash 50; Engulf 30, then heals itself 20 |
+| Garden Husk | Normal, countdown | 75 | Harden, 20 Shield; Ripen, "Bursts next turn"; Burst 90, then it withers |
+| Petal Horror | Normal, debuffer | 60 | Pollen Veil, party 2 Weak + 5 Poison; Tendril Lash 30; Spore-Fall, party 2 Vulnerable |
 | **The Grafted Stag** | Elite: racing statuses | 850 | Antler Gore 55 + 10 Bleed; Shed Petals, party 8 Poison; Bellow, party 2 Weak. Resists control. |
 | **The Seed-Mother** | Elite: a countdown | 700 | Sow, 2 Garden Husks (max 2); Root Slam 50; Nurture, 20 Shield to every enemy. Resists control. |
-| **The Mother Root** | Boss | 1,150, then 1,150 | *Beating:* Pulse, party 8 Poison; Root Spear 65; Grow, 2 Petal Horrors. *Rouse:* Opening. *Flowering Heart:* Petal Storm 22 ×4; Pollen Breath, party 2 Weak and 2 Vulnerable; Heartbloom 110. *Full Bloom, second bar:* Fruit, 2 Garden Husks; Petal Storm 22 ×5; Heartbloom 125. |
+| **The Mother Root** | Boss | 1,150, then 1,150 | *Beating:* Pulse, party 4 Poison; Root Spear 65; Grow, 1 Petal Horror (max 2). *Rouse:* Opening. *Flowering Heart:* Pollen Breath, party 2 Weak and 1 Vulnerable; Petal Storm 18 ×4; Heartbloom 90. *Full Bloom, second bar:* Fruit, 2 Garden Husks; Petal Storm 18 ×5; Heartbloom 100. |
 
 **Fights:** the Devourer alone; Husk and Petal Horror; two Husks and a Gardener; Devourer and Petal Horror.
+
+_Built 1 Nov,_ without the second Boss (below). The lab plays them at Depth 40 (Average build):
+- normal fights take 2.6–3.1 turns;
+- elites take 5.5 (Stag) and 5.8 (Seed-Mother);
+- the Mother Root takes 10.5, with her worst turn at 58% of party HP.
+
+To get there:
+- **Devourer** 150 to 120, and **Petal Horror** 70 to 60. Beside a Petal Horror the Devourer comes with 90 and the **Husk** (90 to 75) with 60, as encounter overrides, or the pairs ran to 3.5 turns.
+- **The Mother Root** first came to 82%. Party Poison never wears off, and her Pulse and every Petal Horror's Pollen Veil kept adding to it, to a quarter of the party's HP a turn by her second bar. On top of that, Pollen Breath's Vulnerable 2 covers her next two actions, which in a cycle of three always includes Heartbloom. So: Pulse 8 to 4; Grow brings 1 Petal Horror (2 at most), not 2; Pollen Breath gives Vulnerable 1, spent on the Petal Storm, which comes next; Petal Storm 22 to 18 a hit; Heartbloom 110 to 90, and Full Bloom's 125 to 100.
+
+Sizes: the Husks the Seed-Mother sows, the Husks of "two Husks and a Gardener" and the Petal Horrors the Mother Root grows stand small (`enemy.sown-husk`, `enemy.grown-petal-horror`), so the anchor stands tallest. In the three-slot fight the Gardener anchors. **Ripen** names the next intent ("Burst next turn", the `foretell` op), and **Burst** ends with `wither`: the Husk loses all its HP, through its Shield. Killing it first cancels both.
+
+**Open:** two Husks sown together Burst on the same turn (the Seed-Mother's worst turn, 49%, is that). It stays under the ceiling at Depth 40; the owner decides whether the second should run a step behind.
+
+**The second Boss** (owner, 1 Nov): the Mother Root alone isn't epic enough for Depth 50. A regal woman enthroned, grown into her throne, her heart open in her chest, vines arcing round her. Options in `art/raw/open-hearted-queen/`; her moveset is proposed to the owner before it's built.
 
 ## New abilities
 
@@ -167,3 +182,5 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 3. **Suture** tends a hurt Boss or summoner first (the Leader, the Tent-Walker), then the ally missing the largest share of its HP (the crew left after the Boss dies), and herself last. Only hurt allies count, so a whole Boss is passed over.
 4. **Every enemy heal uses Suture's rule:** the Lantern Surveyor's Tend, the Leader's Graft (its Shield goes with the heal) and the Gardener's Tend and Graft.
 5. **Band 4's art:** Pollinator 01, Gardener 01, Stilt-Grazer 01, Seed-Bladder 02, Weaver 03, Pollen Queen 03, Crowned Pistil 02. Every option is kept in `art/raw/`.
+6. **Band 5's art:** Blossom Devourer 01, Garden Husk 01, Petal Horror 01, Grafted Stag 01, Seed-Mother 02, Mother Root 01. Every option is kept, with Mother Root 02 and 03 mirrored to face left. The Husk's and the Mother Root's seams read as seams.
+7. **Band 5 gets a second Boss,** an enthroned woman, because the Mother Root alone isn't epic enough for Depth 50.

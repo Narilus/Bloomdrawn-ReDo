@@ -273,6 +273,11 @@ export const M3_LABYRINTH: LabyrinthDef = {
       elite: ['encounter.weaver', 'encounter.pollen-queen'],
       boss: ['encounter.crowned-pistil'],
     },
+    {
+      fight: ['encounter.blossom-devourer', 'encounter.husk-and-petal-horror', 'encounter.two-husks-and-gardener', 'encounter.devourer-and-petal-horror'],
+      elite: ['encounter.grafted-stag', 'encounter.seed-mother'],
+      boss: ['encounter.mother-root'],
+    },
   ],
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
   symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],

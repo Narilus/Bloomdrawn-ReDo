@@ -43,6 +43,12 @@ import pollinatorBattle from '../assets/battle/pollinator.png';
 import seedBladderBattle from '../assets/battle/seed-bladder.png';
 import stiltGrazerBattle from '../assets/battle/stilt-grazer.png';
 import weaverBattle from '../assets/battle/weaver.png';
+import blossomDevourerBattle from '../assets/battle/blossom-devourer.png';
+import gardenHuskBattle from '../assets/battle/garden-husk.png';
+import petalHorrorBattle from '../assets/battle/petal-horror.png';
+import graftedStagBattle from '../assets/battle/grafted-stag.png';
+import seedMotherBattle from '../assets/battle/seed-mother.png';
+import motherRootBattle from '../assets/battle/mother-root.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -98,6 +104,15 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.pollen-queen': pollenQueenBattle,
   'enemy.crowned-pistil': crownedPistilBattle,
   'enemy.crowned-pistil-full-bloom': crownedPistilBattle,
+  'enemy.blossom-devourer': blossomDevourerBattle,
+  'enemy.garden-husk': gardenHuskBattle,
+  'enemy.sown-husk': gardenHuskBattle,
+  'enemy.petal-horror': petalHorrorBattle,
+  'enemy.grown-petal-horror': petalHorrorBattle,
+  'enemy.grafted-stag': graftedStagBattle,
+  'enemy.seed-mother': seedMotherBattle,
+  'enemy.mother-root': motherRootBattle,
+  'enemy.mother-root-full-bloom': motherRootBattle,
 };
 
 export const portraitArt: Readonly<Record<string, string>> = {

@@ -41,6 +41,8 @@ export interface Preview {
   crit?: { amount: number; rate: number };
   resource?: string;
   status?: string;
+  /** An intent's name (`foretell`: the one coming next). */
+  name?: string;
   /** Control flow: whether the branch would resolve, and what it would do. */
   resolves?: boolean;
   branch?: Preview[];

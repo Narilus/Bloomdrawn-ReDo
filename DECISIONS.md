@@ -188,6 +188,10 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Band 4's art (owner, 1 Nov): Pollinator 01, Gardener 01, Stilt-Grazer 01, Seed-Bladder 02, Weaver 03, Pollen Queen 03, Crowned Pistil 02. Every option is kept; the owner says this band worked very well.
 
+- Band 5's art (owner, 1 Nov): Blossom Devourer 01, Garden Husk 01, Petal Horror 01, Grafted Stag 01, Seed-Mother 02, Mother Root 01. Every option is kept; Mother Root 02 and 03 are mirrored to face left. The Husk's split and the Mother Root's seam read as seams, not anatomy.
+
+- Band 5's Boss (owner, 1 Nov): the Mother Root isn't epic enough alone for Depth 50, so band 5 has two Bosses to draw from. The second is a regal woman enthroned and grown into her throne, her heart open as the Expedition Leader's is but grander, with vines arcing around her like Isadora's, a little of the embraced Flesh and Rapture look allowed.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

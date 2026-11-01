@@ -22,6 +22,8 @@ import { repeatOp } from './repeat.ts';
 import { repeatNextOp } from './repeatNext.ts';
 import { volleyOp } from './volley.ts';
 import { whenOp } from './when.ts';
+import { witherOp } from './wither.ts';
+import { foretellOp } from './foretell.ts';
 
 /** The shared operation library, keyed by operation name. */
 export const library: Readonly<Record<string, Operation>> = {
@@ -47,6 +49,8 @@ export const library: Readonly<Record<string, Operation>> = {
   createCard: createCardOp,
   summon: summonOp,
   clearStatuses: clearStatusesOp,
+  wither: witherOp,
+  foretell: foretellOp,
 };
 
 export function getOp(registry: Registry, name: string): Operation | undefined {
@@ -75,3 +79,5 @@ export { transcend } from './transcend.ts';
 export { createCard } from './createCard.ts';
 export { summon } from './summon.ts';
 export { clearStatuses } from './clearStatuses.ts';
+export { wither } from './wither.ts';
+export { foretell } from './foretell.ts';

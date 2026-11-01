@@ -345,6 +345,8 @@ function Intent({ name, previews, skips, source, state }: { name: string; previe
       return [{ icon, amount: p.amount, words: `${p.amount} ${statusName(p.status ?? '')}${self ? ' on itself' : ''}`, to: self }];
     }
     if (p.op === 'drawFewer') return [{ words: `you draw ${p.amount} fewer next turn` }];
+    if (p.op === 'foretell') return [{ words: `${p.name} next turn` }];
+    if (p.op === 'wither') return [{ words: 'then withers' }];
     return [];
   });
   const attacks = previews.some((p) => p.op === 'damage');
