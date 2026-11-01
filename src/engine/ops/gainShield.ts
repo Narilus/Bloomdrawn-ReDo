@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { OpCall, Registry } from '../defs.ts';
 import type { EngineEvent } from '../events.ts';
 import { formulaSchema, type Formula } from '../formula.ts';
-import { leaderFirst } from '../allies.ts';
+import { leaderFirst, leaderOf } from '../allies.ts';
 import { pipeline } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
 import { isAlive, PARTY, type CombatState, type Enemy, type EntityId } from '../state.ts';
@@ -13,13 +13,14 @@ export interface GainShieldArgs extends OpCall {
   /**
    * For an enemy, itself included: `allies`, every living enemy; `lowestAlly`, the living enemy with
    * the lowest HP; `largestAlly`, the one with the most max HP (ties: the earlier one);
-   * `leaderFirst`, where a heal with that target goes, so Shield and heal land together (Graft).
+   * `leaderFirst`, where a heal with that target goes, so Shield and heal land together (Graft);
+   * `leader`, the ally that leads it, a Boss or a summoner (else itself).
    */
   target?: ShieldTarget;
 }
 
-type ShieldTarget = 'allies' | 'lowestAlly' | 'largestAlly' | 'leaderFirst';
-const TARGETS = ['allies', 'lowestAlly', 'largestAlly', 'leaderFirst'] as const;
+type ShieldTarget = 'allies' | 'lowestAlly' | 'largestAlly' | 'leaderFirst' | 'leader';
+const TARGETS = ['allies', 'lowestAlly', 'largestAlly', 'leaderFirst', 'leader'] as const;
 
 export const gainShield = (amount: Formula, target?: ShieldTarget): GainShieldArgs => ({ op: 'gainShield', amount, ...(target ? { target } : {}) });
 
@@ -29,6 +30,7 @@ function holdersOf(state: CombatState, args: GainShieldArgs, ctx: OpContext, reg
   const self = state.enemies.find((e) => e.id === ctx.source);
   if (!self) return [];
   if (args.target === 'leaderFirst') return [leaderFirst(state, self, registry).id];
+  if (args.target === 'leader') return [leaderOf(state, self, registry).id];
   const alive = state.enemies.filter(isAlive);
   if (args.target === 'allies') return alive.map((e) => e.id);
   const pick = (better: (a: Enemy, b: Enemy) => boolean) => alive.reduce<Enemy | undefined>((best, e) => (!best || better(e, best) ? e : best), undefined);
@@ -47,6 +49,7 @@ const GAINS: Record<ShieldTarget | 'self', string> = {
   lowestAlly: 'The enemy with the lowest HP gains',
   largestAlly: 'The enemy with the most max HP gains',
   leaderFirst: 'A hurt Boss or summoner, else the most hurt ally, else itself, gains',
+  leader: 'Its leader gains',
 };
 
 export const gainShieldOp: Operation<GainShieldArgs> = {

@@ -6,6 +6,7 @@ import type { Operation, OpContext } from '../operation.ts';
 import { isAlive, type CombatState } from '../state.ts';
 import { addStacks, bearerOf, landingStatus, type Bearer } from '../statuses.ts';
 import type { Registry } from '../defs.ts';
+import { leaderOf } from '../allies.ts';
 
 export interface ApplyStatusArgs extends OpCall {
   op: 'applyStatus';
@@ -14,9 +15,10 @@ export interface ApplyStatusArgs extends OpCall {
   /**
    * `chosen`: the command's target (the party, for an enemy's intent). `self`: the source's side.
    * `allEnemies`: every living enemy. `eventTarget`: whoever the triggering event happened to (a
-   * passive's reaction). Statuses on any party member land on the whole party.
+   * passive's reaction). `leader`: for an enemy, the ally that leads it, a Boss or a summoner (else
+   * itself). Statuses on any party member land on the whole party.
    */
-  target?: 'chosen' | 'self' | 'allEnemies' | 'eventTarget';
+  target?: 'chosen' | 'self' | 'allEnemies' | 'eventTarget' | 'leader';
 }
 
 export const applyStatus = (
@@ -26,8 +28,11 @@ export const applyStatus = (
 ): ApplyStatusArgs => ({ op: 'applyStatus', status: status.id, stacks, target });
 
 function bearers(state: CombatState, args: ApplyStatusArgs, ctx: OpContext, registry: Registry): Bearer[] {
+  const self = state.enemies.find((e) => e.id === ctx.source);
   const ids =
-    args.target === 'allEnemies'
+    args.target === 'leader'
+      ? [self && leaderOf(state, self, registry).id]
+      : args.target === 'allEnemies'
       ? state.enemies.filter(isAlive).map((e) => e.id)
       : [args.target === 'self' ? ctx.source : args.target === 'eventTarget' ? ctx.event?.target : ctx.target];
   return ids.flatMap((id) => bearerOf(state, id, registry) ?? []);
@@ -38,7 +43,7 @@ export const applyStatusOp: Operation<ApplyStatusArgs> = {
     op: z.literal('applyStatus'),
     status: z.string().min(1),
     stacks: formulaSchema,
-    target: z.enum(['chosen', 'self', 'allEnemies', 'eventTarget']).optional(),
+    target: z.enum(['chosen', 'self', 'allEnemies', 'eventTarget', 'leader']).optional(),
   }),
   validate: (state, args, ctx, registry) => (bearers(state, args, ctx, registry).length > 0 ? undefined : 'No one can bear this status.'),
   resolve(draft, args, ctx, registry) {
@@ -62,6 +67,6 @@ export const applyStatusOp: Operation<ApplyStatusArgs> = {
   },
   describe(args, show) {
     const text = `Apply ${show(args.stacks, 'stacks', args.status)} ${titleCase(args.status.replace(/^status\./, ''))}`;
-    return args.target === 'allEnemies' ? `${text} to all enemies` : text;
+    return args.target === 'allEnemies' ? `${text} to all enemies` : args.target === 'leader' ? `${text} to its leader` : text;
   },
 };

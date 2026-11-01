@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { add, formulaText, stat } from '../formula.ts';
 import { fixtureCombat, fixtureRegistry as registry } from '../testing/fixtures.ts';
 import { gainShield, gainShieldOp } from './gainShield.ts';
+import { summon } from './summon.ts';
+import type { Registry } from '../defs.ts';
 
 const defend = gainShield(add(5, stat('defense')));
 
@@ -57,6 +59,22 @@ describe('gainShield', () => {
     expect(shields()).toEqual([6, 0, 0]);
     state.enemies[2]!.hp = 30;
     expect(shields()).toEqual([0, 0, 6]);
+  });
+
+  it('an add shields the ally that leads it, a Boss or a summoner, hurt or not, else itself (a Trial\'s Marionettes)', () => {
+    const withCaller: Registry = {
+      ...registry,
+      enemies: { ...registry.enemies, 'test.caller': { id: 'test.caller', name: 'Caller', hp: 100, intents: [{ id: 'call', name: 'Call', effects: [summon({ id: 'test.frail' }, 1, 1)] }] } },
+    };
+    const bow = gainShield(6, 'leader');
+    const shields = (enemies: string[]) => {
+      const draft = fixtureCombat(enemies, [], withCaller);
+      gainShieldOp.resolve(draft, bow, { source: draft.enemies[0]!.id }, withCaller);
+      return draft.enemies.map((e) => e.shield);
+    };
+    expect(shields(['test.dummy', 'test.caller'])).toEqual([0, 6]);
+    expect(shields(['test.dummy', 'test.dummy'])).toEqual([6, 0]);
+    expect(gainShieldOp.describe(bow, formulaText, withCaller)).toBe('Its leader gains 6 Shield');
   });
 
   it('describes itself', () => {

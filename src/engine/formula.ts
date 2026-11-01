@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { CardSlot, Keyword, Registry } from './defs.ts';
 import { characterOf } from './dupes.ts';
 import type { OpContext } from './operation.ts';
-import { PARTY, type CardInstance, type CombatState } from './state.ts';
+import { PARTY, type CardInstance, type CombatState, type StatusStack } from './state.ts';
 
 /** A typed amount expression. JSON data, never strings or eval. */
 export type Formula =
@@ -16,7 +16,7 @@ export type Formula =
   | { handCount: Keyword }
   /** Turns held, summed over cards in hand with this keyword. */
   | { heldTurns: Keyword }
-  /** Stacks of a status on the source (the bearer, for a status's own triggers). */
+  /** Stacks of a status on the source (the bearer, for a status's own triggers) that have taken hold. */
   | { stacks: string }
   /** Stacks of a status on the chosen target. */
   | { targetStacks: string }
@@ -91,9 +91,9 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
     // The party and its members share one set of statuses.
     const party = ctx.source === PARTY || state.members.some((m) => m.id === ctx.source);
     const statuses = party ? state.party.statuses : state.enemies.find((e) => e.id === ctx.source)?.statuses;
-    return statuses?.find((s) => s.status === f.stacks)?.stacks ?? 0;
+    return held(statuses?.find((s) => s.status === f.stacks));
   }
-  if ('targetStacks' in f) return state.enemies.find((e) => e.id === ctx.target)?.statuses.find((s) => s.status === f.targetStacks)?.stacks ?? 0;
+  if ('targetStacks' in f) return held(state.enemies.find((e) => e.id === ctx.target)?.statuses.find((s) => s.status === f.targetStacks));
   if ('manaSpent' in f) return state.manaSpent;
   if ('playedThisTurn' in f) return (state.playedThisTurn ?? []).filter((id) => registry.cards[id]?.slot === f.playedThisTurn).length;
   if ('turn' in f) return state.turn;
@@ -104,6 +104,12 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   }
   return ctx.consumed ?? 0;
 }
+
+/**
+ * Stacks that have taken hold: those an enemy applied in the enemy turn wait for it to end (owner,
+ * 20 Oct), so a Sermon before a Lash in the same turn leaves the Lash as shown.
+ */
+const held = (s: StatusStack | undefined): number => (s ? s.stacks - (s.pending ?? 0) : 0);
 
 /** Cards in hand with a keyword. Ritual implies Retain. */
 export function withKeyword(state: CombatState, registry: Registry, keyword: Keyword) {

@@ -3,6 +3,7 @@ import { apply, startCombat } from './combat.ts';
 import type { EnemyDef, Registry, StatusDef } from './defs.ts';
 import { applyStatus, applyStatusOp } from './ops/applyStatus.ts';
 import { damage } from './ops/damage.ts';
+import { mul, stacks } from './formula.ts';
 import { PARTY, type CombatState } from './state.ts';
 import { fixtureRegistry, STARTERS } from './testing/fixtures.ts';
 
@@ -14,11 +15,14 @@ import { fixtureRegistry, STARTERS } from './testing/fixtures.ts';
 const statuses: StatusDef[] = [
   // A lasting enemy buff with no turn count.
   { id: 'test.mighty', stacking: 'add', modifiers: [{ value: 'damage', step: 'outgoingMul', amount: 2 }] },
+  // A lasting enemy buff counted by its stacks (Fervour).
+  { id: 'test.zealous', stacking: 'add', modifiers: [{ value: 'damage', step: 'flat', amount: mul(5, stacks('test.zealous')) }] },
   { id: 'test.feeble', stacking: 'add', lasts: 'ownTurns', modifiers: [{ value: 'damage', step: 'outgoingMul', amount: 0.5 }] },
 ];
 const enemies: EnemyDef[] = [
   { id: 'test.biter', name: 'Biter', hp: 40, intents: [{ id: 'bite', name: 'Bite', effects: [damage(10, { target: 'party' })] }] },
   { id: 'test.rallier', name: 'Rallier', hp: 40, intents: [{ id: 'rally', name: 'Rally', effects: [applyStatus({ id: 'test.mighty' }, 1, 'allEnemies')] }] },
+  { id: 'test.preacher', name: 'Preacher', hp: 40, intents: [{ id: 'preach', name: 'Preach', effects: [applyStatus({ id: 'test.zealous' }, 1, 'allEnemies')] }] },
 ];
 const registry: Registry = {
   ...fixtureRegistry,
@@ -44,6 +48,14 @@ describe('when a status takes hold', () => {
     expect(state.party.hp - first.party.hp).toBe(10); // Rally came first, but the Bite is unchanged
     const second = endTurn(first);
     expect(first.party.hp - second.party.hp).toBe(20); // from the next enemy turn it holds
+  });
+
+  it('a buff counted by its stacks counts only the stacks that have taken hold (a Sermon before a Lash)', () => {
+    const first = endTurn(start(['test.preacher', 'test.biter']));
+    const second = endTurn(first);
+    // One Zealous held from the first turn; the second, preached this turn, waits.
+    expect(first.party.hp - second.party.hp).toBe(15);
+    expect(second.party.hp - endTurn(second).party.hp).toBe(20);
   });
 
   it('a status the party applies during the enemy turn holds at once', () => {

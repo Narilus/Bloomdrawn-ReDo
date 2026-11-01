@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formulaText } from '../formula.ts';
+import type { Registry } from '../defs.ts';
 import { fixtureCombat, fixtureRegistry as registry } from '../testing/fixtures.ts';
 import { applyStatus, applyStatusOp } from './applyStatus.ts';
 
@@ -35,6 +36,21 @@ describe('applyStatus', () => {
     applyStatusOp.resolve(draft, applyStatus({ id: 'test.add' }, 1, 'self'), ctx, registry);
     expect(draft.party.statuses).toEqual([{ status: 'test.add', stacks: 1 }]);
     expect(applyStatusOp.validate?.(draft, applyStatus({ id: 'test.add' }, 1), { source: 'm0' }, registry)).toBeDefined();
+  });
+
+  it("an add's status goes to the ally that leads it, a Boss or a summoner, else to itself (a Trial's Talismans)", () => {
+    const withBoss: Registry = {
+      ...registry,
+      enemies: { ...registry.enemies, 'test.boss': { id: 'test.boss', name: 'Boss', hp: 100, phases: [{ name: 'Second', hp: 100, rouse: { id: 'r', name: 'R', effects: [] }, intents: [{ id: 'a', name: 'A', effects: [] }] }] } },
+    };
+    const chant = applyStatus({ id: 'test.add' }, 1, 'leader');
+    const led = fixtureCombat(['test.dummy', 'test.boss', 'test.dummy'], [], withBoss);
+    applyStatusOp.resolve(led, chant, { source: led.enemies[2]!.id }, withBoss);
+    expect(led.enemies.map((e) => e.statuses.length)).toEqual([0, 1, 0]);
+    const alone = fixtureCombat(['test.dummy', 'test.dummy'], [], withBoss);
+    applyStatusOp.resolve(alone, chant, { source: alone.enemies[1]!.id }, withBoss);
+    expect(alone.enemies.map((e) => e.statuses.length)).toEqual([0, 1]);
+    expect(applyStatusOp.describe(chant, formulaText, withBoss)).toBe('Apply 1 Test.add to its leader');
   });
 
   it('describes itself', () => {
