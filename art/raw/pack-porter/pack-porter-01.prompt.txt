@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a19469-983f-7de3-adf6-e1c4e57764ee
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: the whole figure turned toward the left edge of the image. A ribbed ivory seed pod as tall as a man, standing upright, that has swallowed a porter from behind: only his two legs in canvas trousers and worn leather boots, and one bare arm, remain outside, the five-fingered hand still gripping a canvas pack strap. The pod's skin grows over the edges of his trousers and sleeve in a seam of black sutures and blush skin-petals. At the top of the pod a mouth of raw pink skin-petals opens. The most beautiful part is the petal mouth. Canvas tan, ivory pod and raw pink palette.
+
+Background: fully transparent.

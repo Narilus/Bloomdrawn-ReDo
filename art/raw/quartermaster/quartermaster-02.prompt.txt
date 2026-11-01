@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a19469-983f-7ef2-b9a1-77e75e406504
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: body and face turned toward the left edge of the image. A heavy bearded man's torso rising out of a small two-wheeled wooden supply wagon, his waist merging into the planks under a band of flesh-vines and black sutures. The wagon is stacked with crates and ration tins that have swollen into ivory seed pods, one split open to show blush flesh inside. Both forearms end in iron butcher's cleavers in place of hands. The most beautiful part is the split ivory pod. Leather brown, iron and ivory palette.
+
+Background: fully transparent.

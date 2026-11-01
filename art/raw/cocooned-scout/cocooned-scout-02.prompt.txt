@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a19469-9842-7ab0-beb2-f17db6e7fd90
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: body and face turned toward the left edge of the image. A young woman scout half-emerged from a hanging cocoon of overlapping ivory skin-petals, the cocoon slung by root threads from a broken wooden tent frame. Her head, shoulders and one arm are out of the cocoon. She has two soft moth feelers on her brow, and her free arm has become a large lilac moth wing with a lace-edged rim. A torn canvas-tan scout's collar and strap remain at her neck. The most beautiful part is the lace-edged wing. Ivory, lilac and canvas tan palette.
+
+Background: fully transparent.

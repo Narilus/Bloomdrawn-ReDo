@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a19469-987f-7972-b2b8-42e8002f7a1f
+
+High-resolution pixel art battle sprite for a side-view turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading. Gothic fantasy horror. One full-body creature or figure in a three-quarter view, all of it visible, centred, with empty margin on every side. One bold, simple silhouette that reads at small size, with dense detail inside it. Every join between body parts or materials is drawn as a seam: black sutures, petal collars, root-wrapped joints, skin grown over cloth or metal. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac. The glow is soft and comes from flesh, petals, pods and pollen, with no glints or points of light. Every body is solid and opaque; parts lit from inside stay opaque. Every human hand has exactly five fingers; monstrous limbs end cleanly in paws, hooves, talons, blades, tendrils or tools. No text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Facing left: body and face turned toward the left edge of the image. A woman cartographer whose skin has become the map: her torso is unrolled like a long parchment scroll hanging from her collarbones, drawn with ink-brown coastlines and contour lines that run on into her veins, with no lettering anywhere. From the waist down she is fused into a brass survey tripod wrapped in pale roots. One five-fingered hand holds a small brass compass. Her face is human and thoughtful, with fine ink lines reaching her cheeks. The most beautiful part is the map of coastlines on her skin. Parchment, ink brown, brass and blush palette.
+
+Background: fully transparent.
