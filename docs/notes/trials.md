@@ -1,6 +1,6 @@
 # Trials: the four bosses (M6.7)
 
-Status: **proposed 1 Nov, for the owner's approval.** The rules are his (m6-direction.md B; m6-depth.md "Trials"). The bosses, their names and movesets below are drafts. Numbers are level-1 placeholders that scale with the tier's level like every enemy's, fitted later by the lab. Briefs are in `art/briefs/`, and options in `art/raw/` (sheets: `art/cut/trial-*-sheet.png`).
+Status: **kits approved 1 Nov** ("well designed at first glance"); built and fitted by the lab. The rules are his (m6-direction.md B; m6-depth.md "Trials"). Numbers are level-1 placeholders that scale with the tier's level like every enemy's, fitted later by the lab. Briefs are in `art/briefs/`, and options in `art/raw/` (sheets: `art/cut/trial-*-sheet.png`).
 
 ## How a Trial runs (settled)
 
@@ -10,21 +10,24 @@ Status: **proposed 1 Nov, for the owner's approval.** The rules are his (m6-dire
 
 ## The bosses
 
-Each mirrors its Domain's engine against the party and tests one thing. All are huge, resist control and have two bars. Every one uses rules the game already has unless marked **new**.
+Each mirrors its Domain's engine against the party and tests one thing. All are huge, resist control and have two bars, and every Rouse clears the boss's statuses. One engine addition: an add's `leader` target, so Talismans chant into the Oracle and Marionettes Shield the Ringmaster.
+
+Lab (`trace-tmp`, the four parties at the tier's level): 10–11 turns at Tiers 1–4, like the run Bosses (the Queen 11.4); 12.5–14 at Tier 5, where every Boss runs long against an Average build. Big hits are 40–60% of party HP.
 
 ### Flesh: The Grand Anatomist
 *Look:* a towering surgeon-saint in a blood-pink gown and stitched ivory apron, six grafted arms fanned out like a halo, each holding a brass tool. She cradles a glowing seed pod of embryo buds. *Tests:* build and burst. Her Gestation is shown on her badge, and the payoff is telegraphed a turn ahead.
 
-- **Consultation** (1,100): Incision 30 and party 6 Bleed; Gestate, she gains 2 Gestation; Suture, she heals 40 and gains 30 Shield.
+- **Consultation** (1,100): Incision 30 and party 6 Bleed; Gestate, she gains 3 Gestation; Suture, she heals 40 and gains 30 Shield; Delivery, 20 per Gestation, which it then spends (the intent shows the total).
 - *Rouse:* Scrub In.
-- **The Theatre** (1,100): Gestate (3); Incision; Gestate (3); Delivery, 30 per Gestation, which it then spends (the intent shows the total).
+- **The Theatre** (1,100): Gestate (3); Incision; Gestate (3); Delivery, so twice the first bar's.
+- *Fitted:* every Rouse clears the boss's statuses (DESIGN.md "Bosses"), so a first bar with no Delivery would grow Gestation for nothing; it has its own. 30 a Gestation made the second Delivery about 85% of party HP; at 20 it is about 54%.
 
 ### Rapture: The Veiled Hierophant
 *Look:* a towering cult high priest in bruise-violet vestments, a lace veil hiding all but his smile, candles on his shoulders and a swinging censer. Flesh tentacles rise from the chalk circles beneath him. *Tests:* count × damage, Rapture's two axes. His Tentacles are small adds, so killing them cuts the count, and his Sermon raises the damage of every one.
 
 - **Vespers** (1,000): Raise a Limb, 1 Tentacle (40 HP; Lash 12 every turn; 3 at most); Sermon, every enemy gains 1 Fervour (+6 damage per hit, never wears off); Censer, party 2 Weak.
 - *Rouse:* The Veil Lifts (clears his own statuses; his Tentacles keep theirs).
-- **Compline** (1,000): Raise Two Limbs; Sermon (2 Fervour); Communion 70.
+- **Compline** (1,000): Raise Two Limbs; Sermon (2 Fervour); Communion 90, which her own Fervour raises (about 48% of party HP at level 20; 70 was 39%).
 
 ### Spirit: The Kirin Oracle
 *Look:* a towering shrine oracle with a kirin's gold-leafed horn, pale gold scale patches and hooves under ash-grey robes. A fan of paper talismans with bells hangs behind her, inside a halo of pale gold flames. *Tests:* a delayed payoff. Her Rite is named a turn ahead and grows with every talisman left standing, so kill them or race her.
@@ -38,7 +41,8 @@ Each mirrors its Domain's engine against the party and tests one thing. All are 
 
 - **The Overture** (1,000): Whip Crack 45 and party 2 Vulnerable; Sleight of Hand, party draws 2 fewer next turn; Raise the Marionettes, 2 Marionettes (50 HP; Dance 20; Bow, 20 Shield to the Ringmaster).
 - *Rouse:* The Main Act.
-- **The Main Act** (1,000): Toll the House, party takes 2 Mana debt; Whip Crack; Knife-Thrower 15 ×5; Grand Finale 110.
+- **The Main Act** (1,000): Whip Crack; Knife-Thrower 15 ×5; Toll the House, party takes 2 Mana debt; Grand Finale 110.
+- *Fitted:* in the drafted order Whip Crack's Vulnerable covered the Finale (about 78% of party HP). Now it carries the knives and wears off first, and the Mana goes the turn before the Finale.
 
 ## Open questions
 

@@ -202,6 +202,9 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Profile EXP and depth (owner, 1 Nov): deeper runs give more, without trivialising level 50; the model's curve is +4% a depth past 1 (×2.96 at Depth 50) on a run's fights, elites and Boss.
 
+- M6.6 signed off (owner, 1 Nov).
+- Trial bosses (owner, 1 Nov): the four kits approved at first glance. Sprites: the Grand Anatomist 03, the Ringmaster 03. The Veiled Hierophant was asked for as a woman who embodies Rapture (03 the fallback); the Kirin Oracle redrawn, since 01–03 had extra legs or an arm, dropping her hooves if the model can't draw them.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

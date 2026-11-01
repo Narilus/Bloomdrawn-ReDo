@@ -51,6 +51,13 @@ import seedMotherBattle from '../assets/battle/seed-mother.png';
 import motherRootBattle from '../assets/battle/mother-root.png';
 import openHeartedQueenBattle from '../assets/battle/open-hearted-queen.png';
 import heartBudBattle from '../assets/battle/heart-bud.png';
+import grandAnatomistBattle from '../assets/battle/grand-anatomist.png';
+import veiledHierophantBattle from '../assets/battle/veiled-hierophant.png';
+import raisedLimbBattle from '../assets/battle/raised-limb.png';
+import kirinOracleBattle from '../assets/battle/kirin-oracle.png';
+import paperTalismanBattle from '../assets/battle/paper-talisman.png';
+import ringmasterBattle from '../assets/battle/ringmaster.png';
+import marionetteBattle from '../assets/battle/marionette.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -118,6 +125,13 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.open-hearted-queen': openHeartedQueenBattle,
   'enemy.open-hearted-queen-full-bloom': openHeartedQueenBattle,
   'enemy.heart-bud': heartBudBattle,
+  'enemy.grand-anatomist': grandAnatomistBattle,
+  'enemy.veiled-hierophant': veiledHierophantBattle,
+  'enemy.raised-limb': raisedLimbBattle,
+  'enemy.kirin-oracle': kirinOracleBattle,
+  'enemy.paper-talisman': paperTalismanBattle,
+  'enemy.ringmaster': ringmasterBattle,
+  'enemy.marionette': marionetteBattle,
 };
 
 export const portraitArt: Readonly<Record<string, string>> = {
