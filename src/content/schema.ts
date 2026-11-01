@@ -112,6 +112,7 @@ export const schemas = {
     skipsAction: z.enum(['advance', 'hold']).optional(),
     resistedAs: id.optional(),
     endsAfterAction: z.boolean().optional(),
+    wardsDamage: z.literal(true).optional(),
     lasts: z.enum(['ownTurns', 'opposingTurns']).optional(),
     endsWithTurn: z.literal(true).optional(),
     ...hooks,

@@ -366,6 +366,8 @@ _Revised 31 Oct after the owner's direction (`docs/notes/bestiary-direction.md`)
 
 _Band 2 built 31 Oct: the owner's picks in `src/assets/battle/`, its enemies and fights in `src/content/enemies/` and `src/content/encounters/thicket.ts`, opening at Depth 11 (pools by band in `src/game/labyrinth.ts`, `poolsAt`). Enemy Shield can go to the lowest-HP ally or the one with the most max HP, and intents name where Shield and statuses land and show "draw fewer". Tests: `src/content/scenarios/thicket.test.ts`, the pools in `src/game/labyrinth.test.ts` and `src/app/labyrinth.test.ts`. Next: band 3, starting with the Cocoon._
 
+_Band 2 and the stage overlap signed off 1 Nov. Cocoon built: `status.cocooned` wards damage until the bearer's next action (`wardsDamage`), statuses land and tick through it, and volleys pass it by; the Cocooned Scout is in content without art or a fight yet (`?enemies=enemy.cocooned-scout`). Tests: `src/engine/wards.test.ts`, `src/content/scenarios/lost-expedition.test.ts`. Next: band 3's briefs and options for the owner's pick._
+
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.

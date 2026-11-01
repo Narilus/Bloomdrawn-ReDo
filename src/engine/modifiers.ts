@@ -50,14 +50,24 @@ export function pipeline(
     if (value === 'damage' || (value === 'stacks' && stacksAreDamage(registry.statuses[status ?? '']))) amount *= level.damage / 1000;
     if (value === 'shield') amount *= level.hp / 1000;
   }
-  // A rousing enemy takes no damage (DESIGN.md "Bosses").
-  if (value === 'damage' && isImmune(state, target)) return 0;
+  if (value === 'damage' && takesNoDamage(state, registry, target)) return 0;
   if (value === 'damage' && target !== undefined) {
     const incoming = modifiersOf(state, registry, target).filter(applies);
     amount = scale(amount, incoming.filter((m) => m.step === 'incomingMul'));
   }
   return floorAmount(amount * crit);
 }
+
+// Stacks an enemy applied during the enemy turn take hold once that turn is over.
+const holds = (s: StatusStack) => s.stacks - (s.pending ?? 0) > 0;
+
+/**
+ * Whether damage passes this target by: a rousing enemy (DESIGN.md "Bosses"), or one holding a status
+ * that wards damage (Cocoon). A ward stops damage only; statuses still land, and damage over time
+ * still ticks.
+ */
+export const takesNoDamage = (state: CombatState, registry: Registry, target: EntityId | undefined): boolean =>
+  isImmune(state, target) || !!state.enemies.find((e) => e.id === target)?.statuses.some((s) => holds(s) && registry.statuses[s.status]?.wardsDamage);
 
 /** How many times each volley fires: once, plus any `volleys` modifiers on the source's side (Dance of Bells). */
 export function volleyPasses(state: CombatState, ctx: OpContext, registry: Registry): number {
@@ -71,8 +81,6 @@ export function volleyPasses(state: CombatState, ctx: OpContext, registry: Regis
  * own and its statuses', and the party's that act `on` enemies.
  */
 function modifiersOf(state: CombatState, registry: Registry, id: EntityId): ModifierDef[] {
-  // Stacks an enemy applied during the enemy turn take hold once that turn is over.
-  const holds = (s: StatusStack) => s.stacks - (s.pending ?? 0) > 0;
   const statusMods = (statuses: StatusStack[]) =>
     statuses.filter(holds).flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
   const relicMods = state.relics.flatMap((r) => registry.relics[r.relic]?.modifiers ?? []);

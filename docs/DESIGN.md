@@ -79,6 +79,7 @@ Every character has Crit Rate (5%) and Crit Damage (+50%, so a crit deals 150%);
 | Stun | Skips its next action |
 | Delay | Skips its next action; its shown intent carries over to next turn |
 | Falter | What a resisted Stun or Delay becomes on elites and bosses: the enemy acts at 25% reduced output |
+| Cocooned | The Cocooned Scout's own ward, one turn in a cycle of four: it takes no damage until its next action. Statuses still land and tick, and volleys pass it by |
 
 Enemy intents always show the exact action and number. Random targets are labelled as random, and previews use the same rules code as resolution.
 

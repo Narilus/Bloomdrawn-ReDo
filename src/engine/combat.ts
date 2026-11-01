@@ -434,14 +434,17 @@ function actIntent(rc: Resolution, enemy: Enemy): void {
     if (mode === 'advance') next();
     return;
   }
+  // What this action applies to itself (Cocoon) lasts until its next one.
+  const ending = enemy.statuses.filter((x) => rc.registry.statuses[x.status]?.endsAfterAction).map((x) => x.status);
   enqueue(rc, intent.effects, { source: enemy.id, target: PARTY }, ROOT);
   emit(rc, { type: 'enemyActed', source: enemy.id, target: PARTY }, ROOT);
   drain(rc);
   if (isOver(rc)) return;
-  for (const s of enemy.statuses.filter((x) => rc.registry.statuses[x.status]?.endsAfterAction)) {
+  for (const s of enemy.statuses.filter((x) => ending.includes(x.status))) {
     enemy.statuses.splice(enemy.statuses.indexOf(s), 1);
     emit(rc, { type: 'statusRemoved', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
-    emit(rc, { type: 'controlled', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
+    // A ward ending is the enemy's own doing, not control (Falter).
+    if (!rc.registry.statuses[s.status]?.wardsDamage) emit(rc, { type: 'controlled', source: enemy.id, target: enemy.id, status: s.status }, ROOT);
   }
   drain(rc);
   next();

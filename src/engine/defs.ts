@@ -278,8 +278,10 @@ export interface StatusDef extends Hooks {
   skipsAction?: 'advance' | 'hold';
   /** On a bearer that resists control, this status is applied instead (Stun and Delay become Falter). */
   resistedAs?: string;
-  /** Removed right after the bearer's next action (Falter). */
+  /** Removed right after the bearer's next action (Falter); one its own action applied lasts until the action after (Cocoon). */
   endsAfterAction?: boolean;
+  /** Its bearer takes no damage. Statuses still land, and damage over time still ticks (Cocoon). */
+  wardsDamage?: true;
   /**
    * Stacks are turns, counted on the turns where the status matters: the bearer's own (Weak) or
    * the other side's (Vulnerable). One comes off at the end of each such turn, except the turn

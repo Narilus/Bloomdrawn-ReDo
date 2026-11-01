@@ -112,7 +112,7 @@ Each one shows on the intent before the player commits.
   - *the lowest-HP ally*, as heals already have;
   - *the ally with the most max HP*, which is the Bear or the Queen.
 - **Burst, then withers** (the Garden Husk): after the Burst, the enemy loses all its HP. Ripen's intent says the Burst comes next.
-- **Cocoon** (the Scout): its own immunity to damage until its next action, for one action in a cycle of four. Statuses still land and tick; the Rouse's immunity is unchanged (owner, 31 Oct).
+- **Cocoon** (the Scout): its own immunity to damage until its next action, for one action in a cycle of four. Statuses still land and tick; the Rouse's immunity is unchanged (owner, 31 Oct). Built 1 Nov: `status.cocooned`; volleys pass it by.
 - **Vulnerable on itself** (Unfurl): an enemy applies Vulnerable to itself. The status exists; only the target is new for enemy intents.
 
 ## Prompting

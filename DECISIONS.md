@@ -178,6 +178,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Stage overlap (owner, 1 Nov): in a three-slot fight an add may overlap the anchor's body when it is smaller than the anchor, drawn by depth as the party is (the anchor stands lower, so in front); target areas, plates and intents still never overlap, and aiming picks whoever is drawn in front.
 - Stage overlap, amended (owner, 1 Nov): adds are drawn in front of the anchor, not behind it, since a very large anchor could hide one entirely; smaller enemies are always drawn in front of larger ones, then by depth.
 
+- Band 2 and the stage overlap signed off (owner, 1 Nov); band 3 next, starting with the Cocoon.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

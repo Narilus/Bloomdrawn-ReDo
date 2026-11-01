@@ -3,7 +3,7 @@ import type { OpCall, Registry } from '../defs.ts';
 import type { EngineEvent } from '../events.ts';
 import { evaluate, formulaSchema, type Formula } from '../formula.ts';
 import { rollCrit } from '../crit.ts';
-import { pipeline, volleyPasses } from '../modifiers.ts';
+import { pipeline, takesNoDamage, volleyPasses } from '../modifiers.ts';
 import type { Operation, OpContext, Preview } from '../operation.ts';
 import { fall } from '../phases.ts';
 import { isAlive, vitalsOf, type CombatState, type Enemy, type Vitals } from '../state.ts';
@@ -20,9 +20,9 @@ export interface VolleyArgs extends OpCall {
  */
 export const volley = (hits: Formula, damage: Formula): VolleyArgs => ({ op: 'volley', hits, damage });
 
-/** Lowest HP first; ties go to the earlier slot. A rousing enemy can't be hurt, so hits pass it by. */
-const lowest = (state: CombatState): Enemy | undefined =>
-  state.enemies.filter((e) => isAlive(e) && !e.rousing).reduce<Enemy | undefined>((best, e) => (!best || e.hp < best.hp ? e : best), undefined);
+/** Lowest HP first; ties go to the earlier slot. An enemy that takes no damage (rousing, cocooned) can't be hurt, so hits pass it by. */
+const lowest = (state: CombatState, registry: Registry): Enemy | undefined =>
+  state.enemies.filter((e) => isAlive(e) && !takesNoDamage(state, registry, e.id)).reduce<Enemy | undefined>((best, e) => (!best || e.hp < best.hp ? e : best), undefined);
 
 /** Every hit lands in turn; the HP and Shield after each event go with it, so bars and the end check follow the hits. */
 function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Registry, rolls: boolean): { events: EngineEvent[]; vitals: Vitals[] } {
@@ -34,14 +34,14 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
   };
   const hits = Math.max(0, Math.floor(evaluate(args.hits, draft, ctx, registry)));
   // A volley with no hits, or nothing to hit, does nothing at all.
-  if (hits === 0 || !lowest(draft)) return { events, vitals };
+  if (hits === 0 || !lowest(draft, registry)) return { events, vitals };
   const fired: EngineEvent = { type: 'volleyFired', source: ctx.source };
   if (ctx.owner !== undefined) fired.owner = ctx.owner;
   if (ctx.card !== undefined) fired.card = ctx.card;
   push(fired);
   const passes = volleyPasses(draft, ctx, registry);
   for (let i = 0; i < hits * passes; i++) {
-    let target = lowest(draft);
+    let target = lowest(draft, registry);
     if (!target) break;
     // Each hit rolls its own crit; a preview never rolls.
     const roll = rolls ? rollCrit(draft, ctx, registry) : { mul: 1, crit: false };
@@ -61,7 +61,7 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
       if (fell) push(fell);
       // A broken bar takes the rest of the hit with it.
       if (fell?.type === 'barBroken') remaining = 0;
-      target = remaining > 0 ? lowest(draft) : undefined;
+      target = remaining > 0 ? lowest(draft, registry) : undefined;
     } while (target);
   }
   return { events, vitals };
