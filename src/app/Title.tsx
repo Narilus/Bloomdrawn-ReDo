@@ -137,10 +137,8 @@ export function Game() {
       />
     );
   }
-  if (screen.kind === 'inventory') return <Inventory profile={screen.profile} onBack={toTitle} />;
-  if (screen.kind === 'profile') {
-    return <ProfilePage profile={screen.profile} onClaim={saves.claim} onSelect={(id) => saves.select(CHARACTER_BANNER, id)} onBack={toTitle} />;
-  }
+  if (screen.kind === 'inventory') return <Inventory profile={screen.profile} onSelect={(id) => saves.select(CHARACTER_BANNER, id)} onBack={toTitle} />;
+  if (screen.kind === 'profile') return <ProfilePage profile={screen.profile} onClaim={saves.claim} onBack={toTitle} />;
   if (screen.kind === 'options') {
     return (
       <Options

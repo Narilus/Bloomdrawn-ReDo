@@ -197,6 +197,9 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Band 5 signed off (owner, 1 Nov). Heart-Buds stay at 60 HP: the starter team clears them the turn they come at level 1, but at Depth 50 (party level 40) they live 2–3 turns and heal her, which was the owner's condition for leaving them; doubled, they would stand about 5 turns there.
 
+- Heart-Bud sprite (owner, 1 Nov): option 01; the others are kept.
+- Profile page (owner, 1 Nov): how EXP is earned and other help sit behind a "?" on the page, not on it. SSR Selectors are used from the inventory, marked with a "!" while held, not from a third of the profile page.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

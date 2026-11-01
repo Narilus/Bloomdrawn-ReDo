@@ -378,13 +378,13 @@ _Band 5 built 1 Nov, but for its second Boss: the owner's picks in `src/assets/b
 
 _Band 5's second Boss built 1 Nov: the Open-Hearted Queen (`src/content/enemies/open-hearted-queen.ts`) and her Heart-Buds, in the band's Boss pool beside the Mother Root, and always the Boss at Depth 50 (a band's `finale`, `poolsAt`). Her Vines are a status, and The Vines repeats a hit for each. Garden Husks that arrive together stagger: a summon's `stagger` status, and an encounter entry's starting `status`. Tests: `src/content/scenarios/source.test.ts`, `src/engine/ops/summon.test.ts`, the pools in `src/game/labyrinth.test.ts` and `src/app/labyrinth.test.ts`. Next: the owner plays band 5 and picks the Heart-Bud's sprite; then M6.6._
 
-_Band 5 signed off 1 Nov. The Heart-Buds stay at 60 HP (DECISIONS.md); the Heart-Bud's sprite pick is still open (01 stands in). Next: M6.6._
+_Band 5 signed off 1 Nov. The Heart-Buds stay at 60 HP, and the Heart-Bud's sprite is 01 (DECISIONS.md). Next: M6.6._
 
 ### M6.6 Profile level and the profile page
 Profile EXP from fights, elites, bosses, Trials, first Trial clears and SSR pulls, on an exponential curve to 50. Each level gives a Purified Bloom claimed on the profile page, which also shows wins, losses and enemies defeated. Ascensions need profile level 5, 10 and 15. Levels 25 and 50 give an SSR selector. A badge top left of the menu.
 **Done when:** tests prove the EXP sources, the curve, claims, the ascension gates and the selector (pity untouched); e2e claims a level's Bloom.
 
-_Built 1 Nov: `src/game/profileLevel.ts` (sources, curve, claims), the gates on `ASCENSIONS` in `src/game/levels.ts`, the SSR Selector in `src/game/gacha.ts` (`useSelector`), banking's `play` record for EXP and stats, the badge in `MainMenu.tsx` and the page in `src/app/Profile.tsx`. The numbers are placeholders (docs/notes/m6-depth.md). Tests: `src/game/profileLevel.test.ts`, `src/game/levels.test.ts`, `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/profile.spec.ts`. Next: the owner reviews the numbers and the page; then M6.7._
+_Built 1 Nov: `src/game/profileLevel.ts` (sources, curve, claims), the gates on `ASCENSIONS` in `src/game/levels.ts`, the SSR Selector in `src/game/gacha.ts` (`useSelector`), banking's `play` record for EXP and stats, the badge in `MainMenu.tsx`, the page in `src/app/Profile.tsx` (help behind a "?") and the Selector in the inventory, marked "!" (owner, 1 Nov). The numbers are placeholders (docs/notes/m6-depth.md). Tests: `src/game/profileLevel.test.ts`, `src/game/levels.test.ts`, `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/profile.spec.ts`. Next: the owner reviews the numbers and the page; then M6.7._
 
 ### M6.7 Trials
 A new boss per Domain, with art. Five tiers at levels 10–50, each paying its Domain's material (1, 2, 3, 3, 6) and first clears 1 Purified Bloom (3 for Tier 5). Winning a tier opens the next.

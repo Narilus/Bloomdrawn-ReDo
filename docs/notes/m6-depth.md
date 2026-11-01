@@ -78,7 +78,8 @@ _Built 1 Nov (M6.6), in `src/game/profileLevel.ts`; the numbers are placeholders
 - **Curve:** level 1 to 2 costs 100, and each level a tenth more, rounded to 10. A won run of five fights, two elites and its Boss gives 210, so level 5 takes 3 such runs, 10 takes 7, 15 takes 14, 25 takes 43 and 50 about 500.
 - **Claims:** one Claim takes every level waiting, a Bloom each and a Selector at 25 and 50. The badge shows a pip with the number waiting.
 - **Stats:** runs won and lost (an abandoned run is lost), fights won, elites, Bosses and Trials beaten, counting fights won by tier, not single enemies (my reading).
-- **The Selector:** chosen from the character banner's pool on the profile page; it lands as a pulled copy would.
+- **The Selector:** used from the inventory (its Special tab), chosen from the character banner's pool; it lands as a pulled copy would. While one is held, its tile and the menu's Inventory carry a "!" (owner, 1 Nov).
+- **The page:** the level with Claim, and the stats. How EXP is earned and what levels give sit behind a "?" (owner, 1 Nov).
 
 ## Weapons
 

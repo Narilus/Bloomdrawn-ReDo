@@ -14,6 +14,8 @@ export interface ItemDef {
   tag: ItemTag;
   icon: string;
   text: string;
+  /** A rare item waiting to be used: shown with a "!" while held (owner, 1 Nov). */
+  flag?: true;
 }
 
 export const ITEMS: Record<string, ItemDef> = {
@@ -27,8 +29,8 @@ export const ITEMS: Record<string, ItemDef> = {
   'material.spirit': { name: 'Spirit Shard', plural: 'Spirit Shards', tag: 'material', icon: 'shard', text: 'Ascends a Spirit character at level 10, 20 or 30.' },
   'material.unbound': { name: 'Unbound Badge', plural: 'Unbound Badges', tag: 'material', icon: 'badge', text: 'Ascends an Unbound character at level 10, 20 or 30.' },
   'selector.ssr': {
-    name: 'SSR Selector', plural: 'SSR Selectors', tag: 'special', icon: 'summon',
-    text: 'An SSR character of your choice from the banner, as a pulled copy. Pity is untouched. Profile levels 25 and 50 give one; use it on the profile page.',
+    name: 'SSR Selector', plural: 'SSR Selectors', tag: 'special', icon: 'summon', flag: true,
+    text: 'An SSR character of your choice from the banner, as a pulled copy: new, a dupe level, or Pollen past C5. Pity is untouched. Profile levels 25 and 50 give one.',
   },
 };
 

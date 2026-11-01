@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { itemCount } from '../content/items.ts';
+import { itemCount, ITEMS } from '../content/items.ts';
 import { BLOOM, plural, runBanking, type Profile } from '../game/profile.ts';
 import { levelProgress, unclaimed } from '../game/profileLevel.ts';
 import type { RunSave } from '../save/run.ts';
@@ -75,6 +75,8 @@ export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [exiting, setExiting] = useState(false);
+  // A rare item waiting in the inventory (an SSR Selector) marks it with a "!".
+  const flagged = Object.entries(ITEMS).some(([id, item]) => item.flag && (profile.items?.[id] ?? 0) > 0);
   const toggle = (menu: Open) => setOpen((was) => (was === menu ? null : menu));
   const startNew = (saved: RunSave | null) => {
     if (busy) return;
@@ -127,8 +129,13 @@ export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner
               </button>
             </div>
           )}
-          <button className="menu-item" onClick={onInventory}>
+          <button className="menu-item" onClick={onInventory} aria-label={flagged ? 'Inventory, an item ready to use' : undefined}>
             Inventory
+            {flagged && (
+              <em className="item-flag menu-flag" aria-hidden="true">
+                !
+              </em>
+            )}
           </button>
           <button className="menu-item" onClick={onOptions}>
             Options
