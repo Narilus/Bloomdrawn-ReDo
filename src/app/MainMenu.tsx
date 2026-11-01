@@ -59,6 +59,7 @@ interface MenuProps {
   onContinue: (save: RunSave) => void;
   /** Goes on to party select for a new expedition, abandoning the saved run (given) first. */
   onNew: (saved: RunSave | null) => Promise<void>;
+  onTrials: () => void;
   onRoster: () => void;
   onBanner: () => void;
   onInventory: () => void;
@@ -68,7 +69,7 @@ interface MenuProps {
 
 type Open = 'expedition' | 'banners' | null;
 
-export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner, onInventory, onOptions, onProfile }: MenuProps) {
+export function MainMenu({ boot, featured, onContinue, onNew, onTrials, onRoster, onBanner, onInventory, onOptions, onProfile }: MenuProps) {
   const { profile, run, ended } = boot;
   // A saved run opens the menu on Continue.
   const [open, setOpen] = useState<Open>(run ? 'expedition' : null);
@@ -110,8 +111,8 @@ export function MainMenu({ boot, featured, onContinue, onNew, onRoster, onBanner
               </button>
             </div>
           )}
-          <button className="menu-item" disabled>
-            Trials <small>soon</small>
+          <button className="menu-item" onClick={onTrials}>
+            Trials
           </button>
           <button className="menu-item" onClick={onRoster}>
             Roster

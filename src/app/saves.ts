@@ -8,6 +8,7 @@ import { chooseDepth } from '../game/depth.ts';
 import { chooseFocus, pull, useSelector } from '../game/gacha.ts';
 import { ascend, levelUp } from '../game/levels.ts';
 import { claimLevels } from '../game/profileLevel.ts';
+import { endTrial } from '../game/trials.ts';
 import { bank, buyPreset, lossBanking, NEW_PROFILE, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
@@ -173,6 +174,15 @@ export function createSaves(adapter: SaveAdapter) {
 
     /** Spends an SSR selector on a banner character; a refusal writes nothing. */
     select: (banner: BannerDef, character: string) => enqueue(async () => keep(useSelector(await readProfile(), banner, character))),
+
+    /** Settles a Trial fight: a win pays the Domain's material (a first clear more); a defeat or a refusal writes nothing. */
+    trial: (domain: string, tier: number, won: boolean) =>
+      enqueue(async () => {
+        const material = registry.domains[domain]?.material;
+        if (!material) return { ok: false as const, reason: `There is no ${domain} Trial.` };
+        const result = endTrial(await readProfile(), domain, material, tier, won);
+        return result.ok && result.won ? keep(result) : result;
+      }),
 
     /** Buys one more team preset with Ducats; a refusal writes nothing. */
     buyPreset: (owned: readonly string[]) => enqueue(async () => keep(buyPreset(await readProfile(), owned))),

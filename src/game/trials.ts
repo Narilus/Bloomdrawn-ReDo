@@ -1,3 +1,5 @@
+import type { CombatSetup, EnemyEntry } from '../engine/index.ts';
+import type { Growth } from './expedition.ts';
 import { gainExp } from './profileLevel.ts';
 import type { Profile } from './profile.ts';
 
@@ -54,4 +56,18 @@ export function endTrial(profile: Profile, domain: string, material: string, tie
   after = gainExp(after, 'trial');
   if (first) after = gainExp({ ...after, pulls: after.pulls + def.firstClear, trials: { ...profile.trials, [domain]: tier } }, 'firstTrial');
   return { ok: true, profile: after, won, material: def.pay, pulls: first ? def.firstClear : 0, first };
+}
+
+/**
+ * A Trial's one fight: the party at its own levels, ascensions and dupe levels, with fresh HP and
+ * gauges, no relics or run deck, against the boss at the tier's level.
+ */
+export function trialFight(seed: number, party: readonly string[], growth: Growth, enemies: readonly EnemyEntry[], tier: number): CombatSetup {
+  const def = TRIAL_TIERS[tier - 1];
+  if (!def) throw new Error(`There is no Tier ${tier}.`);
+  const setup: CombatSetup = { seed, party: [...party], enemies: [...enemies], enemyLevel: def.level };
+  if (growth.dupes) setup.dupes = party.map((id) => growth.dupes?.[id] ?? 0);
+  if (growth.levels) setup.levels = party.map((id) => growth.levels?.[id] ?? 1);
+  if (growth.ascensions) setup.ascensions = party.map((id) => growth.ascensions?.[id] ?? 0);
+  return setup;
 }

@@ -7,6 +7,8 @@ import { DEPTH_MAX, depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
 import { ASCENSIONS, MAX_LEVEL } from '../game/levels.ts';
 import { ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
+import { trialFight } from '../game/trials.ts';
+import { TRIALS } from '../content/trials.ts';
 import type { RunSave } from '../save/run.ts';
 import { Banner } from './Banner.tsx';
 import { DEF, Labyrinth, newRun } from './Labyrinth.tsx';
@@ -15,10 +17,11 @@ import { MainMenu } from './MainMenu.tsx';
 import { Options } from './Options.tsx';
 import { ProfilePage } from './Profile.tsx';
 import { PartySelect, Roster } from './Roster.tsx';
+import { TrialFight, Trials } from './Trials.tsx';
 import { browserSaves, type Boot } from './saves.ts';
 
 // The game's screens (docs/notes/m4-run.md, "Save and resume"; m5-collection.md; m6-depth.md): the
-// main menu, and the run, party select, roster, banner, inventory, options and profile page it leads to.
+// main menu, and the run, party select, roster, banner, inventory, options, profile page and Trials it leads to.
 
 type Screen =
   | { kind: 'loading' }
@@ -29,7 +32,10 @@ type Screen =
   | { kind: 'inventory'; profile: Profile }
   | { kind: 'options'; profile: Profile }
   | { kind: 'profile'; profile: Profile }
-  | { kind: 'run'; save: RunSave };
+  | { kind: 'run'; save: RunSave }
+  | { kind: 'trials'; profile: Profile; last?: { domain: string; tier: number } }
+  | { kind: 'trial-party'; profile: Profile; domain: string; tier: number }
+  | { kind: 'trial-fight'; profile: Profile; domain: string; tier: number; party: string[]; seed: number };
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
 const OWN_ALL = import.meta.env.DEV && new URLSearchParams(window.location.search).get('owned') === 'all';
@@ -108,6 +114,56 @@ export function Game() {
       />
     );
   }
+  if (screen.kind === 'trials') {
+    const { profile } = screen;
+    return (
+      <Trials
+        profile={profile}
+        initial={screen.last}
+        onChoose={(domain, tier) => setScreen({ kind: 'trial-party', profile, domain, tier })}
+        onBack={toTitle}
+      />
+    );
+  }
+  if (screen.kind === 'trial-party') {
+    const { profile, domain, tier } = screen;
+    const owned = ownedBy(profile);
+    return (
+      <PartySelect
+        key={profile.teams?.length ?? 0}
+        owned={owned}
+        teams={teamsOf(profile, owned)}
+        team={profile.team ?? 0}
+        money={profile.items?.money ?? 0}
+        presetCost={presetCost(profile)}
+        onBuy={async () => {
+          const result = await saves.buyPreset(owned);
+          if (result.ok) setScreen({ kind: 'trial-party', profile: result.profile, domain, tier });
+        }}
+        onChange={(teams, team) => void saves.teams(teams, team)}
+        startLabel={`Start Tier ${tier}`}
+        onStart={(party) => setScreen({ kind: 'trial-fight', profile, domain, tier, party, seed: Math.floor(Math.random() * 2 ** 31) })}
+        onBack={() => void saves.profile().then((fresh) => setScreen({ kind: 'trials', profile: fresh, last: { domain, tier } }))}
+      />
+    );
+  }
+  if (screen.kind === 'trial-fight') {
+    const { profile, domain, tier, party, seed } = screen;
+    const encounter = registry.encounters[TRIALS.find((t) => t.domain === domain)?.encounter ?? ''];
+    if (!encounter) throw new Error(`There is no ${domain} Trial.`);
+    const toTrials = () => void saves.profile().then((fresh) => setScreen({ kind: 'trials', profile: fresh, last: { domain, tier } }));
+    return (
+      <TrialFight
+        key={seed}
+        domain={domain}
+        tier={tier}
+        setup={trialFight(seed, party, growthOf(profile), encounter.enemies, tier)}
+        onEnd={(won) => saves.trial(domain, tier, won)}
+        onAgain={() => setScreen({ ...screen, seed: Math.floor(Math.random() * 2 ** 31) })}
+        onBack={toTrials}
+      />
+    );
+  }
   if (screen.kind === 'roster') {
     // An action that went through shows the profile it saved; a refusal changes nothing.
     const act = async <R extends { ok: true; profile: Profile } | { ok: false; reason: string }>(job: Promise<R>) => {
@@ -174,6 +230,7 @@ export function Game() {
         if (saved) await saves.end(runBanking(saved.exp, 'abandoned', DEF, itemCount));
         chooseParty();
       }}
+      onTrials={() => setScreen({ kind: 'trials', profile })}
       onRoster={() => setScreen({ kind: 'roster', profile })}
       onBanner={() => setScreen({ kind: 'banner', profile })}
       onInventory={() => setScreen({ kind: 'inventory', profile })}

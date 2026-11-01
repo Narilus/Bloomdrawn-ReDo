@@ -60,12 +60,14 @@ interface PartySelectProps {
   onBuy: () => Promise<void>;
   /** Called with every change, to save the presets. */
   onChange: (teams: Team[], team: number) => void;
-  /** The depth it opens on, and the deepest open. */
-  depth: number;
-  depthOpen: number;
+  /** The depth it opens on, and the deepest open; without them (a Trial) there is no depth to choose. */
+  depth?: number;
+  depthOpen?: number;
   /** Called with every depth chosen, to save it. */
-  onDepth: (depth: number) => void;
+  onDepth?: (depth: number) => void;
   onStart: (party: string[], depth: number) => void;
+  /** The start button's text: "Start expedition" unless given. */
+  startLabel?: string;
   onBack: () => void;
 }
 
@@ -109,12 +111,12 @@ type Picking = { kind: 'place'; place: number } | { kind: 'quick'; picked: strin
  * A place opens the character list: a character goes in, or swaps with the place she was in. Quick
  * select fills all four in the order clicked.
  */
-export function PartySelect({ owned, teams: initialTeams, team: initialTeam, money, presetCost, onBuy, onChange, depth: initialDepth, depthOpen, onDepth, onStart, onBack }: PartySelectProps) {
-  const [depth, setDepth] = useState(Math.min(Math.max(1, initialDepth), depthOpen));
+export function PartySelect({ owned, teams: initialTeams, team: initialTeam, money, presetCost, onBuy, onChange, depth: initialDepth = 1, depthOpen, onDepth, onStart, startLabel, onBack }: PartySelectProps) {
+  const [depth, setDepth] = useState(Math.min(Math.max(1, initialDepth), depthOpen ?? 1));
   const changeDepth = (to: number) => {
-    const next = Math.min(Math.max(1, to), depthOpen);
+    const next = Math.min(Math.max(1, to), depthOpen ?? 1);
     setDepth(next);
-    onDepth(next);
+    onDepth?.(next);
   };
   const [teams, setTeams] = useState<Team[]>(() => initialTeams.map((t) => ({ ...t, members: [...t.members] })));
   const [team, setTeam] = useState(Math.min(initialTeam, initialTeams.length - 1));
@@ -209,7 +211,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
         <p className="roster-hint" role="status">
           {problem ?? 'Ready.'}
         </p>
-        <DepthChooser depth={depth} open={depthOpen} onChange={changeDepth} />
+        {depthOpen !== undefined && <DepthChooser depth={depth} open={depthOpen} onChange={changeDepth} />}
         <div className="panel-buttons">
           <button className="ghost" onClick={onBack}>
             Back
@@ -218,7 +220,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
             Quick select
           </button>
           <button className="end-turn" disabled={problem !== undefined} onClick={() => onStart(current.members as string[], depth)}>
-            Start expedition
+            {startLabel ?? 'Start expedition'}
           </button>
         </div>
       </section>

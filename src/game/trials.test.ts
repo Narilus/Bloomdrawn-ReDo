@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { NEW_PROFILE, type Profile } from './profile.ts';
 import { PROFILE_EXP } from './profileLevel.ts';
-import { endTrial, TRIAL_TIERS, trialCleared, trialOpen } from './trials.ts';
+import { endTrial, TRIAL_TIERS, trialCleared, trialFight, trialOpen } from './trials.ts';
 
 // Trials (docs/notes/m6-depth.md, "Trials"; owner, 31 Oct).
 
@@ -52,5 +52,14 @@ describe('Trials', () => {
   it('a defeat pays nothing and changes nothing', () => {
     const lost = endTrial(NEW_PROFILE, 'flesh', MAT, 1, false);
     expect(lost).toEqual({ ok: true, profile: NEW_PROFILE, won: false, material: 0, pulls: 0, first: false });
+  });
+
+  it("a Trial's fight is the party at its own growth, fresh, against the boss at the tier's level", () => {
+    const growth = { levels: { agathe: 20 }, ascensions: { agathe: 1 }, dupes: { kibane: 2 } };
+    expect(trialFight(7, ['agathe', 'kibane'], growth, ['enemy.boss'], 2)).toEqual({
+      seed: 7, party: ['agathe', 'kibane'], enemies: ['enemy.boss'], enemyLevel: 20, levels: [20, 1], ascensions: [1, 0], dupes: [0, 2],
+    });
+    expect(trialFight(7, ['agathe'], {}, ['enemy.boss'], 5)).toEqual({ seed: 7, party: ['agathe'], enemies: ['enemy.boss'], enemyLevel: 50 });
+    expect(() => trialFight(7, ['agathe'], {}, ['enemy.boss'], 6)).toThrow('There is no Tier 6.');
   });
 });

@@ -3451,3 +3451,192 @@ kbd {
   font-weight: 700;
   color: var(--blush);
 }
+
+/* Trials (M6.7): the four Domain bosses down the left, the one chosen and its tiers on the right. */
+.trials-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  gap: 24px;
+  padding: 48px 0 44px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(184, 149, 90, 0.1), transparent 60%),
+    var(--charcoal-plum);
+}
+
+.trials-screen h2.panel-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 72px;
+  color: var(--blush);
+}
+
+.trials-body {
+  display: grid;
+  grid-template-columns: 420px 1080px;
+  gap: 32px;
+  align-items: start;
+}
+
+.trial-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trial-card {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 8px 16px 8px 8px;
+  border: 2px solid var(--mauve-shadow);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--dusk-plum), var(--aubergine));
+  color: var(--petal-ivory);
+  font-family: var(--serif);
+  text-align: left;
+  cursor: pointer;
+}
+
+.trial-card.domain-flesh, .trial-detail.domain-flesh { border-color: var(--flesh); }
+.trial-card.domain-rapture, .trial-detail.domain-rapture { border-color: var(--rapture); }
+.trial-card.domain-spirit, .trial-detail.domain-spirit { border-color: var(--spirit); }
+.trial-card.domain-unbound, .trial-detail.domain-unbound { border-color: var(--unbound); }
+
+.trial-card.chosen {
+  box-shadow: 0 0 0 4px var(--antique-gold);
+}
+
+.trial-card-art {
+  height: 120px;
+}
+
+.trial-card-text {
+  display: grid;
+  gap: 2px;
+}
+
+.trial-card-text strong {
+  font-size: 30px;
+}
+
+.trial-card-text span {
+  font-size: 20px;
+}
+
+.trial-card-text em {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.trial-detail {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 28px;
+  padding: 24px 30px;
+  border: 2px solid rgba(184, 149, 90, 0.7);
+  border-radius: 14px;
+  background: rgba(46, 30, 42, 0.8);
+  color: var(--petal-ivory);
+}
+
+.trial-detail-art {
+  height: 520px;
+}
+
+.trial-detail-text {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 14px;
+}
+
+.trial-detail-text h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 44px;
+  color: var(--blush);
+}
+
+.trial-pays,
+.trial-note {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.trial-note {
+  opacity: 0.75;
+}
+
+.trial-tiers {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trial-tier {
+  display: grid;
+  grid-template-columns: 76px 84px 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+  white-space: nowrap;
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid rgba(184, 149, 90, 0.5);
+  border-radius: 10px;
+  background: rgba(30, 21, 25, 0.5);
+  color: var(--petal-ivory);
+  font-family: var(--sans);
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.trial-tier strong {
+  font-family: var(--serif);
+  font-size: 24px;
+}
+
+.trial-tier em {
+  font-style: normal;
+  color: var(--antique-gold);
+}
+
+.trial-tier.chosen {
+  border-color: var(--antique-gold);
+  box-shadow: 0 0 0 3px var(--antique-gold);
+}
+
+.trial-tier:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.trial-detail .end-turn {
+  position: static;
+  font-size: 28px;
+  padding: 12px 32px;
+}
+
+.trial-leave {
+  right: 24px;
+  top: 96px;
+  padding: 8px 22px;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--petal-ivory);
+  cursor: pointer;
+}

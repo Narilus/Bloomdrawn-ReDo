@@ -117,6 +117,18 @@ describe('saves', () => {
     expect(bought.profile.teams).toHaveLength(6);
   });
 
+  it("a Trial won keeps the profile it leaves, paid in its Domain's material; a defeat or a tier not open writes nothing (M6.7)", async () => {
+    const { saves, store } = setup();
+    expect(await saves.trial('flesh', 1, false)).toMatchObject({ ok: true, won: false, material: 0 });
+    expect(await profileOf(store)).toBeUndefined();
+    expect(await saves.trial('flesh', 2, true)).toEqual({ ok: false, reason: 'Win Tier 1 first.' });
+    expect(await saves.trial('nowhere', 1, true)).toEqual({ ok: false, reason: 'There is no nowhere Trial.' });
+    expect(await profileOf(store)).toBeUndefined();
+    const won = await saves.trial('rapture', 1, true);
+    expect(won).toMatchObject({ ok: true, won: true, material: 1, pulls: 1, first: true });
+    expect(await profileOf(store)).toMatchObject({ pulls: 11, items: { 'material.rapture': 1 }, trials: { rapture: 1 }, stats: { trials: 1 }, exp: 250 });
+  });
+
   it('pulling mid-run keeps the profile it leaves, and the run, its save and its tally stay as they were', async () => {
     const { saves, store } = setup();
     const save = run();
