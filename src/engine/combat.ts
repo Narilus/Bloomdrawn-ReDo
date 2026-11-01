@@ -168,10 +168,10 @@ export function newEnemy(registry: Registry, enemy: string, id: EntityId, slot: 
   };
 }
 
-/** How many enemies one enemy can summon at most, from the `max` of its summon intents in any phase. */
+/** How many enemies one enemy can summon at most: the most one intent in any phase brings, adding the `max` of each summon in it (Call the Crew). */
 function summonCapacity(registry: Registry, enemy: string): number {
-  const calls = allIntents(registry.enemies[enemy]).flatMap((i) => i.effects);
-  return Math.max(0, ...calls.filter((c) => c.op === 'summon').map((c) => Number(c.max ?? 0)));
+  const room = (effects: readonly OpCall[]) => effects.filter((c) => c.op === 'summon').reduce((n, c) => n + Number(c.max ?? 0), 0);
+  return Math.max(0, ...allIntents(registry.enemies[enemy]).map((i) => room(i.effects)));
 }
 
 /** Pooled resources of the Domains present, at their starting values, read from the party as fielded. */

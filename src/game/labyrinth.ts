@@ -251,6 +251,17 @@ export const M3_LABYRINTH: LabyrinthDef = {
       elite: ['encounter.three-throated-wolf', 'encounter.hive-bear'],
       boss: ['encounter.gathered-beast'],
     },
+    {
+      fight: [
+        'encounter.porter-and-surgeon',
+        'encounter.cartographer-and-surgeon',
+        'encounter.tent-walker',
+        'encounter.porter-and-cartographer',
+        'encounter.tent-walker-and-surgeon',
+      ],
+      elite: ['encounter.quartermaster', 'encounter.cocooned-scout'],
+      boss: ['encounter.expedition-leader'],
+    },
   ],
   events: ['event.survey-pack', 'event.censer', 'event.kneeling-gardener', 'event.seed-vault'],
   symptoms: ['symptom.fevered-pulse', 'symptom.sweet-rot', 'symptom.grafted-hand', 'symptom.pollen-lung'],

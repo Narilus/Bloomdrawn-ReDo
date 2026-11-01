@@ -29,6 +29,13 @@ import litterMoundBattle from '../assets/battle/litter-mound.png';
 import mothMantleBattle from '../assets/battle/moth-mantle.png';
 import thornbackBoarBattle from '../assets/battle/thornback-boar.png';
 import threeThroatedWolfBattle from '../assets/battle/three-throated-wolf.png';
+import cartographerBattle from '../assets/battle/cartographer.png';
+import cocoonedScoutBattle from '../assets/battle/cocooned-scout.png';
+import expeditionLeaderBattle from '../assets/battle/expedition-leader.png';
+import fieldSurgeonBattle from '../assets/battle/field-surgeon.png';
+import packPorterBattle from '../assets/battle/pack-porter.png';
+import quartermasterBattle from '../assets/battle/quartermaster.png';
+import tentWalkerBattle from '../assets/battle/tent-walker.png';
 import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
@@ -64,6 +71,15 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.bloom-bee-knot': beeKnotBattle,
   'enemy.gathered-beast': gatheredBeastBattle,
   'enemy.gathered-beast-full-bloom': gatheredBeastBattle,
+  // Band 3, the Lost Expedition.
+  'enemy.pack-porter': packPorterBattle,
+  'enemy.field-surgeon': fieldSurgeonBattle,
+  'enemy.cartographer': cartographerBattle,
+  'enemy.tent-walker': tentWalkerBattle,
+  'enemy.quartermaster': quartermasterBattle,
+  'enemy.cocooned-scout': cocoonedScoutBattle,
+  'enemy.expedition-leader': expeditionLeaderBattle,
+  'enemy.expedition-leader-full-bloom': expeditionLeaderBattle,
 };
 
 export const portraitArt: Readonly<Record<string, string>> = {

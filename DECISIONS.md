@@ -180,6 +180,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Band 2 and the stage overlap signed off (owner, 1 Nov); band 3 next, starting with the Cocoon.
 
+- Band 3's art (owner, 1 Nov): Pack Porter 02, Field Surgeon 01, Cartographer 02, Tent-Walker 01, Quartermaster 03, Cocooned Scout 01, Expedition Leader 01, every option kept. The Tent-Walker's flap-mouth stays (it suggests anatomy without being explicit; the band carries content warnings), and the owner keeps an eye on it.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

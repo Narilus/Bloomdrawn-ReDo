@@ -28,6 +28,10 @@ const caller: EnemyDef = {
   id: 'test.caller', name: 'Caller', hp: 20,
   phases: [{ name: 'Calling', hp: 20, rouse: { id: 'rouse', name: 'Rouse', effects: [] }, intents: [{ id: 'call', name: 'Call', effects: [summon({ id: 'test.frail' }, 1, 2)] }] }],
 };
+const crew: EnemyDef = {
+  id: 'test.crew', name: 'Crew', hp: 20,
+  intents: [{ id: 'call', name: 'Call', effects: [summon({ id: 'test.frail' }, 1, 1), summon({ id: 'test.dummy' }, 1, 1)] }],
+};
 const card = (id: string, effects: CardDef['effects'], target: CardDef['target'] = 'chosenEnemy'): CardDef => ({ id, name: id, owner: 'test.a', cost: 0, target, effects });
 const cards = [
   card('test.smash', [damage(25)]),
@@ -39,7 +43,7 @@ const cards = [
 const registry: Registry = {
   ...fixtureRegistry,
   cards: { ...fixtureRegistry.cards, ...Object.fromEntries(cards.map((c) => [c.id, c])) },
-  enemies: { ...fixtureRegistry.enemies, 'test.boss': boss, 'test.caller': caller },
+  enemies: { ...fixtureRegistry.enemies, 'test.boss': boss, 'test.caller': caller, 'test.crew': crew },
 };
 
 const fight = (enemies = ['test.boss']) => startCombat({ seed: 1, party: STARTERS, enemies }, registry).state;
@@ -114,5 +118,11 @@ describe('HP bars', () => {
 
   it("lays out slots for what any phase's intents can summon", () => {
     expect(fight(['test.caller']).enemySlots).toBe(3);
+  });
+
+  it('lays out room for everything one intent summons, adding its summons together', () => {
+    const called = endTurn(fight(['test.crew'])).state;
+    expect(called.enemySlots).toBe(3);
+    expect(called.enemies.map((e) => e.enemy)).toEqual(['test.crew', 'test.frail', 'test.dummy']);
   });
 });

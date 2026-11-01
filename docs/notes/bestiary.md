@@ -65,12 +65,19 @@ Looks and story: `bestiary-direction.md` 4.2. The Boss is the man who made his c
 | Pack Porter | Normal, defender | 80 | Brace, 15 Shield; Shoulder the Load, 8 Shield to every enemy; Pack Swing 40 | large |
 | Field Surgeon | Normal, buffer | 45 | Suture, heals the lowest-HP ally 12; Lancet 22 + 5 Bleed | normal |
 | Cartographer | Normal, debuffer | 50 | Survey, party 2 Vulnerable; Compass Point 30; Wrong Turn, you draw 1 fewer next turn | normal |
-| Tent-Walker | Normal, summoner | 140 | Open the Flap, a Seedling (max 2); Collapse 36 and 12 Shield | large |
+| Tent-Walker | Normal, summoner | 90 | Open the Flap, a Seedling (max 2); Collapse 36 and 12 Shield | normal |
 | **The Quartermaster** | Elite: racing heals | 900 | Ration, heals itself 60; Cleaver 55; Ration; Strongbox, 40 Shield. Resists control. | large |
 | **The Cocooned Scout** | Elite: timing | 750 | Cocoon, takes no damage until its next action, though statuses still tick; Unfurl 70, and it is Vulnerable until its next action; Wing Cut 45; Moth Dust, party 2 Weak. Resists control. | large |
-| **The Expedition Leader** | Boss | 1,050, then 1,050 | *Muster:* Bone Saw 60; Survey, party 2 Vulnerable; Call the Crew, a Pack Porter and a Field Surgeon. *Rouse:* He Opens Himself. *Second bar:* Graft, the lowest-HP ally gains 30 Shield and heals 20; Needle Threads 24 ×3; The Last Incision 105. *Full Bloom, second bar:* Call the Crew; Graft; Graft; The Last Incision 115. | huge |
+| **The Expedition Leader** | Boss | 1,100, then 1,100 | *Muster:* Bone Saw 60; Survey, party 2 Vulnerable; Call the Crew, a Pack Porter and a Field Surgeon. *Rouse:* He Opens Himself. *Second bar (Opened):* Graft, the lowest-HP ally gains 30 Shield and heals 20; Needle Threads 24 ×3; The Last Incision 105. *Full Bloom, second bar:* Call the Crew; Graft; Graft; The Last Incision 115. | huge |
 
 **Fights:** Porter and Surgeon; Cartographer and Surgeon; the Tent-Walker alone; Porter and Cartographer; Tent-Walker and Surgeon.
+
+_Built 1 Nov._ The lab plays them at Depth 20 (Average build):
+- normal fights take 2.3–3.0 turns;
+- elites take 5.8 (Scout) and 6.0 (Quartermaster);
+- the Expedition Leader takes 10.1, with his worst turn at 41% of party HP.
+
+To get there, the Leader's bars went from 1,050 to 1,100. The Tent-Walker went from 140 HP to 90, because with the Surgeon and two Seedlings its fight took 3.4 turns. The Tent-Walker's wide sprite stands at normal size, like band 2's wide ones. Call the Crew brings two different crew in one intent, so the engine now makes room for everything one intent summons. Suture heals the lowest-HP ally, so it often has nothing to heal: the Surgeon herself is the lowest until her partner drops below 45.
 
 ## Band 4, Depths 31–40: the Calyx (made)
 
@@ -140,3 +147,8 @@ I checked the owner's looks against the prompt rules (the banned words, and what
 2. **Cocoon** gets its own damage-only immunity: statuses tick and land through it. The Rouse is unchanged and still blocks status ticks.
 3. **Repeated motifs** such as the antlers are fine.
 4. **Hands** may show, and humanoid enemies are welcome when they have more flavour than a job or a plain man. Watch the finger count on monstrous designs.
+
+## Answers (owner, 1 Nov)
+
+1. **Band 3's art:** Pack Porter 02, Field Surgeon 01, Cartographer 02, Tent-Walker 01, Quartermaster 03, Cocooned Scout 01, Expedition Leader 01. Every option is kept in `art/raw/`.
+2. **The Tent-Walker's flap-mouth** stays. It suggests anatomy without being explicit, the teeth on 01 help, and the band carries content warnings. The owner will keep an eye on it.
