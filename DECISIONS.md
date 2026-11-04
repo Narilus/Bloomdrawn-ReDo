@@ -205,6 +205,9 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - M6.6 signed off (owner, 1 Nov).
 - Trial bosses (owner, 1 Nov): the four kits approved at first glance. Sprites: the Grand Anatomist 03, the Ringmaster 03. The Veiled Hierophant was asked for as a woman who embodies Rapture (03 the fallback); the Kirin Oracle redrawn, since 01–03 had extra legs or an arm, dropping her hooves if the model can't draw them.
 
+- Trial sprites (owner, 4 Nov): the Veiled Hierophant 06, now a woman; the Kirin Oracle 06, on two legs with hooves (the other redraws had hand or finger faults, and 08 a missing leg). Every option is kept.
+- Trial tiers and party (owner, 4 Nov): every tier keeps the same moveset, scaled only by level; any party of owned characters may take a Trial.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
