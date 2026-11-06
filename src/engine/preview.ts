@@ -1,4 +1,4 @@
-import { cardCost, chargeOf, countDown, playContext, ultimateEffects, validate, type Command } from './combat.ts';
+import { apply, cardCost, chargeOf, countDown, playContext, ultimateEffects, validate, type Command } from './combat.ts';
 import { characterOf } from './dupes.ts';
 import { intentOf } from './phases.ts';
 import type { OpCall, Registry } from './defs.ts';
@@ -63,6 +63,20 @@ export function previewIntent(state: CombatState, enemyId: EntityId, registry: R
   countDown(createResolution(scratch, registry), 'party');
   for (const e of scratch.enemies) e.shield = 0;
   return previewOps(scratch, intent.effects, { source: enemy.id, target: PARTY }, registry);
+}
+
+/**
+ * What the party's damage over time (Bleed, Poison) would do if you ended your turn now. It lands
+ * after the enemies act, so the enemies' turn plays out on a copy first: stacks their intents add
+ * count, and Poison meets the Shield their hits leave.
+ */
+export function previewPartyTicks(state: CombatState, registry: Registry): Preview[] {
+  if (state.phase !== 'player') return [];
+  const result = apply(state, { type: 'endTurn' }, registry);
+  if (!result.ok) return [];
+  return result.events
+    .filter((e) => e.type === 'damageTaken' && e.target === PARTY && e.status !== undefined)
+    .map((e) => ({ op: 'loseHp', target: PARTY, amount: e.amount ?? 0, absorbed: e.absorbed ?? 0, status: e.status! }));
 }
 
 function previewOps(scratch: CombatState, calls: readonly OpCall[], ctx: OpContext, registry: Registry): Preview[] {

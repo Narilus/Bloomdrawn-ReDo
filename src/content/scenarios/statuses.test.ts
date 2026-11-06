@@ -6,6 +6,7 @@ import {
   intentOf,
   previewCard,
   previewIntent,
+  previewPartyTicks,
   startCombat,
   type CardDef,
   type CombatState,
@@ -34,11 +35,13 @@ const hexer: EnemyDef = {
     { id: 'strike', name: 'Strike', effects: [damage(10, { target: 'party' })] },
   ],
 };
+// Lance: the party gains Bleed 3.
+const lancer: EnemyDef = { id: 'test.lancer', name: 'Lancer', hp: 100, intents: [{ id: 'lance', name: 'Lance', effects: [applyStatus({ id: 'status.bleed' }, 3)] }] };
 const testCards = [stunCard, delayCard, vulnerableCard, weakCard];
 const registry: Registry = {
   ...gameRegistry,
   cards: { ...gameRegistry.cards, ...Object.fromEntries(testCards.map((c) => [c.id, c])) },
-  enemies: { ...gameRegistry.enemies, [resister.id]: resister, [hexer.id]: hexer },
+  enemies: { ...gameRegistry.enemies, [resister.id]: resister, [hexer.id]: hexer, [lancer.id]: lancer },
 };
 const HOUND = 'enemy.bloom-rib-hound';
 // The Hound's HP is tuned often; these tests are about the statuses, not the number.
@@ -79,6 +82,16 @@ describe('Bleed', () => {
     expect(after.party.hp).toBe(210 - 31 - 1);
     expect(after.party.statuses).toEqual([]);
   });
+
+  it("on the party: previewed for the party's HP bar, with the stacks the enemies add before it lands", () => {
+    const state = begin(['test.lancer']);
+    expect(previewPartyTicks(state, registry)).toEqual([{ op: 'loseHp', target: 'party', amount: 3, absorbed: 0, status: 'status.bleed' }]);
+    state.party.statuses.push({ status: 'status.bleed', stacks: 2 });
+    state.party.shield = 50;
+    // Shield doesn't stop Bleed.
+    expect(previewPartyTicks(state, registry)).toEqual([{ op: 'loseHp', target: 'party', amount: 5, absorbed: 0, status: 'status.bleed' }]);
+    expect(run(state, endTurn).state.party.hp).toBe(210 - 5);
+  });
 });
 
 describe('Poison', () => {
@@ -90,6 +103,17 @@ describe('Poison', () => {
     // Bite 31 takes the 14 Shield and 17 HP; Poison 5 takes 5 more.
     expect(after.party.hp).toBe(210 - 17 - 5);
     expect(after.party.statuses).toEqual([{ status: 'status.poison', stacks: 5 }]);
+  });
+
+  it("on the party: previewed for the party's HP bar against the Shield the enemies' hits leave", () => {
+    const state = begin();
+    state.party.statuses.push({ status: 'status.poison', stacks: 5 });
+    state.party.shield = 14;
+    expect(previewPartyTicks(state, registry)).toEqual([{ op: 'loseHp', target: 'party', amount: 5, absorbed: 0, status: 'status.poison' }]);
+    // Bite 31 leaves 3 Shield, which takes 3 of the Poison.
+    state.party.shield = 34;
+    expect(previewPartyTicks(state, registry)).toEqual([{ op: 'loseHp', target: 'party', amount: 5, absorbed: 3, status: 'status.poison' }]);
+    expect(run(state, endTurn).state.party.hp).toBe(210 - 2);
   });
 });
 

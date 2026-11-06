@@ -62,7 +62,7 @@ There are no extra turns or bonus action phases. Effects can refund Mana, draw, 
 
 ### Survival
 
-The party shares one HP pool, equal to the sum of the four characters' Max HP. Current HP carries between fights; Shield does not. A shared bar shows incoming damage from all visible intents, marked Safe when Shield covers it and with a skull when it is lethal.
+The party shares one HP pool, equal to the sum of the four characters' Max HP. Current HP carries between fights; Shield does not. A shared bar shows incoming damage from all visible intents, and the party's damage over time that lands after them, marked Safe when Shield covers it and with a skull when it is lethal.
 
 ### Crit
 

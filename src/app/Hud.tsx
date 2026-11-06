@@ -6,6 +6,7 @@ import {
   GAUGE_MAX,
   intentOf,
   previewIntent,
+  previewPartyTicks,
   previewUltimate,
   type CombatState,
   type EntityId,
@@ -176,9 +177,9 @@ export function PartyBar({ state, vitals, previews }: { state: CombatState; vita
   const { maxHp } = state.party;
   const { hp, shield } = vitals?.party ?? state.party;
   const shieldGain = previews.filter((p) => p.op === 'gainShield' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
-  // Everything the enemies' shown intents will do to the party, with the Shield it has now.
-  const intents = state.phase === 'player' && !vitals ? state.enemies.flatMap((e) => previewIntent(state, e.id, registry)) : [];
-  const incoming = flatten(intents).filter((p) => p.op === 'damage' && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
+  // Everything the enemies' shown intents will do to the party, with the Shield it has now, then its Bleed and Poison.
+  const intents = state.phase === 'player' && !vitals ? [...state.enemies.flatMap((e) => previewIntent(state, e.id, registry)), ...previewPartyTicks(state, registry)] : [];
+  const incoming = flatten(intents).filter((p) => (p.op === 'damage' || p.op === 'loseHp') && p.target === 'party').reduce((n, p) => n + (p.amount ?? 0), 0);
   const loss = hpLoss(intents, 'party');
   const after = Math.max(0, hp - loss);
   return (
