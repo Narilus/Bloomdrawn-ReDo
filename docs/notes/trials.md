@@ -1,6 +1,6 @@
 # Trials: the four bosses (M6.7)
 
-Status: **kits approved 1 Nov** ("well designed at first glance"); built and fitted by the lab. Sprites, tiers and party settled 4 Nov. The rules are his (m6-direction.md B; m6-depth.md "Trials"). Numbers are level-1 placeholders that scale with the tier's level like every enemy's, fitted later by the lab. Briefs are in `art/briefs/`, and options in `art/raw/` (sheets: `art/cut/trial-*-sheet.png`).
+Status: **kits approved 1 Nov** ("well designed at first glance"); built and fitted by the lab. Sprites, tiers and party settled 4 Nov; signed off 6 Nov. The rules are his (m6-direction.md B; m6-depth.md "Trials"). Numbers are level-1 placeholders that scale with the tier's level like every enemy's, fitted later by the lab. Briefs are in `art/briefs/`, and options in `art/raw/` (sheets: `art/cut/trial-*-sheet.png`).
 
 ## How a Trial runs (settled)
 
@@ -27,6 +27,7 @@ Lab (`trace-tmp`, the four parties at the tier's level): 10–11 turns at Tiers 
 
 - **Vespers** (1,000): Raise a Limb, 1 Tentacle (40 HP; Lash 12 every turn; 3 at most); Sermon, every enemy gains 1 Fervour (+6 damage per hit, never wears off); Censer, party 2 Weak.
 - *Rouse:* The Veil Lifts (clears her own statuses; her Tentacles keep theirs).
+- *Placed:* she stands in the middle back slot, so her Limbs rise in front of her and to either side, not behind her (owner, 6 Nov).
 - **Compline** (1,000): Raise Two Limbs; Sermon (2 Fervour); Communion 90, which her own Fervour raises (about 48% of party HP at level 20; 70 was 39%).
 
 ### Spirit: The Kirin Oracle

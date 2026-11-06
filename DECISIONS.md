@@ -208,6 +208,11 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Trial sprites (owner, 4 Nov): the Veiled Hierophant 06, now a woman; the Kirin Oracle 06, on two legs with hooves (the other redraws had hand or finger faults, and 08 a missing leg). Every option is kept.
 - Trial tiers and party (owner, 4 Nov): every tier keeps the same moveset, scaled only by level; any party of owned characters may take a Trial.
 
+- M6.7 signed off (owner, 6 Nov). Flesh is good; the Kirin Oracle is edge-of-the-seat and her Rite may be overtuned, left for now; the Ringmaster is dangerous in a good way, left as is. The adds' sprites stand: Raised Limb 01, Paper Talisman 02, Marionette 02.
+- The Veiled Hierophant stands in the middle slot, her Limbs rising in front of her and to either side (owner, 6 Nov); she stood at the front, right against the party, with her Limbs behind her.
+- The party's HP bar counts its Bleed and Poison in Incoming (owner, 6 Nov), since they land after the enemies act.
+- Relics in Trials (owner, 6 Nov): none for now, the empty Relics plaque stays; a later system may let the player take a relic into a Trial.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

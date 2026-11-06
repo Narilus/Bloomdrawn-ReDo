@@ -120,6 +120,12 @@ describe('The Veiled Hierophant (Rapture: count × damage)', () => {
     expect(shown(preached, 1)).toEqual(['Lash', ['damage 18']]);
   });
 
+  it('she stands in the middle, and her Limbs rise in front of her and to either side (owner, 6 Nov)', () => {
+    const begun = hierophant();
+    expect([begun.enemySlots, begun.enemies[0]!.slot]).toEqual([4, 1]);
+    expect(living(turns(begun, 9), 'enemy.raised-limb').map((e) => e.slot)).toEqual([0, 2, 3]);
+  });
+
   it('she raises at most three; a dead Limb leaves room for the next', () => {
     const many = turns(hierophant(), 9);
     expect(living(many, 'enemy.raised-limb')).toHaveLength(3);

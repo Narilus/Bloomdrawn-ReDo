@@ -46,7 +46,7 @@ export interface CombatSetup {
   seed: number;
   /** Character IDs in slot order; slot 0 is the front. */
   party: string[];
-  /** Enemy IDs in slot order, each optionally with an HP override. */
+  /** Enemy IDs in slot order, each optionally with an HP override, a starting status or its own slot. */
   enemies: EnemyEntry[];
   /** Relic IDs in acquisition order. */
   relics?: string[];
@@ -127,6 +127,13 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     return enemy;
   });
   const summons = enemies.reduce((n, e) => n + summonCapacity(registry, e.enemy), 0);
+  const enemySlots = Math.min(ENEMY_SLOTS_MAX, Math.max(enemies.length, enemies.length + summons));
+  setup.enemies.forEach((entry, i) => {
+    if (typeof entry === 'string' || entry.slot === undefined) return;
+    if (entry.slot >= enemySlots) throw new Error(`Enemy slot ${entry.slot} is past the fight's ${enemySlots}`);
+    enemies[i]!.slot = entry.slot;
+  });
+  if (new Set(enemies.map((e) => e.slot)).size < enemies.length) throw new Error('Two enemies start in one slot');
   const relics = (setup.relics ?? []).map((id) => {
     lookup(registry.relics, id, 'relic');
     return { id: next('r'), relic: id };
@@ -145,7 +152,7 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     party: { hp: Math.min(setup.partyHp ?? maxHp, maxHp), maxHp, shield: 0, statuses: [] },
     members,
     enemies,
-    enemySlots: Math.min(ENEMY_SLOTS_MAX, Math.max(enemies.length, enemies.length + summons)),
+    enemySlots,
     relics,
     piles: { draw: deck, hand: [], discard: [], graveyard: [] },
     resources: {},

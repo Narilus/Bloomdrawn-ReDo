@@ -205,7 +205,8 @@ export interface EncounterDef {
 }
 
 /** `status`: it starts with one stack of this status (Delay: it acts a step behind). */
-export type EnemyEntry = string | { enemy: string; hp?: number; status?: string };
+/** `slot`: where it stands at the start, if not by its order (a summoner at the back, its summons arriving in front). */
+export type EnemyEntry = string | { enemy: string; hp?: number; status?: string; slot?: number };
 
 /**
  * A hand-authored piece of the Labyrinth (DESIGN.md "Motifs"), drawn as rows of hex cells; the
