@@ -1,4 +1,4 @@
-import type { CardDef, CharacterDef, DomainDef, DupeDef, EncounterDef, EnemyDef, EventDef, MotifDef, RelicDef, StatusDef } from '../engine/index.ts';
+import type { CardDef, CharacterDef, DomainDef, DupeDef, EncounterDef, EnemyDef, EventDef, MotifDef, RelicDef, StatusDef, WeaponDef, WeaponStep } from '../engine/index.ts';
 
 // Typed helpers for content files. They return plain JSON-shaped data tagged with `kind`,
 // which is how the registry finds definitions among a module's exports.
@@ -34,3 +34,23 @@ export const domain = (def: DomainDef) => ({ kind: 'domain' as const, ...def });
 export const encounter = (def: EncounterDef) => ({ kind: 'encounter' as const, ...def });
 export const motif = (def: MotifDef) => ({ kind: 'motif' as const, ...def });
 export const event = (def: EventDef) => ({ kind: 'event' as const, ...def });
+
+/** A percentage for rules text: 15, 22.5. */
+export const pct = (x: number) => String(Math.round(x * 10) / 10);
+
+/** Reinforcement steps: +0 to +5, each adding a tenth of the effect's +0 strength (docs/notes/weapons.md). */
+export const WEAPON_STEPS = 6;
+export const REINFORCE_PER_STEP = 0.1;
+
+/**
+ * A weapon, its effect written once as a function of `power`: 1 at +0, 1.5 at +5. Scale the effect's
+ * bonus by it (a 20% boost is `1 + 0.2 × power`), and write the text from it too.
+ */
+export const weapon = (def: Omit<WeaponDef, 'steps'> & { effect: (power: number) => WeaponStep }) => {
+  const { effect, ...rest } = def;
+  return {
+    kind: 'weapon' as const,
+    ...rest,
+    steps: Array.from({ length: WEAPON_STEPS }, (_, step) => effect(1 + REINFORCE_PER_STEP * step)),
+  };
+};

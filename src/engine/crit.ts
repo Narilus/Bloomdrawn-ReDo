@@ -1,6 +1,7 @@
 import type { Registry } from './defs.ts';
 import { characterOf } from './dupes.ts';
-import { critOf } from './levels.ts';
+import { critOf, CRIT_RATE_MAX } from './levels.ts';
+import { critRateBonus } from './modifiers.ts';
 import type { OpContext } from './operation.ts';
 import { nextFloat } from './rng.ts';
 import { PARTY, type CombatState } from './state.ts';
@@ -9,8 +10,15 @@ import { PARTY, type CombatState } from './state.ts';
 // volleys included, each hit rolled on its own from the `crit` stream. Status ticks, `loseHp`, heals,
 // Shields and anything an enemy does never crit, so intents stay exact. Previews never roll.
 
-/** The crit chance and bonus of a hit's source: its owner's, or the party's average for a hit the party itself makes. None for an enemy. */
+/** The crit chance and bonus of a hit's source: its owner's, or the party's average for a hit the party itself makes, plus any `critRate` modifiers. None for an enemy. */
 export function critChance(state: CombatState, ctx: OpContext, registry: Registry): { rate: number; damage: number } | undefined {
+  const base = baseCrit(state, ctx, registry);
+  if (!base) return undefined;
+  const bonus = critRateBonus(state, ctx, registry);
+  return bonus === 0 ? base : { ...base, rate: Math.min(CRIT_RATE_MAX, base.rate + bonus) };
+}
+
+function baseCrit(state: CombatState, ctx: OpContext, registry: Registry): { rate: number; damage: number } | undefined {
   const owner = state.members.find((m) => m.id === (ctx.owner ?? ctx.source));
   if (owner) return critOf(characterOf(owner, registry)!.stats);
   if (ctx.source !== PARTY || state.members.length === 0) return undefined;

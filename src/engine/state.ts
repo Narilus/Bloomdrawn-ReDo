@@ -41,6 +41,14 @@ export interface Member {
   level?: number;
   /** Ascensions she has made, 1 to 3 (`characterOf`); absent if none. */
   ascensions?: number;
+  /** The weapon wielded, and its reinforcement step (absent at +0). */
+  weapon?: Wielded;
+}
+
+/** A weapon in a member's hands: its ID and reinforcement, +1 to +5 (absent at +0). */
+export interface Wielded {
+  weapon: string;
+  step?: number;
 }
 
 export interface Enemy {

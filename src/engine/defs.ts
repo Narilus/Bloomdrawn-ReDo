@@ -47,13 +47,29 @@ export interface ModifierDef {
    * `stacks`: the stacks a status is applied with. `stackLoss`: the stacks a status's own
    * triggers take off its bearer (Bleed's tick).
    */
-  value: 'damage' | 'shield' | 'volleys' | 'stacks' | 'stackLoss';
+  value: 'damage' | 'shield' | 'volleys' | 'stacks' | 'stackLoss' | 'critRate';
   step: 'flat' | 'outgoingMul' | 'incomingMul';
   amount: Formula;
   /** For `stacks` and `stackLoss`: only this status. */
   status?: string;
-  /** A party member's modifier that acts on every enemy's side instead of her own (Bleed on enemies keeping its stacks). */
-  on?: 'enemies';
+  /**
+   * A party member's modifier that acts on another side instead of her own: `enemies`, every enemy's
+   * (Bleed on enemies keeping its stacks); `party`, every party member's and the party's own (a weapon
+   * that makes all Tentacles hit harder).
+   */
+  on?: 'enemies' | 'party';
+  /** Only while one of the source's cards is resolving (not a trigger or an ultimate). */
+  fromCard?: true;
+  /** Only while a card with this keyword is resolving. */
+  keyword?: Keyword;
+  /** Only while a card of this personal slot is resolving. */
+  slot?: CardSlot;
+  /** Only for a volley's hits (Tentacles). */
+  volley?: true;
+  /** Only inside an ifConsume branch that spent this resource (damage that consumes Essence). */
+  consumes?: string;
+  /** Only against a target holding one of these statuses. */
+  targetHas?: string[];
 }
 
 /** Anything that can hold triggers and modifiers. */
@@ -130,6 +146,30 @@ export interface Stats {
   defense: number;
   critRate?: number;
   critDamage?: number;
+}
+
+/** A weapon's main stat: a share of the wielder's HP, Attack or Defense in percent, or crit points added. */
+export type WeaponStat = 'hp' | 'attack' | 'defense' | 'critRate' | 'critDamage';
+
+/** A weapon at one reinforcement step: its effect's hooks, held by the wielder, and its rules text. */
+export interface WeaponStep extends Hooks {
+  text: string;
+}
+
+/**
+ * A weapon (docs/notes/weapons.md): one per character, any character may wield any. The main stat
+ * always applies; the effect is written on a mechanic, so it does nothing for a wielder who never
+ * uses it. `steps` are the effect at +0 to +5. A signature names the character it was made for,
+ * which only the screens read.
+ */
+export interface WeaponDef {
+  id: string;
+  name: string;
+  rarity: 'ssr' | 'sr' | 'r';
+  domain?: string;
+  signature?: string;
+  main: { stat: WeaponStat; amount: number };
+  steps: WeaponStep[];
 }
 
 export interface CharacterDef {
@@ -349,6 +389,7 @@ export interface Registry {
   encounters: Readonly<Record<string, EncounterDef>>;
   motifs: Readonly<Record<string, MotifDef>>;
   events: Readonly<Record<string, EventDef>>;
+  weapons: Readonly<Record<string, WeaponDef>>;
   /** Bounded escape hatch: kit-specific operations, listed so their number stays visible. */
   customOps?: Readonly<Record<string, Operation>>;
 }

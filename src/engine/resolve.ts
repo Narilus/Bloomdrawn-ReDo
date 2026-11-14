@@ -1,5 +1,5 @@
 import type { OpCall, Registry, TriggerDef } from './defs.ts';
-import { characterOf } from './dupes.ts';
+import { characterOf, weaponOf } from './dupes.ts';
 import type { EngineEvent } from './events.ts';
 import { hasKeyword } from './formula.ts';
 import type { OpContext } from './operation.ts';
@@ -88,7 +88,7 @@ export function drain(rc: Resolution): void {
     if (op.validate?.(rc.state, item.call, item.ctx, rc.registry) !== undefined) continue;
     const result = op.resolve(rc.state, item.call, item.ctx, rc.registry);
     if (result.then?.length) {
-      const ctx = result.consumed === undefined ? item.ctx : { ...item.ctx, consumed: result.consumed };
+      const ctx = result.consumed === undefined ? item.ctx : { ...item.ctx, consumed: result.consumed, ...(result.spent !== undefined && { spent: result.spent }) };
       rc.queue.unshift(...result.then.map((call) => ({ call, ctx, origin: item.origin })));
     }
     result.events.forEach((event, i) => emit(rc, event, item.origin, result.vitals?.[i]));
@@ -157,7 +157,10 @@ function triggersOf(state: CombatState, registry: Registry, holder: EntityId): H
   const member = state.members.find((m) => m.id === holder);
   const enemy = state.enemies.find((e) => e.id === holder);
   const relic = state.relics.find((r) => r.id === holder);
-  if (member) sets.push([member.character, characterOf(member, registry)?.passive?.triggers]);
+  if (member) {
+    sets.push([member.character, characterOf(member, registry)?.passive?.triggers]);
+    if (member.weapon) sets.push([member.weapon.weapon, weaponOf(member, registry)?.triggers]);
+  }
   if (enemy) sets.push([enemy.enemy, registry.enemies[enemy.enemy]?.triggers]);
   if (relic) sets.push([relic.relic, registry.relics[relic.relic]?.triggers]);
   for (const s of holder === PARTY ? state.party.statuses : (enemy?.statuses ?? [])) {

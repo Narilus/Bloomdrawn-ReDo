@@ -12,6 +12,7 @@ import {
   type Registry,
   type RunCard,
   type Stats,
+  type Wielded,
 } from '../../engine/index.ts';
 import { registry as gameRegistry } from '../registry.ts';
 
@@ -25,6 +26,8 @@ export interface ScenarioSpec {
   levels?: Record<string, number>;
   /** Ascensions made by character ID; others have none. */
   ascensions?: Record<string, number>;
+  /** Weapons by character ID, at +0 unless a step is given; others wield none. */
+  weapons?: Record<string, string | Wielded>;
   enemies?: string[];
   seed?: number;
   /** Let the party crit at its real rates; otherwise no hit crits, so numbers are exact. */
@@ -35,6 +38,8 @@ export interface ScenarioSpec {
      * made. A Domain's generic card names the character who owns it.
      */
     hand?: (string | Required<RunCard>)[];
+    /** Cleanups a held card has been held through, by card ID. */
+    held?: Record<string, number>;
     resources?: Record<string, number>;
     mana?: number;
     /** Ultimate gauges by character ID. */
@@ -87,6 +92,10 @@ export function runScenario(spec: ScenarioSpec, content: Registry = gameRegistry
       dupes: party.map((id) => spec.dupes?.[id] ?? 0),
       levels: party.map((id) => spec.levels?.[id] ?? 1),
       ascensions: party.map((id) => spec.ascensions?.[id] ?? 0),
+      weapons: party.map((id) => {
+        const w = spec.weapons?.[id];
+        return w === undefined ? null : typeof w === 'string' ? { weapon: w } : w;
+      }),
     },
     registry,
   ).state;
@@ -95,6 +104,11 @@ export function runScenario(spec: ScenarioSpec, content: Registry = gameRegistry
     const pool = [...state.piles.hand, ...state.piles.draw];
     state.piles.hand = spec.setup.hand.map((id) => takeOrMake(state, pool, id, registry));
     state.piles.draw = pool;
+  }
+  for (const [card, held] of Object.entries(spec.setup?.held ?? {})) {
+    const instance = state.piles.hand.find((c) => c.card === card);
+    if (!instance) throw new Error(`Scenario: ${card} is not in hand to be held`);
+    instance.held = held;
   }
   Object.assign(state.resources, spec.setup?.resources);
   if (spec.setup?.mana !== undefined) state.mana = spec.setup.mana;

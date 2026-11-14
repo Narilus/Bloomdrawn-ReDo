@@ -40,12 +40,14 @@ function fire(draft: CombatState, args: VolleyArgs, ctx: OpContext, registry: Re
   if (ctx.card !== undefined) fired.card = ctx.card;
   push(fired);
   const passes = volleyPasses(draft, ctx, registry);
+  // Its hits are a volley's, for the modifiers that only touch Tentacles.
+  const hitCtx: OpContext = { ...ctx, volley: true };
   for (let i = 0; i < hits * passes; i++) {
     let target = lowest(draft, registry);
     if (!target) break;
     // Each hit rolls its own crit; a preview never rolls.
-    const roll = rolls ? rollCrit(draft, ctx, registry) : { mul: 1, crit: false };
-    let remaining = pipeline('damage', args.damage, draft, ctx, registry, target.id, undefined, roll.mul);
+    const roll = rolls ? rollCrit(draft, hitCtx, registry) : { mul: 1, crit: false };
+    let remaining = pipeline('damage', args.damage, draft, hitCtx, registry, target.id, undefined, roll.mul);
     // A hit always lands on its target, even for 0; only excess beyond a kill moves on.
     do {
       const absorbed = Math.min(target.shield, remaining);

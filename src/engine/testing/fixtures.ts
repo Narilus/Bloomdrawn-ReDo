@@ -120,6 +120,7 @@ export const fixtureRegistry: Registry = {
   encounters: {},
   motifs: {},
   events: {},
+  weapons: {},
   customOps: { 'test.gain': gain, 'test.hit': hit, 'test.fail': fail },
 };
 

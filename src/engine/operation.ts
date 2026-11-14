@@ -17,14 +17,22 @@ export interface OpContext {
   consumed?: number;
   /** The card being played, if a card is resolving (not a trigger or an ultimate). */
   card?: EntityId;
+  /** That card's definition ID, and the cleanups it was held through before it was played. */
+  def?: string;
+  held?: number;
+  /** Inside an ifConsume branch: the resource just spent. */
+  spent?: string;
+  /** A volley's hit (Tentacles). */
+  volley?: true;
 }
 
 export interface OpResult {
   events: EngineEvent[];
   /** Nested operations to resolve next, ahead of anything already queued (control flow). */
   then?: OpCall[];
-  /** Passed to the `then` operations as `ctx.consumed`. */
+  /** Passed to the `then` operations as `ctx.consumed`, and the resource as `ctx.spent`. */
   consumed?: number;
+  spent?: string;
   /** HP and Shield right after each of `events`, from an operation that lands several hits in one go. */
   vitals?: Vitals[];
 }

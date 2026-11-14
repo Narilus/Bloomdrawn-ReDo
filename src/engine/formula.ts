@@ -27,7 +27,15 @@ export type Formula =
   /** A share of the party's current or max HP, so costs scale with a levelled team (owner, 19 Oct). */
   | { percent: number; of: PartyHp }
   /** The party's average of a stat, from fielded stats (Rapture's starting potency). */
-  | { partyStat: StatName };
+  | { partyStat: StatName }
+  /** The smallest of its terms. */
+  | { min: Formula[] }
+  /** The amount on the event that woke a trigger (the Embryo just consumed). */
+  | { eventAmount: true }
+  /** The cleanups the card resolving was held through before it was played. */
+  | { cardHeld: true }
+  /** Mana owed to next turn's refill. */
+  | { manaDebt: true };
 
 export type PartyHp = 'hp' | 'maxHp';
 
@@ -51,6 +59,10 @@ export const consumed = (): Formula => ({ consumed: true });
 /** `percent`% of the party's current (`hp`) or max HP, before rounding down. */
 export const percentOf = (percent: number, of: PartyHp): Formula => ({ percent, of });
 export const partyStat = (name: StatName): Formula => ({ partyStat: name });
+export const min = (...terms: Formula[]): Formula => ({ min: terms });
+export const eventAmount = (): Formula => ({ eventAmount: true });
+export const cardHeld = (): Formula => ({ cardHeld: true });
+export const manaDebtOwed = (): Formula => ({ manaDebt: true });
 export const shareOf = (f: { percent: number; of: PartyHp }, party: Record<PartyHp, number>): number => (party[f.of] * f.percent) / 100;
 
 export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
@@ -71,6 +83,10 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
     z.strictObject({ consumed: z.literal(true) }),
     z.strictObject({ percent: z.number().positive(), of: z.enum(['hp', 'maxHp']) }),
     z.strictObject({ partyStat: z.enum(['hp', 'attack', 'defense']) }),
+    z.strictObject({ min: z.array(formulaSchema).min(1) }),
+    z.strictObject({ eventAmount: z.literal(true) }),
+    z.strictObject({ cardHeld: z.literal(true) }),
+    z.strictObject({ manaDebt: z.literal(true) }),
   ]),
 );
 
@@ -84,6 +100,10 @@ export function evaluate(f: Formula, state: CombatState, ctx: OpContext, registr
   if ('resource' in f) return state.resources[f.resource] ?? 0;
   if ('add' in f) return f.add.reduce<number>((sum, t) => sum + evaluate(t, state, ctx, registry), 0);
   if ('mul' in f) return f.mul.reduce<number>((product, t) => product * evaluate(t, state, ctx, registry), 1);
+  if ('min' in f) return Math.min(...f.min.map((t) => evaluate(t, state, ctx, registry)));
+  if ('eventAmount' in f) return ctx.event?.amount ?? 0;
+  if ('cardHeld' in f) return ctx.held ?? 0;
+  if ('manaDebt' in f) return state.manaDebt;
   if ('handSize' in f) return state.piles.hand.length;
   if ('handCount' in f) return withKeyword(state, registry, f.handCount).length;
   if ('heldTurns' in f) return withKeyword(state, registry, f.heldTurns).reduce((sum, c) => sum + (c.held ?? 0), 0);
@@ -141,5 +161,9 @@ export function formulaText(f: Formula): string {
   if ('turn' in f) return 'the turn number';
   if ('percent' in f) return `${f.percent}% of the party's ${f.of === 'hp' ? 'current' : 'max'} HP`;
   if ('partyStat' in f) return `the party's average ${titleCase(f.partyStat === 'hp' ? 'HP' : f.partyStat)}`;
+  if ('min' in f) return `the least of ${f.min.map(formulaText).join(', ')}`;
+  if ('eventAmount' in f) return 'the amount';
+  if ('cardHeld' in f) return 'turns it was held';
+  if ('manaDebt' in f) return 'Mana owed';
   return 'the amount consumed';
 }

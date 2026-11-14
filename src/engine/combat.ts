@@ -24,6 +24,7 @@ import {
   type EntityId,
   type Member,
   type Vitals,
+  type Wielded,
 } from './state.ts';
 
 export type Command =
@@ -60,6 +61,8 @@ export interface CombatSetup {
   levels?: number[];
   /** Ascensions made, from the profile, in slot order; default 0. */
   ascensions?: number[];
+  /** Weapons wielded, from the profile, in slot order; null or absent for none. */
+  weapons?: (Wielded | null)[];
   /** Percent added to every enemy's max HP and to the damage enemies deal (the run's Bloom stage); default 0. */
   enemyScale?: number;
   /** Every enemy's level, scaling its HP and damage (`enemyLevelScale`); default 1. */
@@ -96,6 +99,12 @@ export function startCombat(setup: CombatSetup, registry: Registry): CombatStart
     if (level > 1) member.level = level;
     const ascensions = Math.floor(setup.ascensions?.[slot] ?? 0);
     if (ascensions > 0) member.ascensions = ascensions;
+    const wielded = setup.weapons?.[slot];
+    if (wielded) {
+      lookup(registry.weapons, wielded.weapon, 'weapon');
+      const step = Math.floor(wielded.step ?? 0);
+      member.weapon = step > 0 ? { weapon: wielded.weapon, step } : { weapon: wielded.weapon };
+    }
     return member;
   });
   const characters = members.map((m) => characterOf(m, registry)!);
@@ -262,7 +271,8 @@ function validateCalls(state: CombatState, calls: readonly OpCall[], ctx: OpCont
 }
 
 export function playContext(card: CardInstance, target: EntityId | undefined): OpContext {
-  const ctx: OpContext = { source: card.owner, owner: card.owner, card: card.uid };
+  const ctx: OpContext = { source: card.owner, owner: card.owner, card: card.uid, def: card.card };
+  if (card.held) ctx.held = card.held;
   if (target !== undefined) ctx.target = target;
   return ctx;
 }
@@ -279,9 +289,10 @@ function playCard(rc: Resolution, command: { card: EntityId; target?: EntityId }
   s.manaSpent += cost;
   const repeats = 1 + s.next.repeat;
   s.next = { costDelta: 0, repeat: 0 };
+  // Before it leaves the hand, which clears the turns it was held.
+  const ctx = playContext(card, command.target);
   leaveHand(card);
 
-  const ctx = playContext(card, command.target);
   for (let i = 0; i < repeats; i++) enqueue(rc, def.effects, ctx, ROOT);
   enqueue(rc, chargeOf(def), ctx, ROOT);
   const played: EngineEvent = { type: 'cardPlayed', source: card.owner, owner: card.owner, card: card.uid, def: card.card };

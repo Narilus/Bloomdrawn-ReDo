@@ -49,6 +49,7 @@ export const ifConsumeOp: Operation<IfConsumeArgs> = {
       events: [ctx.owner === undefined ? event : { ...event, owner: ctx.owner }],
       then: args.branch,
       consumed: need,
+      spent: args.resource,
     };
   },
   preview(state, args, ctx, registry) {

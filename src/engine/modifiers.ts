@@ -1,6 +1,6 @@
 import type { ModifierDef, Registry } from './defs.ts';
-import { characterOf } from './dupes.ts';
-import { evaluate, type Formula } from './formula.ts';
+import { characterOf, weaponOf } from './dupes.ts';
+import { evaluate, hasKeyword, type Formula } from './formula.ts';
 import { enemyLevelScale } from './levels.ts';
 import type { OpContext } from './operation.ts';
 import { isImmune } from './phases.ts';
@@ -34,7 +34,7 @@ export function pipeline(
   /** A crit's multiplier for a party damage hit, after the incoming multipliers and before Shield. */
   crit = 1,
 ): number {
-  const applies = (m: ModifierDef) => m.value === value && (m.status === undefined || m.status === status);
+  const applies = (m: ModifierDef) => m.value === value && (m.status === undefined || m.status === status) && inScope(m, state, ctx, registry, target);
   const outgoing = modifiersOf(state, registry, ctx.source).filter(applies);
   const sum = (mods: ModifierDef[]) => mods.reduce((n, m) => n + evaluate(m.amount, state, ctx, registry), 0);
   const scale = (n: number, mods: ModifierDef[]) => mods.reduce((x, m) => x * evaluate(m.amount, state, ctx, registry), n);
@@ -58,6 +58,28 @@ export function pipeline(
   return floorAmount(amount * crit);
 }
 
+/** Whether a modifier's scope covers what is resolving: the card, a volley's hit, the resource just spent, the target's statuses. */
+function inScope(m: ModifierDef, state: CombatState, ctx: OpContext, registry: Registry, target?: EntityId): boolean {
+  const card = ctx.def === undefined ? undefined : registry.cards[ctx.def];
+  if ((m.fromCard || m.keyword || m.slot) && !card) return false;
+  if (m.keyword && !hasKeyword(card?.keywords, m.keyword)) return false;
+  if (m.slot && card?.slot !== m.slot) return false;
+  if (m.volley && !ctx.volley) return false;
+  if (m.consumes !== undefined && ctx.spent !== m.consumes) return false;
+  if (m.targetHas) {
+    const statuses = state.enemies.find((e) => e.id === target)?.statuses ?? [];
+    if (!statuses.some((s) => holds(s) && m.targetHas!.includes(s.status))) return false;
+  }
+  return true;
+}
+
+/** Crit rate points added to a party hit by `critRate` modifiers on the source's side (a weapon's). */
+export function critRateBonus(state: CombatState, ctx: OpContext, registry: Registry, target?: EntityId): number {
+  return modifiersOf(state, registry, ctx.source)
+    .filter((m) => m.value === 'critRate' && inScope(m, state, ctx, registry, target))
+    .reduce((n, m) => n + evaluate(m.amount, state, ctx, registry), 0);
+}
+
 // Stacks an enemy applied during the enemy turn take hold once that turn is over.
 const holds = (s: StatusStack) => s.stacks - (s.pending ?? 0) > 0;
 
@@ -76,24 +98,26 @@ export function volleyPasses(state: CombatState, ctx: OpContext, registry: Regis
 }
 
 /**
- * Modifiers that belong to an entity's side. A party member: her passive, the party's statuses and
- * every relic. The whole party: every member's passive, its statuses and every relic. An enemy: its
- * own and its statuses', and the party's that act `on` enemies.
+ * Modifiers that belong to an entity's side. A party member: her passive and weapon, the party's
+ * statuses, every relic, and every member's that act `on` the party. The whole party: every member's
+ * passive and weapon, its statuses and every relic. An enemy: its own and its statuses', and the
+ * party's that act `on` enemies.
  */
 function modifiersOf(state: CombatState, registry: Registry, id: EntityId): ModifierDef[] {
   const statusMods = (statuses: StatusStack[]) =>
     statuses.filter(holds).flatMap((s) => registry.statuses[s.status]?.modifiers ?? []);
   const relicMods = state.relics.flatMap((r) => registry.relics[r.relic]?.modifiers ?? []);
-  const passive = (m: CombatState['members'][number]) => characterOf(m, registry)?.passive?.modifiers ?? [];
+  const held = (m: CombatState['members'][number]) => [...(characterOf(m, registry)?.passive?.modifiers ?? []), ...(weaponOf(m, registry)?.modifiers ?? [])];
   const partyStatuses = statusMods(state.party.statuses);
   const own = (mods: ModifierDef[]) => mods.filter((m) => m.on === undefined);
+  const partyWide = () => state.members.flatMap(held).filter((m) => m.on === 'party');
 
-  if (id === PARTY) return own([...state.members.flatMap(passive), ...partyStatuses, ...relicMods]);
+  if (id === PARTY) return [...own([...state.members.flatMap(held), ...partyStatuses, ...relicMods]), ...partyWide()];
   const member = state.members.find((m) => m.id === id);
-  if (member) return own([...passive(member), ...partyStatuses, ...relicMods]);
+  if (member) return [...own([...held(member), ...partyStatuses, ...relicMods]), ...partyWide()];
   const enemy = state.enemies.find((e) => e.id === id);
   if (enemy) {
-    const fromParty = [...state.members.flatMap(passive), ...partyStatuses, ...relicMods].filter((m) => m.on === 'enemies');
+    const fromParty = [...state.members.flatMap(held), ...partyStatuses, ...relicMods].filter((m) => m.on === 'enemies');
     return [...(registry.enemies[enemy.enemy]?.modifiers ?? []), ...statusMods(enemy.statuses), ...fromParty];
   }
   return [];

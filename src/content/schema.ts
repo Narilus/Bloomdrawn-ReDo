@@ -25,14 +25,24 @@ const trigger = z.strictObject({
   do: z.array(opCall).min(1),
 });
 
+const slot = z.enum(['strike', 'defense', 'transcend', 'flavourA', 'flavourB']);
+const keyword = z.enum(['retain', 'ritual', 'exhaust', 'fleeting']);
+
 const modifier = z
   .strictObject({
-    value: z.enum(['damage', 'shield', 'volleys', 'stacks', 'stackLoss']),
+    value: z.enum(['damage', 'shield', 'volleys', 'stacks', 'stackLoss', 'critRate']),
     step: z.enum(['flat', 'outgoingMul', 'incomingMul']),
     amount: formulaSchema,
     status: id.optional(),
-    on: z.literal('enemies').optional(),
+    on: z.enum(['enemies', 'party']).optional(),
+    fromCard: z.literal(true).optional(),
+    keyword: keyword.optional(),
+    slot: slot.optional(),
+    volley: z.literal(true).optional(),
+    consumes: z.string().min(1).optional(),
+    targetHas: z.array(id).min(1).optional(),
   })
+  .refine((m) => m.value !== 'critRate' || m.step === 'flat', 'Crit rate is flat.')
   .refine((m) => m.value !== 'volleys' || m.step === 'flat', 'Extra volleys are flat.')
   .refine((m) => m.status === undefined || m.value === 'stacks' || m.value === 'stackLoss', 'Only stacks and stack loss name a status.');
 
@@ -182,6 +192,17 @@ export const schemas = {
         each: formulaSchema.optional(),
       })
       .optional(),
+  }),
+  weapon: z.strictObject({
+    kind: z.literal('weapon'),
+    id,
+    name: z.string().min(1),
+    rarity: z.enum(['ssr', 'sr', 'r']),
+    domain: id.optional(),
+    signature: id.optional(),
+    main: z.strictObject({ stat: z.enum(['hp', 'attack', 'defense', 'critRate', 'critDamage']), amount: z.number().positive() }),
+    // +0 to +5 (docs/notes/weapons.md).
+    steps: z.array(z.strictObject({ text: z.string().min(1), ...hooks })).length(6),
   }),
 };
 

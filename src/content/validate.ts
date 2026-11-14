@@ -3,7 +3,7 @@ import { formulaReads, getOp, slotAt, stacksAreDamage, templateSlots, type CardS
 import { KINDS, schemas, type Kind } from './schema.ts';
 
 /** The folders content lives in. registry.ts globs these; tools outside Vite (tools/lab) walk them. */
-export const CONTENT_FOLDERS = ['characters', 'symptoms', 'enemies', 'statuses', 'relics', 'domains', 'encounters', 'motifs', 'events'] as const;
+export const CONTENT_FOLDERS = ['characters', 'symptoms', 'enemies', 'statuses', 'relics', 'domains', 'encounters', 'motifs', 'events', 'weapons'] as const;
 
 /** Docs/DESIGN.md cost bands by personal card slot. */
 const COST_BANDS: Record<CardSlot, [number, number]> = {
@@ -26,6 +26,7 @@ const FAMILY = {
   encounter: 'encounters',
   motif: 'motifs',
   event: 'events',
+  weapon: 'weapons',
 } as const;
 
 type Modules = Record<string, Record<string, unknown>>;
@@ -41,7 +42,7 @@ interface Found {
  */
 export function validateContent(modules: Modules): { registry: Registry; errors: string[] } {
   const errors: string[] = [];
-  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {}, encounters: {}, motifs: {}, events: {} } as {
+  const registry = { cards: {}, characters: {}, enemies: {}, statuses: {}, relics: {}, domains: {}, encounters: {}, motifs: {}, events: {}, weapons: {} } as {
     [K in keyof typeof FAMILY as (typeof FAMILY)[K]]: Record<string, never>;
   };
   const fileOf = new Map<string, string>();
@@ -86,7 +87,7 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       const path = `${at}[${i}]`;
       const op = getOp(reg, call.op);
       if (!op) return fail(where(kind, defId), defId, `${path}: unknown operation "${call.op}"`);
-      const ratio = kind === 'card' || kind === 'character' || kind === 'relic' ? ratioProblem(call) : undefined;
+      const ratio = kind === 'card' || kind === 'character' || kind === 'relic' || kind === 'weapon' ? ratioProblem(call) : undefined;
       if (ratio) fail(where(kind, defId), defId, `${path}: ${ratio}`);
       const args = op.args.safeParse(call);
       if (!args.success) {
@@ -113,6 +114,7 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
     hooks?.triggers?.forEach((t, i) => checkCalls(kind, defId, t.do, `${at}triggers[${i}].do`));
     hooks?.modifiers?.forEach((m, i) => {
       if (m.status !== undefined && !reg.statuses[m.status]) fail(where(kind, defId), defId, `${at}modifiers[${i}]: unknown status "${m.status}"`);
+      for (const s of m.targetHas ?? []) if (!reg.statuses[s]) fail(where(kind, defId), defId, `${at}modifiers[${i}]: unknown status "${s}"`);
     });
   };
   // Every `{path}` slot in authored text must point at a formula inside its own definition.
@@ -212,6 +214,15 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
   }
   for (const r of Object.values(reg.relics)) checkHooks('relic', r.id, r, '');
   for (const d of Object.values(reg.domains)) checkHooks('domain', d.id, d, '');
+  for (const w of Object.values(reg.weapons)) {
+    const at = where('weapon', w.id);
+    w.steps.forEach((step, i) => checkHooks('weapon', w.id, step, `steps[${i}].`));
+    // Signatures are SSR and name a character; SR and R weapons belong to a Domain.
+    if (w.signature !== undefined && !reg.characters[w.signature]) fail(at, w.id, `signature "${w.signature}" is not a character`);
+    if ((w.rarity === 'ssr') !== (w.signature !== undefined)) fail(at, w.id, 'a weapon is SSR exactly when it is a signature');
+    if (w.domain !== undefined && !reg.domains[w.domain]) fail(at, w.id, `domain "${w.domain}" is not defined`);
+    if (w.rarity !== 'ssr' && w.domain === undefined) fail(at, w.id, 'an SR or R weapon belongs to a Domain');
+  }
   for (const en of Object.values(reg.encounters)) {
     for (const entry of en.enemies) {
       const id = typeof entry === 'string' ? entry : entry.enemy;
