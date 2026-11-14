@@ -213,6 +213,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - The party's HP bar counts its Bleed and Poison in Incoming (owner, 6 Nov), since they land after the enemies act.
 - Relics in Trials (owner, 6 Nov): none for now, the empty Relics plaque stays; a later system may let the player take a relic into a Trial.
 
+- Weapon guidelines (owner, 14 Nov): every weapon can be equipped by every character; a signature weapon is made for its character and clearly hers, and an effect that doesn't fit another wielder simply doesn't apply. A weapon has at least a main stat and an effect; copies reinforce it up to a maximum, raising its effect, and are never needed, only investment. Banners get two tickboxes, auto-reinforce copies and auto-salvage copies of maxed weapons, the salvage currency and its use to be decided. The character page gets sub-pages in a left-hand list (attributes, weapon, kit, dupes and so on), with the art kept; the inventory moves to the same left-hand list and gains Weapons, with reinforcing and salvage. The C of dupe levels needs a themed meaning, or another letter.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
