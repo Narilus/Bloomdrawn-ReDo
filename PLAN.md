@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.5: the bestiary, drafted in `docs/notes/bestiary.md` for the owner's approval
+**Current task:** M6.8 Weapons: built, waiting on the owner's feel check (M6.7 signed off 6 Nov)
 
 ## Milestones
 
@@ -393,7 +393,8 @@ A new boss per Domain, with art. Five tiers at levels 10–50, each paying its D
 _Built 1 Nov: Trials' rules in `src/game/trials.ts` (tiers, pay, first clears, unlocking, EXP and stats, and `trialFight`); the four bosses and their adds in `src/content/enemies/`, listed by Domain in `src/content/trials.ts`, kits approved and fitted by the lab (`docs/notes/trials.md`); the Trials screen and its fight in `src/app/Trials.tsx`, from the main menu through party select, with Give up. Tests: `src/game/trials.test.ts`, `src/content/scenarios/trials.test.ts`, `src/app/saves.test.ts`, `e2e/trials.spec.ts`. Art: the four bosses are the owner's picks (4 Nov); the three adds are provisional. Tiers keep one moveset and any party may enter (owner, 4 Nov). Signed off 6 Nov, with the Hierophant moved to the middle slot and party Bleed and Poison counted in the HP bar's Incoming._
 
 ### M6.8 Weapons
-Drafted in `docs/notes/weapons.md` (14 Nov); second draft after the owner's answers, with names, signature effects and salvage still to approve: signature SSR weapons, SR and R sets per Domain, a main stat and an effect, no levels (on trial), reinforcing +1 to +5 and salvage. Then equipping on the character page, SR and R pull results as weapons, and the weapon banner with its own pity.
+Designed in `docs/notes/weapons.md` (accepted 15 Nov): eight signature SSR weapons and two SR and two R per Domain, each a main stat and an effect, no levels (on trial), reinforcing +1 to +5 and salvage for Pollen. Equipping on the character page (now tabbed: Attributes, Weapon, Kit, Potential), the inventory's Weapons, SR and R pull results as weapons, the weapon banner with its own pity, and the banners' two tickboxes.
+_Built 15 Nov. Engine: `WeaponDef`, a member's `weapon` (main stat in `characterOf`, effect held like a passive via `weaponOf`), modifier scope filters and an `on: 'party'` side (`src/engine/modifiers.ts`). Content: `src/content/weapons/`. Profile: `src/game/weapons.ts` (copies, equip, reinforce, salvage, lock, what a pulled copy becomes), save v11. Screens: `src/app/Roster.tsx` (character page), `src/app/Inventory.tsx`, `src/app/Banner.tsx`, `src/app/Weapons.tsx`; glyphs until weapon art. Lab: `npm run lab:weapons`. Tests: `src/content/scenarios/weapons.test.ts` (every weapon), `src/game/weapons.test.ts`, `src/save/profile.test.ts`, `e2e/weapons.spec.ts`. Waiting on the owner's feel check, the party-wide stacking question, and weapon art (a sub-step)._
 **Done when:** every weapon passive has a scenario test, tests prove the weapon banner's pity is its own and the new pull results, and e2e equips a weapon.
 
 ### M6.9 Profile Shop

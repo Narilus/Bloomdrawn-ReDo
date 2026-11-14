@@ -1,6 +1,6 @@
 # Weapons (M6.8)
 
-Status: **second draft, 14 Nov,** after the owner's answers to the first (`docs/notes/weapons-answers.md`). Settled: no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Still open: the names, the new signature effects and the salvage numbers (questions at the end).
+Status: **accepted 15 Nov and built** (M6.8). From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen. The lab's first run and its open question are under "The lab".
 
 ## Rules
 
@@ -161,7 +161,22 @@ The same left-hand column replaces today's tabs: **All, Currencies, Memories, Ma
 
 ## The lab
 
-Before the numbers are set, the owner asked for modelling (14 Nov): each party with no weapons, R, SR, their signatures, and signatures swapped onto the wrong characters, at fixed stats, to see how much a weapon moves a fight and whether +30% is too much.
+Before the numbers are set, the owner asked for modelling (14 Nov): each party with no weapons, R, SR, their signatures, and signatures swapped onto the wrong characters, at fixed stats, to see how much a weapon moves a fight and whether +30% is too much. `npm run lab:weapons` does this. First run (15 Nov): level 40 with every ascension, 10 turns against one dummy that can't fall or strike back, 60 seeds, ultimates fired when charged. Damage, then Shield, each against no weapons:
+
+| Loadout | Starters | Flesh | Rapture | Spirit |
+|---|---:|---:|---:|---:|
+| R (each member's Domain, Attack) | +15% / +5% | +14% / 0% | +21% / 0% | +15% / +2% |
+| SR (each member's Domain, Attack) | +29% / 0% | +26% / 0% | +42% / 0% | +27% / −1% |
+| Signatures | +39% / +28% | +12% / +28% | +29% / +11% | +35% / +9% |
+| Signatures, main stat only | +14% / +16% | +2% / +17% | +11% / +7% | +25% / +7% |
+| Signatures, passed one place along | +9% / +27% | 0% / +15% | +6% / +11% | +9% / +5% |
+| Signatures at +5 | +51% / +38% | +17% / +34% | +38% / +11% | +41% / +10% |
+
+What it shows:
+- A signature is best on its owner: passed along, the same four signatures give a fraction of the damage, since the effects stop fitting.
+- Main stats do most of an R's or SR's work. A full set of signatures' main stats adds 2–25% damage, depending on how many are Attack; Flesh's signatures are mostly Defense, HP and Crit Damage, so Flesh gains Shield, not damage.
+- **An SR set beats the signatures on damage in Flesh and Rapture.** Every member there wields an Attack SR, and the four Bone Rosaries' Tentacle bonus multiplies four times (×1.46), because a party-wide effect applies once for each copy. **Open question for the owner:** should a party-wide effect (Bone Rosary, Wax Candle, Torn Veil) count once however many members wield it?
+- The dummy never strikes, so Defense and HP main stats show only as Shield; fights against real encounters come with the balance pass.
 
 ## How it's built (for reference)
 

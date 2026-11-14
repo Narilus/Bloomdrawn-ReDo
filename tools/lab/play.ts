@@ -12,6 +12,7 @@ import {
   type EngineEvent,
   type Preview,
   type Registry,
+  type Wielded,
 } from '../../src/engine/index.ts';
 
 // The lab's simple player and its seeded fights against practice dummies, shared by the damage
@@ -37,6 +38,8 @@ export interface FightOptions {
   ascensions?: number;
   /** Every member's dupe level (those with dupes); C0 if absent. */
   dupes?: number;
+  /** Each member's weapon, in party order; none if absent. */
+  weapons?: (Wielded | null)[];
 }
 
 export interface Fight {
@@ -47,6 +50,8 @@ export interface Fight {
   cards: number;
   /** Resources at the start of turn 6. */
   turn6: Record<string, number>;
+  /** Shield the party gained in all. */
+  shield: number;
 }
 
 const flatten = (previews: Preview[]): Preview[] => previews.flatMap((p) => [p, ...(p.resolves === false ? [] : flatten(p.branch ?? []))]);
@@ -80,16 +85,17 @@ function choose(state: CombatState, registry: Registry, setup: Setup): Command |
 }
 
 export function fight(seed: number, setup: Setup, registry: Registry, options: FightOptions): Fight {
-  const { turns, enemies, level = 1, ascensions = 0, dupes = 0 } = options;
+  const { turns, enemies, level = 1, ascensions = 0, dupes = 0, weapons } = options;
   const party = setup.party;
   const dupeLevels = party.map((id) => (registry.characters[id]?.dupes?.length ? dupes : 0));
   let state = startCombat(
-    { seed, party, enemies: Array<string>(enemies).fill(DUMMY), levels: party.map(() => level), ascensions: party.map(() => ascensions), dupes: dupeLevels },
+    { seed, party, enemies: Array<string>(enemies).fill(DUMMY), levels: party.map(() => level), ascensions: party.map(() => ascensions), dupes: dupeLevels, ...(weapons && { weapons }) },
     registry,
   ).state;
   const perTurn = Array<number>(turns).fill(0);
   const ultimate = Array<number>(turns).fill(0);
   let cards = 0;
+  let shield = 0;
   let turn6: Record<string, number> = {};
   while (state.turn <= turns && state.phase === 'player') {
     const turn = state.turn;
@@ -101,9 +107,10 @@ export function fight(seed: number, setup: Setup, registry: Registry, options: F
     perTurn[turn - 1]! += dealt;
     if (command.type === 'fireUltimate') ultimate[turn - 1]! += dealt;
     if (command.type === 'playCard') cards += 1;
+    shield += result.events.filter((e) => e.type === 'shieldGained' && e.target === PARTY).reduce((n, e) => n + (e.amount ?? 0), 0);
     state = result.state;
   }
-  return { perTurn, ultimate, cards, turn6 };
+  return { perTurn, ultimate, cards, turn6, shield };
 }
 
 export const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);

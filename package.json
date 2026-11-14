@@ -17,7 +17,8 @@
     "e2e": "playwright test",
     "art": "node tools/art/cli.ts",
     "lab": "node tools/lab/curves.ts",
-    "lab:depth": "node tools/lab/depth.ts"
+    "lab:depth": "node tools/lab/depth.ts",
+    "lab:weapons": "node tools/lab/weapons.ts"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "5.3.0",
