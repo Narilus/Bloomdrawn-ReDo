@@ -1,8 +1,8 @@
 // Weapons (docs/notes/weapons.md, "The lab"; owner, 14 Nov): how much a weapon moves a party. Seeded
 // fights against practice dummies at level 40 with every ascension, played by the lab's simple
-// player, for each party with no weapons, an R or an SR of each member's Domain (the Attack ones),
-// their signatures, the signatures' main stats alone (a blank copy), the signatures passed one place
-// along (on the wrong characters), and the signatures at +5. The dummies never strike, so Shield is
+// player, for each party with no weapons, a set of four distinct Rs or SRs (a weapon at most once
+// per team, owner 15 Nov), the SR set's main stats alone (blank copies), their signatures and their
+// main stats alone, the signatures passed one place along (on the wrong characters), and +5. The dummies never strike, so Shield is
 // counted, not tested. A measuring tool, not a test. Run `npm run lab:weapons -- [--seeds 100] [--turns 10] [--enemies 1]`.
 import { parseArgs } from 'node:util';
 import type { Registry, WeaponDef, Wielded } from '../../src/engine/index.ts';
@@ -33,15 +33,27 @@ const PARTIES: Setup[] = [
 const registry = await loadRegistry();
 const weapons = Object.values(registry.weapons);
 const signatureOf = (character: string) => weapons.find((w) => w.signature === character)!;
-/** The Domain's weapon of a rarity whose main stat is Attack. */
-const attackWeapon = (domain: string, rarity: WeaponDef['rarity']) => weapons.find((w) => w.domain === domain && w.rarity === rarity && w.main.stat === 'attack')!;
 const domainOf = (character: string) => registry.characters[character]!.domain;
 
-// A blank copy of each signature: its main stat, no effect.
-const blanks = Object.fromEntries(signaturesBlank().map((w) => [w.id, w]));
-function signaturesBlank(): WeaponDef[] {
-  return weapons.filter((w) => w.signature).map((w) => ({ ...w, id: `lab.blank.${w.id}`, steps: w.steps.map((s) => ({ text: s.text })) }));
+/**
+ * A set of distinct weapons of one rarity, one per member front first (owner, 15 Nov: a weapon at most
+ * once per team): her own Domain's Attack weapon if it's free, else any free Attack weapon of that
+ * rarity (the Domains in order), else any free one.
+ */
+function distinctSet(party: string[], rarity: WeaponDef['rarity']): string[] {
+  const used = new Set<string>();
+  const pool = weapons.filter((w) => w.rarity === rarity);
+  return party.map((c) => {
+    const free = pool.filter((w) => !used.has(w.id));
+    const pick = free.find((w) => w.domain === domainOf(c) && w.main.stat === 'attack') ?? free.find((w) => w.main.stat === 'attack') ?? free[0]!;
+    used.add(pick.id);
+    return pick.id;
+  });
 }
+
+// A blank copy of every weapon: its main stat, no effect.
+const blank = (id: string) => `lab.blank.${id}`;
+const blanks = Object.fromEntries(weapons.map((w) => [blank(w.id), { ...w, id: blank(w.id), steps: w.steps.map((s) => ({ text: s.text })) }]));
 // The dummy has 9,999 HP, which a level-40 party breaks; here it can't fall, so damage isn't capped.
 const content: Registry = {
   ...registry,
@@ -51,10 +63,11 @@ const content: Registry = {
 
 const LOADOUTS: [string, (party: string[]) => (Wielded | null)[]][] = [
   ['None', (p) => p.map(() => null)],
-  ['R (Domain, Attack)', (p) => p.map((c) => ({ weapon: attackWeapon(domainOf(c), 'r').id }))],
-  ['SR (Domain, Attack)', (p) => p.map((c) => ({ weapon: attackWeapon(domainOf(c), 'sr').id }))],
+  ['R set', (p) => distinctSet(p, 'r').map((weapon) => ({ weapon }))],
+  ['SR set', (p) => distinctSet(p, 'sr').map((weapon) => ({ weapon }))],
+  ['SR set, main stats only', (p) => distinctSet(p, 'sr').map((id) => ({ weapon: blank(id) }))],
   ['Signatures', (p) => p.map((c) => ({ weapon: signatureOf(c).id }))],
-  ['Signatures, main stat only', (p) => p.map((c) => ({ weapon: `lab.blank.${signatureOf(c).id}` }))],
+  ['Signatures, main stats only', (p) => p.map((c) => ({ weapon: blank(signatureOf(c).id) }))],
   ['Signatures, passed along', (p) => p.map((_, i) => ({ weapon: signatureOf(p[(i + 1) % p.length]!).id }))],
   ['Signatures at +5', (p) => p.map((c) => ({ weapon: signatureOf(c).id, step: 5 }))],
 ];
@@ -76,4 +89,6 @@ for (const setup of PARTIES) {
     console.log(`| ${setup.name} | ${name} | ${Math.round(damage)} | ${pct(damage, base.damage)} | ${Math.round(shield)} | ${pct(shield, base.shield)} |`);
   }
 }
-console.log('\nSignatures on the wrong characters keep their main stats; only effects that fit the wielder apply.');
+console.log('\nSignatures on the wrong characters keep their main stats; only effects that fit the wielder apply.\n');
+const short = (id: string) => registry.weapons[id]!.name;
+for (const setup of PARTIES) console.log(`- ${setup.name}: R set ${distinctSet(setup.party, 'r').map(short).join(', ')}; SR set ${distinctSet(setup.party, 'sr').map(short).join(', ')}.`);

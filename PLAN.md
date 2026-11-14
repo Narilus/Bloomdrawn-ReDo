@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.8 Weapons: built, waiting on the owner's feel check (M6.7 signed off 6 Nov)
+**Current task:** M6.8 Weapons: moving to team presets; the one-entry-per-weapon proposal waits for the owner (M6.7 signed off 6 Nov)
 
 ## Milestones
 
@@ -394,7 +394,7 @@ _Built 1 Nov: Trials' rules in `src/game/trials.ts` (tiers, pay, first clears, u
 
 ### M6.8 Weapons
 Designed in `docs/notes/weapons.md` (accepted 15 Nov): eight signature SSR weapons and two SR and two R per Domain, each a main stat and an effect, no levels (on trial), reinforcing +1 to +5 and salvage for Pollen. Equipping on the character page (now tabbed: Attributes, Weapon, Kit, Potential), the inventory's Weapons, SR and R pull results as weapons, the weapon banner with its own pity, and the banners' two tickboxes.
-_Built 15 Nov. Engine: `WeaponDef`, a member's `weapon` (main stat in `characterOf`, effect held like a passive via `weaponOf`), modifier scope filters and an `on: 'party'` side (`src/engine/modifiers.ts`). Content: `src/content/weapons/`. Profile: `src/game/weapons.ts` (copies, equip, reinforce, salvage, lock, what a pulled copy becomes), save v11. Screens: `src/app/Roster.tsx` (character page), `src/app/Inventory.tsx`, `src/app/Banner.tsx`, `src/app/Weapons.tsx`; glyphs until weapon art. Lab: `npm run lab:weapons`. Tests: `src/content/scenarios/weapons.test.ts` (every weapon), `src/game/weapons.test.ts`, `src/save/profile.test.ts`, `e2e/weapons.spec.ts`. Waiting on the owner's feel check, the party-wide stacking question, and weapon art (a sub-step)._
+_Built 15 Nov. Engine: `WeaponDef`, a member's `weapon` (main stat in `characterOf`, effect held like a passive via `weaponOf`), modifier scope filters and an `on: 'party'` side (`src/engine/modifiers.ts`). Content: `src/content/weapons/`. Profile: `src/game/weapons.ts` (copies, equip, reinforce, salvage, lock, what a pulled copy becomes), save v11. Screens: `src/app/Roster.tsx` (character page), `src/app/Inventory.tsx`, `src/app/Banner.tsx`, `src/app/Weapons.tsx`; glyphs until weapon art. Lab: `npm run lab:weapons`. Tests: `src/content/scenarios/weapons.test.ts` (every weapon), `src/game/weapons.test.ts`, `src/save/profile.test.ts`, `e2e/weapons.spec.ts`. Revised by the owner 15 Nov: weapons move to team presets, one of each per preset; the one-entry-per-weapon proposal and its migration are in the note for approval, then built together with presets. Weapon art is a sub-step._
 **Done when:** every weapon passive has a scenario test, tests prove the weapon banner's pity is its own and the new pull results, and e2e equips a weapon.
 
 ### M6.9 Profile Shop

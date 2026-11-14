@@ -1,15 +1,18 @@
 # Weapons (M6.8)
 
-Status: **accepted 15 Nov and built** (M6.8). From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen. The lab's first run and its open question are under "The lab".
+Status: **built 15 Nov as copies wielded by characters; being revised.** From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen.
+
+**Decided 15 Nov (owner), not built yet:** weapons are equipped in team presets, not on characters, and a weapon appears at most once per preset (see "Team presets"). **Proposed, for the owner:** one entry per weapon instead of copies, no lock, signatures filled in automatically, and the save migration (see "Proposal: one entry per weapon"). Nothing below marked "proposed" is built.
 
 ## Rules
 
-- **Anyone can wield any weapon,** one weapon per character. A weapon copy has one wielder at a time; equipping it on someone else takes it off the first, after a confirm that names who has it.
+- **Anyone can wield any weapon.** Weapons are equipped in a team preset, one under each member (owner, 15 Nov). **A weapon appears at most once per preset,** so each weapon's effect counts once in a team, and different weapons' effects all apply. No "party-wide counts once" rule is needed.
+- **Presets share weapons.** One weapon can be in any number of presets, once in each. A run (or a Trial) copies its preset's weapons, and their steps, when it starts.
 - **Every weapon has a main stat and an effect.** The main stat always applies. The effect works off a mechanic (a keyword, a resource or a status), not a single card, so it helps any wielder who uses that mechanic, and does nothing for one who doesn't.
 - **Effects say "the wielder",** never "she" or "her", since anyone may hold a weapon, including characters not yet made.
 - **Rarities:** SSR (the eight signatures), SR and R.
 - **Reinforcing.** A duplicate of a weapon reinforces it, from +0 up to +5. Each step raises the **effect** by a tenth of its +0 value, so +5 is ×1.5. The main stat never changes. A +0 weapon does its whole job; reinforcing is investment, never needed.
-- **Salvage.** An unequipped, unlocked duplicate can be salvaged (see "Salvage"). A **lock** keeps a weapon from salvage, by hand or automatic.
+- **Salvage.** A spare copy can be salvaged for Pollen (see "Salvage"). Under the proposal, a weapon itself is never salvaged, only its spares, so there is no lock.
 - **No weapon levels, on trial** (owner, 14 Nov; Morimens is the precedent). The main stat is a share of the wielder's stat, so it keeps up as the character levels. DESIGN's "weapon materials" go with it.
 
 ### Main stats (placeholders)
@@ -76,16 +79,16 @@ The names are working names, like the rest.
 - **SR and R results on both banners:**
   - an SR is a random SR weapon;
   - an R is half the time a random R weapon, and half the time today's Memories and Ducats.
-- A result reads as before, plus what happened to the copy: "Surgeon's Scalpel (new)", "(reinforced to +2)" or "(salvaged)".
+- A result reads as before, plus what happened to the copy: "Surgeon's Scalpel (new)", "(reinforced to +2)", "(salvaged)", or, under the proposal, "(a spare)".
 
 ### The two tickboxes
 
 These go on both banner screens, since SR and R weapons come from both. They're one setting, saved in the profile, and both are off by default.
 
-- ☐ **Auto-reinforce duplicates.** A duplicate of a weapon you already have reinforces your highest copy below +5, preferring one that's equipped.
-- ☐ **Auto-salvage duplicates of maxed weapons.** A duplicate of a weapon you hold at +5 is salvaged.
+- ☐ **Auto-reinforce duplicates.** A duplicate of a weapon below +5 raises it one step.
+- ☐ **Auto-salvage duplicates of maxed weapons.** A duplicate of a weapon at +5 is salvaged.
 
-They don't conflict. Reinforcing goes first, and salvage only takes what's left. With both on, duplicates grow your weapons up to +5 and are salvaged after that. With salvage alone, duplicates of weapons below +5 are kept. A weapon's first copy is never salvaged, and neither is any copy of a locked weapon.
+They don't conflict. Reinforcing goes first, and salvage only takes what's left. With both on, duplicates grow a weapon to +5 and are salvaged after that. Otherwise a duplicate is kept as a spare. A weapon's first copy is never salvaged. (Built today on copies, with a lock; the proposal below simplifies both.)
 
 ## Salvage
 
@@ -102,7 +105,7 @@ The sums per 100 pulls (SR about 16, R weapons about 41):
 | SR duplicate | 2 |
 | SSR duplicate | 40, as a character past C5 |
 
-Salvaging a reinforced copy pays for every copy in it: a +2 SR pays 6.
+Salvage pays per spare copy. (As built today, salvaging a reinforced copy pays for every copy in it: a +2 SR pays 6.)
 
 The lab checks Pollen income against what the Profile Shop (M6.9) sells before the numbers are set. If they can't be balanced, salvage pays **Ducats** instead (the owner's fallback): about 50 for an R and 200 for an SR, small next to a run's 1,100 at Depth 1.
 
@@ -116,67 +119,104 @@ Recommendations, in plain gacha terms, not flower terms:
 
 The tabs run down the left, like the main menu, and the art stays large in the middle. The character's name, title, Domain, role, level and Potential stay above the panel whichever tab is open. Arrows step to the previous or next character.
 
+**Decided 15 Nov:** the Weapon tab goes, since weapons now belong to presets. The page shows the character's own stats, without any weapon.
+
 ```
 ┌──────────────┬───────────────────────────┬────────────────────────────────────┐
 │  ‹ Kibane ›  │                           │ Kibane, the Nine-Tailed            │
 │              │                           │ Spirit · Attacker · Lv 32 · P2     │
 │ ▌Attributes  │                           ├────────────────────────────────────┤
-│  Weapon      │      (character art,      │                                    │
-│  Kit         │       full height)        │   the chosen tab's panel           │
-│  Potential   │                           │                                    │
-│              │                           │                                    │
+│  Kit         │      (character art,      │                                    │
+│  Potential   │       full height)        │   the chosen tab's panel           │
 │              │                           │                                    │
 │  Back        │                           │                                    │
 └──────────────┴───────────────────────────┴────────────────────────────────────┘
 ```
 
-- **Attributes:**
-  - stats (HP, Attack, Defense, Crit Rate, Crit Damage), each with what the weapon adds shown beside it;
-  - level, the EXP bank, Level up and Ascend, as today.
-- **Weapon:**
-  - the equipped weapon's card: name, rarity, main stat, effect at its step, its +0 to +5 pips, and "Signature · Kibane" if it is one;
-  - **Change**, a list of owned copies with the character's signature first, then by rarity, each showing who wields it;
-  - **Unequip** and **Reinforce**.
-- **Kit:** the five cards and reward cards, the passive, the ultimate and its Transcended form (today's page, under one tab).
-- **Potential:** P1 to P5 as today's dupe levels, the ones reached lit, and how many copies are owned.
+- **Attributes:** base stats (HP, Attack, Defense, Crit Rate, Crit Damage); level, the EXP bank, Level up and Ascend.
+- **Kit:** the five cards and reward cards, the passive, the ultimate and its Transcended form.
+- **Potential:** P1 to P5, the ones reached lit.
+
+## Team presets
+
+**Decided 15 Nov (owner):** equipping happens on the team preset screen (party select, for runs and Trials), with a weapon sub-slot under each member. Each slot shows the member's stats with her weapon.
+
+```
+┌───────────────┬───────────────┬───────────────┬───────────────┐
+│ Front: Maelia │ 2: Agathe     │ 3: Anthe      │ 4: Leonora    │
+│ HP 72 ATK 9   │ HP 50 ATK 16  │ HP 78 ATK 9   │ HP 45 ATK 18  │
+│ DEF 20        │ DEF 12        │ DEF 15        │ DEF 9         │
+├───────────────┼───────────────┼───────────────┼───────────────┤
+│ ◇ Seed-Orb    │ ◇ Bone Rosary │ ◇ Vigil Lamp  │ ◇ (none)      │
+│   Staff +0    │   +2          │   +0          │               │
+└───────────────┴───────────────┴───────────────┴───────────────┘
+```
+
+- **The weapon sub-slot** opens a picker of owned weapons, the member's signature first, then by rarity, each marked if another slot in this preset holds it. "None" empties the slot.
+- **Picking a weapon another slot holds moves it,** after a confirm naming who holds it: "Agathe holds it in this team. Move it to Maelia?" Other presets are untouched.
+- **Proposed:** the weapon belongs to the member in that preset. When members swap places it goes with her; when she's removed, her slot empties.
+- **Proposed:** when a character joins a preset and her signature is owned and not already in that preset, it fills her sub-slot.
+- A run or Trial started from the preset copies its weapons and their steps at the start, as it copies levels today. Reinforcing mid-run counts from the next run.
 
 ## The inventory
 
-The same left-hand column replaces today's tabs: **All, Currencies, Memories, Materials, Weapons, Special.**
+The same left-hand column as the main menu: **All, Currencies, Memories, Materials, Weapons, Special.** Built 15 Nov as one tile per copy, with Reinforce, Salvage and Lock. Under the proposal it becomes one tile per weapon:
 
 ```
-┌──────────────┬──────────────────────────────────────┬─────────────────────────┐
-│   All        │  [Scalpel +2] [Rosary +0] [Bell +5]  │  Surgeon's Scalpel  SR  │
-│   Currencies │  [Hook +0]    [Hook +0]   [Fan +1]   │  Attack +18%            │
-│   Memories   │  [Hourglass +0] ...                  │  Bleed, Poison +14.4%   │
-│   Materials  │                                      │  Reinforced +2 ◆◆◇◇◇    │
-│ ▌Weapons     │  Filter: rarity · Domain             │  Wielded by Virelle     │
-│   Special    │                                      │  [Reinforce] [Salvage]  │
-│   Back       │                                      │  [Lock]                 │
-└──────────────┴──────────────────────────────────────┴─────────────────────────┘
+┌──────────────┬───────────────────────────────────────┬────────────────────────┐
+│   All        │  [Scalpel +2 ×1] [Rosary +0] [Bell +5]│  Surgeon's Scalpel  SR │
+│   Currencies │  [Hook +0 ×3]    [Fan +1]             │  Attack +18%           │
+│   Memories   │                                       │  Bleed, Poison +14.4%  │
+│   Materials  │                                       │  +2 ◆◆◇◇◇  1 spare     │
+│ ▌Weapons     │                                       │  In Team 1 (Virelle)   │
+│   Special    │                                       │  [Reinforce] [Salvage] │
+│   Back       │                                       │                        │
+└──────────────┴───────────────────────────────────────┴────────────────────────┘
 ```
 
-- Under **Weapons**, each copy is a tile: its icon framed in its rarity colour, its +step, a lock, and the wielder's face if it has one.
-- The detail panel shows the main stat, the effect now and at +5, and the wielder. **Reinforce** chooses a duplicate of the same weapon; **Salvage** confirms and shows what it pays; **Lock** toggles.
+- A tile shows the weapon's glyph (art later) framed in its rarity colour, its step, and its spares (×3).
+- The detail panel shows the main stat, the effect now and at +5, and the presets it's in. **Reinforce** spends one spare for a step; **Salvage** spends spares for Pollen (one, or all, after a confirm showing the total).
+
+## Proposal: one entry per weapon
+
+For the owner (15 Nov). Not built.
+
+- **The profile holds each weapon once:** its step (+0 to +5) and its spare copies. Owning a weapon is having its entry; there are no copies to tell apart and no wielders to track, since presets name weapons by ID.
+- **A pulled copy:**
+  - the first is the weapon, at +0;
+  - after that, with auto-reinforce on and the weapon below +5, it raises the step;
+  - with auto-salvage on and the weapon at +5, it's salvaged (R 1, SR 2, SSR 40 Pollen);
+  - otherwise it's a spare.
+- **By hand:** Reinforce spends a spare for a step; Salvage turns spares into Pollen. The weapon itself is never salvaged, so **the lock goes**: there's nothing left for it to protect.
+- **Auto-fill:** a member's owned signature fills her sub-slot when she joins a preset, if that preset doesn't already hold it.
+- **Save migration (v11 → v12):**
+  - copies of a weapon merge into one entry at the highest step;
+  - the other copies become spares, one for every copy reinforced into them (a +1 and a +0 beside a kept +2 make 3 spares), so nothing pulled is lost. The simpler alternative, one spare per leftover copy, would quietly lose reinforcement;
+  - the weapon each character wielded goes to her slot in every saved preset she's in, front first, skipping a weapon already in that preset. A profile with no saved presets keeps its weapons unassigned;
+  - locks are dropped. Pull history is kept as it was ("a duplicate" for a copy kept).
+  - A run in progress is untouched: it already holds its own copy of its weapons.
+- **What changes in code:** `Profile.weapons` becomes weapon → `{ step, spares }`; `equipped` goes; each `Team` gains `weapons`, a weapon ID or null per place; the save rejects a preset holding one weapon twice or a weapon not owned. The engine is unchanged: a member still fights with `{ weapon, step }`.
 
 ## The lab
 
-Before the numbers are set, the owner asked for modelling (14 Nov): each party with no weapons, R, SR, their signatures, and signatures swapped onto the wrong characters, at fixed stats, to see how much a weapon moves a fight and whether +30% is too much. `npm run lab:weapons` does this. First run (15 Nov): level 40 with every ascension, 10 turns against one dummy that can't fall or strike back, 60 seeds, ultimates fired when charged. Damage, then Shield, each against no weapons:
+Before the numbers are set, the owner asked for modelling (14 Nov): each party with no weapons, R, SR, their signatures, and signatures on the wrong characters, to see how much a weapon moves a fight and whether +30% is too much. `npm run lab:weapons` does this: level 40 with every ascension, 10 turns against one dummy that can't fall or strike back, 60 seeds, ultimates fired when charged.
+
+The first run (15 Nov) gave each member her own Domain's Attack weapon, so a Rapture team wore two or more Bone Rosaries and their Tentacle bonus multiplied. The owner's answer is one weapon per preset. The rerun uses **sets of four distinct weapons**: each member's own Domain's Attack weapon if it's free, else any free Attack weapon (for example, Rapture's SR set is Bone Rosary, Iron Snare, Surgeon's Scalpel, Talisman Fan). Damage, then Shield, against no weapons:
 
 | Loadout | Starters | Flesh | Rapture | Spirit |
 |---|---:|---:|---:|---:|
-| R (each member's Domain, Attack) | +15% / +5% | +14% / 0% | +21% / 0% | +15% / +2% |
-| SR (each member's Domain, Attack) | +29% / 0% | +26% / 0% | +42% / 0% | +27% / −1% |
+| R set (distinct) | +15% / +5% | +10% / 0% | +16% / 0% | +12% / +3% |
+| SR set (distinct) | +29% / 0% | +19% / 0% | +32% / 0% | +22% / 0% |
+| SR set, main stats only | +18% / 0% | +18% / 0% | +18% / 0% | +18% / 0% |
 | Signatures | +39% / +28% | +12% / +28% | +29% / +11% | +35% / +9% |
-| Signatures, main stat only | +14% / +16% | +2% / +17% | +11% / +7% | +25% / +7% |
+| Signatures, main stats only | +14% / +16% | +2% / +17% | +11% / +7% | +25% / +7% |
 | Signatures, passed one place along | +9% / +27% | 0% / +15% | +6% / +11% | +9% / +5% |
 | Signatures at +5 | +51% / +38% | +17% / +34% | +38% / +11% | +41% / +10% |
 
 What it shows:
-- A signature is best on its owner: passed along, the same four signatures give a fraction of the damage, since the effects stop fitting.
-- Main stats do most of an R's or SR's work. A full set of signatures' main stats adds 2–25% damage, depending on how many are Attack; Flesh's signatures are mostly Defense, HP and Crit Damage, so Flesh gains Shield, not damage.
-- **An SR set beats the signatures on damage in Flesh and Rapture.** Every member there wields an Attack SR, and the four Bone Rosaries' Tentacle bonus multiplies four times (×1.46), because a party-wide effect applies once for each copy. **Open question for the owner:** should a party-wide effect (Bone Rosary, Wax Candle, Torn Veil) count once however many members wield it?
-- The dummy never strikes, so Defense and HP main stats show only as Shield; fights against real encounters come with the balance pass.
+- **A signature is best on its owner.** Passed along, the same four give 0–9% damage instead of 12–39%.
+- **Bone Rosary needs no change yet.** Worn once, the whole SR set's effects add +14% in Rapture (32% against 18% from main stats alone) and +11% for the starters, where Tentacles are most of the damage; elsewhere they add 1–4%. That's what an Attack SR set should do.
+- **The SR set's lead over the signatures in Flesh (+19% against +12%) and Rapture (+32% against +29%) is main stats.** The SR set is four Attack stats (+18% each); those parties' signatures are mostly Defense, HP and crit, which add only 2–11% damage here. A dummy that never strikes can't show what Defense and HP are worth, so this is a question for real encounters in the balance pass: whether those signatures' main stats are worth what they cost in damage.
 
 ## How it's built (for reference)
 
@@ -185,11 +225,11 @@ What it shows:
   - a member's weapon joins the member's stats (main stat) and hooks (effect);
   - reinforcing scales the effect's amounts;
   - filters for "the wielder's cards" and "consumed by the wielder" (Embryo, Essence); held-turn counts already exist for Hours Kept.
-- **Save (v11):** weapon copies as `{ uid, weapon, step, locked? }`; `equipped` as character → copy; the two tickboxes.
+- **Save (v11, built):** weapon copies as `{ uid, weapon, step, locked? }`; `equipped` as character → copy; the two tickboxes. The proposal's v12 is above.
 - **Art (a sub-step, owner, 14 Nov):** an icon for every weapon, signatures and the 16 generics, through `npm run art`: a prop-only prompt stem in the battle sprites' pixel style, symbolic where that reads better than a literal object (the Sealed Ledger as a clasped book with a wax seal, the Torn Veil as a strip of lace with bells). The owner picks, as with sprites.
 
 ## Questions for the owner
 
-1. **Names:** Potential (P1–P5) for characters and Reinforce (+1 to +5) for weapons, or one of the alternatives?
-2. **Signature effects:** do the eight rewrites hit "best on their character, still useful to a future one"?
-3. **Salvage:** Pollen at R 1, SR 2, SSR 40, for the lab to check against the M6.9 shop, with Ducats as the fallback?
+1. **One entry per weapon:** the proposal above, with the lock dropped and signatures filled in automatically?
+2. **Migration spares:** one spare for every copy reinforced into a merged copy (nothing lost), or one per leftover copy?
+3. **A weapon in a preset belongs to its member,** moving with her when places swap and leaving with her?
