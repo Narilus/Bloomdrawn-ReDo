@@ -27,6 +27,8 @@ test('the roster shows a kit, and a run starts with the team chosen, in its orde
   await page.getByRole('button', { name: 'Back' }).click();
   await page.getByRole('button', { name: 'Maelia', exact: true }).click();
   await expect(page.locator('.character-info h2')).toHaveText('Maelia, Midwife of the Bloom');
+  // Her kit is on its own tab (M6.8).
+  await page.getByRole('tab', { name: 'Kit' }).click();
   await expect(page.locator('.character-info')).toContainText('The first time each turn a card gains Embryo, gain 1 more.');
   await expect(page.locator('.character-cards .card')).toHaveCount(7);
   expect(await artHeight(page, '.character-art img')).toBeCloseTo(antheHeight, 0);
@@ -86,18 +88,20 @@ test('the roster shows a kit, and a run starts with the team chosen, in its orde
   expect(errors).toEqual([]);
 });
 
-test("a character's dupe level shows on the roster, and the page shows her at it, with every level listed (M5.4)", async ({ page }) => {
+test("a character's Potential shows on the roster, and the page shows her at it, with every level listed (M5.4, M6.8)", async ({ page }) => {
   const data = { pulls: 0, runs: 0, owned: ['kibane'], dupes: { kibane: 3 } };
   const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 6, contentVersion: 1, data } } });
   await page.goto('/');
   await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Roster' }).click();
-  await expect(page.locator('.roster-tile[aria-label="Kibane"] .roster-level')).toHaveText('C3');
+  await expect(page.locator('.roster-tile[aria-label="Kibane"] .roster-level')).toHaveText('P3');
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-level')).toHaveCount(0);
   await page.getByRole('button', { name: 'Kibane', exact: true }).click();
   // C2's +10% HP and +3 Attack; C3's Foxfire Rite at 80% of Attack 18 plus 240% of it per Essence.
   await expect(page.locator('.character-stats')).toContainText('HP55Attack18');
+  await page.getByRole('tab', { name: 'Kit' }).click();
   await expect(page.locator('.character-cards').first()).toContainText('Deal 14 + 43 × Essence damage.');
+  await page.getByRole('tab', { name: 'Potential' }).click();
   await expect(page.locator('.character-dupes li')).toHaveCount(5);
   await expect(page.locator('.character-dupes li.reached')).toHaveCount(3);
   await page.locator('.character-dupes').scrollIntoViewIfNeeded();
@@ -125,7 +129,9 @@ test('a character levels up and ascends on her page, and party select buys a pre
   // A Support at level 10 before ascending (m6-scaling.md, 4.4–4.5).
   await expect(page.locator('.character-stats')).toContainText('HP117Attack16Defense30');
   // Her Strike is 300% of Attack 16.
+  await page.getByRole('tab', { name: 'Kit' }).click();
   await expect(page.locator('.character-cards').first()).toContainText('Deal 48 damage.');
+  await page.getByRole('tab', { name: 'Attributes' }).click();
   await expect(growth.getByRole('button', { name: /Ascend/ })).toContainText('gives 1 Purified Bloom');
   await growth.getByRole('button', { name: /Ascend/ }).click();
   const reward = page.getByRole('dialog', { name: 'Ascension reward' });

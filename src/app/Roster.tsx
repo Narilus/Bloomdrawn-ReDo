@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
-import { describeCharacter, type CardDef } from '../engine/index.ts';
+import { critOf, describeCharacter, type CardDef } from '../engine/index.ts';
 import { fieldedCharacter, runCardText, type Growth } from '../game/expedition.ts';
 import { affordableLevels, ascend, ascensionCost, ASCENSIONS, ASCENSION_PULLS, ascensionsOf, levelCap, levelCost, levelOf, MAX_LEVEL, MEMORIES, type GrowthResult } from '../game/levels.ts';
 import { DEPTH_BAND, DEPTH_MAX, rewardMultiplier } from '../game/depth.ts';
 import { BLOOM, PARTY_SIZE, partyProblem, plural, type Profile, placeInTeam, quickTeam, removeFromTeam, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
+import { MAX_STEP, wielderOf, type WeaponResult } from '../game/weapons.ts';
 import { battleArt } from '../stage/art.ts';
 import { CardFace, markNumber } from './CardView.tsx';
+import { SideList } from './SideList.tsx';
+import { sortCopies, WeaponCard, WeaponTile } from './Weapons.tsx';
 
 // The roster, a character's page and party select (docs/notes/m5-collection.md, "The roster and the party").
 
@@ -31,7 +34,7 @@ export function Art({ id, className }: { id: string; className: string }) {
   );
 }
 
-/** A character as a tile: her art, name and Domain, her level and dupe level if given, and her place in the party if she has one. */
+/** A character as a tile: her art, name and Domain, her level and Potential if given, and her place in the party if she has one. */
 function Tile({ id, place, level, dupes, onClick }: { id: string; place?: number | undefined; level?: number | undefined; dupes?: number | undefined; onClick: () => void }) {
   const def = registry.characters[id];
   return (
@@ -41,7 +44,7 @@ function Tile({ id, place, level, dupes, onClick }: { id: string; place?: number
       <span>{DOMAIN_LABEL[def?.domain ?? ''] ?? def?.domain}</span>
       {place !== undefined && <em className="roster-place">{place + 1}</em>}
       {level ? <em className="roster-lv">Lv {level}</em> : null}
-      {dupes ? <em className="roster-level">C{dupes}</em> : null}
+      {dupes ? <em className="roster-level">P{dupes}</em> : null}
     </button>
   );
 }
@@ -288,13 +291,16 @@ interface RosterProps {
   growth: Growth;
   onLevelUp: (id: string, levels: number) => Promise<GrowthResult>;
   onAscend: (id: string) => Promise<GrowthResult>;
+  onEquip: (id: string, uid: string) => Promise<WeaponResult>;
+  onUnequip: (id: string) => Promise<WeaponResult>;
+  onReinforce: (uid: string, fodder: string) => Promise<WeaponResult>;
   onBack: () => void;
 }
 
 /** Every owned character, with her level and dupe level; one opens her page. */
-export function Roster({ owned, profile, growth, onLevelUp, onAscend, onBack }: RosterProps) {
+export function Roster({ owned, profile, growth, onBack, ...actions }: RosterProps) {
   const [open, setOpen] = useState<string | null>(null);
-  if (open) return <CharacterPage id={open} profile={profile} growth={growth} onLevelUp={onLevelUp} onAscend={onAscend} onBack={() => setOpen(null)} />;
+  if (open) return <CharacterPage id={open} ids={owned} profile={profile} growth={growth} {...actions} onStep={setOpen} onBack={() => setOpen(null)} />;
   return (
     <div className="roster-screen">
       <h2 className="panel-title">Roster</h2>
@@ -403,93 +409,96 @@ function Growing({
   );
 }
 
-/** A character's stats and kit at her dupe level and level, with the numbers her stats fix, what each dupe level does, and levelling. */
-function CharacterPage({ id, profile, growth, onLevelUp, onAscend, onBack }: Omit<RosterProps, 'owned' | 'onBack'> & { id: string; onBack: () => void }) {
+type Tab = 'attributes' | 'weapon' | 'kit' | 'potential';
+const TABS: [Tab, string][] = [
+  ['attributes', 'Attributes'],
+  ['weapon', 'Weapon'],
+  ['kit', 'Kit'],
+  ['potential', 'Potential'],
+];
+const ROLE_LABEL: Record<string, string> = { attacker: 'Attacker', sentinel: 'Sentinel', support: 'Support', hybrid: 'Hybrid' };
+
+/**
+ * A character's page (docs/notes/weapons.md, "The character page"): the tabs down the left, the art
+ * large in the middle, and the chosen tab beside it under her name, which stays whichever tab is
+ * open. Arrows step to the previous or next character.
+ */
+function CharacterPage({
+  id,
+  ids,
+  profile,
+  growth,
+  onLevelUp,
+  onAscend,
+  onEquip,
+  onUnequip,
+  onReinforce,
+  onStep,
+  onBack,
+}: Omit<RosterProps, 'owned' | 'onBack'> & { id: string; ids: readonly string[]; onStep: (id: string) => void; onBack: () => void }) {
   const base = registry.characters[id];
   const def = fieldedCharacter(id, registry, growth);
   const [gained, setGained] = useState(0);
+  const [tab, setTab] = useState<Tab>('attributes');
   if (!base || !def) return null;
-  const level = growth.dupes?.[id] ?? 0;
-  const kit = describeCharacter(def);
-  const cards = def.cards.map((c) => registry.cards[c]).filter((c): c is CardDef => c !== undefined);
-  const rewards = Object.values(registry.cards).filter((c) => c.reward && c.owner === id);
-  const face = (card: CardDef) => (
-    <CardFace
-      key={card.id}
-      id={card.id}
-      def={card}
-      owner={def}
-      text={runCardText({ card: card.id, owner: id }, registry, { charge: false, keywords: false, mark: markNumber }, growth)}
-      cost={card.cost}
-      registry={registry}
-      playable
-    />
-  );
+  const potential = growth.dupes?.[id] ?? 0;
+  const at = ids.indexOf(id);
+  const step = (by: number) => onStep(ids[(at + by + ids.length) % ids.length]!);
   return (
     <div className={`character-page domain-${def.domain}`} aria-label={def.name}>
-      <Art id={id} className="character-art" />
-      <div className="character-info">
-        <h2>{fullName(id)}</h2>
-        <p className="character-domain">
-          {DOMAIN_LABEL[def.domain] ?? def.domain}
-          {` · Level ${growth.levels?.[id] ?? 1}`}
-          {base.dupes?.length ? ` · C${level}` : ''}
-        </p>
-        <dl className="character-stats">
-          <dt>HP</dt>
-          <dd>{def.stats.hp}</dd>
-          <dt>Attack</dt>
-          <dd>{def.stats.attack}</dd>
-          <dt>Defense</dt>
-          <dd>{def.stats.defense}</dd>
-        </dl>
-        <Growing id={id} profile={profile} onLevelUp={onLevelUp} onAscend={onAscend} onGained={setGained} />
-        {def.passive && (
-          <section>
-            <h3>
-              {def.passive.name} <small>Passive · {def.passive.scope === 'run' ? 'run' : 'combat'}</small>
-            </h3>
-            <p>{kit.passive}</p>
-          </section>
-        )}
-        {def.ultimate && (
-          <section>
-            <h3>
-              {def.ultimate.name} <small>Ultimate</small>
-            </h3>
-            <p>{kit.ultimate}</p>
-            {kit.transcended && (
-              <p className="character-transcended">
-                <em>Transcended:</em> {kit.transcended}
-              </p>
-            )}
-          </section>
-        )}
-        <h3>Cards</h3>
-        <div className="character-cards">{cards.map(face)}</div>
-        {rewards.length > 0 && (
-          <>
-            <h3>Reward cards</h3>
-            <div className="character-cards">{rewards.map(face)}</div>
-          </>
-        )}
-        {base.dupes?.length ? (
-          <section>
-            <h3>Dupes</h3>
-            <ol className="character-dupes" aria-label="Dupes">
-              {base.dupes.map((d, i) => (
-                <li key={i} className={i < level ? 'reached' : undefined}>
-                  <em>C{i + 1}</em> {d.text}
-                </li>
-              ))}
-            </ol>
-          </section>
-        ) : null}
-      </div>
-      <div className="panel-buttons character-back">
-        <button className="ghost" onClick={onBack}>
+      <nav className="character-nav" aria-label="Character">
+        <div className="character-step">
+          <button className="ghost" aria-label="Previous character" disabled={ids.length < 2} onClick={() => step(-1)}>
+            ‹
+          </button>
+          <strong>{def.name}</strong>
+          <button className="ghost" aria-label="Next character" disabled={ids.length < 2} onClick={() => step(1)}>
+            ›
+          </button>
+        </div>
+        <SideList label="Character page" items={TABS} chosen={tab} onChoose={setTab} />
+        <button className="ghost side-back" onClick={onBack}>
           Back
         </button>
+      </nav>
+      <Art id={id} className="character-art" />
+      <div className="character-info">
+        <header className="character-header">
+          <h2>{fullName(id)}</h2>
+          <p className="character-domain">
+            {DOMAIN_LABEL[def.domain] ?? def.domain}
+            {def.role ? ` · ${ROLE_LABEL[def.role]}` : ''}
+            {` · Level ${growth.levels?.[id] ?? 1}`}
+            {base.dupes?.length ? ` · P${potential}` : ''}
+          </p>
+        </header>
+        <div className="character-panel" role="tabpanel" aria-label={TABS.find(([t]) => t === tab)?.[1]}>
+          {tab === 'attributes' && (
+            <>
+              <Attributes id={id} growth={growth} />
+              <Growing id={id} profile={profile} onLevelUp={onLevelUp} onAscend={onAscend} onGained={setGained} />
+            </>
+          )}
+          {tab === 'weapon' && <WeaponTab id={id} profile={profile} onEquip={onEquip} onUnequip={onUnequip} onReinforce={onReinforce} />}
+          {tab === 'kit' && <Kit id={id} growth={growth} />}
+          {tab === 'potential' &&
+            (base.dupes?.length ? (
+              <section>
+                <h3>
+                  Potential <small>P{potential} of {base.dupes.length} · each copy pulled after the first opens one</small>
+                </h3>
+                <ol className="character-dupes" aria-label="Potential">
+                  {base.dupes.map((d, i) => (
+                    <li key={i} className={i < potential ? 'reached' : undefined}>
+                      <em>P{i + 1}</em> {d.text}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : (
+              <p>No Potential levels yet.</p>
+            ))}
+        </div>
       </div>
       {gained > 0 && (
         <div className="result reward ascension-reward" role="dialog" aria-label="Ascension reward">
@@ -509,5 +518,184 @@ function CharacterPage({ id, profile, growth, onLevelUp, onAscend, onBack }: Omi
         </div>
       )}
     </div>
+  );
+}
+
+/** Her stats as she fights, each with what her weapon adds beside it. */
+function Attributes({ id, growth }: { id: string; growth: Growth }) {
+  const armed = fieldedCharacter(id, registry, growth)?.stats;
+  const bare = fieldedCharacter(id, registry, { ...growth, weapons: undefined })?.stats;
+  if (!armed || !bare) return null;
+  const [a, b] = [critOf(armed), critOf(bare)];
+  const rows: [string, number, number, string][] = [
+    ['HP', armed.hp, bare.hp, ''],
+    ['Attack', armed.attack, bare.attack, ''],
+    ['Defense', armed.defense, bare.defense, ''],
+    ['Crit Rate', a.rate, b.rate, '%'],
+    ['Crit Damage', a.damage, b.damage, '%'],
+  ];
+  return (
+    <dl className="character-stats">
+      {rows.map(([name, value, without, unit]) => (
+        <div key={name}>
+          <dt>{name}</dt>
+          <dd>
+            {value}
+            {unit}
+            {value !== without && <small className="stat-weapon"> (+{value - without}{unit} weapon)</small>}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** Her passive, ultimate and cards, with the numbers her stats fix. */
+function Kit({ id, growth }: { id: string; growth: Growth }) {
+  const def = fieldedCharacter(id, registry, growth);
+  if (!def) return null;
+  const kit = describeCharacter(def);
+  const cards = def.cards.map((c) => registry.cards[c]).filter((c): c is CardDef => c !== undefined);
+  const rewards = Object.values(registry.cards).filter((c) => c.reward && c.owner === id);
+  const face = (card: CardDef) => (
+    <CardFace
+      key={card.id}
+      id={card.id}
+      def={card}
+      owner={def}
+      text={runCardText({ card: card.id, owner: id }, registry, { charge: false, keywords: false, mark: markNumber }, growth)}
+      cost={card.cost}
+      registry={registry}
+      playable
+    />
+  );
+  return (
+    <>
+      {def.passive && (
+        <section>
+          <h3>
+            {def.passive.name} <small>Passive · {def.passive.scope === 'run' ? 'run' : 'combat'}</small>
+          </h3>
+          <p>{kit.passive}</p>
+        </section>
+      )}
+      {def.ultimate && (
+        <section>
+          <h3>
+            {def.ultimate.name} <small>Ultimate</small>
+          </h3>
+          <p>{kit.ultimate}</p>
+          {kit.transcended && (
+            <p className="character-transcended">
+              <em>Transcended:</em> {kit.transcended}
+            </p>
+          )}
+        </section>
+      )}
+      <h3>Cards</h3>
+      <div className="character-cards">{cards.map(face)}</div>
+      {rewards.length > 0 && (
+        <>
+          <h3>Reward cards</h3>
+          <div className="character-cards">{rewards.map(face)}</div>
+        </>
+      )}
+    </>
+  );
+}
+
+/**
+ * Her weapon: its card, and Change (every owned copy, her signature first, each showing who wields
+ * it), Unequip and Reinforce (with a duplicate of the same weapon). Taking a copy from someone else
+ * asks first. The game refuses what can't be done; the page shows why.
+ */
+function WeaponTab({ id, profile, onEquip, onUnequip, onReinforce }: Pick<RosterProps, 'onEquip' | 'onUnequip' | 'onReinforce'> & { id: string; profile: Profile }) {
+  const [open, setOpen] = useState<'change' | 'reinforce' | null>(null);
+  const [taking, setTaking] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const uid = profile.equipped?.[id];
+  const copy = profile.weapons?.find((c) => c.uid === uid);
+  const def = copy && registry.weapons[copy.weapon];
+  const copies = profile.weapons ?? [];
+  const name = registry.characters[id]?.name ?? id;
+  const act = (job: () => Promise<WeaponResult>, done: string) => {
+    if (busy) return;
+    setBusy(true);
+    job()
+      .then((r) => setNote(r.ok ? done : r.reason))
+      .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
+      .finally(() => {
+        setBusy(false);
+        setOpen(null);
+        setTaking(null);
+      });
+  };
+  const choose = (pick: string) => {
+    const holder = wielderOf(profile, pick);
+    if (holder && holder !== id) return setTaking(pick);
+    act(() => onEquip(id, pick), `${name} wields it.`);
+  };
+  const fodder = copy ? copies.filter((c) => c.weapon === copy.weapon && c.uid !== copy.uid && !c.locked && !wielderOf(profile, c.uid)) : [];
+  const holderName = taking ? registry.characters[wielderOf(profile, taking) ?? '']?.name : undefined;
+  return (
+    <section className="character-weapon" aria-label="Weapon">
+      {def && copy ? <WeaponCard def={def} step={copy.step ?? 0} /> : <p>{name} wields no weapon.</p>}
+      <div className="panel-buttons">
+        <button className="end-turn" disabled={busy || copies.length === 0} onClick={() => (setNote(null), setOpen('change'))}>
+          Change
+        </button>
+        {copy && (
+          <>
+            <button className="ghost" disabled={busy} onClick={() => act(() => onUnequip(id), 'Back in the inventory.')}>
+              Unequip
+            </button>
+            <button className="ghost" disabled={busy || (copy.step ?? 0) >= MAX_STEP || fodder.length === 0} onClick={() => (setNote(null), setOpen('reinforce'))}>
+              Reinforce
+            </button>
+          </>
+        )}
+      </div>
+      <p className="character-note" role="status">
+        {note ?? (copies.length === 0 ? 'Weapons come from banner pulls.' : copy && (copy.step ?? 0) < MAX_STEP && fodder.length === 0 ? 'Reinforcing needs a duplicate of this weapon that no one wields.' : '')}
+      </p>
+      {open && (
+        <div className="team-picker weapon-picker" role="dialog" aria-label={open === 'change' ? 'Choose a weapon' : 'Choose a duplicate'}>
+          <h3>{open === 'change' ? `A weapon for ${name}` : 'Reinforce with a duplicate'}</h3>
+          <ul className="weapon-grid">
+            {(open === 'change' ? sortCopies(copies, id) : sortCopies(fodder)).map((c) => (
+              <li key={c.uid}>
+                <WeaponTile
+                  copy={c}
+                  wielder={wielderOf(profile, c.uid)}
+                  pressed={c.uid === uid}
+                  onClick={() => (open === 'change' ? choose(c.uid) : act(() => onReinforce(uid!, c.uid), `Reinforced to +${Math.min(MAX_STEP, (copy?.step ?? 0) + 1 + (c.step ?? 0))}.`))}
+                />
+              </li>
+            ))}
+          </ul>
+          {taking && (
+            <div className="weapon-confirm" role="alertdialog" aria-label="Take the weapon">
+              <p>
+                {holderName} wields it. Take it for {name}?
+              </p>
+              <div className="panel-buttons">
+                <button className="end-turn" disabled={busy} onClick={() => act(() => onEquip(id, taking), `${name} wields it; ${holderName} has none.`)}>
+                  Take it
+                </button>
+                <button className="ghost" onClick={() => setTaking(null)}>
+                  Keep it there
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="panel-buttons">
+            <button className="ghost" onClick={() => (setOpen(null), setTaking(null))}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

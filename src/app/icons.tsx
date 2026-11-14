@@ -160,6 +160,56 @@ const PATHS: Record<string, React.ReactNode> = {
       <circle cx="12" cy="15" r="3.6" fill="none" stroke="var(--icon-cut, #2e1e2a)" strokeWidth="1.3" />
     </>
   ),
+  // Weapon glyphs, until the weapons have art: a blade, a lamp, a bell, a cord of beads, a clasped book, a paper charm, a staff with an orb.
+  blade: (
+    <>
+      <path d="M3.5 20.5l11-11 2.5 2.5-11 11H3.5z" stroke="none" />
+      <path d="M15.5 8.5l4.5-4.5" fill="none" strokeWidth="2.6" strokeLinecap="round" />
+    </>
+  ),
+  lamp: (
+    <>
+      <path d="M9 4.5a3 3 0 0 1 6 0" fill="none" strokeWidth="1.8" />
+      <path d="M7 7h10l-1 12H8z" fill="none" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M12 10.5c1.6 1.8 2 3 2 4a2 2 0 0 1-4 0c0-1 .4-2.2 2-4z" stroke="none" />
+      <path d="M6 21h12" fill="none" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M12 3a5.5 5.5 0 0 1 5.5 5.5c0 4.5 1.5 6.5 3 8H3.5c1.5-1.5 3-3.5 3-8A5.5 5.5 0 0 1 12 3z" stroke="none" />
+      <circle cx="12" cy="19.5" r="2" stroke="none" />
+    </>
+  ),
+  cord: (
+    <>
+      <circle cx="12" cy="10" r="6.5" fill="none" strokeWidth="1.4" />
+      {[0, 60, 120, 180, 240, 300].map((a) => (
+        <circle key={a} cx={12 + 6.5 * Math.sin((a * Math.PI) / 180)} cy={10 - 6.5 * Math.cos((a * Math.PI) / 180)} r="1.7" stroke="none" />
+      ))}
+      <path d="M12 16.5v5" fill="none" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  book: (
+    <>
+      <path d="M5 3.5h11.5a2 2 0 0 1 2 2v15H7a2 2 0 0 1-2-2z" stroke="none" />
+      <circle cx="18.5" cy="12" r="2.4" fill="var(--icon-cut, #2e1e2a)" stroke="none" />
+      <circle cx="18.5" cy="12" r="1.4" stroke="none" />
+    </>
+  ),
+  charm: (
+    <>
+      <path d="M7.5 2.5h9v15l-4.5 4-4.5-4z" fill="none" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M10 6.5h4M10 9.5h4M10 12.5h4" fill="none" strokeWidth="1.6" strokeLinecap="round" />
+    </>
+  ),
+  staff: (
+    <>
+      <circle cx="16.5" cy="6.5" r="4" fill="none" strokeWidth="2" />
+      <circle cx="16.5" cy="6.5" r="1.6" stroke="none" />
+      <path d="M13.6 9.4L4 19" fill="none" strokeWidth="2.6" strokeLinecap="round" />
+    </>
+  ),
   // Two arrows chasing each other round a circle: switch.
   switch: (
     <>

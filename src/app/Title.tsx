@@ -180,6 +180,9 @@ export function Game() {
         growth={growthOf(screen.profile)}
         onLevelUp={(id, levels) => act(saves.levelUp(id, levels))}
         onAscend={(id) => act(saves.ascend(id))}
+        onEquip={(id, uid) => act(saves.equip(id, uid))}
+        onUnequip={(id) => act(saves.unequip(id))}
+        onReinforce={(uid, fodder) => act(saves.reinforce(uid, fodder))}
         onBack={toTitle}
       />
     );
@@ -195,7 +198,17 @@ export function Game() {
       />
     );
   }
-  if (screen.kind === 'inventory') return <Inventory profile={screen.profile} onSelect={(id) => saves.select(CHARACTER_BANNER, id)} onBack={toTitle} />;
+  if (screen.kind === 'inventory')
+    return (
+      <Inventory
+        profile={screen.profile}
+        onSelect={(id) => saves.select(CHARACTER_BANNER, id)}
+        onReinforce={saves.reinforce}
+        onSalvage={saves.salvage}
+        onLock={saves.lock}
+        onBack={toTitle}
+      />
+    );
   if (screen.kind === 'profile') return <ProfilePage profile={screen.profile} onClaim={saves.claim} onBack={toTitle} />;
   if (screen.kind === 'options') {
     return (
