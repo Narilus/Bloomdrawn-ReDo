@@ -18,8 +18,10 @@ import {
   type RunCard,
   type Streams,
   type TextOptions,
+  type Wielded,
   withDupes,
   withGrowth,
+  withWeaponStat,
 } from '../engine/index.ts';
 import { BLOOM_NODES, bloomNodeDue, bloomTick, reached, spawnBloomNode, stageOf, type BloomStage } from './bloom.ts';
 import { resolveTile, stopsOn, walk, type Board } from './board.ts';
@@ -105,6 +107,8 @@ export interface Growth {
   dupes?: Readonly<Record<string, number>> | undefined;
   levels?: Readonly<Record<string, number>> | undefined;
   ascensions?: Readonly<Record<string, number>> | undefined;
+  /** The weapon each character wields, and its reinforcement (`weapons.ts`). */
+  weapons?: Readonly<Record<string, Wielded>> | undefined;
 }
 
 /** Plain JSON, like combat state. */
@@ -117,6 +121,8 @@ export interface Expedition {
   dupes?: Record<string, number>;
   levels?: Record<string, number>;
   ascensions?: Record<string, number>;
+  /** The party's weapons when the run began, by character; one equipped mid-run counts from the next run. */
+  weapons?: Record<string, Wielded>;
   /** The run's depth (`depth.ts`): its enemies' level and its rewards' multiplier. Absent is Depth 1. */
   depth?: number;
   board: Board;
@@ -170,11 +176,13 @@ export function startExpedition(
   const dupes = of(growth.dupes, 0);
   const levels = of(growth.levels, 1);
   const ascensions = of(growth.ascensions, 0);
+  const weapons = Object.fromEntries(party.filter((id) => growth.weapons?.[id]).map((id) => [id, { ...growth.weapons![id]! }]));
   return {
     party,
     ...(Object.keys(dupes).length > 0 && { dupes }),
     ...(Object.keys(levels).length > 0 && { levels }),
     ...(Object.keys(ascensions).length > 0 && { ascensions }),
+    ...(Object.keys(weapons).length > 0 && { weapons }),
     ...(depth > 1 && { depth }),
     board: generateBoard(seed, def.board, motifs, depth),
     phase: 'map',
@@ -282,6 +290,7 @@ export function expeditionFight(exp: Expedition, registry: Registry): CombatSetu
   if (exp.dupes) setup.dupes = exp.party.map((id) => exp.dupes?.[id] ?? 0);
   if (exp.levels) setup.levels = exp.party.map((id) => exp.levels?.[id] ?? 1);
   if (exp.ascensions) setup.ascensions = exp.party.map((id) => exp.ascensions?.[id] ?? 0);
+  if (exp.weapons) setup.weapons = exp.party.map((id) => exp.weapons?.[id] ?? null);
   if (exp.depth && exp.depth > 1) setup.enemyLevel = exp.depth;
   const scale = boss ? 0 : stageOf(exp.clock).enemyScale;
   if (scale > 0) setup.enemyScale = scale;
@@ -375,10 +384,13 @@ function closeVictory(exp: Expedition): Expedition {
   return next;
 }
 
-/** A character as she fights: at her dupe level, level and ascensions, if given (an expedition's or a profile's). */
+/** A character as she fights: at her dupe level, level and ascensions, with her weapon's main stat, if given (an expedition's or a profile's). */
 export function fieldedCharacter(id: string, registry: Registry, growth: Growth = {}) {
   const def = registry.characters[id];
-  return def && withGrowth(withDupes(def, growth.dupes?.[id]), growth.levels?.[id], growth.ascensions?.[id]);
+  if (!def) return undefined;
+  const grown = withGrowth(withDupes(def, growth.dupes?.[id]), growth.levels?.[id], growth.ascensions?.[id]);
+  const weapon = registry.weapons[growth.weapons?.[id]?.weapon ?? ''];
+  return weapon ? { ...grown, stats: withWeaponStat(grown.stats, weapon) } : grown;
 }
 
 /** A run card's text with its owner's stats (at her dupe level and level) as numbers; what depends on the fight shows as written. */

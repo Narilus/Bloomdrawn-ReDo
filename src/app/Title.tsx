@@ -3,6 +3,7 @@ import { CHARACTER_BANNER } from '../content/banners.ts';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
+import { wieldedBy } from '../game/weapons.ts';
 import { DEPTH_MAX, depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
 import { ASCENSIONS, MAX_LEVEL } from '../game/levels.ts';
@@ -47,12 +48,13 @@ const DEV_DUPES = devNumber('dupes', 5);
 const DEV_LEVEL = devNumber('level', MAX_LEVEL);
 /** Dev builds only: `?depths=all` opens every depth in party select, to try deep runs. Nothing is saved. */
 const DEV_ALL_DEPTHS = import.meta.env.DEV && new URLSearchParams(window.location.search).get('depths') === 'all';
-/** The profile's dupe levels, levels and ascensions, or `?dupes`'s and `?level`'s. */
+/** The profile's dupe levels, levels and ascensions, or `?dupes`'s and `?level`'s, and its weapons. */
 const growthOf = (profile: Profile): Growth => ({
   dupes: DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes,
   levels: DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, DEV_LEVEL])) : profile.levels,
   ascensions:
     DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, ASCENSIONS.filter((a) => a.at < DEV_LEVEL).length])) : profile.ascensions,
+  weapons: wieldedBy(profile, registry),
 });
 
 /** The characters a profile can field, leaving out any the game no longer has. */

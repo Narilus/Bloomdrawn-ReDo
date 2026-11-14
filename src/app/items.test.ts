@@ -19,8 +19,7 @@ describe('items', () => {
       ...Object.values(registry.domains).flatMap((d) => (d.material ? [d.material] : [])),
       ...Object.values(items).flatMap((share) => Object.keys(share)),
       ...materials,
-      ...CHARACTER_BANNER.sr.one,
-      ...Object.keys(CHARACTER_BANNER.r),
+      ...Object.keys(CHARACTER_BANNER.r.items),
     ]);
     expect([...used].filter((id) => !ITEMS[id])).toEqual([]);
   });

@@ -6,7 +6,7 @@ import { memoryAdapter } from './adapters.ts';
 import { profileSave } from './profile.ts';
 import { createSaveStore } from './store.ts';
 
-const BANNER: BannerDef = { id: 'banner.test', name: 'Test', pity: 'test', pool: ['virelle', 'kibane'], sr: { one: ['material.flesh'], amount: 1 }, r: { money: 100 } };
+const BANNER: BannerDef = { id: 'banner.test', name: 'Test', kind: 'character', pity: 'test', pool: ['virelle', 'kibane'], sr: ['weapon.surgeons-scalpel'], r: { weapons: ['weapon.suture-hook'], chance: 0.5, items: { money: 100 } } };
 
 describe('the profile save', () => {
   it('survives a reload: a new store on the same storage reads back what was banked', async () => {
@@ -112,6 +112,31 @@ describe('the profile save', () => {
     adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 9, contentVersion: 1, data: { ...NEW_PROFILE, exp: 40 } }));
     expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, exp: 40 }, savedSchemaVersion: 9 });
     for (const bad of [{ trials: { flesh: 0 } }, { trials: { flesh: 6 } }]) {
+      await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
+  it('keeps weapons, wielders, the weapon Focus and the tickboxes, and a v10 profile (M6.7) owns none (M6.8)', async () => {
+    const adapter = memoryAdapter();
+    const data = {
+      ...NEW_PROFILE,
+      weaponFocus: 'weapon.seed-orb-staff',
+      weapons: [{ uid: 'w1', weapon: 'weapon.surgeons-scalpel', step: 2 }, { uid: 'w2', weapon: 'weapon.suture-hook', locked: true as const }],
+      equipped: { virelle: 'w1' },
+      weaponSettings: { autoReinforce: true as const },
+    };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 10, contentVersion: 1, data: { ...NEW_PROFILE, trials: { flesh: 1 } } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, trials: { flesh: 1 } }, savedSchemaVersion: 10 });
+    const copy = { uid: 'w1', weapon: 'weapon.suture-hook' };
+    for (const bad of [
+      { weapons: [{ ...copy, step: 6 }] },
+      { weapons: [{ ...copy, step: 0 }] },
+      { weapons: [copy, copy] },
+      { weapons: [copy], equipped: { virelle: 'w2' } },
+      { weapons: [copy], equipped: { virelle: 'w1', maelia: 'w1' } },
+    ]) {
       await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
     }
   });

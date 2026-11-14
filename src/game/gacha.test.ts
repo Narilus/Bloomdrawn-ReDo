@@ -20,10 +20,11 @@ import { NEW_PROFILE, type Profile } from './profile.ts';
 const BANNER: BannerDef = {
   id: 'banner.test',
   name: 'Test',
+  kind: 'character',
   pity: 'test',
   pool: ['a', 'b', 'c'],
-  sr: { one: ['material.x', 'material.y'], amount: 1 },
-  r: { 'memory.faint': 1, money: 100 },
+  sr: ['w.sr1', 'w.sr2'],
+  r: { weapons: ['w.r1', 'w.r2'], chance: 0.5, items: { 'memory.faint': 1, money: 100 } },
 };
 
 /** A profile focused on `a`. */
@@ -47,8 +48,9 @@ function many(times: number, count: 1 | 10, seed = 1): PullRecord[] {
   for (let i = 0; i < times; i++) {
     const result = pulled(profile, count, seed);
     all.push(...result.records);
-    // The history is copied on every pull; keep it short so many pulls stay quick.
-    profile = { ...result.profile, gacha: { ...result.profile.gacha!, history: [] } };
+    // The history and weapon copies are copied on every pull; keep them short so many pulls stay quick.
+    const { weapons: _copies, ...rest } = result.profile;
+    profile = { ...rest, gacha: { ...result.profile.gacha!, history: [] } };
   }
   return all;
 }
@@ -105,8 +107,12 @@ describe('the gacha', () => {
     expect(profile.gacha?.history).toEqual(records);
     for (const r of records) {
       expect(r.pityAfter).toBe(r.rarity === 'ssr' ? 0 : r.pityBefore + 1);
-      if (r.rarity === 'r') expect(r.items).toEqual({ pollen: POLLEN_PER_PULL, 'memory.faint': 1, money: 100 });
-      if (r.rarity === 'sr') expect(Object.keys(r.items).filter((k) => k !== 'pollen').map((k) => [k, r.items[k]])).toEqual([[expect.stringMatching(/^material\.[xy]$/), 1]]);
+      // An R is an R weapon or Memories and Ducats; an SR is always an SR weapon (docs/notes/weapons.md).
+      if (r.rarity === 'r') {
+        if (r.weapon) expect([r.weapon, r.items]).toEqual([expect.stringMatching(/^w\.r[12]$/), { pollen: POLLEN_PER_PULL }]);
+        else expect(r.items).toEqual({ pollen: POLLEN_PER_PULL, 'memory.faint': 1, money: 100 });
+      }
+      if (r.rarity === 'sr') expect([r.weapon, r.items]).toEqual([expect.stringMatching(/^w\.sr[12]$/), { pollen: POLLEN_PER_PULL }]);
     }
     // The profile's items are the sum of what the pulls gave.
     const sum: Record<string, number> = {};

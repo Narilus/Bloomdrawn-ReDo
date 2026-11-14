@@ -37,6 +37,7 @@ import {
   type Expedition,
   type Growth,
 } from '../game/expedition.ts';
+import { missingContent } from '../game/check.ts';
 import { bloomNodeDue } from '../game/bloom.ts';
 import { bank, NEW_PROFILE, runBanking } from '../game/profile.ts';
 import { itemCount } from '../content/items.ts';
@@ -313,6 +314,21 @@ describe('card rewards', () => {
     expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 172 damage twice.');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('levels');
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('ascensions');
+  });
+
+  it('a run fields the weapons its party held when it began: main stats in max HP and card text, and a run saved with a weapon the game lacks is caught (M6.8)', () => {
+    const party = ['virelle', 'isadora', 'kibane', 'hester'];
+    // Leonora isn't fielded, so her weapon isn't kept.
+    const growth = { weapons: { hester: { weapon: 'weapon.snare-line', step: 2 }, virelle: { weapon: 'weapon.surgeons-scalpel' }, leonora: { weapon: 'weapon.sealed-ledger' } } };
+    const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, growth), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
+    expect(exp.weapons).toEqual({ hester: { weapon: 'weapon.snare-line', step: 2 }, virelle: { weapon: 'weapon.surgeons-scalpel' } });
+    const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
+    expect(combat.members.map((m) => m.weapon)).toEqual([{ weapon: 'weapon.surgeons-scalpel' }, undefined, undefined, { weapon: 'weapon.snare-line', step: 2 }]);
+    // Hester's 55 HP +30% is 72 (rounded); Virelle's Attack 18 +18% is 21, so Thorn Spur's 150% is 31.
+    expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([45 + 50 + 50 + 72, 45 + 50 + 50 + 72]);
+    expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 31 damage twice.');
+    expect(missingContent({ ...exp, weapons: { hester: { weapon: 'weapon.gone' } } }, undefined, registry)).toBe('weapons weapon.gone');
+    expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('weapons');
   });
 
   it('elites give relics only, the Boss ends the run, and a Bloom node fight offers cards like any fight', () => {

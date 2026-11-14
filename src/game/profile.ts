@@ -2,6 +2,7 @@ import { reached } from './bloom.ts';
 import { rewardMultiplier } from './depth.ts';
 import type { Expedition, ExpeditionDef } from './expedition.ts';
 import type { Gacha } from './gacha.ts';
+import type { WeaponCopy, WeaponSettings } from './weapons.ts';
 import { runExp } from './profileLevel.ts';
 
 // The player's profile, kept across runs (docs/notes/m4-run.md, "Banking"; m5-collection.md): banked
@@ -23,6 +24,14 @@ export interface Profile {
   items?: Record<string, number>;
   /** The character banner's Focus: the pool character an SSR's 50/50 is for (owner, 28 Oct). */
   focus?: string;
+  /** The weapon banner's Focus: the signature weapon its SSR 50/50 is for. */
+  weaponFocus?: string;
+  /** Weapon copies owned (`weapons.ts`), oldest first. */
+  weapons?: WeaponCopy[];
+  /** The copy each character wields, by character, as the copy's `uid`. */
+  equipped?: Record<string, string>;
+  /** The banners' two tickboxes, both off unless set. */
+  weaponSettings?: WeaponSettings;
   /** The gacha's stream, pity, 50/50 losses and audit history, from the first pull. */
   gacha?: Gacha;
   /** Saved team presets, each a party front first. A profile that has never saved one has the defaults (`teamsOf`). */

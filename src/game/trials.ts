@@ -69,5 +69,6 @@ export function trialFight(seed: number, party: readonly string[], growth: Growt
   if (growth.dupes) setup.dupes = party.map((id) => growth.dupes?.[id] ?? 0);
   if (growth.levels) setup.levels = party.map((id) => growth.levels?.[id] ?? 1);
   if (growth.ascensions) setup.ascensions = party.map((id) => growth.ascensions?.[id] ?? 0);
+  if (growth.weapons) setup.weapons = party.map((id) => growth.weapons?.[id] ?? null);
   return setup;
 }

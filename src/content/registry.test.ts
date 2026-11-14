@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyStatus, damage, gainShield, heal, ifConsume, loseHp, mul, percentOf, stacks, stat } from '../engine/index.ts';
 import { card, character, domain, enemy, relic, status, variant } from './define.ts';
 import { registry, validateContent } from './registry.ts';
-import { CHARACTER_BANNER } from './banners.ts';
+import { CHARACTER_BANNER, WEAPON_BANNER } from './banners.ts';
 import { ITEM_NAMES } from './items.ts';
 import { STARTERS } from './roster.ts';
 
@@ -28,10 +28,23 @@ describe('content registry', () => {
   it('the character banner pools the banner four, never a starter, and every item it gives has a name', () => {
     expect([...CHARACTER_BANNER.pool].sort()).toEqual(['hester', 'isadora', 'kibane', 'virelle']);
     expect(CHARACTER_BANNER.pool.filter((id) => !registry.characters[id] || STARTERS.includes(id))).toEqual([]);
-    // One material per Domain: the one its characters ascend with.
-    expect([...CHARACTER_BANNER.sr.one].sort()).toEqual(Object.values(registry.domains).map((d) => d.material).sort());
     expect(Object.values(registry.domains).filter((d) => !d.material || !ITEM_NAMES[d.material])).toEqual([]);
-    expect([...CHARACTER_BANNER.sr.one, ...Object.keys(CHARACTER_BANNER.r), 'pollen'].filter((item) => !ITEM_NAMES[item])).toEqual([]);
+    expect([...Object.keys(CHARACTER_BANNER.r.items), 'pollen'].filter((item) => !ITEM_NAMES[item])).toEqual([]);
+  });
+
+  it("the weapon banner pools every signature, the starters' included; SRs and Rs are every SR and R weapon", () => {
+    const signatures = Object.values(registry.weapons).filter((w) => w.signature);
+    expect(signatures.map((w) => w.signature).sort()).toEqual(Object.keys(registry.characters).sort());
+    expect([...WEAPON_BANNER.pool].sort()).toEqual(signatures.map((w) => w.id).sort());
+    for (const banner of [CHARACTER_BANNER, WEAPON_BANNER]) {
+      expect([...banner.sr].sort()).toEqual(Object.values(registry.weapons).filter((w) => w.rarity === 'sr').map((w) => w.id).sort());
+      expect([...banner.r.weapons].sort()).toEqual(Object.values(registry.weapons).filter((w) => w.rarity === 'r').map((w) => w.id).sort());
+      expect(banner.r.chance).toBe(0.5);
+    }
+    // Two SR and two R per Domain (owner, 14 Nov).
+    for (const d of Object.keys(registry.domains)) {
+      expect(Object.values(registry.weapons).filter((w) => w.domain === d).map((w) => w.rarity).sort()).toEqual(['r', 'r', 'sr', 'sr']);
+    }
   });
 
   it('the starters are four characters, one per Domain', () => {

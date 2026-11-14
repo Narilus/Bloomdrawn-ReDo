@@ -19,7 +19,7 @@ import {
 
 // Profile level (docs/notes/m6-depth.md, "Profile level"; owner, 31 Oct). The numbers are placeholders.
 
-const BANNER: BannerDef = { id: 'banner.test', name: 'Test', pity: 'test', pool: ['a', 'b'], sr: { one: ['material.x'], amount: 1 }, r: { money: 100 } };
+const BANNER: BannerDef = { id: 'banner.test', name: 'Test', kind: 'character', pity: 'test', pool: ['a', 'b'], sr: ['w.sr'], r: { weapons: [], chance: 0, items: { money: 100 } } };
 const at = (level: number, extra: Partial<Profile> = {}): Profile => ({ ...NEW_PROFILE, exp: expToReach(level), ...extra });
 
 describe('the profile EXP curve', () => {

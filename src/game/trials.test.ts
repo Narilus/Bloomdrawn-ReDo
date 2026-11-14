@@ -60,6 +60,7 @@ describe('Trials', () => {
       seed: 7, party: ['agathe', 'kibane'], enemies: ['enemy.boss'], enemyLevel: 20, levels: [20, 1], ascensions: [1, 0], dupes: [0, 2],
     });
     expect(trialFight(7, ['agathe'], {}, ['enemy.boss'], 5)).toEqual({ seed: 7, party: ['agathe'], enemies: ['enemy.boss'], enemyLevel: 50 });
+    expect(trialFight(7, ['agathe', 'kibane'], { weapons: { kibane: { weapon: 'w', step: 1 } } }, ['enemy.boss'], 1).weapons).toEqual([null, { weapon: 'w', step: 1 }]);
     expect(() => trialFight(7, ['agathe'], {}, ['enemy.boss'], 6)).toThrow('There is no Tier 6.');
   });
 });

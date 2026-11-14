@@ -3,6 +3,7 @@ import { DEPTH_MAX } from '../game/depth.ts';
 import { ASCENSIONS, levelCap, MAX_LEVEL } from '../game/levels.ts';
 import { PROFILE_MAX, profileLevelOf } from '../game/profileLevel.ts';
 import { TRIAL_TIERS } from '../game/trials.ts';
+import { MAX_STEP } from '../game/weapons.ts';
 import { emptyTeam, PARTY_SIZE, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
 import type { SaveKind } from './store.ts';
 
@@ -15,6 +16,8 @@ const pullRecord = z.strictObject({
   banner: id,
   rarity: z.enum(['ssr', 'sr', 'r']),
   character: id.optional(),
+  weapon: id.optional(),
+  copy: z.union([z.enum(['new', 'kept', 'salvaged']), z.int().min(1).max(MAX_STEP)]).optional(),
   items,
   dupe: z.union([z.literal('new'), z.literal('overflow'), z.int().positive()]).optional(),
   focus: id.optional(),
@@ -37,6 +40,10 @@ const profileSchema = z.strictObject({
   ascensions: z.record(id, z.int().min(1).max(ASCENSIONS.length)).optional(),
   items: items.optional(),
   focus: id.optional(),
+  weaponFocus: id.optional(),
+  weapons: z.array(z.strictObject({ uid: id, weapon: id, step: z.int().min(1).max(MAX_STEP).optional(), locked: z.literal(true).optional() })).min(1).optional(),
+  equipped: z.record(id, id).optional(),
+  weaponSettings: z.strictObject({ autoReinforce: z.literal(true).optional(), autoSalvage: z.literal(true).optional() }).optional(),
   gacha: z.strictObject({ stream: z.int().nonnegative(), pity: z.record(id, count), losses: z.record(id, count), history: z.array(pullRecord) }).optional(),
   teams: z.array(z.strictObject({ name: z.string().min(1).max(TEAM_NAME_LENGTH), members: z.array(id.nullable()).length(PARTY_SIZE) })).min(1).optional(),
   team: z.int().nonnegative().optional(),
@@ -52,11 +59,11 @@ const profileSchema = z.strictObject({
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
  * gained and their dupes, levels and ascensions, items, the Focus and the gacha, the team presets and
- * the run in progress's tally, profile EXP, claims and stats, and the Trial tiers won.
+ * the run in progress's tally, profile EXP, claims and stats, the Trial tiers won, and weapons.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 10,
+  schemaVersion: 11,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -97,6 +104,8 @@ export const profileSave: SaveKind<Profile> = {
     8: (data) => data,
     // v10 added Trials (M6.7): a v9 profile has won none.
     9: (data) => data,
+    // v11 added weapons (M6.8): a v10 profile owns none, and its SR pulls gave materials, as recorded.
+    10: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;
@@ -104,6 +113,11 @@ export const profileSave: SaveKind<Profile> = {
     for (const [character, ascensions] of Object.entries(profile.ascensions ?? {})) {
       if ((profile.levels?.[character] ?? 1) < levelCap(ascensions - 1)) throw new Error(`${character} ascended below level ${levelCap(ascensions - 1)}`);
     }
+    const uids = (profile.weapons ?? []).map((w) => w.uid);
+    if (new Set(uids).size !== uids.length) throw new Error('two weapon copies share an ID');
+    const held = Object.values(profile.equipped ?? {});
+    if (held.some((uid) => !uids.includes(uid))) throw new Error('a character wields a weapon copy that is not owned');
+    if (new Set(held).size !== held.length) throw new Error('two characters wield one weapon copy');
     if ((profile.claimed ?? 1) > profileLevelOf(profile.exp)) throw new Error(`profile level ${profile.claimed} claimed before it was reached`);
     for (const [character, level] of Object.entries(profile.levels ?? {})) {
       if (level > levelCap(profile.ascensions?.[character] ?? 0)) throw new Error(`${character} is past level ${levelCap(profile.ascensions?.[character] ?? 0)} without ascending`);

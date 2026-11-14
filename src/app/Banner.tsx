@@ -287,14 +287,14 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
                 <tr>
                   <th>SR</th>
                   <td>{percent(RATES.sr)}</td>
-                  <td>
-                    {banner.sr.amount} of {banner.sr.one.map(itemName).join(', ')}, one at random
-                  </td>
+                  <td>One of the {banner.sr.length} SR weapons, each as likely</td>
                 </tr>
                 <tr>
                   <th>R</th>
                   <td>{percent(RATES.r)}</td>
-                  <td>{itemsText(banner.r)}</td>
+                  <td>
+                    {percent(banner.r.chance)} one of the {banner.r.weapons.length} R weapons, else {itemsText(banner.r.items)}
+                  </td>
                 </tr>
               </tbody>
             </table>

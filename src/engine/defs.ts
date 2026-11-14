@@ -297,20 +297,22 @@ export type EventOutcome =
   | { do: 'tick'; count: number };
 
 /**
- * A gacha banner (docs/DESIGN.md, "Gacha"): the character banner now, a weapon banner later. The
+ * A gacha banner (docs/DESIGN.md, "Gacha"): the character banner and the weapon banner. The
  * profile's gacha pulls on it (src/game/gacha.ts); the engine never reads it.
  */
 export interface BannerDef {
   id: string;
   name: string;
-  /** Banners in one family share a pity counter (DESIGN.md: Featured and Standard track separately). */
+  /** What its SSRs are: characters, or signature weapons. */
+  kind: 'character' | 'weapon';
+  /** Banners in one family share a pity counter; the character and weapon banners track separately. */
   pity: string;
-  /** The SSR characters. The player's Focus is one of them; the others are what a lost 50/50 gives, each as likely. The pool only grows. */
+  /** The SSRs. The player's Focus is one of them; the others are what a lost 50/50 gives, each as likely. The pool only grows. */
   pool: string[];
-  /** An SR gives `amount` of one item drawn from `one` (ascension materials until weapons). */
-  sr: { one: string[]; amount: number };
-  /** What an R gives, by item (Memories and Ducats until weapons). */
-  r: Record<string, number>;
+  /** An SR is one of these weapons, each as likely (docs/notes/weapons.md). */
+  sr: string[];
+  /** An R is one of `weapons` with `chance`, each as likely, and otherwise `items` (Memories and Ducats). */
+  r: { weapons: string[]; chance: number; items: Record<string, number> };
 }
 
 export interface StatusDef extends Hooks {

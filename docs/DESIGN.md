@@ -317,7 +317,7 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 | EXP bank | EXP items in three tiers accumulate passively from all play; low tiers cover early levels and refund excess | A newly pulled character can be levelled at once, with no regrinding |
 | Ascension | Every 10 levels needs Domain materials plus money, and each gives 1 pull (owner, 30 Oct) | Build checks and challenges between bands |
 | Skill levels | Skill items level each personal card, the ultimate and the passive individually; levels raise numbers only, with mechanical changes reserved for bespoke kit designs | Targeted investment in a favourite |
-| Character dupes | C1–C5: passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
+| Character dupes | Potential, P1–P5 (owner, 15 Nov; the screens still say C until the character page pass): passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
 | Weapons | One per character; SSR, SR or R; a main stat (a share of the wielder's stat, so no weapon levels, on trial: owner, 14 Nov) and an effect; duplicates reinforce it from +0 to +5. Signature weapons are SSR (`docs/notes/weapons.md`) | Pull sink; stats and build options |
 | Gear | Six slots, set bonuses, main stats, substats, rerolls | Deep build tuning; recommended for a later phase |
 | Profile level | Earned by play (fights, Trials, first Trial clears, SSR pulls), never by EXP items; 1 to 50 on an exponential curve. Profile levels 5, 10 and 15 allow the ascensions at 10, 20 and 30, and each level gives 1 pull (owner, 31 Oct) | Paces raw power behind real play |
@@ -346,7 +346,7 @@ Pulls are earned only, spent one-for-one on banners with fully visible odds, pit
 There is no Standard banner to pull on (owner, 28 Oct). With nothing rotating, a Standard banner would offer less than a featured one, and a second currency to prop it up would only add hoarding anxiety.
 
 - **Character banner, with a Focus:** the player picks a Focus from the banner pool and can change it at any time. Each SSR is a 50/50: the Focus, or a random other pool character. Pity and the loss count belong to the profile and survive a change of Focus. The pool only grows: a new character joins it for good and can be focused at once (a release can still be showcased on the banner screen). The starters never enter it.
-- **Weapon banner, later:** on the same Purified Blooms, with its own pity and the same Focus rule for signature weapons, once weapon rates and guarantees are approved.
+- **Weapon banner:** on the same Purified Blooms, with its own pity and the same Focus rule; its pool is all eight signature weapons, the starters' included (owner, 14 Nov).
 - **One currency:** a Purified Bloom is one pull on either banner.
 
 ### Rates and pity
@@ -358,11 +358,11 @@ There is no Standard banner to pull on (owner, 28 Oct). With nothing rotating, a
 | Hard pity (guaranteed SSR) | Pull 30; the counter resets on every SSR |
 | Focus SSR | 50/50 at each SSR; a loss is a random other pool character and gives extra Pollen. After two losses the next SSR is guaranteed the Focus. Worst case: SSRs at pulls 30, 60 and 90, the third being the Focus. The loss count resets when the Focus is obtained, and carries over a change of Focus |
 | Ten-pull | At least one SR or better |
-| Pity families | The character banner and (later) the weapon banner track separately |
+| Pity families | The character banner and the weapon banner track separately |
 
 ### Results
 
-Every result shows its rarity and its family: SSR character, SSR signature weapon, SR or R weapon, or a material. Characters are always SSR. New characters, signature weapons and locked items are never auto-discarded; optional auto-discard converts eligible low results into Profile Shop currency.
+Every result shows its rarity and its family: SSR character, SSR signature weapon, SR or R weapon, or Memories and Ducats. Characters are always SSR. On both banners an SR is a random SR weapon, and an R is half the time a random R weapon, otherwise Memories and Ducats. Two tickboxes on the banners, off by default, handle duplicate weapons: **Auto-reinforce duplicates** (into a copy below +5, the wielded one first) and **Auto-salvage duplicates of maxed weapons** (into Pollen). Reinforcing goes first; a weapon's first copy and locked weapons are never salvaged (`docs/notes/weapons.md`).
 
 ### Pull sources
 

@@ -1,13 +1,16 @@
 import { createStreams, nextFloat, nextInt, type BannerDef } from '../engine/index.ts';
 import { BLOOM, plural, type Profile } from './profile.ts';
 import { gainExp, SSR_SELECTOR } from './profileLevel.ts';
+import { receiveWeapon, type CopyOutcome } from './weapons.ts';
 
 // The gacha (docs/DESIGN.md, "Gacha"; docs/notes/m5-collection.md): SSR 3%, SR 15%, R 82%, a flat
 // rate until hard pity at pull 30, and at least one SR in a ten-pull. One Purified Bloom per pull.
 // One character banner with a Focus the player picks from its pool (owner, 28 Oct): each SSR is a
 // 50/50 between the Focus and another pool character, and after two losses the next is the Focus.
 // Pity and the loss count belong to the profile, by family, and survive a change of Focus. Its
-// randomness is its own seeded stream in the profile and never touches a run's. Pure.
+// randomness is its own seeded stream in the profile and never touches a run's. The weapon banner
+// works the same on signature weapons, with its own pity and Focus; on both, an SR is an SR weapon
+// and an R half the time an R weapon (docs/notes/weapons.md). Pure.
 
 export type Rarity = 'ssr' | 'sr' | 'r';
 
@@ -33,6 +36,9 @@ export interface PullRecord {
   rarity: Rarity;
   /** An SSR's character. */
   character?: string;
+  /** The weapon a pull gave, and what became of the copy. */
+  weapon?: string;
+  copy?: CopyOutcome;
   /** Everything the pull gave, by item, Pollen included. */
   items: Record<string, number>;
   /** An SSR's dupe handling: a new character, the dupe level reached, or past C5 into Pollen. */
@@ -70,16 +76,22 @@ export const pityOf = (profile: Profile, banner: BannerDef) => profile.gacha?.pi
 /** 50/50s lost in a row on this banner's family. */
 export const lossesOf = (profile: Profile, banner: BannerDef) => profile.gacha?.losses[banner.pity] ?? 0;
 
+/** A banner's Focus in the profile, if it is still in the pool. */
+export function focusOf(profile: Profile, banner: BannerDef): string | undefined {
+  const focus = banner.kind === 'weapon' ? profile.weaponFocus : profile.focus;
+  return focus && banner.pool.includes(focus) ? focus : undefined;
+}
+
 /** The profile with a new Focus, which must be in the banner's pool. Pity and losses are untouched. */
-export function chooseFocus(profile: Profile, banner: BannerDef, character: string): Profile {
-  if (!banner.pool.includes(character)) throw new Error(`${character} is not in the ${banner.name} pool`);
-  return { ...profile, focus: character };
+export function chooseFocus(profile: Profile, banner: BannerDef, id: string): Profile {
+  if (!banner.pool.includes(id)) throw new Error(`${id} is not in the ${banner.name} pool`);
+  return banner.kind === 'weapon' ? { ...profile, weaponFocus: id } : { ...profile, focus: id };
 }
 
 /** Pulls `count` times (1 or a ten-pull), one Purified Bloom each. `seed` starts the stream on a profile's first pull. */
 export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_PULL, seed: number): PullResult {
-  const focus = profile.focus;
-  if (!focus || !banner.pool.includes(focus)) return { ok: false, reason: 'Choose a Focus first.' };
+  const focus = focusOf(profile, banner);
+  if (!focus) return { ok: false, reason: 'Choose a Focus first.' };
   if (profile.pulls < count) return { ok: false, reason: `This needs ${plural(count, BLOOM)}.` };
   const others = banner.pool.filter((id) => id !== focus);
   const rng = { gacha: profile.gacha?.stream ?? createStreams(seed, ['gacha']).gacha };
@@ -87,6 +99,8 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
   const dupes = { ...profile.dupes };
   const owned = [...profile.owned];
   const history = [...(profile.gacha?.history ?? [])];
+  // Weapon copies and the tickboxes, as receiveWeapon reads and changes them.
+  let armory: Profile = { ...profile };
   let pity = pityOf(profile, banner);
   let losses = lossesOf(profile, banner);
   let blooms = profile.pulls;
@@ -110,25 +124,41 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
 
     const got: Record<string, number> = { pollen: POLLEN_PER_PULL };
     let character: string | undefined;
+    let weapon: string | undefined;
+    let copy: CopyOutcome | undefined;
     let dupe: PullRecord['dupe'];
     let fiftyFifty: PullRecord['fiftyFifty'];
+    const pick = (ids: readonly string[]) => ids[nextInt(rng, 'gacha', ids.length)]!;
     if (rarity === 'ssr') {
       if (losses >= LOSSES_TO_GUARANTEE) fiftyFifty = 'guaranteed';
       // A pool of the Focus alone has no one to lose to.
       else fiftyFifty = others.length === 0 || nextFloat(rng, 'gacha') < FOCUS_CHANCE ? 'won' : 'lost';
+      let won: string;
       if (fiftyFifty === 'lost') {
-        character = others[nextInt(rng, 'gacha', others.length)]!;
+        won = pick(others);
         losses += 1;
         got.pollen! += POLLEN_PER_LOSS;
       } else {
-        character = focus;
+        won = focus;
         losses = 0;
       }
-      dupe = gainCopy(character, owned, dupes, got);
+      if (banner.kind === 'weapon') weapon = won;
+      else {
+        character = won;
+        dupe = gainCopy(character, owned, dupes, got);
+      }
     } else if (rarity === 'sr') {
-      got[banner.sr.one[nextInt(rng, 'gacha', banner.sr.one.length)]!] = banner.sr.amount;
+      weapon = pick(banner.sr);
+    } else if (banner.r.weapons.length > 0 && nextFloat(rng, 'gacha') < banner.r.chance) {
+      weapon = pick(banner.r.weapons);
     } else {
-      Object.assign(got, banner.r);
+      Object.assign(got, banner.r.items);
+    }
+    if (weapon) {
+      const received = receiveWeapon(armory, weapon, rarity);
+      armory = received.profile;
+      copy = received.outcome;
+      if (received.pollen > 0) got.pollen! += received.pollen;
     }
     for (const [item, n] of Object.entries(got)) items[item] = (items[item] ?? 0) + n;
 
@@ -139,6 +169,7 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
       banner: banner.id,
       rarity,
       ...(character && { character }),
+      ...(weapon && { weapon, copy: copy! }),
       items: got,
       ...(dupe !== undefined && { dupe }),
       focus,
@@ -160,7 +191,12 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
     history,
   };
   // Each SSR pulled gives profile EXP (owner, 31 Oct).
-  const after = gainExp({ ...profile, pulls: blooms, owned, items, dupes, gacha }, 'ssr', records.filter((r) => r.rarity === 'ssr').length);
+  const { weapons, equipped } = armory;
+  const after = gainExp(
+    { ...profile, pulls: blooms, owned, items, dupes, gacha, ...(weapons && { weapons }), ...(equipped && { equipped }) },
+    'ssr',
+    records.filter((r) => r.rarity === 'ssr').length,
+  );
   return { ok: true, profile: after, records };
 }
 

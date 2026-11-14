@@ -25,6 +25,7 @@ const runSchema = z.strictObject({
     dupes: z.record(z.string(), z.int().min(1).max(5)).optional(),
     levels: z.record(z.string(), z.int().min(2).max(40)).optional(),
     ascensions: z.record(z.string(), z.int().min(1).max(3)).optional(),
+    weapons: z.record(z.string(), z.strictObject({ weapon: z.string(), step: z.int().min(1).max(5).optional() })).optional(),
     depth: z.int().min(2).max(DEPTH_MAX).optional(),
     fights: z.int().nonnegative().optional(),
     material: z.string().optional(),

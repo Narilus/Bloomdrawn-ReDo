@@ -8,6 +8,7 @@ import type { Expedition } from './expedition.ts';
 export function missingContent(exp: Expedition, combat: CombatState | undefined, registry: Registry): string | undefined {
   const wanted: [keyof Registry, string][] = [
     ...exp.party.map((id) => ['characters', id] as [keyof Registry, string]),
+    ...Object.values(exp.weapons ?? {}).map((w) => ['weapons', w.weapon] as [keyof Registry, string]),
     ...[...exp.relics, ...exp.offered].map((id) => ['relics', id] as [keyof Registry, string]),
     ...[...exp.deck, ...exp.offeredCards].map((c) => ['cards', c.card] as [keyof Registry, string]),
     ...Object.values(exp.shops).flatMap((shop) => shop.relics.map((r) => ['relics', r.relic] as [keyof Registry, string])),
@@ -18,6 +19,7 @@ export function missingContent(exp: Expedition, combat: CombatState | undefined,
   }
   if (combat) {
     wanted.push(...combat.members.map((m) => ['characters', m.character] as [keyof Registry, string]));
+    wanted.push(...combat.members.flatMap((m) => (m.weapon ? [['weapons', m.weapon.weapon] as [keyof Registry, string]] : [])));
     wanted.push(...combat.enemies.map((e) => ['enemies', e.enemy] as [keyof Registry, string]));
     wanted.push(...combat.relics.map((r) => ['relics', r.relic] as [keyof Registry, string]));
     const piles = [...combat.piles.draw, ...combat.piles.hand, ...combat.piles.discard, ...combat.piles.graveyard];
