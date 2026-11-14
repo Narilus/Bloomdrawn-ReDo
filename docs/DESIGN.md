@@ -303,7 +303,7 @@ Inside a run the player earns Obols, cards, relics and Symptoms. All of them van
 | Victory | All profile rewards marked during the run |
 | Defeat or abandon | A reduced share, scaled by depth and progress. A run quit before any progress banks nothing, and no route banks more than playing to win |
 
-Never banked: Obols, run cards, relics, Symptoms, Curses or run HP. Always eligible: pulls, EXP items, ascension materials, weapon materials and profile money.
+Never banked: Obols, run cards, relics, Symptoms, Curses or run HP. Always eligible: pulls, EXP items, ascension materials and profile money.
 
 ## Meta progression
 
@@ -318,7 +318,7 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 | Ascension | Every 10 levels needs Domain materials plus money, and each gives 1 pull (owner, 30 Oct) | Build checks and challenges between bands |
 | Skill levels | Skill items level each personal card, the ultimate and the passive individually; levels raise numbers only, with mechanical changes reserved for bespoke kit designs | Targeted investment in a favourite |
 | Character dupes | C1–C5: passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
-| Weapons | One per character; SSR, SR or R; level, ascend and dupe from +0 to +5. Signature weapons are SSR | Pull sink; stats and build options |
+| Weapons | One per character; SSR, SR or R; a main stat (a share of the wielder's stat, so no weapon levels, on trial: owner, 14 Nov) and an effect; duplicates reinforce it from +0 to +5. Signature weapons are SSR (`docs/notes/weapons.md`) | Pull sink; stats and build options |
 | Gear | Six slots, set bonuses, main stats, substats, rerolls | Deep build tuning; recommended for a later phase |
 | Profile level | Earned by play (fights, Trials, first Trial clears, SSR pulls), never by EXP items; 1 to 50 on an exponential curve. Profile levels 5, 10 and 15 allow the ascensions at 10, 20 and 30, and each level gives 1 pull (owner, 31 Oct) | Paces raw power behind real play |
 

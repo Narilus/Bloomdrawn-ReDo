@@ -215,6 +215,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Weapon guidelines (owner, 14 Nov): every weapon can be equipped by every character; a signature weapon is made for its character and clearly hers, and an effect that doesn't fit another wielder simply doesn't apply. A weapon has at least a main stat and an effect; copies reinforce it up to a maximum, raising its effect, and are never needed, only investment. Banners get two tickboxes, auto-reinforce copies and auto-salvage copies of maxed weapons, the salvage currency and its use to be decided. The character page gets sub-pages in a left-hand list (attributes, weapon, kit, dupes and so on), with the art kept; the inventory moves to the same left-hand list and gains Weapons, with reinforcing and salvage. The C of dupe levels needs a themed meaning, or another letter.
 
+- Weapons, first draft answered (owner, 14 Nov): no weapon levels, as a trial (Morimens is the precedent), then lab modelling of parties with a variety of weapons; +30% may be overtuned. All eight signatures in the weapon pool; two SR and two R per Domain to start, more later. Corolla and Grafts rejected (a car; merging different weapons): plain terms instead, +1 to +5 kept. Signature effects must name a mechanic, not a single card: best on their character, usable by a future one; "the wielder", never "she". Salvage may pay Pollen if its income can be balanced, otherwise Ducats. Weapon art may be a sub-step now, abstract or symbolic where that serves.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
