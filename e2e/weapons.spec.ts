@@ -49,7 +49,14 @@ test('a preset equips weapons: a sub-slot under each member, her signature fille
   const picker = page.getByRole('dialog', { name: 'A weapon for Anthe' });
   await expect(picker.locator('.weapon-tile-name')).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier", "Surgeon's Scalpel"]);
   await page.screenshot({ path: 'test-results/screenshots/party-weapon-picker.png' });
+  // A weapon clicked is previewed on the right, with Anthe's stats if she took it: Attack 9 +18% is 11.
   await picker.getByRole('button', { name: "Surgeon's Scalpel +2, 2 spares, held by Maelia" }).click();
+  const preview = picker.getByRole('complementary', { name: 'Preview' });
+  await expect(preview.locator('.weapon-card h3')).toContainText("Surgeon's Scalpel");
+  await expect(preview).toContainText('Maelia holds it in this team.');
+  await expect(preview.locator('.slot-stats')).toContainText('Attack11');
+  await page.screenshot({ path: 'test-results/screenshots/party-weapon-preview.png' });
+  await preview.getByRole('button', { name: 'Equip' }).click();
   await expect(page.getByRole('alertdialog', { name: 'Move the weapon' })).toContainText('Maelia holds it in this team. Move it to Anthe?');
   await page.getByRole('button', { name: 'Move it' }).click();
   await expect(page.getByRole('button', { name: "Anthe's weapon: Surgeon's Scalpel +2" })).toBeVisible();

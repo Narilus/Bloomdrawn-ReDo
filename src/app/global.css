@@ -3125,10 +3125,52 @@ kbd {
   color: var(--antique-gold);
 }
 
+/* The weapon picker (M6.8): the weapons on the left, the chosen one's preview on the right. */
+.weapon-picker-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 560px;
+  gap: 32px;
+  width: min(1560px, 100%);
+  min-height: 0;
+}
+
 .weapon-picker .weapon-grid {
-  width: min(1100px, 100%);
   align-content: start;
   overflow-y: auto;
+  padding: 4px;
+}
+
+.weapon-preview {
+  display: grid;
+  align-self: start;
+  align-content: start;
+  gap: 12px;
+  padding: 22px 24px;
+  border: 1px solid rgba(184, 149, 90, 0.7);
+  border-radius: 12px;
+  background: rgba(46, 30, 42, 0.85);
+}
+
+.weapon-preview .weapon-card {
+  border: 0;
+  padding: 0;
+  background: none;
+}
+
+.weapon-preview h4 {
+  margin: 4px 0 0;
+  font-family: var(--serif);
+  font-size: 22px;
+}
+
+.weapon-preview-holder {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.weapon-preview .end-turn {
+  justify-self: start;
 }
 
 .weapon-confirm {

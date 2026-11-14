@@ -10,7 +10,7 @@ import { assignWeapon, holderOf, placeMember, quickMembers, removeMember, teamWe
 import { battleArt } from '../stage/art.ts';
 import { CardFace, markNumber } from './CardView.tsx';
 import { SideList } from './SideList.tsx';
-import { sortWeapons, WeaponGlyph, WeaponTile } from './Weapons.tsx';
+import { sortWeapons, WeaponCard, WeaponGlyph, WeaponTile } from './Weapons.tsx';
 
 // The roster, a character's page and party select (docs/notes/m5-collection.md, "The roster and the party").
 
@@ -290,6 +290,7 @@ export function PartySelect({
           members={current.members}
           weapons={weapons}
           armory={armory}
+          growth={growth}
           moving={picking.moving}
           onChoose={(w) => chooseWeapon(picking.place, w)}
           onMove={(w) => {
@@ -358,8 +359,9 @@ export function PartySelect({
 }
 
 /**
- * One place's weapon: every weapon owned, the member's signature first, each marked with who holds it
- * in this preset. Picking one another place holds asks first, naming who holds it.
+ * One place's weapon: every weapon owned on the left, the member's signature first, each marked with
+ * who holds it in this preset; the chosen one previewed on the right (owner, 15 Nov), with the
+ * member's stats if she took it, and Equip. Equipping one another place holds asks first, naming who.
  */
 function WeaponPicker({
   member,
@@ -367,6 +369,7 @@ function WeaponPicker({
   members,
   weapons,
   armory,
+  growth,
   moving,
   onChoose,
   onMove,
@@ -378,6 +381,7 @@ function WeaponPicker({
   members: readonly (string | null)[];
   weapons: readonly (string | null)[];
   armory: Readonly<Record<string, OwnedWeapon>>;
+  growth: Growth;
   moving?: string | undefined;
   onChoose: (weapon: string | null) => void;
   onMove: (weapon: string) => void;
@@ -390,19 +394,40 @@ function WeaponPicker({
     return i >= 0 ? (members[i] ?? undefined) : undefined;
   };
   const holder = moving ? registry.characters[heldBy(moving) ?? '']?.name : undefined;
+  const sorted = sortWeapons(armory, member);
+  const [shown, setShown] = useState<string | undefined>(weapons[place] ?? sorted[0]);
+  const def = shown ? registry.weapons[shown] : undefined;
+  const held = shown ? armory[shown] : undefined;
+  const shownHolder = shown ? heldBy(shown) : undefined;
+  const withIt = def && held ? fieldedCharacter(member, registry, { ...growth, weapons: { [member]: { weapon: def.id, ...((held.step ?? 0) > 0 && { step: held.step }) } } })?.stats : undefined;
   return (
     <div className="team-picker weapon-picker" role="dialog" aria-label={`A weapon for ${name}`}>
       <h3>A weapon for {name}</h3>
-      {Object.keys(armory).length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="banner-dialog-note">No weapons yet: banner pulls give them.</p>
       ) : (
-        <ul className="weapon-grid">
-          {sortWeapons(armory, member).map((w) => (
-            <li key={w}>
-              <WeaponTile id={w} owned={armory[w]!} holder={heldBy(w)} pressed={weapons[place] === w} onClick={() => onChoose(w)} />
-            </li>
-          ))}
-        </ul>
+        <div className="weapon-picker-body">
+          <ul className="weapon-grid">
+            {sorted.map((w) => (
+              <li key={w}>
+                <WeaponTile id={w} owned={armory[w]!} holder={heldBy(w)} pressed={shown === w} onClick={() => setShown(w)} />
+              </li>
+            ))}
+          </ul>
+          {def && held && (
+            <aside className="weapon-preview" aria-label="Preview">
+              <WeaponCard def={def} step={held.step ?? 0} spares={held.spares ?? 0} />
+              <p className="weapon-preview-holder">
+                {shownHolder === member ? `${name} holds it.` : shownHolder ? `${registry.characters[shownHolder]?.name ?? shownHolder} holds it in this team.` : 'No one in this team holds it.'}
+              </p>
+              <h4>{name} with it</h4>
+              <StatList stats={withIt} compact />
+              <button className="end-turn" disabled={shownHolder === member} onClick={() => onChoose(def.id)}>
+                {shownHolder === member ? 'Equipped' : 'Equip'}
+              </button>
+            </aside>
+          )}
+        </div>
       )}
       {moving && (
         <div className="weapon-confirm" role="alertdialog" aria-label="Move the weapon">
