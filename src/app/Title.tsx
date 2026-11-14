@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CHARACTER_BANNER } from '../content/banners.ts';
+import { CHARACTER_BANNER, WEAPON_BANNER } from '../content/banners.ts';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
@@ -29,7 +29,7 @@ type Screen =
   | { kind: 'title'; boot: Boot }
   | { kind: 'party'; profile: Profile }
   | { kind: 'roster'; profile: Profile }
-  | { kind: 'banner'; profile: Profile }
+  | { kind: 'banner'; profile: Profile; banner: 'character' | 'weapon' }
   | { kind: 'inventory'; profile: Profile }
   | { kind: 'options'; profile: Profile }
   | { kind: 'profile'; profile: Profile }
@@ -191,9 +191,15 @@ export function Game() {
     // The seed only starts the gacha's stream on a profile's first pull; after that the profile carries it.
     return (
       <Banner
+        key={screen.banner}
+        banner={screen.banner === 'weapon' ? WEAPON_BANNER : CHARACTER_BANNER}
         profile={screen.profile}
         onPull={(banner, count) => saves.pull(banner, count, Math.floor(Math.random() * 2 ** 31))}
         onFocus={saves.focus}
+        onSettings={async (settings) => {
+          const result = await saves.weaponSettings(settings);
+          return result.profile;
+        }}
         onBack={toTitle}
       />
     );
@@ -247,7 +253,7 @@ export function Game() {
       }}
       onTrials={() => setScreen({ kind: 'trials', profile })}
       onRoster={() => setScreen({ kind: 'roster', profile })}
-      onBanner={() => setScreen({ kind: 'banner', profile })}
+      onBanner={(banner) => setScreen({ kind: 'banner', profile, banner })}
       onInventory={() => setScreen({ kind: 'inventory', profile })}
       onOptions={() => setScreen({ kind: 'options', profile })}
       onProfile={() => setScreen({ kind: 'profile', profile })}

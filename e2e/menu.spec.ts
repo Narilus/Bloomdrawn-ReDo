@@ -22,7 +22,7 @@ test('the main menu opens each screen, and Reset needs the box ticked and RESET 
   await expect(page.locator('.roster-tile')).toHaveCount(5);
   await page.getByRole('button', { name: 'Back' }).click();
   await page.getByRole('button', { name: 'Banners' }).click();
-  await expect(page.getByRole('button', { name: /Weapon banner/ })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Weapon banner' })).toBeEnabled();
   await page.screenshot({ path: 'test-results/screenshots/main-menu-banners.png' });
   await page.getByRole('button', { name: 'Character banner' }).click();
   await expect(page.locator('.currency-bloom strong')).toHaveText('7');

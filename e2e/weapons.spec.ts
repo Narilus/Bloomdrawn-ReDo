@@ -100,3 +100,36 @@ test('the inventory lists weapons: reinforce with a duplicate, lock, and salvage
   await expect(page.locator('.inventory-weapons .weapon-tile')).toHaveCount(3);
   expect(errors).toEqual([]);
 });
+
+test('the weapon banner: its own Focus among the signatures, the two tickboxes, and weapons in the results', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.goto('/');
+  await importSave(page, saveFile(JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 11, contentVersion: 1, data: { ...profile, pulls: 10 } } } })));
+  await page.getByRole('button', { name: 'Banners' }).click();
+  await page.getByRole('button', { name: 'Weapon banner' }).click();
+  await expect(page.locator('.banner-header h2')).toHaveText('Weapon banner');
+  await page.getByRole('button', { name: 'Switch' }).click();
+  const pool = page.getByRole('dialog', { name: 'Choose a Focus' });
+  await expect(pool.locator('.weapon-tile')).toHaveCount(8);
+  await page.screenshot({ path: 'test-results/screenshots/weapon-banner-pool.png' });
+  await pool.getByRole('button', { name: "Kibane's Foxfire Gauntlet" }).click();
+  await expect(page.locator('.banner-focus-info .weapon-card h3')).toContainText("Kibane's Foxfire Gauntlet");
+  // The tickboxes save at once and show on both banners.
+  const ticks = page.getByRole('group', { name: 'Weapon duplicates' });
+  await ticks.getByRole('checkbox', { name: 'Auto-reinforce duplicates' }).check();
+  await expect(ticks.getByRole('checkbox', { name: 'Auto-reinforce duplicates' })).toBeChecked();
+  await page.screenshot({ path: 'test-results/screenshots/weapon-banner.png' });
+  await page.getByRole('button', { name: /Pull 10/ }).click();
+  const results = page.getByRole('dialog', { name: 'Results' });
+  await expect(results.locator('.banner-result')).toHaveCount(10);
+  // A ten-pull has an SR or better, and every SR is a weapon.
+  await expect(results.locator('.banner-result.rarity-sr .banner-result-glyph, .banner-result.rarity-ssr .banner-result-glyph').first()).toBeVisible();
+  await page.screenshot({ path: 'test-results/screenshots/weapon-banner-results.png' });
+  await results.getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Banners' }).click();
+  await page.getByRole('button', { name: 'Character banner' }).click();
+  await expect(page.getByRole('group', { name: 'Weapon duplicates' }).getByRole('checkbox', { name: 'Auto-reinforce duplicates' })).toBeChecked();
+  expect(errors).toEqual([]);
+});

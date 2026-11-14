@@ -61,7 +61,7 @@ interface MenuProps {
   onNew: (saved: RunSave | null) => Promise<void>;
   onTrials: () => void;
   onRoster: () => void;
-  onBanner: () => void;
+  onBanner: (kind: 'character' | 'weapon') => void;
   onInventory: () => void;
   onOptions: () => void;
   onProfile: () => void;
@@ -122,11 +122,11 @@ export function MainMenu({ boot, featured, onContinue, onNew, onTrials, onRoster
           </button>
           {open === 'banners' && (
             <div className="menu-sub">
-              <button className="menu-item" onClick={onBanner}>
+              <button className="menu-item" onClick={() => onBanner('character')}>
                 Character banner
               </button>
-              <button className="menu-item" disabled>
-                Weapon banner <small>soon</small>
+              <button className="menu-item" onClick={() => onBanner('weapon')}>
+                Weapon banner
               </button>
             </div>
           )}

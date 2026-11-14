@@ -3223,6 +3223,61 @@ kbd {
   font-size: 22px;
 }
 
+/* The pity line, and under it the two weapon tickboxes (M6.8). */
+.banner-middle {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.banner-ticks {
+  display: flex;
+  gap: 22px;
+  font-size: 16px;
+}
+
+.banner-ticks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.banner-ticks input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--antique-gold);
+}
+
+/* The weapon banner: the Focus weapon's card on the left, the character it was made for faded behind. */
+.banner-focus-art.faded {
+  opacity: 0.35;
+}
+
+.banner-focus-info .weapon-card {
+  max-width: 600px;
+  background: rgba(30, 21, 25, 0.85);
+}
+
+.banner-focus-info .weapon-card h3 {
+  font-size: 40px;
+  line-height: 1.1;
+  text-shadow: none;
+}
+
+.banner-weapon-tile {
+  width: 220px;
+  padding: 20px 12px 16px;
+}
+
+.banner-weapon-tile .weapon-tile-name {
+  font-size: 18px;
+}
+
+.banner-result-glyph {
+  margin: 30px 0 10px;
+}
+
 .banner-pity strong {
   color: var(--antique-gold);
   font-size: 28px;

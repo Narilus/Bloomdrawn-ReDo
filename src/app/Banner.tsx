@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { CHARACTER_BANNER } from '../content/banners.ts';
 import { ITEM_NAMES } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import type { BannerDef } from '../engine/index.ts';
 import {
   FOCUS_CHANCE,
+  focusOf,
   HARD_PITY,
   lossesOf,
   LOSSES_TO_GUARANTEE,
@@ -19,14 +19,18 @@ import {
   type PullResult,
 } from '../game/gacha.ts';
 import { BLOOM, plural, type Profile } from '../game/profile.ts';
+import { MAX_STEP, SALVAGE, type WeaponSettings } from '../game/weapons.ts';
 import { Icon } from './icons.tsx';
 import { Currencies } from './MainMenu.tsx';
 import { Art } from './Roster.tsx';
+import { WeaponCard, WeaponGlyph } from './Weapons.tsx';
 
 // The banner screen (docs/notes/m5-collection.md, "The gacha"; owner, 29 Oct): the Focus large,
 // the Purified Blooms top right, and along the bottom Back, Rules (the odds and every rule), History
 // (every pull, under the 50/50 status), Switch (the pool, to change the Focus), Pull 1 and Pull 10.
 // The pity counter stays on screen. No gendered words here: the roster may not stay all women.
+// The weapon banner is the same screen on signature weapons, with its own pity and Focus; both
+// carry the two weapon tickboxes, since SR and R weapons come from both (docs/notes/weapons.md).
 
 const RARITY: Record<PullRecord['rarity'], string> = { ssr: 'SSR', sr: 'SR', r: 'R' };
 const FIFTY_FIFTY: Record<NonNullable<PullRecord['fiftyFifty']>, string> = { won: '50/50 won', lost: '50/50 lost', guaranteed: 'Focus guaranteed' };
@@ -38,15 +42,21 @@ const itemsText = (items: Record<string, number>) =>
     .map(([id, n]) => `${n} ${itemName(id)}`)
     .join(', ');
 const percent = (rate: number) => `${Math.round(rate * 1000) / 10}%`;
-const characterName = (id: string) => registry.characters[id]?.name ?? id;
+/** A character's or a weapon's name. */
+const nameOf = (id: string) => registry.characters[id]?.name ?? registry.weapons[id]?.name ?? id;
 
-/** What a pull gave, in words: the character and the dupe handling, or the items, Pollen last. */
+/** What a pull gave, in words: the character or weapon and what became of the copy, or the items, Pollen last. */
 export function pullText(record: PullRecord): string {
   const { pollen: _pollen, ...rest } = record.items;
+  const lost = record.fiftyFifty === 'lost' ? `, +${POLLEN_PER_LOSS} Pollen` : '';
   if (record.character) {
-    const dupe = record.dupe === 'new' ? 'new' : record.dupe === 'overflow' ? `past C5: +${POLLEN_PER_OVERFLOW} Pollen` : `C${record.dupe}`;
-    const lost = record.fiftyFifty === 'lost' ? `, +${POLLEN_PER_LOSS} Pollen` : '';
-    return `${characterName(record.character)} (${dupe}${lost})`;
+    const dupe = record.dupe === 'new' ? 'new' : record.dupe === 'overflow' ? `past P5: +${POLLEN_PER_OVERFLOW} Pollen` : `P${record.dupe}`;
+    return `${nameOf(record.character)} (${dupe}${lost})`;
+  }
+  if (record.weapon) {
+    const copy =
+      record.copy === 'new' ? 'new' : record.copy === 'kept' ? 'a duplicate' : record.copy === 'salvaged' ? `salvaged: +${SALVAGE[record.rarity]} Pollen` : `reinforced to +${record.copy}`;
+    return `${nameOf(record.weapon)} (${copy}${lost})`;
   }
   return itemsText(rest);
 }
@@ -57,22 +67,30 @@ const notesText = (record: PullRecord) =>
     .filter(Boolean)
     .join(', ');
 
-/** Owned or not, and the dupe level. */
-const ownedText = (profile: Profile, id: string) => (profile.owned.includes(id) ? `Owned${profile.dupes?.[id] ? `, C${profile.dupes[id]}` : ''}` : 'Not owned');
+/** Owned or not, and the Potential or the copies and highest step. */
+function ownedText(profile: Profile, id: string): string {
+  if (registry.weapons[id]) {
+    const copies = (profile.weapons ?? []).filter((c) => c.weapon === id);
+    return copies.length === 0 ? 'Not owned' : `${plural(copies.length, 'copy', 'copies')}, best +${Math.max(...copies.map((c) => c.step ?? 0))}`;
+  }
+  return profile.owned.includes(id) ? `Owned${profile.dupes?.[id] ? `, P${profile.dupes[id]}` : ''}` : 'Not owned';
+}
 
 interface BannerProps {
+  banner: BannerDef;
   profile: Profile;
   onPull: (banner: BannerDef, count: 1 | typeof TEN_PULL) => Promise<PullResult>;
   /** Saves a new Focus and gives back the profile. */
-  onFocus: (banner: BannerDef, character: string) => Promise<Profile>;
+  onFocus: (banner: BannerDef, id: string) => Promise<Profile>;
+  /** Saves the two weapon tickboxes and gives back the profile. */
+  onSettings: (settings: WeaponSettings) => Promise<Profile>;
   onBack: () => void;
 }
 
 /** Which container is open over the banner. */
 type Open = 'switch' | 'history' | 'rules' | 'results' | null;
 
-export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProps) {
-  const banner = CHARACTER_BANNER;
+export function Banner({ banner, profile: initial, onPull, onFocus, onSettings, onBack }: BannerProps) {
   const [profile, setProfile] = useState(initial);
   const [last, setLast] = useState<PullRecord[]>([]);
   const [open, setOpen] = useState<Open>(null);
@@ -80,8 +98,14 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
   const [error, setError] = useState<string | null>(null);
   const pity = pityOf(profile, banner);
   const losses = lossesOf(profile, banner);
-  const focus = profile.focus && banner.pool.includes(profile.focus) ? profile.focus : undefined;
-  const def = focus ? registry.characters[focus] : undefined;
+  const weapons = banner.kind === 'weapon';
+  const focus = focusOf(profile, banner);
+  const weapon = focus ? registry.weapons[focus] : undefined;
+  // The character on show: the Focus, or the one a signature weapon is for.
+  const shown = focus ? (weapon ? weapon.signature : focus) : undefined;
+  const def = shown ? registry.characters[shown] : undefined;
+  const settings = profile.weaponSettings ?? {};
+  const maxed = weapon && (profile.weapons ?? []).some((c) => c.weapon === weapon.id && (c.step ?? 0) >= MAX_STEP);
   const history = [...(profile.gacha?.history ?? [])].reverse();
   // Pollen always, then whatever else the profile has banked.
   const banked = Object.keys(ITEM_NAMES).filter((id) => id === 'pollen' || profile.items?.[id]);
@@ -102,6 +126,12 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
       setLast(result.records);
       setOpen('results');
     });
+  // The box shows its new state at once; the saved profile follows.
+  const tick = (key: keyof WeaponSettings, on: boolean) => {
+    const next: WeaponSettings = { ...settings, [key]: on || undefined };
+    setProfile((p) => ({ ...p, weaponSettings: next }));
+    act(async () => setProfile(await onSettings(next)));
+  };
   const focusOn = (id: string) =>
     act(async () => {
       if (id !== focus) setProfile(await onFocus(banner, id));
@@ -124,7 +154,21 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
       <Currencies profile={profile} only="bloom" />
 
       <section className="banner-stage">
-        {focus && def ? (
+        {focus && weapon ? (
+          <>
+            <div className="banner-focus-info">
+              <em className="banner-focus-tag">Focus</em>
+              <WeaponCard def={weapon} />
+              <p className="banner-focus-owned">{ownedText(profile, focus)}</p>
+              {maxed && (
+                <p className="banner-warning" role="alert">
+                  You hold it at +{MAX_STEP}: {settings.autoSalvage ? `further copies are salvaged for ${SALVAGE.ssr} Pollen each` : 'further copies are kept as duplicates'}.
+                </p>
+              )}
+            </div>
+            {shown && <Art id={shown} className="banner-focus-art faded" />}
+          </>
+        ) : focus && def ? (
           <>
             <div className="banner-focus-info">
               <em className="banner-focus-tag">Focus</em>
@@ -135,7 +179,7 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
               </p>
               {(profile.dupes?.[focus] ?? 0) >= MAX_DUPES && (
                 <p className="banner-warning" role="alert">
-                  {def.name} is at C{MAX_DUPES}: any further copy becomes {POLLEN_PER_OVERFLOW} Pollen.
+                  {def.name} is at P{MAX_DUPES}: any further copy becomes {POLLEN_PER_OVERFLOW} Pollen.
                 </p>
               )}
             </div>
@@ -143,7 +187,7 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
           </>
         ) : (
           <p className="banner-no-focus">
-            Choose a Focus with <strong>Switch</strong>: the character each SSR's 50/50 is for.
+            Choose a Focus with <strong>Switch</strong>: the {weapons ? 'signature weapon' : 'character'} each SSR's 50/50 is for.
           </p>
         )}
       </section>
@@ -160,9 +204,19 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
             History
           </button>
         </div>
-        <p className="banner-pity">
-          SSR guaranteed within <strong>{HARD_PITY - pity}</strong> {HARD_PITY - pity === 1 ? 'pull' : 'pulls'}
-        </p>
+        <div className="banner-middle">
+          <p className="banner-pity">
+            SSR guaranteed within <strong>{HARD_PITY - pity}</strong> {HARD_PITY - pity === 1 ? 'pull' : 'pulls'}
+          </p>
+          <div className="banner-ticks" role="group" aria-label="Weapon duplicates">
+            <label>
+              <input type="checkbox" checked={!!settings.autoReinforce} disabled={busy} onChange={(e) => tick('autoReinforce', e.target.checked)} /> Auto-reinforce duplicates
+            </label>
+            <label>
+              <input type="checkbox" checked={!!settings.autoSalvage} disabled={busy} onChange={(e) => tick('autoSalvage', e.target.checked)} /> Auto-salvage duplicates of maxed weapons
+            </label>
+          </div>
+        </div>
         <div className="panel-buttons">
           <button className={`ghost banner-switch${focus ? '' : ' urgent'}`} disabled={busy} onClick={() => setOpen('switch')}>
             <Icon name="switch" /> Switch
@@ -187,17 +241,34 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
           <div className="team-picker-grid">
             {banner.pool.map((id) => {
               const tile = registry.characters[id];
+              const arm = registry.weapons[id];
+              if (arm)
+                return (
+                  <button
+                    key={id}
+                    className={`weapon-tile banner-weapon-tile rarity-${arm.rarity}`}
+                    aria-label={arm.name}
+                    aria-pressed={id === focus}
+                    disabled={busy}
+                    onClick={() => focusOn(id)}
+                  >
+                    <WeaponGlyph def={arm} className="large" />
+                    <span className="weapon-tile-name">{arm.name}</span>
+                    <span className="weapon-tile-wielder">{ownedText(profile, id)}</span>
+                    {id === focus && <em className="banner-focus-tag">Focus</em>}
+                  </button>
+                );
               return (
                 <button
                   key={id}
                   className={`roster-tile domain-${tile?.domain ?? ''}${id === focus ? ' chosen' : ''}`}
-                  aria-label={characterName(id)}
+                  aria-label={nameOf(id)}
                   aria-pressed={id === focus}
                   disabled={busy}
                   onClick={() => focusOn(id)}
                 >
                   <Art id={id} className="roster-art" />
-                  <strong>{characterName(id)}</strong>
+                  <strong>{nameOf(id)}</strong>
                   <span>{ownedText(profile, id)}</span>
                   {id === focus && <em className="banner-focus-tag">Focus</em>}
                 </button>
@@ -218,7 +289,7 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
                 <>No Focus chosen.</>
               ) : losses >= LOSSES_TO_GUARANTEE ? (
                 <>
-                  Your next SSR is guaranteed to be <strong>{characterName(focus)}</strong>.
+                  Your next SSR is guaranteed to be <strong>{nameOf(focus)}</strong>.
                 </>
               ) : (
                 <>
@@ -229,7 +300,7 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
             <p className="banner-banked">Banked: {banked.map((id) => `${itemName(id)} ${profile.items?.[id] ?? 0}`).join(' · ')}</p>
           </header>
           <div className="banner-history-scroll">
-            {history.length === 0 ? (
+            {history.filter((r) => r.banner === banner.id).length === 0 ? (
               <p className="banner-empty">No pulls yet.</p>
             ) : (
               <table className="banner-history" aria-label="Pulls">
@@ -244,14 +315,14 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
                   </tr>
                 </thead>
                 <tbody>
-                  {history.map((r) => (
+                  {history.filter((r) => r.banner === banner.id).map((r) => (
                     <tr key={r.n} className={`rarity-${r.rarity}`}>
                       <td>{r.n}</td>
                       <td>
                         <em>{RARITY[r.rarity]}</em> {pullText(r)}
                         {notesText(r) && <small> ({notesText(r)})</small>}
                       </td>
-                      <td>{r.focus ? characterName(r.focus) : ''}</td>
+                      <td>{r.focus ? nameOf(r.focus) : ''}</td>
                       <td>
                         {r.pityBefore} → {r.pityAfter}
                       </td>
@@ -305,8 +376,15 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
               <li>After {LOSSES_TO_GUARANTEE} lost 50/50s in a row, the next SSR is your Focus.</li>
               <li>Pity and 50/50 losses carry over when you change your Focus.</li>
               <li>Every ten-pull has an SR or better.</li>
+              {weapons ? (
+                <li>A signature weapon pulled is a weapon copy, never the character.</li>
+              ) : (
+                <li>
+                  A character's copies after the first raise their Potential from P1 to P{MAX_DUPES}; past P{MAX_DUPES}, each becomes {POLLEN_PER_OVERFLOW} Pollen.
+                </li>
+              )}
               <li>
-                A character's copies after the first raise their level from C1 to C{MAX_DUPES}; past C{MAX_DUPES}, each becomes {POLLEN_PER_OVERFLOW} Pollen.
+                A weapon's duplicates are kept, unless a tickbox says otherwise: auto-reinforce raises a copy below +{MAX_STEP} (the wielded one first), and auto-salvage turns a duplicate of a weapon held at +{MAX_STEP} into Pollen ({SALVAGE.r} for an R, {SALVAGE.sr} for an SR, {SALVAGE.ssr} for an SSR). Reinforcing goes first; a weapon's first copy and locked weapons are never salvaged.
               </li>
               <li>Every pull costs one {BLOOM} and gives {POLLEN_PER_PULL} Pollen.</li>
             </ul>
@@ -321,6 +399,7 @@ export function Banner({ profile: initial, onPull, onFocus, onBack }: BannerProp
             {last.map((r) => (
               <div key={r.n} className={`banner-result rarity-${r.rarity}`}>
                 {r.character && <Art id={r.character} className="banner-result-art" />}
+                {r.weapon && registry.weapons[r.weapon] && <WeaponGlyph def={registry.weapons[r.weapon]!} className="large banner-result-glyph" />}
                 <em>{RARITY[r.rarity]}</em>
                 <span>{pullText(r)}</span>
                 {r.fiftyFifty && <small>{FIFTY_FIFTY[r.fiftyFifty]}</small>}

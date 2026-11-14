@@ -3,7 +3,7 @@ import { blooms, importSave, openBanner, saveFile } from './menu.ts';
 
 // The banner (M5.3; owner, 28 and 29 Oct): the Focus is chosen with Switch, Pull 1 and Pull 10
 // spend Purified Blooms and show their results, and History holds every pull, with pity, losses
-// and Blooms before and after, under the 50/50 status. Rules hold the odds. A Focus at C5 is warned of.
+// and Blooms before and after, under the 50/50 status. Rules hold the odds. A Focus at P5 is warned of.
 
 const backup = (data: object) =>
   JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 6, contentVersion: 1, data } } });
@@ -78,12 +78,12 @@ test('chooses a Focus, pulls once and ten times, and sees the results and the hi
   expect(errors).toEqual([]);
 });
 
-test('a Focus at C5 is warned of, and two losses show the guarantee, kept through a Switch', async ({ page }) => {
+test('a Focus at P5 is warned of, and two losses show the guarantee, kept through a Switch', async ({ page }) => {
   await page.goto('/');
   const data = { pulls: 3, runs: 0, owned: ['kibane'], dupes: { kibane: 5 }, focus: 'kibane', gacha: { stream: 1, pity: { character: 4 }, losses: { character: 2 }, history: [] } };
   await load(page, backup(data));
   await openBanner(page);
-  await expect(page.locator('.banner-warning')).toHaveText('Kibane is at C5: any further copy becomes 40 Pollen.');
+  await expect(page.locator('.banner-warning')).toHaveText('Kibane is at P5: any further copy becomes 40 Pollen.');
   await expect(page.locator('.banner-pity')).toContainText('SSR guaranteed within 26 pulls');
   await page.screenshot({ path: 'test-results/screenshots/banner-c5.png' });
   await page.getByRole('button', { name: 'History' }).click();
