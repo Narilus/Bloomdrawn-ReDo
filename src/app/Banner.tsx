@@ -55,7 +55,7 @@ export function pullText(record: PullRecord): string {
   }
   if (record.weapon) {
     const copy =
-      record.copy === 'new' ? 'new' : record.copy === 'kept' ? 'a duplicate' : record.copy === 'salvaged' ? `salvaged: +${SALVAGE[record.rarity]} Pollen` : `reinforced to +${record.copy}`;
+      record.copy === 'new' ? 'new' : record.copy === 'spare' || record.copy === 'kept' ? 'a spare' : record.copy === 'salvaged' ? `salvaged: +${SALVAGE[record.rarity]} Pollen` : `reinforced to +${record.copy}`;
     return `${nameOf(record.weapon)} (${copy}${lost})`;
   }
   return itemsText(rest);
@@ -67,11 +67,11 @@ const notesText = (record: PullRecord) =>
     .filter(Boolean)
     .join(', ');
 
-/** Owned or not, and the Potential or the copies and highest step. */
+/** Owned or not, and the Potential, or the weapon's step and spares. */
 function ownedText(profile: Profile, id: string): string {
   if (registry.weapons[id]) {
-    const copies = (profile.weapons ?? []).filter((c) => c.weapon === id);
-    return copies.length === 0 ? 'Not owned' : `${plural(copies.length, 'copy', 'copies')}, best +${Math.max(...copies.map((c) => c.step ?? 0))}`;
+    const held = profile.weapons?.[id];
+    return held ? `Owned, +${held.step ?? 0}${held.spares ? `, ${plural(held.spares, 'spare')}` : ''}` : 'Not owned';
   }
   return profile.owned.includes(id) ? `Owned${profile.dupes?.[id] ? `, P${profile.dupes[id]}` : ''}` : 'Not owned';
 }
@@ -105,7 +105,7 @@ export function Banner({ banner, profile: initial, onPull, onFocus, onSettings, 
   const shown = focus ? (weapon ? weapon.signature : focus) : undefined;
   const def = shown ? registry.characters[shown] : undefined;
   const settings = profile.weaponSettings ?? {};
-  const maxed = weapon && (profile.weapons ?? []).some((c) => c.weapon === weapon.id && (c.step ?? 0) >= MAX_STEP);
+  const maxed = weapon && (profile.weapons?.[weapon.id]?.step ?? 0) >= MAX_STEP;
   const history = [...(profile.gacha?.history ?? [])].reverse();
   // Pollen always, then whatever else the profile has banked.
   const banked = Object.keys(ITEM_NAMES).filter((id) => id === 'pollen' || profile.items?.[id]);
@@ -162,7 +162,7 @@ export function Banner({ banner, profile: initial, onPull, onFocus, onSettings, 
               <p className="banner-focus-owned">{ownedText(profile, focus)}</p>
               {maxed && (
                 <p className="banner-warning" role="alert">
-                  You hold it at +{MAX_STEP}: {settings.autoSalvage ? `further copies are salvaged for ${SALVAGE.ssr} Pollen each` : 'further copies are kept as duplicates'}.
+                  You hold it at +{MAX_STEP}: {settings.autoSalvage ? `further copies are salvaged for ${SALVAGE.ssr} Pollen each` : 'further copies are kept as spares'}.
                 </p>
               )}
             </div>
@@ -384,7 +384,7 @@ export function Banner({ banner, profile: initial, onPull, onFocus, onSettings, 
                 </li>
               )}
               <li>
-                A weapon's duplicates are kept, unless a tickbox says otherwise: auto-reinforce raises a copy below +{MAX_STEP} (the wielded one first), and auto-salvage turns a duplicate of a weapon held at +{MAX_STEP} into Pollen ({SALVAGE.r} for an R, {SALVAGE.sr} for an SR, {SALVAGE.ssr} for an SSR). Reinforcing goes first; a weapon's first copy and locked weapons are never salvaged.
+                A weapon's duplicates are kept as spares, unless a tickbox says otherwise: auto-reinforce raises a weapon below +{MAX_STEP} a step, and auto-salvage turns a duplicate of a weapon at +{MAX_STEP} into Pollen ({SALVAGE.r} for an R, {SALVAGE.sr} for an SR, {SALVAGE.ssr} for an SSR). Reinforcing goes first; the weapon itself is never salvaged.
               </li>
               <li>Every pull costs one {BLOOM} and gives {POLLEN_PER_PULL} Pollen.</li>
             </ul>

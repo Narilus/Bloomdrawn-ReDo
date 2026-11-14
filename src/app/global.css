@@ -2546,8 +2546,8 @@ kbd {
   justify-items: center;
   gap: 6px;
   width: 320px;
-  height: 420px;
-  padding: 12px 10px 16px;
+  height: 360px;
+  padding: 12px 10px 14px;
   border: 2px solid var(--antique-gold);
   border-radius: 14px;
   background: linear-gradient(180deg, var(--dusk-plum), var(--aubergine));
@@ -2578,7 +2578,70 @@ kbd {
 
 .team-slot-art {
   width: 100%;
-  height: 278px;
+  height: 220px;
+}
+
+/* Under each place (M6.8): its stats with its weapon, and the weapon, which opens the weapon picker. */
+.team-place {
+  display: grid;
+  gap: 8px;
+  width: 320px;
+}
+
+.slot-stats {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 6px;
+  font-size: 14px;
+}
+
+.slot-stats dt {
+  opacity: 0.65;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slot-stats dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.team-weapon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 6px 10px;
+  border: 1px solid rgba(184, 149, 90, 0.45);
+  border-radius: 10px;
+  background: rgba(46, 30, 42, 0.7);
+  color: var(--petal-ivory);
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.team-weapon:hover {
+  border-color: var(--antique-gold);
+}
+
+.team-weapon .weapon-glyph {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  font-size: 28px;
+}
+
+.team-weapon small {
+  color: var(--antique-gold);
+  font-weight: 800;
+}
+
+.team-weapon-none {
+  opacity: 0.6;
 }
 
 .team-slot strong {

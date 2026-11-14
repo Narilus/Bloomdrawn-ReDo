@@ -17,7 +17,8 @@ const pullRecord = z.strictObject({
   rarity: z.enum(['ssr', 'sr', 'r']),
   character: id.optional(),
   weapon: id.optional(),
-  copy: z.union([z.enum(['new', 'kept', 'salvaged']), z.int().min(1).max(MAX_STEP)]).optional(),
+  // `kept` is a v11 copy kept as a duplicate; v12 calls it a spare.
+  copy: z.union([z.enum(['new', 'spare', 'kept', 'salvaged']), z.int().min(1).max(MAX_STEP)]).optional(),
   items,
   dupe: z.union([z.literal('new'), z.literal('overflow'), z.int().positive()]).optional(),
   focus: id.optional(),
@@ -41,11 +42,13 @@ const profileSchema = z.strictObject({
   items: items.optional(),
   focus: id.optional(),
   weaponFocus: id.optional(),
-  weapons: z.array(z.strictObject({ uid: id, weapon: id, step: z.int().min(1).max(MAX_STEP).optional(), locked: z.literal(true).optional() })).min(1).optional(),
-  equipped: z.record(id, id).optional(),
+  weapons: z.record(id, z.strictObject({ step: z.int().min(1).max(MAX_STEP).optional(), spares: z.int().positive().optional() })).optional(),
   weaponSettings: z.strictObject({ autoReinforce: z.literal(true).optional(), autoSalvage: z.literal(true).optional() }).optional(),
   gacha: z.strictObject({ stream: z.int().nonnegative(), pity: z.record(id, count), losses: z.record(id, count), history: z.array(pullRecord) }).optional(),
-  teams: z.array(z.strictObject({ name: z.string().min(1).max(TEAM_NAME_LENGTH), members: z.array(id.nullable()).length(PARTY_SIZE) })).min(1).optional(),
+  teams: z
+    .array(z.strictObject({ name: z.string().min(1).max(TEAM_NAME_LENGTH), members: z.array(id.nullable()).length(PARTY_SIZE), weapons: z.array(id.nullable()).length(PARTY_SIZE).optional() }))
+    .min(1)
+    .optional(),
   team: z.int().nonnegative().optional(),
   depth: z.int().min(1).max(DEPTH_MAX).optional(),
   deepest: z.int().min(1).max(DEPTH_MAX).optional(),
@@ -63,7 +66,7 @@ const profileSchema = z.strictObject({
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 11,
+  schemaVersion: 12,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -106,6 +109,33 @@ export const profileSave: SaveKind<Profile> = {
     9: (data) => data,
     // v11 added weapons (M6.8): a v10 profile owns none, and its SR pulls gave materials, as recorded.
     10: (data) => data,
+    // v12 owns each weapon once and equips weapons in presets (owner, 15 Nov). Copies of a weapon merge
+    // at the highest step; the rest become spares, one for each copy reinforced into them, so nothing
+    // pulled is lost. Each character's weapon goes under her in every saved preset, front first,
+    // skipping one already there; locks go.
+    11: (data) => {
+      type Copy = { uid: string; weapon: string; step?: number };
+      const { weapons: copies = [], equipped = {}, ...rest } = data as { weapons?: Copy[]; equipped?: Record<string, string>; teams?: { name: string; members: (string | null)[] }[] };
+      const weapons: Record<string, { step?: number; spares?: number }> = {};
+      for (const id of new Set(copies.map((c) => c.weapon))) {
+        const mine = copies.filter((c) => c.weapon === id).sort((a, b) => (b.step ?? 0) - (a.step ?? 0));
+        const step = mine[0]!.step ?? 0;
+        const spares = mine.slice(1).reduce((n, c) => n + 1 + (c.step ?? 0), 0);
+        weapons[id] = { ...(step > 0 && { step }), ...(spares > 0 && { spares }) };
+      }
+      const weaponOf = (character: string | null) => copies.find((c) => c.uid === equipped[character ?? ''])?.weapon ?? null;
+      const teams = rest.teams?.map((t) => {
+        const used = new Set<string>();
+        const held = t.members.map((m) => {
+          const w = weaponOf(m);
+          if (!w || used.has(w)) return null;
+          used.add(w);
+          return w;
+        });
+        return held.some((w) => w !== null) ? { ...t, weapons: held } : t;
+      });
+      return { ...rest, ...(teams && { teams }), ...(Object.keys(weapons).length > 0 && { weapons }) };
+    },
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;
@@ -113,11 +143,12 @@ export const profileSave: SaveKind<Profile> = {
     for (const [character, ascensions] of Object.entries(profile.ascensions ?? {})) {
       if ((profile.levels?.[character] ?? 1) < levelCap(ascensions - 1)) throw new Error(`${character} ascended below level ${levelCap(ascensions - 1)}`);
     }
-    const uids = (profile.weapons ?? []).map((w) => w.uid);
-    if (new Set(uids).size !== uids.length) throw new Error('two weapon copies share an ID');
-    const held = Object.values(profile.equipped ?? {});
-    if (held.some((uid) => !uids.includes(uid))) throw new Error('a character wields a weapon copy that is not owned');
-    if (new Set(held).size !== held.length) throw new Error('two characters wield one weapon copy');
+    for (const team of profile.teams ?? []) {
+      const held = (team.weapons ?? []).filter((w): w is string => w !== null);
+      if (new Set(held).size !== held.length) throw new Error(`${team.name} holds one weapon twice`);
+      if (held.some((w) => !profile.weapons?.[w])) throw new Error(`${team.name} holds a weapon that is not owned`);
+      if ((team.weapons ?? []).some((w, i) => w !== null && team.members[i] === null)) throw new Error(`${team.name} has a weapon in an empty place`);
+    }
     if ((profile.claimed ?? 1) > profileLevelOf(profile.exp)) throw new Error(`profile level ${profile.claimed} claimed before it was reached`);
     for (const [character, level] of Object.entries(profile.levels ?? {})) {
       if (level > levelCap(profile.ascensions?.[character] ?? 0)) throw new Error(`${character} is past level ${levelCap(profile.ascensions?.[character] ?? 0)} without ascending`);

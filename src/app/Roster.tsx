@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
-import { critOf, describeCharacter, type CardDef } from '../engine/index.ts';
+import { critOf, describeCharacter, type CardDef, type Stats } from '../engine/index.ts';
 import { fieldedCharacter, runCardText, type Growth } from '../game/expedition.ts';
 import { affordableLevels, ascend, ascensionCost, ASCENSIONS, ASCENSION_PULLS, ascensionsOf, levelCap, levelCost, levelOf, MAX_LEVEL, MEMORIES, type GrowthResult } from '../game/levels.ts';
 import { DEPTH_BAND, DEPTH_MAX, rewardMultiplier } from '../game/depth.ts';
-import { BLOOM, PARTY_SIZE, partyProblem, plural, type Profile, placeInTeam, quickTeam, removeFromTeam, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
-import { MAX_STEP, wielderOf, type WeaponResult } from '../game/weapons.ts';
+import { BLOOM, PARTY_SIZE, partyProblem, plural, type Profile, renameTeam, TEAM_NAME_LENGTH, type Team } from '../game/profile.ts';
+import { assignWeapon, holderOf, placeMember, quickMembers, removeMember, teamWeapons, type OwnedWeapon } from '../game/weapons.ts';
 import { battleArt } from '../stage/art.ts';
 import { CardFace, markNumber } from './CardView.tsx';
 import { SideList } from './SideList.tsx';
-import { sortCopies, WeaponCard, WeaponTile } from './Weapons.tsx';
+import { sortWeapons, WeaponGlyph, WeaponTile } from './Weapons.tsx';
 
 // The roster, a character's page and party select (docs/notes/m5-collection.md, "The roster and the party").
 
@@ -68,7 +68,12 @@ interface PartySelectProps {
   depthOpen?: number;
   /** Called with every depth chosen, to save it. */
   onDepth?: (depth: number) => void;
-  onStart: (party: string[], depth: number) => void;
+  /** Starts with the party, the depth and the preset's weapon under each place. */
+  onStart: (party: string[], depth: number, weapons: (string | null)[]) => void;
+  /** The weapons owned, for the weapon under each place; none if absent. */
+  armory?: Readonly<Record<string, OwnedWeapon>> | undefined;
+  /** Levels, ascensions and Potential, for each place's stats. */
+  growth?: Growth;
   /** The start button's text: "Start expedition" unless given. */
   startLabel?: string;
   onBack: () => void;
@@ -106,22 +111,43 @@ function DepthChooser({ depth, open, onChange }: { depth: number; open: number; 
   );
 }
 
-/** Which picker is open: one place's, or quick select with the characters clicked so far. */
-type Picking = { kind: 'place'; place: number } | { kind: 'quick'; picked: string[] } | null;
+/**
+ * Which picker is open: one place's, quick select with the characters clicked so far, or one place's
+ * weapon, with the weapon to move after a confirm if another place holds it.
+ */
+type Picking = { kind: 'place'; place: number } | { kind: 'quick'; picked: string[] } | { kind: 'weapon'; place: number; moving?: string } | null;
 
 /**
  * Party select (owner, 26 Oct): team presets on the left; the chosen one's four places on the right.
  * A place opens the character list: a character goes in, or swaps with the place she was in. Quick
- * select fills all four in the order clicked.
+ * select fills all four in the order clicked. Under each place is its weapon (owner, 15 Nov): a
+ * weapon once per preset, moving with its member, her owned signature filled in when she joins, and
+ * each place's stats shown with it.
  */
-export function PartySelect({ owned, teams: initialTeams, team: initialTeam, money, presetCost, onBuy, onChange, depth: initialDepth = 1, depthOpen, onDepth, onStart, startLabel, onBack }: PartySelectProps) {
+export function PartySelect({
+  owned,
+  teams: initialTeams,
+  team: initialTeam,
+  money,
+  presetCost,
+  onBuy,
+  onChange,
+  depth: initialDepth = 1,
+  depthOpen,
+  onDepth,
+  onStart,
+  startLabel,
+  armory = {},
+  growth = {},
+  onBack,
+}: PartySelectProps) {
   const [depth, setDepth] = useState(Math.min(Math.max(1, initialDepth), depthOpen ?? 1));
   const changeDepth = (to: number) => {
     const next = Math.min(Math.max(1, to), depthOpen ?? 1);
     setDepth(next);
     onDepth?.(next);
   };
-  const [teams, setTeams] = useState<Team[]>(() => initialTeams.map((t) => ({ ...t, members: [...t.members] })));
+  const [teams, setTeams] = useState<Team[]>(() => initialTeams.map((t) => ({ ...t, members: [...t.members], ...(t.weapons && { weapons: [...t.weapons] }) })));
   const [team, setTeam] = useState(Math.min(initialTeam, initialTeams.length - 1));
   const [picking, setPicking] = useState<Picking>(null);
   const current = teams[team]!;
@@ -137,7 +163,19 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
     setTeam(chosen);
     onChange(next, chosen);
   };
-  const setMembers = (members: (string | null)[]) => commit(teams.map((t, i) => (i === team ? { ...t, members } : t)));
+  const setCurrent = (next: Team) => commit(teams.map((t, i) => (i === team ? next : t)));
+  const signatureOf = (id: string) => Object.values(registry.weapons).find((w) => w.signature === id && armory[w.id])?.id;
+  // A weapon no longer owned (or no longer in the game) counts as none.
+  const weapons = teamWeapons(current).map((w) => (w && armory[w] && registry.weapons[w] ? w : null));
+  const wielded = Object.fromEntries(
+    current.members.flatMap((m, i) => (m && weapons[i] ? [[m, { weapon: weapons[i], ...((armory[weapons[i]]?.step ?? 0) > 0 && { step: armory[weapons[i]]!.step }) }]] : [])),
+  );
+  const chooseWeapon = (place: number, weapon: string | null) => {
+    const holder = weapon ? holderOf({ ...current, weapons }, weapon) : undefined;
+    if (weapon && holder !== undefined && holder !== place) return setPicking({ kind: 'weapon', place, moving: weapon });
+    setCurrent(assignWeapon({ ...current, weapons }, place, weapon));
+    setPicking(null);
+  };
   const setName = (name: string, done: boolean) => {
     const next = teams.map((t, i) => (i === team ? { ...t, name: done ? renameTeam(name, i) : name.slice(0, TEAM_NAME_LENGTH) } : t));
     if (done) commit(next);
@@ -187,8 +225,9 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
         <ol className="team-slots" aria-label="Party">
           {current.members.map((id, i) => {
             const def = id ? registry.characters[id] : undefined;
+            const weapon = weapons[i] ? registry.weapons[weapons[i]] : undefined;
             return (
-              <li key={i}>
+              <li key={i} className="team-place">
                 <button
                   className={`team-slot${id ? ` domain-${def?.domain ?? ''}` : ' empty'}`}
                   aria-label={`${placeLabel(i)}: ${def?.name ?? 'empty'}`}
@@ -207,6 +246,23 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
                     </span>
                   )}
                 </button>
+                {id && (
+                  <>
+                    <StatList stats={fieldedCharacter(id, registry, { ...growth, weapons: wielded })?.stats} compact />
+                    <button className="team-weapon" aria-label={`${def?.name ?? id}'s weapon: ${weapon ? `${weapon.name} +${armory[weapon.id]?.step ?? 0}` : 'none'}`} onClick={() => setPicking({ kind: 'weapon', place: i })}>
+                      {weapon ? (
+                        <>
+                          <WeaponGlyph def={weapon} />
+                          <span>
+                            {weapon.name} <small>+{armory[weapon.id]?.step ?? 0}</small>
+                          </span>
+                        </>
+                      ) : (
+                        <span className="team-weapon-none">{Object.keys(armory).length > 0 ? 'Choose a weapon' : 'No weapons yet'}</span>
+                      )}
+                    </button>
+                  </>
+                )}
               </li>
             );
           })}
@@ -222,12 +278,29 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
           <button className="ghost" onClick={() => setPicking({ kind: 'quick', picked: [] })}>
             Quick select
           </button>
-          <button className="end-turn" disabled={problem !== undefined} onClick={() => onStart(current.members as string[], depth)}>
+          <button className="end-turn" disabled={problem !== undefined} onClick={() => onStart(current.members as string[], depth, weapons)}>
             {startLabel ?? 'Start expedition'}
           </button>
         </div>
       </section>
-      {picking && (
+      {picking?.kind === 'weapon' && (
+        <WeaponPicker
+          member={current.members[picking.place] ?? ''}
+          place={picking.place}
+          members={current.members}
+          weapons={weapons}
+          armory={armory}
+          moving={picking.moving}
+          onChoose={(w) => chooseWeapon(picking.place, w)}
+          onMove={(w) => {
+            setCurrent(assignWeapon({ ...current, weapons }, picking.place, w));
+            setPicking(null);
+          }}
+          onBack={() => setPicking({ kind: 'weapon', place: picking.place })}
+          onCancel={() => setPicking(null)}
+        />
+      )}
+      {picking && picking.kind !== 'weapon' && (
         <div className="team-picker" role="dialog" aria-label={picking.kind === 'quick' ? 'Quick select' : `Choose for ${placeLabel(picking.place)}`}>
           <h3>{picking.kind === 'quick' ? 'Quick select: click up to four, front first' : `Choose for ${placeLabel(picking.place)}`}</h3>
           <div className="team-picker-grid">
@@ -240,7 +313,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
                   place={place >= 0 ? place : undefined}
                   onClick={() => {
                     if (picking.kind === 'place') {
-                      setMembers(placeInTeam(current.members, picking.place, id));
+                      setCurrent(placeMember({ ...current, weapons }, picking.place, id, signatureOf(id)));
                       setPicking(null);
                     } else {
                       const picked = picking.picked.includes(id) ? picking.picked.filter((x) => x !== id) : picking.picked.length < PARTY_SIZE ? [...picking.picked, id] : picking.picked;
@@ -259,7 +332,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
               <button
                 className="ghost"
                 onClick={() => {
-                  setMembers(removeFromTeam(current.members, picking.place));
+                  setCurrent(removeMember({ ...current, weapons }, picking.place));
                   setPicking(null);
                 }}
               >
@@ -270,7 +343,7 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
               <button
                 className="end-turn"
                 onClick={() => {
-                  setMembers(quickTeam(picking.picked));
+                  setCurrent(quickMembers(current, picking.picked, signatureOf));
                   setPicking(null);
                 }}
               >
@@ -284,6 +357,82 @@ export function PartySelect({ owned, teams: initialTeams, team: initialTeam, mon
   );
 }
 
+/**
+ * One place's weapon: every weapon owned, the member's signature first, each marked with who holds it
+ * in this preset. Picking one another place holds asks first, naming who holds it.
+ */
+function WeaponPicker({
+  member,
+  place,
+  members,
+  weapons,
+  armory,
+  moving,
+  onChoose,
+  onMove,
+  onBack,
+  onCancel,
+}: {
+  member: string;
+  place: number;
+  members: readonly (string | null)[];
+  weapons: readonly (string | null)[];
+  armory: Readonly<Record<string, OwnedWeapon>>;
+  moving?: string | undefined;
+  onChoose: (weapon: string | null) => void;
+  onMove: (weapon: string) => void;
+  onBack: () => void;
+  onCancel: () => void;
+}) {
+  const name = registry.characters[member]?.name ?? member;
+  const heldBy = (w: string) => {
+    const i = weapons.indexOf(w);
+    return i >= 0 ? (members[i] ?? undefined) : undefined;
+  };
+  const holder = moving ? registry.characters[heldBy(moving) ?? '']?.name : undefined;
+  return (
+    <div className="team-picker weapon-picker" role="dialog" aria-label={`A weapon for ${name}`}>
+      <h3>A weapon for {name}</h3>
+      {Object.keys(armory).length === 0 ? (
+        <p className="banner-dialog-note">No weapons yet: banner pulls give them.</p>
+      ) : (
+        <ul className="weapon-grid">
+          {sortWeapons(armory, member).map((w) => (
+            <li key={w}>
+              <WeaponTile id={w} owned={armory[w]!} holder={heldBy(w)} pressed={weapons[place] === w} onClick={() => onChoose(w)} />
+            </li>
+          ))}
+        </ul>
+      )}
+      {moving && (
+        <div className="weapon-confirm" role="alertdialog" aria-label="Move the weapon">
+          <p>
+            {holder} holds it in this team. Move it to {name}?
+          </p>
+          <div className="panel-buttons">
+            <button className="end-turn" onClick={() => onMove(moving)}>
+              Move it
+            </button>
+            <button className="ghost" onClick={onBack}>
+              Keep it there
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="panel-buttons">
+        <button className="ghost" onClick={onCancel}>
+          Cancel
+        </button>
+        {weapons[place] && (
+          <button className="ghost" onClick={() => onChoose(null)}>
+            No weapon
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface RosterProps {
   owned: readonly string[];
   profile: Profile;
@@ -291,9 +440,6 @@ interface RosterProps {
   growth: Growth;
   onLevelUp: (id: string, levels: number) => Promise<GrowthResult>;
   onAscend: (id: string) => Promise<GrowthResult>;
-  onEquip: (id: string, uid: string) => Promise<WeaponResult>;
-  onUnequip: (id: string) => Promise<WeaponResult>;
-  onReinforce: (uid: string, fodder: string) => Promise<WeaponResult>;
   onBack: () => void;
 }
 
@@ -409,10 +555,10 @@ function Growing({
   );
 }
 
-type Tab = 'attributes' | 'weapon' | 'kit' | 'potential';
+type Tab = 'attributes' | 'kit' | 'potential';
+// Weapons are equipped in team presets, not here (owner, 15 Nov).
 const TABS: [Tab, string][] = [
   ['attributes', 'Attributes'],
-  ['weapon', 'Weapon'],
   ['kit', 'Kit'],
   ['potential', 'Potential'],
 ];
@@ -430,9 +576,6 @@ function CharacterPage({
   growth,
   onLevelUp,
   onAscend,
-  onEquip,
-  onUnequip,
-  onReinforce,
   onStep,
   onBack,
 }: Omit<RosterProps, 'owned' | 'onBack'> & { id: string; ids: readonly string[]; onStep: (id: string) => void; onBack: () => void }) {
@@ -479,7 +622,6 @@ function CharacterPage({
               <Growing id={id} profile={profile} onLevelUp={onLevelUp} onAscend={onAscend} onGained={setGained} />
             </>
           )}
-          {tab === 'weapon' && <WeaponTab id={id} profile={profile} onEquip={onEquip} onUnequip={onUnequip} onReinforce={onReinforce} />}
           {tab === 'kit' && <Kit id={id} growth={growth} />}
           {tab === 'potential' &&
             (base.dupes?.length ? (
@@ -521,29 +663,28 @@ function CharacterPage({
   );
 }
 
-/** Her stats as she fights, each with what her weapon adds beside it. */
+/** Her own stats, at her level, ascensions and Potential; a weapon's main stat shows on the preset screen. */
 function Attributes({ id, growth }: { id: string; growth: Growth }) {
-  const armed = fieldedCharacter(id, registry, growth)?.stats;
-  const bare = fieldedCharacter(id, registry, { ...growth, weapons: undefined })?.stats;
-  if (!armed || !bare) return null;
-  const [a, b] = [critOf(armed), critOf(bare)];
-  const rows: [string, number, number, string][] = [
-    ['HP', armed.hp, bare.hp, ''],
-    ['Attack', armed.attack, bare.attack, ''],
-    ['Defense', armed.defense, bare.defense, ''],
-    ['Crit Rate', a.rate, b.rate, '%'],
-    ['Crit Damage', a.damage, b.damage, '%'],
+  return <StatList stats={fieldedCharacter(id, registry, { ...growth, weapons: undefined })?.stats} />;
+}
+
+/** HP, Attack, Defense, Crit Rate and Crit Damage. */
+function StatList({ stats, compact = false }: { stats: Stats | undefined; compact?: boolean }) {
+  if (!stats) return null;
+  const crit = critOf(stats);
+  const rows: [string, string][] = [
+    ['HP', String(stats.hp)],
+    ['Attack', String(stats.attack)],
+    ['Defense', String(stats.defense)],
+    ['Crit Rate', `${crit.rate}%`],
+    ['Crit Damage', `${crit.damage}%`],
   ];
   return (
-    <dl className="character-stats">
-      {rows.map(([name, value, without, unit]) => (
+    <dl className={compact ? 'slot-stats' : 'character-stats'}>
+      {rows.map(([name, value]) => (
         <div key={name}>
           <dt>{name}</dt>
-          <dd>
-            {value}
-            {unit}
-            {value !== without && <small className="stat-weapon"> (+{value - without}{unit} weapon)</small>}
-          </dd>
+          <dd>{value}</dd>
         </div>
       ))}
     </dl>
@@ -601,101 +742,5 @@ function Kit({ id, growth }: { id: string; growth: Growth }) {
         </>
       )}
     </>
-  );
-}
-
-/**
- * Her weapon: its card, and Change (every owned copy, her signature first, each showing who wields
- * it), Unequip and Reinforce (with a duplicate of the same weapon). Taking a copy from someone else
- * asks first. The game refuses what can't be done; the page shows why.
- */
-function WeaponTab({ id, profile, onEquip, onUnequip, onReinforce }: Pick<RosterProps, 'onEquip' | 'onUnequip' | 'onReinforce'> & { id: string; profile: Profile }) {
-  const [open, setOpen] = useState<'change' | 'reinforce' | null>(null);
-  const [taking, setTaking] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
-  const uid = profile.equipped?.[id];
-  const copy = profile.weapons?.find((c) => c.uid === uid);
-  const def = copy && registry.weapons[copy.weapon];
-  const copies = profile.weapons ?? [];
-  const name = registry.characters[id]?.name ?? id;
-  const act = (job: () => Promise<WeaponResult>, done: string) => {
-    if (busy) return;
-    setBusy(true);
-    job()
-      .then((r) => setNote(r.ok ? done : r.reason))
-      .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
-      .finally(() => {
-        setBusy(false);
-        setOpen(null);
-        setTaking(null);
-      });
-  };
-  const choose = (pick: string) => {
-    const holder = wielderOf(profile, pick);
-    if (holder && holder !== id) return setTaking(pick);
-    act(() => onEquip(id, pick), `${name} wields it.`);
-  };
-  const fodder = copy ? copies.filter((c) => c.weapon === copy.weapon && c.uid !== copy.uid && !c.locked && !wielderOf(profile, c.uid)) : [];
-  const holderName = taking ? registry.characters[wielderOf(profile, taking) ?? '']?.name : undefined;
-  return (
-    <section className="character-weapon" aria-label="Weapon">
-      {def && copy ? <WeaponCard def={def} step={copy.step ?? 0} /> : <p>{name} wields no weapon.</p>}
-      <div className="panel-buttons">
-        <button className="end-turn" disabled={busy || copies.length === 0} onClick={() => (setNote(null), setOpen('change'))}>
-          Change
-        </button>
-        {copy && (
-          <>
-            <button className="ghost" disabled={busy} onClick={() => act(() => onUnequip(id), 'Back in the inventory.')}>
-              Unequip
-            </button>
-            <button className="ghost" disabled={busy || (copy.step ?? 0) >= MAX_STEP || fodder.length === 0} onClick={() => (setNote(null), setOpen('reinforce'))}>
-              Reinforce
-            </button>
-          </>
-        )}
-      </div>
-      <p className="character-note" role="status">
-        {note ?? (copies.length === 0 ? 'Weapons come from banner pulls.' : copy && (copy.step ?? 0) < MAX_STEP && fodder.length === 0 ? 'Reinforcing needs a duplicate of this weapon that no one wields.' : '')}
-      </p>
-      {open && (
-        <div className="team-picker weapon-picker" role="dialog" aria-label={open === 'change' ? 'Choose a weapon' : 'Choose a duplicate'}>
-          <h3>{open === 'change' ? `A weapon for ${name}` : 'Reinforce with a duplicate'}</h3>
-          <ul className="weapon-grid">
-            {(open === 'change' ? sortCopies(copies, id) : sortCopies(fodder)).map((c) => (
-              <li key={c.uid}>
-                <WeaponTile
-                  copy={c}
-                  wielder={wielderOf(profile, c.uid)}
-                  pressed={c.uid === uid}
-                  onClick={() => (open === 'change' ? choose(c.uid) : act(() => onReinforce(uid!, c.uid), `Reinforced to +${Math.min(MAX_STEP, (copy?.step ?? 0) + 1 + (c.step ?? 0))}.`))}
-                />
-              </li>
-            ))}
-          </ul>
-          {taking && (
-            <div className="weapon-confirm" role="alertdialog" aria-label="Take the weapon">
-              <p>
-                {holderName} wields it. Take it for {name}?
-              </p>
-              <div className="panel-buttons">
-                <button className="end-turn" disabled={busy} onClick={() => act(() => onEquip(id, taking), `${name} wields it; ${holderName} has none.`)}>
-                  Take it
-                </button>
-                <button className="ghost" onClick={() => setTaking(null)}>
-                  Keep it there
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="panel-buttons">
-            <button className="ghost" onClick={() => (setOpen(null), setTaking(null))}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-    </section>
   );
 }

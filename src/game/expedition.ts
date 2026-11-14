@@ -121,7 +121,7 @@ export interface Expedition {
   dupes?: Record<string, number>;
   levels?: Record<string, number>;
   ascensions?: Record<string, number>;
-  /** The party's weapons when the run began, by character; one equipped mid-run counts from the next run. */
+  /** The party's weapons and steps when the run began, from its preset, by character; a change mid-run counts from the next run. */
   weapons?: Record<string, Wielded>;
   /** The run's depth (`depth.ts`): its enemies' level and its rewards' multiplier. Absent is Depth 1. */
   depth?: number;

@@ -2,7 +2,7 @@ import { reached } from './bloom.ts';
 import { rewardMultiplier } from './depth.ts';
 import type { Expedition, ExpeditionDef } from './expedition.ts';
 import type { Gacha } from './gacha.ts';
-import type { WeaponCopy, WeaponSettings } from './weapons.ts';
+import type { OwnedWeapon, WeaponSettings } from './weapons.ts';
 import { runExp } from './profileLevel.ts';
 
 // The player's profile, kept across runs (docs/notes/m4-run.md, "Banking"; m5-collection.md): banked
@@ -26,10 +26,8 @@ export interface Profile {
   focus?: string;
   /** The weapon banner's Focus: the signature weapon its SSR 50/50 is for. */
   weaponFocus?: string;
-  /** Weapon copies owned (`weapons.ts`), oldest first. */
-  weapons?: WeaponCopy[];
-  /** The copy each character wields, by character, as the copy's `uid`. */
-  equipped?: Record<string, string>;
+  /** Weapons owned, by ID, each once with its step and spare copies (`weapons.ts`). */
+  weapons?: Record<string, OwnedWeapon>;
   /** The banners' two tickboxes, both off unless set. */
   weaponSettings?: WeaponSettings;
   /** The gacha's stream, pity, 50/50 losses and audit history, from the first pull. */
@@ -91,6 +89,8 @@ export const TEAM_NAME_LENGTH = 24;
 export interface Team {
   name: string;
   members: (string | null)[];
+  /** The weapon under each place, by ID, a weapon at most once (owner, 15 Nov); absent or null is none. */
+  weapons?: (string | null)[];
 }
 
 /** The characters a profile can field: the starters, then those it has gained. */
@@ -109,7 +109,7 @@ export const emptyTeam = (index: number): Team => ({ name: teamName(index), memb
 
 /** A profile's presets: those it saved, else the defaults, with the first four owned in Team 1. */
 export function teamsOf(profile: Profile, owned: readonly string[]): Team[] {
-  if (profile.teams) return profile.teams.map((t) => ({ name: t.name, members: [...t.members] }));
+  if (profile.teams) return profile.teams.map((t) => ({ name: t.name, members: [...t.members], ...(t.weapons && { weapons: [...t.weapons] }) }));
   const teams = Array.from({ length: TEAM_PRESETS }, (_, i) => emptyTeam(i));
   teams[0]!.members = Array.from({ length: PARTY_SIZE }, (_, i) => owned[i] ?? null);
   return teams;

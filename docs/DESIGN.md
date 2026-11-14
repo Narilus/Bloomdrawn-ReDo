@@ -362,7 +362,7 @@ There is no Standard banner to pull on (owner, 28 Oct). With nothing rotating, a
 
 ### Results
 
-Every result shows its rarity and its family: SSR character, SSR signature weapon, SR or R weapon, or Memories and Ducats. Characters are always SSR. On both banners an SR is a random SR weapon, and an R is half the time a random R weapon, otherwise Memories and Ducats. Two tickboxes on the banners, off by default, handle duplicate weapons: **Auto-reinforce duplicates** (into a copy below +5, the wielded one first) and **Auto-salvage duplicates of maxed weapons** (into Pollen). Reinforcing goes first; a weapon's first copy and locked weapons are never salvaged (`docs/notes/weapons.md`).
+Every result shows its rarity and its family: SSR character, SSR signature weapon, SR or R weapon, or Memories and Ducats. Characters are always SSR. On both banners an SR is a random SR weapon, and an R is half the time a random R weapon, otherwise Memories and Ducats. Two tickboxes on the banners, off by default, handle duplicate weapons: **Auto-reinforce duplicates** (into a copy below +5, the wielded one first) and **Auto-salvage duplicates of maxed weapons** (into Pollen). Each weapon is owned once with its step and spare copies; a spare reinforces it or is salvaged by hand, and the weapon itself is never salvaged (owner, 15 Nov; `docs/notes/weapons.md`).
 
 ### Pull sources
 

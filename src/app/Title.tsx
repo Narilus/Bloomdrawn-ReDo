@@ -3,7 +3,7 @@ import { CHARACTER_BANNER, WEAPON_BANNER } from '../content/banners.ts';
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import { STARTERS } from '../content/roster.ts';
-import { wieldedBy } from '../game/weapons.ts';
+import { wieldedOf } from '../game/weapons.ts';
 import { DEPTH_MAX, depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
 import { ASCENSIONS, MAX_LEVEL } from '../game/levels.ts';
@@ -36,7 +36,7 @@ type Screen =
   | { kind: 'run'; save: RunSave }
   | { kind: 'trials'; profile: Profile; last?: { domain: string; tier: number } }
   | { kind: 'trial-party'; profile: Profile; domain: string; tier: number }
-  | { kind: 'trial-fight'; profile: Profile; domain: string; tier: number; party: string[]; seed: number };
+  | { kind: 'trial-fight'; profile: Profile; domain: string; tier: number; party: string[]; weapons: (string | null)[]; seed: number };
 
 /** Dev builds only: `?owned=all` fields every character, to try kits before the gacha gives them. Nothing is saved. */
 const OWN_ALL = import.meta.env.DEV && new URLSearchParams(window.location.search).get('owned') === 'all';
@@ -48,13 +48,12 @@ const DEV_DUPES = devNumber('dupes', 5);
 const DEV_LEVEL = devNumber('level', MAX_LEVEL);
 /** Dev builds only: `?depths=all` opens every depth in party select, to try deep runs. Nothing is saved. */
 const DEV_ALL_DEPTHS = import.meta.env.DEV && new URLSearchParams(window.location.search).get('depths') === 'all';
-/** The profile's dupe levels, levels and ascensions, or `?dupes`'s and `?level`'s, and its weapons. */
+/** The profile's dupe levels, levels and ascensions, or `?dupes`'s and `?level`'s. Weapons come from the preset a run starts with. */
 const growthOf = (profile: Profile): Growth => ({
   dupes: DEV_DUPES ? Object.fromEntries(Object.values(registry.characters).filter((c) => c.dupes?.length).map((c) => [c.id, DEV_DUPES])) : profile.dupes,
   levels: DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, DEV_LEVEL])) : profile.levels,
   ascensions:
     DEV_LEVEL > 1 ? Object.fromEntries(Object.keys(registry.characters).map((id) => [id, ASCENSIONS.filter((a) => a.at < DEV_LEVEL).length])) : profile.ascensions,
-  weapons: wieldedBy(profile, registry),
 });
 
 /** The characters a profile can field, leaving out any the game no longer has. */
@@ -111,7 +110,9 @@ export function Game() {
         depth={DEV_ALL_DEPTHS ? (screen.profile.depth ?? 1) : depthOf(screen.profile)}
         depthOpen={DEV_ALL_DEPTHS ? DEPTH_MAX : depthOpen(screen.profile)}
         onDepth={(depth) => void saves.depth(depth)}
-        onStart={(party, depth) => void startNew(party, growthOf(screen.profile), depth)}
+        armory={screen.profile.weapons}
+        growth={growthOf(screen.profile)}
+        onStart={(party, depth, weapons) => void startNew(party, { ...growthOf(screen.profile), weapons: wieldedOf(screen.profile, party, weapons, registry) }, depth)}
         onBack={toTitle}
       />
     );
@@ -144,13 +145,15 @@ export function Game() {
         }}
         onChange={(teams, team) => void saves.teams(teams, team)}
         startLabel={`Start Tier ${tier}`}
-        onStart={(party) => setScreen({ kind: 'trial-fight', profile, domain, tier, party, seed: Math.floor(Math.random() * 2 ** 31) })}
+        armory={profile.weapons}
+        growth={growthOf(profile)}
+        onStart={(party, _depth, weapons) => setScreen({ kind: 'trial-fight', profile, domain, tier, party, weapons, seed: Math.floor(Math.random() * 2 ** 31) })}
         onBack={() => void saves.profile().then((fresh) => setScreen({ kind: 'trials', profile: fresh, last: { domain, tier } }))}
       />
     );
   }
   if (screen.kind === 'trial-fight') {
-    const { profile, domain, tier, party, seed } = screen;
+    const { profile, domain, tier, party, weapons, seed } = screen;
     const encounter = registry.encounters[TRIALS.find((t) => t.domain === domain)?.encounter ?? ''];
     if (!encounter) throw new Error(`There is no ${domain} Trial.`);
     const toTrials = () => void saves.profile().then((fresh) => setScreen({ kind: 'trials', profile: fresh, last: { domain, tier } }));
@@ -159,7 +162,7 @@ export function Game() {
         key={seed}
         domain={domain}
         tier={tier}
-        setup={trialFight(seed, party, growthOf(profile), encounter.enemies, tier)}
+        setup={trialFight(seed, party, { ...growthOf(profile), weapons: wieldedOf(profile, party, weapons, registry) }, encounter.enemies, tier)}
         onEnd={(won) => saves.trial(domain, tier, won)}
         onAgain={() => setScreen({ ...screen, seed: Math.floor(Math.random() * 2 ** 31) })}
         onBack={toTrials}
@@ -180,9 +183,6 @@ export function Game() {
         growth={growthOf(screen.profile)}
         onLevelUp={(id, levels) => act(saves.levelUp(id, levels))}
         onAscend={(id) => act(saves.ascend(id))}
-        onEquip={(id, uid) => act(saves.equip(id, uid))}
-        onUnequip={(id) => act(saves.unequip(id))}
-        onReinforce={(uid, fodder) => act(saves.reinforce(uid, fodder))}
         onBack={toTitle}
       />
     );
@@ -211,7 +211,6 @@ export function Game() {
         onSelect={(id) => saves.select(CHARACTER_BANNER, id)}
         onReinforce={saves.reinforce}
         onSalvage={saves.salvage}
-        onLock={saves.lock}
         onBack={toTitle}
       />
     );

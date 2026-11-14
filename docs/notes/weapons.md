@@ -1,8 +1,8 @@
 # Weapons (M6.8)
 
-Status: **built 15 Nov as copies wielded by characters; being revised.** From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen.
+Status: **built 15 Nov, in presets.** From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen.
 
-**Decided 15 Nov (owner), not built yet:** weapons are equipped in team presets, not on characters, and a weapon appears at most once per preset (see "Team presets"). **Proposed, for the owner:** one entry per weapon instead of copies, no lock, signatures filled in automatically, and the save migration (see "Proposal: one entry per weapon"). Nothing below marked "proposed" is built.
+Decided and built 15 Nov (owner): weapons are equipped in team presets, a weapon at most once per preset (see "Team presets"); each weapon is owned once with its step and spares, with no lock; a member's owned signature fills her slot when she joins a preset; a preset's weapon moves and leaves with its member (see "Owning weapons"). The first build (copies wielded by characters, a Weapon tab, locks) is gone; save v12 migrates it.
 
 ## Rules
 
@@ -12,7 +12,7 @@ Status: **built 15 Nov as copies wielded by characters; being revised.** From th
 - **Effects say "the wielder",** never "she" or "her", since anyone may hold a weapon, including characters not yet made.
 - **Rarities:** SSR (the eight signatures), SR and R.
 - **Reinforcing.** A duplicate of a weapon reinforces it, from +0 up to +5. Each step raises the **effect** by a tenth of its +0 value, so +5 is ×1.5. The main stat never changes. A +0 weapon does its whole job; reinforcing is investment, never needed.
-- **Salvage.** A spare copy can be salvaged for Pollen (see "Salvage"). Under the proposal, a weapon itself is never salvaged, only its spares, so there is no lock.
+- **Salvage.** A spare copy can be salvaged for Pollen (see "Salvage"). The weapon itself is never salvaged, only its spares, so there is no lock.
 - **No weapon levels, on trial** (owner, 14 Nov; Morimens is the precedent). The main stat is a share of the wielder's stat, so it keeps up as the character levels. DESIGN's "weapon materials" go with it.
 
 ### Main stats (placeholders)
@@ -79,7 +79,7 @@ The names are working names, like the rest.
 - **SR and R results on both banners:**
   - an SR is a random SR weapon;
   - an R is half the time a random R weapon, and half the time today's Memories and Ducats.
-- A result reads as before, plus what happened to the copy: "Surgeon's Scalpel (new)", "(reinforced to +2)", "(salvaged)", or, under the proposal, "(a spare)".
+- A result reads as before, plus what happened to the copy: "Surgeon's Scalpel (new)", "(reinforced to +2)", "(a spare)" or "(salvaged)".
 
 ### The two tickboxes
 
@@ -88,7 +88,7 @@ These go on both banner screens, since SR and R weapons come from both. They're 
 - ☐ **Auto-reinforce duplicates.** A duplicate of a weapon below +5 raises it one step.
 - ☐ **Auto-salvage duplicates of maxed weapons.** A duplicate of a weapon at +5 is salvaged.
 
-They don't conflict. Reinforcing goes first, and salvage only takes what's left. With both on, duplicates grow a weapon to +5 and are salvaged after that. Otherwise a duplicate is kept as a spare. A weapon's first copy is never salvaged. (Built today on copies, with a lock; the proposal below simplifies both.)
+They don't conflict. Reinforcing goes first, and salvage only takes what's left. With both on, duplicates grow a weapon to +5 and are salvaged after that. Otherwise a duplicate is kept as a spare. The weapon itself is never salvaged.
 
 ## Salvage
 
@@ -105,7 +105,7 @@ The sums per 100 pulls (SR about 16, R weapons about 41):
 | SR duplicate | 2 |
 | SSR duplicate | 40, as a character past C5 |
 
-Salvage pays per spare copy. (As built today, salvaging a reinforced copy pays for every copy in it: a +2 SR pays 6.)
+Salvage pays per spare copy.
 
 The lab checks Pollen income against what the Profile Shop (M6.9) sells before the numbers are set. If they can't be balanced, salvage pays **Ducats** instead (the owner's fallback): about 50 for an R and 200 for an SR, small next to a run's 1,100 at Depth 1.
 
@@ -119,7 +119,7 @@ Recommendations, in plain gacha terms, not flower terms:
 
 The tabs run down the left, like the main menu, and the art stays large in the middle. The character's name, title, Domain, role, level and Potential stay above the panel whichever tab is open. Arrows step to the previous or next character.
 
-**Decided 15 Nov:** the Weapon tab goes, since weapons now belong to presets. The page shows the character's own stats, without any weapon.
+Weapons belong to presets (owner, 15 Nov), so the page has no Weapon tab and shows the character's own stats, without any weapon.
 
 ```
 ┌──────────────┬───────────────────────────┬────────────────────────────────────┐
@@ -139,7 +139,7 @@ The tabs run down the left, like the main menu, and the art stays large in the m
 
 ## Team presets
 
-**Decided 15 Nov (owner):** equipping happens on the team preset screen (party select, for runs and Trials), with a weapon sub-slot under each member. Each slot shows the member's stats with her weapon.
+Equipping happens on the team preset screen (owner, 15 Nov) (party select, for runs and Trials), with a weapon sub-slot under each member. Each slot shows the member's stats with her weapon.
 
 ```
 ┌───────────────┬───────────────┬───────────────┬───────────────┐
@@ -154,13 +154,13 @@ The tabs run down the left, like the main menu, and the art stays large in the m
 
 - **The weapon sub-slot** opens a picker of owned weapons, the member's signature first, then by rarity, each marked if another slot in this preset holds it. "None" empties the slot.
 - **Picking a weapon another slot holds moves it,** after a confirm naming who holds it: "Agathe holds it in this team. Move it to Maelia?" Other presets are untouched.
-- **Proposed:** the weapon belongs to the member in that preset. When members swap places it goes with her; when she's removed, her slot empties.
-- **Proposed:** when a character joins a preset and her signature is owned and not already in that preset, it fills her sub-slot.
+- The weapon belongs to the member in that preset: when members swap places it goes with her; when she's removed or replaced, it leaves with her.
+- When a character joins a preset and her signature is owned and not already in that preset, it fills her sub-slot (quick select too).
 - A run or Trial started from the preset copies its weapons and their steps at the start, as it copies levels today. Reinforcing mid-run counts from the next run.
 
 ## The inventory
 
-The same left-hand column as the main menu: **All, Currencies, Memories, Materials, Weapons, Special.** Built 15 Nov as one tile per copy, with Reinforce, Salvage and Lock. Under the proposal it becomes one tile per weapon:
+The same left-hand column as the main menu: **All, Currencies, Memories, Materials, Weapons, Special.** One tile per weapon:
 
 ```
 ┌──────────────┬───────────────────────────────────────┬────────────────────────┐
@@ -177,9 +177,9 @@ The same left-hand column as the main menu: **All, Currencies, Memories, Materia
 - A tile shows the weapon's glyph (art later) framed in its rarity colour, its step, and its spares (×3).
 - The detail panel shows the main stat, the effect now and at +5, and the presets it's in. **Reinforce** spends one spare for a step; **Salvage** spends spares for Pollen (one, or all, after a confirm showing the total).
 
-## Proposal: one entry per weapon
+## Owning weapons
 
-For the owner (15 Nov). Not built.
+Proposed and approved 15 Nov; built.
 
 - **The profile holds each weapon once:** its step (+0 to +5) and its spare copies. Owning a weapon is having its entry; there are no copies to tell apart and no wielders to track, since presets name weapons by ID.
 - **A pulled copy:**
@@ -191,7 +191,7 @@ For the owner (15 Nov). Not built.
 - **Auto-fill:** a member's owned signature fills her sub-slot when she joins a preset, if that preset doesn't already hold it.
 - **Save migration (v11 → v12):**
   - copies of a weapon merge into one entry at the highest step;
-  - the other copies become spares, one for every copy reinforced into them (a +1 and a +0 beside a kept +2 make 3 spares), so nothing pulled is lost. The simpler alternative, one spare per leftover copy, would quietly lose reinforcement;
+  - the other copies become spares, one for every copy reinforced into them (a +1 and a +0 beside a kept +2 make 3 spares), so nothing pulled is lost (left to my judgement: the only profile pulled none);
   - the weapon each character wielded goes to her slot in every saved preset she's in, front first, skipping a weapon already in that preset. A profile with no saved presets keeps its weapons unassigned;
   - locks are dropped. Pull history is kept as it was ("a duplicate" for a copy kept).
   - A run in progress is untouched: it already holds its own copy of its weapons.
@@ -225,11 +225,6 @@ What it shows:
   - a member's weapon joins the member's stats (main stat) and hooks (effect);
   - reinforcing scales the effect's amounts;
   - filters for "the wielder's cards" and "consumed by the wielder" (Embryo, Essence); held-turn counts already exist for Hours Kept.
-- **Save (v11, built):** weapon copies as `{ uid, weapon, step, locked? }`; `equipped` as character → copy; the two tickboxes. The proposal's v12 is above.
+- **Save (v12):** `weapons` as weapon → `{ step?, spares? }`; each preset's `weapons`, a weapon ID or null per place; the two tickboxes. The save refuses a preset holding a weapon twice, one not owned, or one in an empty place. v11's copies migrate as above.
+- **Game:** `src/game/weapons.ts`: pulled copies, reinforce, salvage, and the preset rules (`placeMember`, `removeMember`, `quickMembers`, `assignWeapon`, `wieldedOf` for a run's or Trial's start).
 - **Art (a sub-step, owner, 14 Nov):** an icon for every weapon, signatures and the 16 generics, through `npm run art`: a prop-only prompt stem in the battle sprites' pixel style, symbolic where that reads better than a literal object (the Sealed Ledger as a clasped book with a wax seal, the Torn Veil as a strip of lace with bells). The owner picks, as with sprites.
-
-## Questions for the owner
-
-1. **One entry per weapon:** the proposal above, with the lock dropped and signatures filled in automatically?
-2. **Migration spares:** one spare for every copy reinforced into a merged copy (nothing lost), or one per leftover copy?
-3. **A weapon in a preset belongs to its member,** moving with her when places swap and leaving with her?

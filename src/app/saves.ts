@@ -9,7 +9,7 @@ import { chooseFocus, pull, useSelector } from '../game/gacha.ts';
 import { ascend, levelUp } from '../game/levels.ts';
 import { claimLevels } from '../game/profileLevel.ts';
 import { endTrial } from '../game/trials.ts';
-import { equip, reinforce, salvage, setWeaponSettings, toggleLock, unequip, type WeaponSettings } from '../game/weapons.ts';
+import { reinforce, salvage, setWeaponSettings, type WeaponSettings } from '../game/weapons.ts';
 import { bank, buyPreset, lossBanking, NEW_PROFILE, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
@@ -185,12 +185,9 @@ export function createSaves(adapter: SaveAdapter) {
         return result.ok && result.won ? keep(result) : result;
       }),
 
-    /** Weapons (docs/notes/weapons.md): equip, unequip, reinforce, salvage and lock; a refusal writes nothing. */
-    equip: (character: string, uid: string) => enqueue(async () => keep(equip(await readProfile(), character, uid))),
-    unequip: (character: string) => enqueue(async () => keep({ ok: true as const, profile: unequip(await readProfile(), character) })),
-    reinforce: (uid: string, fodder: string) => enqueue(async () => keep(reinforce(await readProfile(), uid, fodder))),
-    salvage: (uid: string) => enqueue(async () => keep(salvage(await readProfile(), uid, registry))),
-    lock: (uid: string) => enqueue(async () => keep(toggleLock(await readProfile(), uid))),
+    /** Weapons (docs/notes/weapons.md): a spare reinforces a weapon a step, or spares are salvaged; a refusal writes nothing. */
+    reinforce: (weapon: string) => enqueue(async () => keep(reinforce(await readProfile(), weapon))),
+    salvage: (weapon: string, count: number) => enqueue(async () => keep(salvage(await readProfile(), weapon, count, registry))),
     /** Keeps the banners' two tickboxes. */
     weaponSettings: (settings: WeaponSettings) => enqueue(async () => keep({ ok: true as const, profile: setWeaponSettings(await readProfile(), settings) })),
 

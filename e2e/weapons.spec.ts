@@ -1,70 +1,69 @@
 import { expect, test } from '@playwright/test';
 import { importSave, saveFile } from './menu.ts';
 
-// Weapons (M6.8; docs/notes/weapons.md): a character's page has tabs down the left; the Weapon tab
-// equips a copy (asking before taking one from someone else) and its main stat shows on Attributes.
+// Weapons (M6.8; docs/notes/weapons.md; owner, 15 Nov): weapons are equipped in team presets, a
+// sub-slot under each member, once per preset (moving after a confirm), and each place's stats show
+// its weapon. The inventory holds each weapon once with its spares; the character page shows base stats.
 
 const profile = {
   pulls: 0,
   runs: 0,
   owned: ['virelle'],
-  weapons: [
-    { uid: 'w1', weapon: 'weapon.thorn-rapier' },
-    { uid: 'w2', weapon: 'weapon.surgeons-scalpel', step: 2 },
-    { uid: 'w3', weapon: 'weapon.surgeons-scalpel' },
-    { uid: 'w4', weapon: 'weapon.seed-orb-staff', locked: true },
-  ],
-  equipped: { maelia: 'w2' },
+  weapons: {
+    'weapon.thorn-rapier': {},
+    'weapon.surgeons-scalpel': { step: 2, spares: 2 },
+    'weapon.seed-orb-staff': {},
+  },
+  teams: [{ name: 'Team 1', members: ['agathe', 'maelia', 'anthe', 'leonora'], weapons: [null, 'weapon.surgeons-scalpel', null, null] }],
+  team: 0,
 };
-const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 11, contentVersion: 1, data: profile } } });
+const backup = JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 12, contentVersion: 1, data: profile } } });
 
-test("a character's page: tabs on the left, equipping a weapon, its stat on Attributes", async ({ page }) => {
+test('a preset equips weapons: a sub-slot under each member, her signature filled in, a weapon moved after a confirm, stats with it', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
-  await page.goto('/');
+  await page.goto('/?encounters=encounter.training');
   await importSave(page, saveFile(backup));
+
+  // The character page has no Weapon tab, and shows her own stats.
   await page.getByRole('button', { name: 'Roster' }).click();
   await page.getByRole('button', { name: 'Virelle', exact: true }).click();
-  const tabs = page.getByRole('tablist', { name: 'Character page' });
-  await expect(tabs.getByRole('tab')).toHaveText(['Attributes', 'Weapon', 'Kit', 'Potential']);
-  await expect(page.locator('.character-header h2')).toHaveText('Virelle, the Open Wound');
-  await page.screenshot({ path: 'test-results/screenshots/character-attributes.png' });
+  await expect(page.getByRole('tablist', { name: 'Character page' }).getByRole('tab')).toHaveText(['Attributes', 'Kit', 'Potential']);
+  await expect(page.locator('.character-stats')).toContainText('Attack18');
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Back' }).click();
 
-  // Virelle wields nothing; she takes the Thorn Rapier, her signature, listed first.
-  await tabs.getByRole('tab', { name: 'Weapon' }).click();
-  await expect(page.locator('.character-weapon')).toContainText('Virelle wields no weapon.');
-  await page.getByRole('button', { name: 'Change' }).click();
-  const picker = page.getByRole('dialog', { name: 'Choose a weapon' });
-  await expect(picker.locator('.weapon-tile-name').first()).toHaveText("Virelle's Thorn Rapier");
-  await page.screenshot({ path: 'test-results/screenshots/character-weapon-change.png' });
-  await picker.getByRole('button', { name: "Virelle's Thorn Rapier +0" }).click();
-  await expect(page.locator('.weapon-card h3')).toContainText("Virelle's Thorn Rapier");
-  await expect(page.locator('.weapon-card')).toContainText('Crit Damage +24%');
-  await expect(page.locator('.weapon-card')).toContainText('Signature · Virelle');
-  await page.screenshot({ path: 'test-results/screenshots/character-weapon.png' });
+  await page.getByRole('button', { name: 'Expedition' }).click();
+  await expect(page.getByRole('button', { name: "Maelia's weapon: Surgeon's Scalpel +2" })).toBeVisible();
+  // Maelia's Attack 9 with the Scalpel's +18% is 11.
+  await expect(page.locator('.team-place').nth(1).locator('.slot-stats')).toContainText('Attack11');
+  await page.screenshot({ path: 'test-results/screenshots/party-weapons.png' });
 
-  // Maelia's Scalpel is taken only after a confirm.
-  await page.getByRole('button', { name: 'Change' }).click();
-  await picker.getByRole('button', { name: "Surgeon's Scalpel +2, wielded by Maelia" }).click();
-  await expect(page.getByRole('alertdialog', { name: 'Take the weapon' })).toContainText('Maelia wields it. Take it for Virelle?');
-  await page.getByRole('button', { name: 'Take it' }).click();
-  await expect(page.getByRole('status')).toHaveText('Virelle wields it; Maelia has none.');
-  // Reinforce with the spare Scalpel: +2 and a +0 copy make +3.
-  await page.getByRole('button', { name: 'Reinforce' }).click();
-  await page.getByRole('dialog', { name: 'Choose a duplicate' }).getByRole('button', { name: "Surgeon's Scalpel +0" }).click();
-  await expect(page.getByRole('status')).toHaveText('Reinforced to +3.');
+  // Virelle joins in Agathe's place, bringing her owned signature.
+  await page.getByRole('button', { name: 'Front: Agathe' }).click();
+  await page.getByRole('dialog', { name: 'Choose for Front' }).getByRole('button', { name: 'Virelle', exact: true }).click();
+  await expect(page.getByRole('button', { name: "Virelle's weapon: Virelle's Thorn Rapier +0" })).toBeVisible();
 
-  // Attributes shows what the weapon adds: Attack 18 +18% is 21.
-  await tabs.getByRole('tab', { name: 'Attributes' }).click();
-  await expect(page.locator('.character-stats')).toContainText('Attack21 (+3 weapon)');
-  // The arrows step to the next character, on the same tab.
-  await page.getByRole('button', { name: 'Next character' }).click();
-  await expect(page.locator('.character-header h2')).not.toHaveText('Virelle, the Open Wound');
-  await expect(tabs.getByRole('tab', { name: 'Attributes' })).toHaveAttribute('aria-selected', 'true');
+  // Anthe takes the Scalpel from Maelia, after a confirm naming her.
+  await page.getByRole('button', { name: "Anthe's weapon: none" }).click();
+  const picker = page.getByRole('dialog', { name: 'A weapon for Anthe' });
+  await expect(picker.locator('.weapon-tile-name')).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier", "Surgeon's Scalpel"]);
+  await page.screenshot({ path: 'test-results/screenshots/party-weapon-picker.png' });
+  await picker.getByRole('button', { name: "Surgeon's Scalpel +2, 2 spares, held by Maelia" }).click();
+  await expect(page.getByRole('alertdialog', { name: 'Move the weapon' })).toContainText('Maelia holds it in this team. Move it to Anthe?');
+  await page.getByRole('button', { name: 'Move it' }).click();
+  await expect(page.getByRole('button', { name: "Anthe's weapon: Surgeon's Scalpel +2" })).toBeVisible();
+  await expect(page.getByRole('button', { name: "Maelia's weapon: none" })).toBeVisible();
+
+  // The run copies the preset's weapons: Virelle fights with her Rapier (Crit Damage +24%).
+  await page.getByRole('button', { name: 'Start expedition' }).click();
+  await page.locator('[data-tile="2,0"]').click();
+  await expect(page.locator('.mana strong')).toBeVisible();
+  await expect(page.locator('.portrait-name')).toHaveText(['Virelle', 'Maelia', 'Anthe', 'Leonora']);
   expect(errors).toEqual([]);
 });
 
-test('the inventory lists weapons: reinforce with a duplicate, lock, and salvage for Pollen after a confirm', async ({ page }) => {
+test('the inventory holds each weapon once: reinforce with a spare, salvage spares for Pollen after a confirm', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/');
@@ -73,30 +72,23 @@ test('the inventory lists weapons: reinforce with a duplicate, lock, and salvage
   const kinds = page.getByRole('tablist', { name: 'Item kinds' });
   await expect(kinds.getByRole('tab')).toHaveText(['All', 'Currencies', 'Memories', 'Materials', 'Weapons', 'Special']);
   await kinds.getByRole('tab', { name: 'Weapons' }).click();
-  // The signatures first, then the SR copies, the highest step first.
-  await expect(page.locator('.inventory-weapons .weapon-tile-name')).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier", "Surgeon's Scalpel", "Surgeon's Scalpel"]);
+  await expect(page.locator('.inventory-weapons .weapon-tile-name')).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier", "Surgeon's Scalpel"]);
   const detail = page.getByRole('complementary', { name: 'Weapon' });
-  await page.getByRole('button', { name: "Surgeon's Scalpel +2, wielded by Maelia" }).click();
+  await page.getByRole('button', { name: "Surgeon's Scalpel +2, 2 spares" }).click();
   await expect(detail).toContainText('Attack +18%');
   await expect(detail).toContainText('Bleed and Poison the wielder applies are 14.4% more.');
-  await expect(detail).toContainText('Wielded by Maelia');
+  await expect(detail).toContainText('In Team 1 (Maelia).');
   await page.screenshot({ path: 'test-results/screenshots/inventory-weapons.png' });
 
-  // The wielded copy can't be salvaged; the spare can, for 2 Pollen, once locked no more.
-  await detail.getByRole('button', { name: 'Salvage' }).click();
-  await page.getByRole('alertdialog', { name: 'Salvage' }).getByRole('button', { name: 'Salvage' }).click();
-  await expect(page.getByRole('status')).toHaveText('That copy is wielded.');
-  await page.getByRole('button', { name: "Surgeon's Scalpel +0" }).click();
-  await detail.getByRole('button', { name: 'Lock' }).click();
-  await expect(page.getByRole('status')).toHaveText('Locked: it is never salvaged.');
-  await detail.getByRole('button', { name: 'Salvage' }).click();
-  await page.getByRole('alertdialog', { name: 'Salvage' }).getByRole('button', { name: 'Salvage' }).click();
-  await expect(page.getByRole('status')).toHaveText('That copy is locked.');
-  await detail.getByRole('button', { name: 'Unlock' }).click();
-  await detail.getByRole('button', { name: 'Salvage' }).click();
-  await expect(page.getByRole('alertdialog', { name: 'Salvage' })).toContainText("Salvage Surgeon's Scalpel +0 for 2 Pollen?");
+  await detail.getByRole('button', { name: 'Reinforce' }).click();
+  await expect(page.getByRole('status')).toHaveText('Reinforced to +3.');
+  await expect(detail).toContainText('1 spare');
+  await detail.getByRole('button', { name: 'Salvage', exact: true }).click();
+  await expect(page.getByRole('alertdialog', { name: 'Salvage' })).toContainText("Salvage a spare of Surgeon's Scalpel for 2 Pollen?");
   await page.getByRole('alertdialog', { name: 'Salvage' }).getByRole('button', { name: 'Salvage' }).click();
   await expect(page.getByRole('status')).toHaveText('Salvaged. Pollen held: 2.');
+  // The weapon itself stays.
+  await expect(detail.getByRole('button', { name: 'Salvage', exact: true })).toBeDisabled();
   await expect(page.locator('.inventory-weapons .weapon-tile')).toHaveCount(3);
   expect(errors).toEqual([]);
 });
@@ -105,7 +97,7 @@ test('the weapon banner: its own Focus among the signatures, the two tickboxes, 
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   await page.goto('/');
-  await importSave(page, saveFile(JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 11, contentVersion: 1, data: { ...profile, pulls: 10 } } } })));
+  await importSave(page, saveFile(JSON.stringify({ format: 'bloomdrawn-backup', saves: { profile: { format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 12, contentVersion: 1, data: { ...profile, pulls: 10 } } } })));
   await page.getByRole('button', { name: 'Banners' }).click();
   await page.getByRole('button', { name: 'Weapon banner' }).click();
   await expect(page.locator('.banner-header h2')).toHaveText('Weapon banner');

@@ -4,12 +4,12 @@ import { registry } from '../content/registry.ts';
 import type { SelectResult } from '../game/gacha.ts';
 import { BLOOM, type Profile } from '../game/profile.ts';
 import { SSR_SELECTOR } from '../game/profileLevel.ts';
-import { MAX_STEP, salvageValue, wielderOf, type WeaponResult } from '../game/weapons.ts';
+import { MAX_STEP, presetsWith, SALVAGE, type WeaponResult } from '../game/weapons.ts';
 import { Icon } from './icons.tsx';
 import { Currencies } from './MainMenu.tsx';
 import { selectedText, SelectorPicker } from './Profile.tsx';
 import { SideList } from './SideList.tsx';
-import { sortCopies, WeaponCard, WeaponTile } from './Weapons.tsx';
+import { sortWeapons, WeaponCard, WeaponTile } from './Weapons.tsx';
 
 // The inventory (docs/notes/m6-depth.md, "Main menu"; owner, 31 Oct): everything the profile holds,
 // in a list down the left like the main menu's (owner, 14 Nov), one entry per item tag and Weapons. Every item shows, held or not, so the player learns what exists; a chosen
@@ -39,15 +39,14 @@ function entriesOf(profile: Profile, tag: ItemTag | 'all'): Entry[] {
 interface InventoryProps {
   profile: Profile;
   onSelect: (character: string) => Promise<SelectResult>;
-  onReinforce: (uid: string, fodder: string) => Promise<WeaponResult>;
-  onSalvage: (uid: string) => Promise<WeaponResult>;
-  onLock: (uid: string) => Promise<WeaponResult>;
+  onReinforce: (weapon: string) => Promise<WeaponResult>;
+  onSalvage: (weapon: string, count: number) => Promise<WeaponResult>;
   onBack: () => void;
 }
 
 type Kind = ItemTag | 'all' | 'weapons';
 
-export function Inventory({ profile: initial, onSelect, onReinforce, onSalvage, onLock, onBack }: InventoryProps) {
+export function Inventory({ profile: initial, onSelect, onReinforce, onSalvage, onBack }: InventoryProps) {
   const [profile, setProfile] = useState(initial);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -82,7 +81,7 @@ export function Inventory({ profile: initial, onSelect, onReinforce, onSalvage, 
         </button>
       </nav>
       {tab === 'weapons' ? (
-        <WeaponsPanel profile={profile} onChange={setProfile} onReinforce={onReinforce} onSalvage={onSalvage} onLock={onLock} />
+        <WeaponsPanel profile={profile} onChange={setProfile} onReinforce={onReinforce} onSalvage={onSalvage} />
       ) : (
         <div className="inventory-body" role="tabpanel">
           <ul className="inventory-grid">
@@ -127,18 +126,20 @@ export function Inventory({ profile: initial, onSelect, onReinforce, onSalvage, 
 }
 
 /**
- * Weapons (docs/notes/weapons.md, "The inventory"): every copy as a tile, the chosen one's card,
- * and Reinforce (with a duplicate), Salvage (after a confirm that shows the Pollen) and Lock. The
- * game refuses what can't be done; the panel shows why.
+ * Weapons (docs/notes/weapons.md, "The inventory"; owner, 15 Nov): each weapon owned as one tile with
+ * its step and spares; the chosen one's card, the presets it's in, Reinforce (a spare for a step) and
+ * Salvage (spares for Pollen, after a confirm). The weapon itself is never salvaged. The game refuses
+ * what can't be done; the panel shows why.
  */
-function WeaponsPanel({ profile, onChange, onReinforce, onSalvage, onLock }: { profile: Profile; onChange: (p: Profile) => void } & Pick<InventoryProps, 'onReinforce' | 'onSalvage' | 'onLock'>) {
-  const copies = sortCopies(profile.weapons ?? []);
-  const [chosen, setChosen] = useState<string | undefined>(copies[0]?.uid);
-  const [open, setOpen] = useState<'reinforce' | 'salvage' | null>(null);
+function WeaponsPanel({ profile, onChange, onReinforce, onSalvage }: { profile: Profile; onChange: (p: Profile) => void } & Pick<InventoryProps, 'onReinforce' | 'onSalvage'>) {
+  const owned = profile.weapons ?? {};
+  const ids = sortWeapons(owned);
+  const [chosen, setChosen] = useState<string | undefined>(ids[0]);
+  const [salvaging, setSalvaging] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string>();
-  const copy = copies.find((c) => c.uid === chosen) ?? copies[0];
-  const def = copy && registry.weapons[copy.weapon];
+  const id = chosen && owned[chosen] ? chosen : ids[0];
+  const def = id ? registry.weapons[id] : undefined;
   const act = (job: () => Promise<WeaponResult>, done: (p: Profile) => string) => {
     if (busy) return;
     setBusy(true);
@@ -151,76 +152,64 @@ function WeaponsPanel({ profile, onChange, onReinforce, onSalvage, onLock }: { p
       .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
       .finally(() => {
         setBusy(false);
-        setOpen(null);
+        setSalvaging(null);
       });
   };
-  if (!copy || !def) {
+  if (!id || !def) {
     return (
       <div className="inventory-body" role="tabpanel">
         <p className="inventory-empty">No weapons yet. Banner pulls give them: an SR is always a weapon, an R often is.</p>
       </div>
     );
   }
-  const fodder = copies.filter((c) => c.weapon === copy.weapon && c.uid !== copy.uid && !c.locked && !wielderOf(profile, c.uid));
-  const step = copy.step ?? 0;
+  const held = owned[id]!;
+  const step = held.step ?? 0;
+  const spares = held.spares ?? 0;
+  const presets = presetsWith(profile.teams ?? [], id);
   return (
     <div className="inventory-body" role="tabpanel">
       <ul className="weapon-grid inventory-weapons">
-        {copies.map((c) => (
-          <li key={c.uid}>
-            <WeaponTile copy={c} wielder={wielderOf(profile, c.uid)} pressed={c.uid === copy.uid} onClick={() => (setChosen(c.uid), setNote(undefined))} />
+        {ids.map((w) => (
+          <li key={w}>
+            <WeaponTile id={w} owned={owned[w]!} pressed={w === id} onClick={() => (setChosen(w), setNote(undefined), setSalvaging(null))} />
           </li>
         ))}
       </ul>
       <aside className="inventory-detail weapon-detail" aria-label="Weapon">
-        <WeaponCard def={def} step={step} wielder={wielderOf(profile, copy.uid) ?? ''} />
+        <WeaponCard def={def} step={step} spares={spares} />
+        <p className="weapon-presets">{presets.length === 0 ? 'In no team preset.' : `In ${presets.map((p) => `${p.team} (${registry.characters[p.member]?.name ?? p.member})`).join(', ')}.`}</p>
         <div className="panel-buttons">
-          <button className="end-turn" disabled={busy || step >= MAX_STEP || fodder.length === 0} onClick={() => (setNote(undefined), setOpen('reinforce'))}>
+          <button className="end-turn" disabled={busy || step >= MAX_STEP || spares === 0} onClick={() => act(() => onReinforce(id), (p) => `Reinforced to +${p.weapons?.[id]?.step ?? 0}.`)}>
             Reinforce
           </button>
-          <button className="ghost" disabled={busy} onClick={() => (setNote(undefined), setOpen('salvage'))}>
+          <button className="ghost" disabled={busy || spares === 0} onClick={() => (setNote(undefined), setSalvaging(1))}>
             Salvage
           </button>
-          <button className="ghost" disabled={busy} onClick={() => act(() => onLock(copy.uid), () => (copy.locked ? 'Unlocked.' : 'Locked: it is never salvaged.'))}>
-            {copy.locked ? 'Unlock' : 'Lock'}
-          </button>
+          {spares > 1 && (
+            <button className="ghost" disabled={busy} onClick={() => (setNote(undefined), setSalvaging(spares))}>
+              Salvage all
+            </button>
+          )}
         </div>
         <p className="inventory-note" role="status">
-          {note ?? (step < MAX_STEP && fodder.length === 0 ? 'Reinforcing needs a duplicate that no one wields.' : '')}
+          {note ?? (spares === 0 ? (step < MAX_STEP ? 'A duplicate pulled is a spare: it reinforces this weapon or is salvaged.' : `At +${MAX_STEP}.`) : '')}
         </p>
-        {open === 'salvage' && (
+        {salvaging !== null && (
           <div className="weapon-confirm" role="alertdialog" aria-label="Salvage">
             <p>
-              Salvage {def.name} +{step} for {itemCount('pollen', salvageValue(copy, registry))}?
+              Salvage {salvaging === 1 ? 'a spare' : `${salvaging} spares`} of {def.name} for {itemCount('pollen', SALVAGE[def.rarity] * salvaging)}?
             </p>
             <div className="panel-buttons">
-              <button className="end-turn" disabled={busy} onClick={() => act(() => onSalvage(copy.uid), (p) => `Salvaged. Pollen held: ${(p.items?.pollen ?? 0).toLocaleString('en-GB')}.`)}>
+              <button className="end-turn" disabled={busy} onClick={() => act(() => onSalvage(id, salvaging), (p) => `Salvaged. Pollen held: ${(p.items?.pollen ?? 0).toLocaleString('en-GB')}.`)}>
                 Salvage
               </button>
-              <button className="ghost" onClick={() => setOpen(null)}>
-                Keep it
+              <button className="ghost" onClick={() => setSalvaging(null)}>
+                Keep them
               </button>
             </div>
           </div>
         )}
       </aside>
-      {open === 'reinforce' && (
-        <div className="team-picker weapon-picker" role="dialog" aria-label="Choose a duplicate">
-          <h3>Reinforce {def.name}</h3>
-          <ul className="weapon-grid">
-            {fodder.map((c) => (
-              <li key={c.uid}>
-                <WeaponTile copy={c} onClick={() => act(() => onReinforce(copy.uid, c.uid), () => `Reinforced to +${Math.min(MAX_STEP, step + 1 + (c.step ?? 0))}.`)} />
-              </li>
-            ))}
-          </ul>
-          <div className="panel-buttons">
-            <button className="ghost" onClick={() => setOpen(null)}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

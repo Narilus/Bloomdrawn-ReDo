@@ -36,9 +36,9 @@ export interface PullRecord {
   rarity: Rarity;
   /** An SSR's character. */
   character?: string;
-  /** The weapon a pull gave, and what became of the copy. */
+  /** The weapon a pull gave, and what became of the copy (`kept`: a v11 duplicate, now called a spare). */
   weapon?: string;
-  copy?: CopyOutcome;
+  copy?: CopyOutcome | 'kept';
   /** Everything the pull gave, by item, Pollen included. */
   items: Record<string, number>;
   /** An SSR's dupe handling: a new character, the dupe level reached, or past C5 into Pollen. */
@@ -191,9 +191,9 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
     history,
   };
   // Each SSR pulled gives profile EXP (owner, 31 Oct).
-  const { weapons, equipped } = armory;
+  const { weapons } = armory;
   const after = gainExp(
-    { ...profile, pulls: blooms, owned, items, dupes, gacha, ...(weapons && { weapons }), ...(equipped && { equipped }) },
+    { ...profile, pulls: blooms, owned, items, dupes, gacha, ...(weapons && { weapons }) },
     'ssr',
     records.filter((r) => r.rarity === 'ssr').length,
   );

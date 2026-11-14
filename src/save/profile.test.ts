@@ -116,29 +116,56 @@ describe('the profile save', () => {
     }
   });
 
-  it('keeps weapons, wielders, the weapon Focus and the tickboxes, and a v10 profile (M6.7) owns none (M6.8)', async () => {
+  it('keeps weapons, presets with their weapons, the weapon Focus and the tickboxes; a v10 profile (M6.7) owns none (M6.8)', async () => {
     const adapter = memoryAdapter();
     const data = {
       ...NEW_PROFILE,
       weaponFocus: 'weapon.seed-orb-staff',
-      weapons: [{ uid: 'w1', weapon: 'weapon.surgeons-scalpel', step: 2 }, { uid: 'w2', weapon: 'weapon.suture-hook', locked: true as const }],
-      equipped: { virelle: 'w1' },
+      weapons: { 'weapon.surgeons-scalpel': { step: 2, spares: 1 }, 'weapon.suture-hook': {} },
+      teams: [{ name: 'Team 1', members: ['virelle', 'maelia', null, null], weapons: ['weapon.surgeons-scalpel', null, null, null] }],
       weaponSettings: { autoReinforce: true as const },
     };
     await createSaveStore(adapter, 1).write(profileSave, data);
     expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
     adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 10, contentVersion: 1, data: { ...NEW_PROFILE, trials: { flesh: 1 } } }));
     expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, trials: { flesh: 1 } }, savedSchemaVersion: 10 });
-    const copy = { uid: 'w1', weapon: 'weapon.suture-hook' };
+    const team = (weapons: (string | null)[], members: (string | null)[] = ['virelle', 'maelia', null, null]) => ({ teams: [{ name: 'Team 1', members, weapons }] });
+    const hook = { weapons: { 'weapon.suture-hook': {} } };
     for (const bad of [
-      { weapons: [{ ...copy, step: 6 }] },
-      { weapons: [{ ...copy, step: 0 }] },
-      { weapons: [copy, copy] },
-      { weapons: [copy], equipped: { virelle: 'w2' } },
-      { weapons: [copy], equipped: { virelle: 'w1', maelia: 'w1' } },
+      { weapons: { 'weapon.suture-hook': { step: 6 } } },
+      { weapons: { 'weapon.suture-hook': { spares: 0 } } },
+      { ...hook, ...team(['weapon.suture-hook', 'weapon.suture-hook', null, null]) },
+      { ...hook, ...team(['weapon.surgeons-scalpel', null, null, null]) },
+      { ...hook, ...team([null, null, 'weapon.suture-hook', null]) },
     ]) {
       await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad }), JSON.stringify(bad)).rejects.toThrow();
     }
+  });
+
+  it('a v11 profile (copies, 15 Nov) owns each weapon once at its best step, the rest as spares, and its wielders move into its presets', async () => {
+    const adapter = memoryAdapter();
+    const copies = [
+      { uid: 'w1', weapon: 'weapon.surgeons-scalpel', step: 2 },
+      { uid: 'w2', weapon: 'weapon.surgeons-scalpel', step: 1, locked: true },
+      { uid: 'w3', weapon: 'weapon.surgeons-scalpel' },
+      { uid: 'w4', weapon: 'weapon.thorn-rapier' },
+    ];
+    // Virelle and Maelia wielded two Scalpels; Team 1 keeps the front one's.
+    const teams = [
+      { name: 'Team 1', members: ['virelle', 'maelia', 'hester', null] },
+      { name: 'Team 2', members: ['hester', null, null, null] },
+    ];
+    const data = { ...NEW_PROFILE, weapons: copies, equipped: { virelle: 'w1', maelia: 'w2', hester: 'w4' }, teams };
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 11, contentVersion: 1, data }));
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual({
+      ...NEW_PROFILE,
+      // The +1 counts two copies, the +0 one: three spares beside the kept +2.
+      weapons: { 'weapon.surgeons-scalpel': { step: 2, spares: 3 }, 'weapon.thorn-rapier': {} },
+      teams: [
+        { ...teams[0], weapons: ['weapon.surgeons-scalpel', null, 'weapon.thorn-rapier', null] },
+        { ...teams[1], weapons: ['weapon.thorn-rapier', null, null, null] },
+      ],
+    });
   });
 
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
