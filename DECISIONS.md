@@ -222,6 +222,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Weapon icons (owner, 15 Nov): Seed-Orb Staff 03, Chalk-Circle Censer 03, Vigil Lamp 03, Sealed Ledger 01, Thorn Rapier 03, Torn Veil 02, Foxfire Gauntlet 01, Snare-Line 02, Surgeon's Scalpel 02, Womb-Glass Lantern 01, Suture Hook 01, Pod Sling 01, Bone Rosary 01, Procession Bell 02, Wax Candle 02, Prayer Rope 01, Talisman Fan 01, Gold-Leaf Lamp 01, Paper Charm 01, Temple Bell 01, Iron Snare 01, Brass Hourglass 02, Whetstone 02, Tin Compass 01. Weapon tiles are one size everywhere (168 × 188, an 80px icon).
 
 - M6.8 signed off (owner, 15 Nov).
+- Shop screen (owner, 15 Nov): Pollen shows top right beside Ducats and Purified Blooms. Draft the starters' Potential levels next.
 
 ## Open
 - Gear at launch or later (recommendation: later).
