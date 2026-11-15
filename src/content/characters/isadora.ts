@@ -48,16 +48,15 @@ export const ribbonLash = card({
   text: 'Deal {effects.0.amount} damage. Trigger a volley.',
 });
 
-// Rapt at P0 gives +1, at P1 +2; at P5 Tentacles also attack a second time at the end of each turn.
-const rapt = (potency: number, capstone = false) => ({
+// Rapt at P0 gives +1, at P1 +2, once a turn; at P5 it answers every volley a card triggers (owner, 15 Nov).
+const rapt = (potency: number, every = false) => ({
   name: 'Rapt', scope: 'combat' as const,
-  text:
-    'The first time each turn a card triggers a volley, Tentacles deal +{triggers.0.do.0.amount} damage for the rest of combat.' +
-    (capstone ? ' At the end of each turn, Tentacles attack twice.' : ''),
+  text: `${every ? 'Each time' : 'The first time each turn'} a card triggers a volley, Tentacles deal +{triggers.0.do.0.amount} damage for the rest of combat.`,
   triggers: [
-    { on: 'volleyFired' as const, filter: { fromCard: true as const }, once: 'turn' as const, do: [gainResource('potency', mul(0.2 * potency, stat('attack')))] },
-    // A second end-of-turn attack beside the Domain's own, choosing its targets afresh.
-    ...(capstone ? [{ on: 'turnEnd' as const, do: [tentacleVolley()] }] : []),
+    {
+      on: 'volleyFired' as const, filter: { fromCard: true as const }, ...(every ? {} : { once: 'turn' as const }),
+      do: [gainResource('potency', mul(0.2 * potency, stat('attack')))],
+    },
   ],
 });
 
@@ -91,6 +90,6 @@ export const isadora = character({
     p2(STATS),
     { text: 'Ecstatic Spin costs 3.', cards: { [ecstaticSpin.id]: ecstaticSpinC3.id } },
     { text: 'Dance of Bells also gains 2 Tentacles.', ultimate: danceOf(2) },
-    { text: 'At the end of each turn, Tentacles attack twice.', passive: rapt(2, true) },
+    { text: 'Rapt answers every volley a card triggers, not only the first each turn.', passive: rapt(2, true) },
   ],
 });

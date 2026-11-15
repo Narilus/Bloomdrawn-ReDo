@@ -225,6 +225,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Shop screen (owner, 15 Nov): Pollen shows top right beside Ducats and Purified Blooms. Draft the starters' Potential levels next.
 - Starter Potential, first draft (owner, 15 Nov): Agathe's looks far too strong for Rapture, and the extra Tentacles, Embryo and Essence across Agathe, Maelia and Anthe may be excessive; model it in the lab (`npm run lab:potential`, `docs/notes/starter-kits.md`).
 - Starter Potential (owner, 15 Nov): the lighter set B for Agathe, Maelia and Anthe; Leonora keeps her draft (`docs/notes/starter-kits.md`). Revisit Isadora's P5. Docs and code say P0–P5 for dupe levels, not C0–C5.
+- Isadora's P5 (owner, 15 Nov): Rapt answers every volley a card triggers, not only the first each turn, replacing the second end-of-turn attack (`docs/notes/banner-kits.md`).
 
 ## Open
 - Gear at launch or later (recommendation: later).

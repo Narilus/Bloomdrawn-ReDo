@@ -64,19 +64,19 @@ for (const setup of PARTIES) {
 }
 }
 
-// Isadora's P5 and alternatives. Her P5 restates Rapt (P1's +2) with the capstone beside it.
+// Isadora's P5 (owner, 15 Nov: Rapt on every volley from a card) and the alternatives it was chosen from.
+// The P4 level's Rapt (P1's +2, once a turn) is the base the alternatives build on.
 type Triggers = NonNullable<PassiveDef['triggers']>;
 const P1_RAPT = isadora.isadora.dupes![0]!.passive! as PassiveDef & { triggers: Triggers };
 const raptTrigger = P1_RAPT.triggers[0]!;
 const rapt = (triggers: Triggers): DupeDef => ({ text: 'Lab.', passive: { ...P1_RAPT, text: 'Lab.', triggers } });
-const { once: _once, ...raptEvery } = raptTrigger;
 const spin3: CardDef = variant(isadora.ecstaticSpin, 5, { cost: 3, effects: [tentacleVolley(), tentacleVolley(), tentacleVolley()], text: 'Lab.' });
 const ALTERNATIVES: [string, DupeDef | undefined][] = [
-  ['Now: Tentacles attack twice at end of turn', undefined],
+  ['Before: Tentacles attack twice at end of turn', rapt([raptTrigger, { on: 'turnEnd', do: [tentacleVolley()] }])],
   ['Nothing (P5 adds no effect)', { text: 'Lab.' }],
   ['The second attack at half damage', rapt([raptTrigger, { on: 'turnEnd', do: [volley(resource('tentacles'), mul(0.5, resource('potency')))] }])],
   ['The second attack only with 10 or more Tentacles', rapt([raptTrigger, { on: 'turnEnd', do: [when(gte(resource('tentacles'), 10), [tentacleVolley()])] }])],
-  ['Rapt answers every volley from a card, not only the first', rapt([raptEvery])],
+  ['Now: Rapt answers every volley from a card, not only the first', undefined],
   // Swaps chain: by P5 her deck holds P3's Ecstatic Spin, so that's the one replaced.
   ['Ecstatic Spin triggers a volley three times', { text: 'Lab.', cards: { [isadora.ecstaticSpinC3.id]: spin3.id } }],
 ];

@@ -140,18 +140,31 @@ describe('Isadora', () => {
     expect: { resources: { tentacles: 5 }, enemyHp: [BIG_HP - 36 - 190] },
   });
 
-  scenario('P5: at the end of each turn, Tentacles attack twice', {
+  // Attack 18 at P2: Rapt gives 40% of it, 7.2, each time. Ecstatic Spin triggers two volleys, Ribbon Lash one.
+  scenario('P5: Rapt answers every volley a card triggers, not only the first each turn', {
     party: BANNER,
     dupes: { isadora: 5 },
-    setup: { hand: [], resources: { tentacles: 2 } },
-    play: [{ endTurn: true }],
-    expect: { enemyHp: [600 - 2 * 12 * 2] },
-    check: ({ state }) => expect(state.resources['potency']).toBeCloseTo(12.6),
+    setup: { hand: ['isadora.ecstatic-spin-c3', 'isadora.ribbon-lash'], resources: { tentacles: 1 } },
+    play: [{ card: 'isadora.ecstatic-spin-c3' }, { card: 'isadora.ribbon-lash', target: 0 }],
+    check: ({ state }) => {
+      expect(state.resources['potency']).toBeCloseTo(12.6 + 3 * 7.2);
+      expect(describeKit(state, 'm1', registry).passive).toBe(
+        'Each time a card triggers a volley, Tentacles deal +7 damage for the rest of combat.',
+      );
+    },
   });
 
-  scenario('P4, for comparison: once', {
+  scenario('P4, for comparison: once a turn', {
     party: BANNER,
     dupes: { isadora: 4 },
+    setup: { hand: ['isadora.ecstatic-spin-c3', 'isadora.ribbon-lash'], resources: { tentacles: 1 } },
+    play: [{ card: 'isadora.ecstatic-spin-c3' }, { card: 'isadora.ribbon-lash', target: 0 }],
+    check: ({ state }) => expect(state.resources['potency']).toBeCloseTo(12.6 + 7.2),
+  });
+
+  scenario('P5: Tentacles attack once at end of turn, as at P4', {
+    party: BANNER,
+    dupes: { isadora: 5 },
     setup: { hand: [], resources: { tentacles: 2 } },
     play: [{ endTurn: true }],
     expect: { enemyHp: [600 - 2 * 12] },

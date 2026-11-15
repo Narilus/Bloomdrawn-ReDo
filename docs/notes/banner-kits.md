@@ -52,9 +52,9 @@ Bleed stacks on her cards were tripled and her Strike became a combo in the Fles
 
 Agathe builds the Tentacle count; Isadora raises the damage per hit and spends it in volleys, so the two multiply. A volley that hits twice fires as two volleys, one after the other: every hit takes whichever enemy has the lowest HP at that moment, so the second pass picks its targets from the HP the first left, and passes the dead by.
 
-**Dupes:** P1, Rapt gives +2. P3, Ecstatic Spin costs 3. P4, Dance of Bells also gains 2 Tentacles. P5, at the end of each turn, Tentacles attack twice.
+**Dupes:** P1, Rapt gives +2. P3, Ecstatic Spin costs 3. P4, Dance of Bells also gains 2 Tentacles. P5, Rapt answers every volley a card triggers, not only the first each turn (owner, 15 Nov; it was a second end-of-turn attack, below).
 
-**P5, revisited (owner, 15 Nov; `npm run lab:potential -- --isadora`).** Her P5 makes the Rapture party (Agathe, Isadora, Leonora, Hester) deal +168% over 20 turns against everyone at P0; Virelle's whole set gives Flesh +59% and Kibane's Spirit +65%. P1–P4 alone already give +65% (P1's Rapt +29%), so no capstone brings her whole set down to theirs; what the P5 step itself adds is the lever. The alternatives, all from operations the engine has (level 40, every ascension, 30 seeds, one dummy; three dummies give the same, since her party hits one target at a time):
+**P5, revisited (owner, 15 Nov; `npm run lab:potential -- --isadora`). Chosen: Rapt on every volley from a card.** Her P5 makes the Rapture party (Agathe, Isadora, Leonora, Hester) deal +168% over 20 turns against everyone at P0; Virelle's whole set gives Flesh +59% and Kibane's Spirit +65%. P1–P4 alone already give +65% (P1's Rapt +29%), so no capstone brings her whole set down to theirs; what the P5 step itself adds is the lever. The alternatives, all from operations the engine has (level 40, every ascension, 30 seeds, one dummy; three dummies give the same, since her party hits one target at a time):
 
 | P5 | 20 turns, vs P0 | vs P4 | 10 turns, vs P0 | vs P4 |
 |---|---:|---:|---:|---:|

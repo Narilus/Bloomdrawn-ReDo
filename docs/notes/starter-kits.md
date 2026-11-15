@@ -177,4 +177,4 @@ As built, the lab gives the same as B above. One difference: it now counts Shiel
 3. Anthe: B, its P5 as drafted.
 4. Leonora: her draft.
 
-Isadora's P5 is to be revisited (`banner-kits.md`; `npm run lab:potential` models alternatives).
+Isadora's P5 was revisited too: now Rapt answers every volley from a card (`banner-kits.md`).
