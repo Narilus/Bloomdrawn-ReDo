@@ -221,6 +221,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Weapons proposal approved (owner, 15 Nov): one entry per weapon (step and spares), no lock, a member's owned signature filled in when she joins a preset; the migration left to my judgement (no weapons pulled on the existing profile). A preset's weapon belongs to its member, moving with her when places swap and leaving with her. The SR sets out-damaging Flesh's and Rapture's signatures is to watch, not fix: real teams mix archetypes (shielders, later healers and batteries), and later kits and weapons will differ by mechanics, interactions, buffs and QoL rather than raw stats.
 - Weapon icons (owner, 15 Nov): Seed-Orb Staff 03, Chalk-Circle Censer 03, Vigil Lamp 03, Sealed Ledger 01, Thorn Rapier 03, Torn Veil 02, Foxfire Gauntlet 01, Snare-Line 02, Surgeon's Scalpel 02, Womb-Glass Lantern 01, Suture Hook 01, Pod Sling 01, Bone Rosary 01, Procession Bell 02, Wax Candle 02, Prayer Rope 01, Talisman Fan 01, Gold-Leaf Lamp 01, Paper Charm 01, Temple Bell 01, Iron Snare 01, Brass Hourglass 02, Whetstone 02, Tin Compass 01. Weapon tiles are one size everywhere (168 × 188, an 80px icon).
 
+- M6.8 signed off (owner, 15 Nov).
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

@@ -1,6 +1,6 @@
 # Weapons (M6.8)
 
-Status: **built 15 Nov, in presets.** From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen.
+Status: **built 15 Nov, in presets; signed off 15 Nov.** From the owner's answers (`docs/notes/weapons-answers.md`): no weapon levels, on trial; all eight signatures in the weapon pool; two SR and two R per Domain to start, more later; the numbers are placeholders for the lab; art as a sub-step. Accepted 15 Nov: Potential and Reinforce, the signature effects below, salvage for Pollen.
 
 Decided and built 15 Nov (owner): weapons are equipped in team presets, a weapon at most once per preset (see "Team presets"); each weapon is owned once with its step and spares, with no lock; a member's owned signature fills her slot when she joins a preset; a preset's weapon moves and leaves with its member (see "Owning weapons"). The first build (copies wielded by characters, a Weapon tab, locks) is gone; save v12 migrates it.
 
