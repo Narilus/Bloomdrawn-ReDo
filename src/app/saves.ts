@@ -1,5 +1,6 @@
 import { itemCount } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
+import { STARTERS } from '../content/roster.ts';
 import { CONTENT_VERSION } from '../content/version.ts';
 import { missingContent } from '../game/check.ts';
 import type { ExpeditionDef } from '../game/expedition.ts';
@@ -8,9 +9,10 @@ import { chooseDepth } from '../game/depth.ts';
 import { chooseFocus, pull, useSelector } from '../game/gacha.ts';
 import { ascend, levelUp } from '../game/levels.ts';
 import { claimLevels } from '../game/profileLevel.ts';
+import { buyDupe } from '../game/shop.ts';
 import { endTrial } from '../game/trials.ts';
 import { reinforce, salvage, setWeaponSettings, type WeaponSettings } from '../game/weapons.ts';
-import { bank, buyPreset, lossBanking, NEW_PROFILE, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
+import { bank, buyPreset, lossBanking, NEW_PROFILE, ownedCharacters, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
 import { runSave, type RunSave } from '../save/run.ts';
@@ -190,6 +192,13 @@ export function createSaves(adapter: SaveAdapter) {
     salvage: (weapon: string, count: number) => enqueue(async () => keep(salvage(await readProfile(), weapon, count, registry))),
     /** Keeps the banners' two tickboxes. */
     weaponSettings: (settings: WeaponSettings) => enqueue(async () => keep({ ok: true as const, profile: setWeaponSettings(await readProfile(), settings) })),
+
+    /** Buys a character's next Potential level in the Profile Shop, the starters' included; a refusal writes nothing. */
+    buyDupe: (character: string) =>
+      enqueue(async () => {
+        const profile = await readProfile();
+        return keep(buyDupe(profile, character, ownedCharacters(profile, STARTERS), registry.characters[character]?.dupes?.length ?? 0));
+      }),
 
     /** Buys one more team preset with Ducats; a refusal writes nothing. */
     buyPreset: (owned: readonly string[]) => enqueue(async () => keep(buyPreset(await readProfile(), owned))),

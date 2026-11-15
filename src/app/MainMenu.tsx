@@ -63,13 +63,14 @@ interface MenuProps {
   onRoster: () => void;
   onBanner: (kind: 'character' | 'weapon') => void;
   onInventory: () => void;
+  onShop: () => void;
   onOptions: () => void;
   onProfile: () => void;
 }
 
 type Open = 'expedition' | 'banners' | null;
 
-export function MainMenu({ boot, featured, onContinue, onNew, onTrials, onRoster, onBanner, onInventory, onOptions, onProfile }: MenuProps) {
+export function MainMenu({ boot, featured, onContinue, onNew, onTrials, onRoster, onBanner, onInventory, onShop, onOptions, onProfile }: MenuProps) {
   const { profile, run, ended } = boot;
   // A saved run opens the menu on Continue.
   const [open, setOpen] = useState<Open>(run ? 'expedition' : null);
@@ -137,6 +138,9 @@ export function MainMenu({ boot, featured, onContinue, onNew, onTrials, onRoster
                 !
               </em>
             )}
+          </button>
+          <button className="menu-item" onClick={onShop}>
+            Shop
           </button>
           <button className="menu-item" onClick={onOptions}>
             Options

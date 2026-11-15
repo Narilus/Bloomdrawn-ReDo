@@ -652,7 +652,7 @@ function CharacterPage({
             (base.dupes?.length ? (
               <section>
                 <h3>
-                  Potential <small>P{potential} of {base.dupes.length} · each copy pulled after the first opens one</small>
+                  Potential <small>P{potential} of {base.dupes.length} · each copy pulled after the first, or bought in the Shop, opens one</small>
                 </h3>
                 <ol className="character-dupes" aria-label="Potential">
                   {base.dupes.map((d, i) => (

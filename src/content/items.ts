@@ -20,7 +20,7 @@ export interface ItemDef {
 
 export const ITEMS: Record<string, ItemDef> = {
   money: { name: 'Ducats', tag: 'currency', icon: 'ducat', text: "The profile's coin. Pays for levels, ascensions and team presets." },
-  pollen: { name: 'Pollen', tag: 'currency', icon: 'poison', text: 'Every pull gives some, a lost 50/50 more, and a copy past C5 more again. The Profile Shop will take it for dupes.' },
+  pollen: { name: 'Pollen', tag: 'currency', icon: 'poison', text: 'Every pull gives some, a lost 50/50 more, and a copy past P5 more again. The Profile Shop sells character dupes for it.' },
   'memory.faint': { name: 'Faint Memory', plural: 'Faint Memories', tag: 'memory', icon: 'memory', text: "100 EXP toward a character's next level." },
   'memory.clear': { name: 'Clear Memory', plural: 'Clear Memories', tag: 'memory', icon: 'memory', text: "500 EXP toward a character's next level. What a level doesn't use comes back as Faint Memories." },
   'memory.vivid': { name: 'Vivid Memory', plural: 'Vivid Memories', tag: 'memory', icon: 'memory', text: "2,000 EXP toward a character's next level. What a level doesn't use comes back as smaller Memories." },
@@ -30,7 +30,7 @@ export const ITEMS: Record<string, ItemDef> = {
   'material.unbound': { name: 'Unbound Badge', plural: 'Unbound Badges', tag: 'material', icon: 'badge', text: 'Ascends an Unbound character at level 10, 20 or 30.' },
   'selector.ssr': {
     name: 'SSR Selector', plural: 'SSR Selectors', tag: 'special', icon: 'summon', flag: true,
-    text: 'An SSR character of your choice from the banner, as a pulled copy: new, a dupe level, or Pollen past C5. Pity is untouched. Profile levels 25 and 50 give one.',
+    text: 'An SSR character of your choice from the banner, as a pulled copy: new, a dupe level, or Pollen past P5. Pity is untouched. Profile levels 25 and 50 give one.',
   },
 };
 

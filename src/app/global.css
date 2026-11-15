@@ -2076,6 +2076,74 @@ kbd {
   font-variant-numeric: lining-nums;
 }
 
+/* The Profile Shop (M6.9): the inventory's layout, owned characters as tiles. */
+.shop-grid {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  gap: 16px;
+  max-height: 820px;
+  overflow-y: auto;
+}
+
+.roster-tile.shop-tile {
+  width: 200px;
+}
+
+.shop-tile .roster-art {
+  height: 170px;
+}
+
+.shop-tile[aria-pressed='true'] {
+  box-shadow: 0 0 0 4px var(--antique-gold);
+}
+
+.shop-purse {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 22px;
+}
+
+.shop-purse .item-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.shop-purse strong {
+  font-family: var(--serif);
+  font-size: 28px;
+  color: var(--antique-gold);
+  font-variant-numeric: lining-nums;
+}
+
+.shop-detail {
+  justify-items: stretch;
+  text-align: left;
+}
+
+.shop-detail h3,
+.shop-detail .inventory-held {
+  text-align: center;
+}
+
+.shop-detail .character-dupes li.next {
+  opacity: 0.85;
+}
+
+.shop-price {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-variant-numeric: lining-nums;
+}
+
+.shop-detail .end-turn {
+  justify-self: start;
+}
+
 /* Options (M6.1): profile management, its Reset behind a ticked box and a typed word. */
 .options-screen {
   position: absolute;

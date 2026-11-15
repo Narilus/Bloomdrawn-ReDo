@@ -18,11 +18,12 @@ import { MainMenu } from './MainMenu.tsx';
 import { Options } from './Options.tsx';
 import { ProfilePage } from './Profile.tsx';
 import { PartySelect, Roster } from './Roster.tsx';
+import { Shop } from './Shop.tsx';
 import { TrialFight, Trials } from './Trials.tsx';
 import { browserSaves, type Boot } from './saves.ts';
 
 // The game's screens (docs/notes/m4-run.md, "Save and resume"; m5-collection.md; m6-depth.md): the
-// main menu, and the run, party select, roster, banner, inventory, options, profile page and Trials it leads to.
+// main menu, and the run, party select, roster, banner, inventory, shop, options, profile page and Trials it leads to.
 
 type Screen =
   | { kind: 'loading' }
@@ -31,6 +32,7 @@ type Screen =
   | { kind: 'roster'; profile: Profile }
   | { kind: 'banner'; profile: Profile; banner: 'character' | 'weapon' }
   | { kind: 'inventory'; profile: Profile }
+  | { kind: 'shop'; profile: Profile }
   | { kind: 'options'; profile: Profile }
   | { kind: 'profile'; profile: Profile }
   | { kind: 'run'; save: RunSave }
@@ -214,6 +216,7 @@ export function Game() {
         onBack={toTitle}
       />
     );
+  if (screen.kind === 'shop') return <Shop profile={screen.profile} owned={ownedBy(screen.profile)} onBuy={saves.buyDupe} onBack={toTitle} />;
   if (screen.kind === 'profile') return <ProfilePage profile={screen.profile} onClaim={saves.claim} onBack={toTitle} />;
   if (screen.kind === 'options') {
     return (
@@ -254,6 +257,7 @@ export function Game() {
       onRoster={() => setScreen({ kind: 'roster', profile })}
       onBanner={(banner) => setScreen({ kind: 'banner', profile, banner })}
       onInventory={() => setScreen({ kind: 'inventory', profile })}
+      onShop={() => setScreen({ kind: 'shop', profile })}
       onOptions={() => setScreen({ kind: 'options', profile })}
       onProfile={() => setScreen({ kind: 'profile', profile })}
     />

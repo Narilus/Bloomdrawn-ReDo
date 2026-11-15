@@ -117,6 +117,19 @@ describe('saves', () => {
     expect(bought.profile.teams).toHaveLength(6);
   });
 
+  it('buying a dupe keeps the profile it leaves; a refusal writes nothing (M6.9)', async () => {
+    const { saves, store } = setup();
+    expect(await saves.buyDupe('virelle')).toEqual({ ok: false, reason: 'Only characters you own have dupes for sale.' });
+    expect(await profileOf(store)).toBeUndefined();
+    await store.write(profileSave, { pulls: 0, runs: 0, owned: ['virelle'], items: { pollen: 50 } });
+    expect(await saves.buyDupe('virelle')).toEqual({ ok: false, reason: 'A dupe costs 100 Pollen; you have 50.' });
+    await store.write(profileSave, { pulls: 0, runs: 0, owned: ['virelle'], items: { pollen: 150 } });
+    const bought = await saves.buyDupe('virelle');
+    if (!bought.ok) throw new Error(bought.reason);
+    expect(bought.level).toBe(1);
+    expect(await profileOf(store)).toEqual({ pulls: 0, runs: 0, owned: ['virelle'], items: { pollen: 50 }, dupes: { virelle: 1 } });
+  });
+
   it("a Trial won keeps the profile it leaves, paid in its Domain's material; a defeat or a tier not open writes nothing (M6.7)", async () => {
     const { saves, store } = setup();
     expect(await saves.trial('flesh', 1, false)).toMatchObject({ ok: true, won: false, material: 0 });
