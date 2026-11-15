@@ -90,7 +90,7 @@ Censer Rite's damage increase lasts the combat, so each cast ramps the Tentacles
 
 ## Potential, P1–P5 (draft for the owner, 15 Nov)
 
-Status: **draft, waiting on the owner.** The Profile Shop (M6.9) sells the starters' dupes, but they have no Potential levels yet. These follow the banner four (`docs/notes/banner-kits.md`): P1 changes the passive, P2 the stats, P3 a Flavour card, P4 the ultimate, P5 a capstone. P2 is the shared rule (+10% HP, +3 Attack, +3 Defense). Numbers are placeholders for the lab. Every one is built from operations and triggers the engine already has.
+Status: **draft, modelled 15 Nov; waiting on the owner.** The owner judged the first draft (A, below) too generous with Tentacles, Essence and Embryo, and asked for the lab; a lighter set (B) and the results follow it. The Profile Shop (M6.9) sells the starters' dupes, but they have no Potential levels yet. These follow the banner four (`docs/notes/banner-kits.md`): P1 changes the passive, P2 the stats, P3 a Flavour card, P4 the ultimate, P5 a capstone. P2 is the shared rule (+10% HP, +3 Attack, +3 Defense). Numbers are placeholders for the lab. Every one is built from operations and triggers the engine already has.
 
 For comparison, the banner four: Virelle P1 Opened Vein gives 2 Embryo, P3 Open the Wound's detonation is three times the Bleed, P4 Thousand Cuts hits 2 more times, P5 Bleed on enemies stops losing stacks. Hester P1 Hunter's Patience gives 3 Vulnerable, P3 Weighted Net costs 1, P4 The Snare Closes also applies 2 Vulnerable, P5 her Weak and Vulnerable last a turn longer.
 
@@ -134,9 +134,43 @@ For comparison, the banner four: Virelle P1 Opened Vein gives 2 Embryo, P3 Open 
 | P4 | Balance the Books: gain Mana equal to the Mana spent this turn (Transcended: and draw 2). | Also **draws 2** (Transcended: **4**). |
 | P5 | | Running Tab also makes **the next card she plays cost 1 less**. |
 
+### B, the lighter set (Leonora unchanged)
+
+B gives little more Tentacles, Essence or Embryo: Shield, card flow, cost and a one-off volley instead.
+
+| | Agathe | Maelia | Anthe |
+|---|---|---|---|
+| P1 | First Hymn also gives the party Shield equal to twice her Defense. | Midwife's Hands also gives the party Shield equal to her Defense. | Vigil also gives the party Shield equal to her Defense for each Ritual in hand. |
+| P3 | Call the Choir always draws its card. | Bud Cutting costs 2. | Votive Candle costs 4. |
+| P4 | Hymn of the Hundred Arms also triggers a volley before she Transcends. | Birthing Bloom heals and Shields half as much again. | Hours Kept also draws 1 card. |
+| P5 | Her Strike triggers a volley with 4 or more Tentacles. | When Embryo is consumed, every enemy gains 0.34 × her Attack Poison for each. | Held Rituals cost 2 less at cleanup, not 1. |
+
+### The lab
+
+`npm run lab:potential` builds both sets in a copy of the content (nothing in the game changes) and measures a party's damage and Shield as one member climbs P1 to P5 while the rest stay at P0, against the banner four's real levels. Level 40, every ascension, 30 seeds, 20 turns against one dummy (the lab's player rarely fires an ultimate before turn 8, so 10 turns barely measure P4; 10-turn and three-dummy runs agree on everything else).
+
+| Member, party | A at P5 | B at P5 | Shield at P5, A / B |
+|---|---:|---:|---:|
+| Agathe, Starters | +166% | +33% | −3% / −2% |
+| Agathe, Rapture | +125% | +31% | +10% / +12% |
+| Maelia, Starters | +20% | +23% | +61% / +59% |
+| Maelia, Flesh | +33% | +10% | +20% / +67% |
+| Anthe, Starters | +25% | +9% | +1% / +22% |
+| Anthe, Spirit | +42% | −10% | +15% / +116% |
+| Leonora (A only), Starters / Flesh / Rapture / Spirit | +24% / +11% / +34% / −1% | | |
+| *Banner:* Virelle, Flesh | +59% | | +13% |
+| *Banner:* Isadora, Rapture | +168% | | +17% |
+| *Banner:* Kibane, Spirit | +65% | | +5% |
+| *Banner:* Hester, three parties | +1% to +24% | | +17% to +19% |
+
+- **Agathe's draft is as strong as you thought:** +125–166% at P5, and +36–50% from Censer Rite at 2 alone (each cast raises Tentacle damage for the fight). That's Isadora's level, and her P5 is the outlier among the banner four. B is +31–33%, below Virelle and Kibane.
+- **Maelia's and Anthe's drafts sit inside the banner four's range** (+20–42%, against Virelle's +59% and Kibane's +65%), but most of it is extra Embryo and Essence. B moves them to Shield: Maelia +10–23% damage and up to +67% Shield, Anthe up to +116% Shield.
+- **Anthe's B P5 loses damage** (−10% in Spirit): cheaper Rituals let the lab's player cast Votive Candle sooner, on less Essence. A player who holds them would do better, but as a capstone it reads weak.
+- **Side finding:** Kibane's real P1 (Foxfire charges 15) costs her party 10–17% damage in the lab, likely because her ultimate fires sooner, on less Essence. Worth a look in M6.12.
+
 ### Questions
 
-1. Are these the right directions? Change any line you like.
-2. Maelia's P5 is the strongest here: with P1 every card that gains Embryo gains 2 more. Keep it and let the lab check it, or cap it (say, only the first two times each turn)?
-3. Agathe's P5 adds Tentacles every turn, which stacks with Isadora's P5 (Tentacles attack twice). Fine to let the lab measure that pair once it's built?
-4. Anthe's P5 and her signature weapon (Rituals deal more per turn held) both reward holding Rituals. Is that overlap welcome, or should P5 do something else?
+1. Agathe: take B? Or keep one stronger line from A, such as Censer Rite at 2?
+2. Maelia: B (Shield) or A (more Embryo; its damage sits below Virelle's)?
+3. Anthe: B with a new P5 (for example, Votive Candle deals 3 per Essence, A's P3, which raises damage without adding Essence), or A?
+4. Leonora: keep A?

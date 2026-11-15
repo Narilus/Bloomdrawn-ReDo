@@ -36,8 +36,8 @@ export interface FightOptions {
   level?: number;
   /** Every member's ascensions; none if absent. */
   ascensions?: number;
-  /** Every member's dupe level (those with dupes); C0 if absent. */
-  dupes?: number;
+  /** Every member's dupe level (those with dupes), or each member's in party order; P0 if absent. */
+  dupes?: number | number[];
   /** Each member's weapon, in party order; none if absent. */
   weapons?: (Wielded | null)[];
 }
@@ -87,7 +87,7 @@ function choose(state: CombatState, registry: Registry, setup: Setup): Command |
 export function fight(seed: number, setup: Setup, registry: Registry, options: FightOptions): Fight {
   const { turns, enemies, level = 1, ascensions = 0, dupes = 0, weapons } = options;
   const party = setup.party;
-  const dupeLevels = party.map((id) => (registry.characters[id]?.dupes?.length ? dupes : 0));
+  const dupeLevels = Array.isArray(dupes) ? dupes : party.map((id) => (registry.characters[id]?.dupes?.length ? dupes : 0));
   let state = startCombat(
     { seed, party, enemies: Array<string>(enemies).fill(DUMMY), levels: party.map(() => level), ascensions: party.map(() => ascensions), dupes: dupeLevels, ...(weapons && { weapons }) },
     registry,
