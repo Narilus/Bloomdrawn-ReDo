@@ -45,10 +45,17 @@ export const mainStatText = (def: WeaponDef) => `${STAT[def.main.stat]} +${def.m
 /** The weapon's effect text at a step, +0 to +5. */
 export const effectText = (def: WeaponDef, step = 0) => def.steps[Math.min(MAX_STEP, Math.max(0, step))]?.text ?? '';
 
+/** The owner's picked icons (`npm run art -- pick --icon`), by weapon ID: src/assets/weapons/<name>.png is weapon.<name>. */
+const ART: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(import.meta.glob<string>('../assets/weapons/*.png', { eager: true, import: 'default' })).map(([path, url]) => [`weapon.${path.replace(/^.*\/|\.png$/g, '')}`, url]),
+);
+
+/** A weapon's icon in a frame of its rarity colour: its art, or its glyph until it has art. */
 export function WeaponGlyph({ def, className = '' }: { def: WeaponDef; className?: string }) {
+  const art = ART[def.id];
   return (
     <span className={`weapon-glyph rarity-${def.rarity}${className ? ` ${className}` : ''}`} aria-hidden="true">
-      <Icon name={GLYPH[def.id] ?? 'blade'} />
+      {art ? <img src={art} alt="" draggable={false} /> : <Icon name={GLYPH[def.id] ?? 'blade'} />}
     </span>
   );
 }

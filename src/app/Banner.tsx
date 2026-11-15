@@ -246,13 +246,13 @@ export function Banner({ banner, profile: initial, onPull, onFocus, onSettings, 
                 return (
                   <button
                     key={id}
-                    className={`weapon-tile banner-weapon-tile rarity-${arm.rarity}`}
+                    className={`weapon-tile rarity-${arm.rarity}`}
                     aria-label={arm.name}
                     aria-pressed={id === focus}
                     disabled={busy}
                     onClick={() => focusOn(id)}
                   >
-                    <WeaponGlyph def={arm} className="large" />
+                    <WeaponGlyph def={arm} />
                     <span className="weapon-tile-name">{arm.name}</span>
                     <span className="weapon-tile-wielder">{ownedText(profile, id)}</span>
                     {id === focus && <em className="banner-focus-tag">Focus</em>}

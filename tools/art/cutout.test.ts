@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chromaKey, cutout, keyColour, normaliseAlpha, opaqueBounds, SPRITE_HEIGHT, standardise, trim, type Colour } from './cutout.ts';
+import { chromaKey, cutout, ICON_SIZE, iconise, keyColour, normaliseAlpha, opaqueBounds, SPRITE_HEIGHT, standardise, trim, type Colour } from './cutout.ts';
 import { blank, fill, scaleArea, scaleNearest, type Rgba } from './image.ts';
 
 const BLUE: Colour = [0, 2, 254];
@@ -91,5 +91,18 @@ describe('cutout', () => {
     expect([out.width, out.height]).toEqual([46, 42]);
     expect(pixel(out, 0, 0)[3]).toBe(0);
     expect(pixel(out, 20, 20)).toEqual([...RED, 255]);
+  });
+});
+
+describe('weapon icons', () => {
+  it('fit a cut-out inside the square, centred, with a margin, never enlarged', () => {
+    const wide = blank(1000, 500);
+    fill(wide, RED);
+    const icon = iconise(wide);
+    expect([icon.width, icon.height]).toEqual([ICON_SIZE, ICON_SIZE]);
+    expect(opaqueBounds(icon)).toEqual({ x: 12, y: 70, width: 232, height: 116 });
+    const small = blank(40, 20);
+    fill(small, RED);
+    expect(opaqueBounds(iconise(small))).toEqual({ x: 108, y: 118, width: 40, height: 20 });
   });
 });

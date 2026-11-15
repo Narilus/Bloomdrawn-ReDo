@@ -1,26 +1,27 @@
-// Art pipeline: generate battle sprite options with `codex exec`, cut them out, and lay them out
-// for the owner to pick. Run `npm run art` for usage.
+// Art pipeline: generate battle sprite and weapon icon options with `codex exec`, cut them out, and
+// lay them out for the owner to pick. Run `npm run art` for usage.
 import { spawn } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
-import { cutout, standardise } from './cutout.ts';
+import { cutout, iconise, standardise } from './cutout.ts';
 import { blank, composite, fill, readPng, scaleArea, scaleNearest, writePng, type Rgba } from './image.ts';
 import { composePrompt, promptProblems, stemFrom, type Background } from './prompt.ts';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 const CODEX_HOME = process.env.CODEX_HOME ?? join(homedir(), '.codex');
 const USAGE = `Usage:
-  npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>] [--stem battle|enemy]
+  npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>] [--stem battle|enemy|icon]
       Stem from DESIGN.md + art/briefs/<character>.txt -> art/raw/<character>/<character>-NN.png
-      (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down)
+      (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down; --stem icon: a weapon icon)
   npm run art -- cut <raw.png...>
       Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
       The cut sprites side by side at in-game height on the stage colour (out: art/cut/<character>-sheet.png)
-  npm run art -- pick <raw.png>
-      The owner's pick, cut and stored at the standard height -> src/assets/battle/<character>.png`;
+  npm run art -- pick <raw.png> [--icon]
+      The owner's pick, cut and stored at the standard height -> src/assets/battle/<character>.png
+      (--icon: fitted in a square instead -> src/assets/weapons/<weapon>.png)`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -31,6 +32,7 @@ async function main() {
       ref: { type: 'string' },
       height: { type: 'string', default: '400' },
       stem: { type: 'string', default: 'battle' },
+      icon: { type: 'boolean', default: false },
     },
   });
   const [command, ...rest] = positionals;
@@ -38,12 +40,12 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle or enemy');
+    if (!stem) throw new Error('--stem must be battle, enemy or icon');
     await generate(rest[0], Number(values.n), background, stem, values.ref);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
   } else if (command === 'pick' && rest[0]) {
-    pick(rest[0]);
+    pick(rest[0], values.icon);
   } else if (command === 'sheet' && rest.length > 1) {
     sheet(rest[0] as string, rest.slice(1), Number(values.height));
   } else {
@@ -53,7 +55,7 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem' } as const;
 
 async function generate(character: string, count: number, background: Background, label: string, reference?: string) {
   if (count < 1 || count > 4) throw new Error('--n must be 1 to 4');
@@ -133,8 +135,10 @@ function cut(file: string) {
   save(out, cutout(readPng(file)));
 }
 
-function pick(file: string) {
-  save(join(ROOT, 'src/assets/battle', `${basename(dirname(file))}.png`), standardise(cutout(readPng(file))));
+function pick(file: string, icon = false) {
+  const name = `${basename(dirname(file))}.png`;
+  if (icon) save(join(ROOT, 'src/assets/weapons', name), iconise(cutout(readPng(file))));
+  else save(join(ROOT, 'src/assets/battle', name), standardise(cutout(readPng(file))));
 }
 
 function save(out: string, image: Rgba) {

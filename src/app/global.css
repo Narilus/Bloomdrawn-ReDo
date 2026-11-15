@@ -2987,6 +2987,7 @@ kbd {
 .weapon-glyph {
   display: inline-grid;
   place-items: center;
+  overflow: hidden;
   width: 56px;
   height: 56px;
   border: 2px solid var(--rarity, var(--mauve-shadow));
@@ -2997,9 +2998,16 @@ kbd {
 }
 
 .weapon-glyph.large {
-  width: 96px;
-  height: 96px;
-  font-size: 60px;
+  width: 112px;
+  height: 112px;
+  font-size: 66px;
+}
+
+/* A weapon's art fills its frame; the frame's colour is still its rarity. */
+.weapon-glyph img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .rarity-ssr {
@@ -3066,9 +3074,15 @@ kbd {
   color: var(--rarity);
 }
 
+/*
+ * Every weapon tile is one size wherever it shows (owner, 15 Nov): 168 × 188, an 80px icon, two lines
+ * kept for the name and one for its holder or spares, so a long name or a missing holder never
+ * changes a tile's height.
+ */
 .weapon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, 168px);
+  grid-auto-rows: 188px;
   gap: 12px;
   margin: 0;
   padding: 0;
@@ -3078,10 +3092,13 @@ kbd {
 .weapon-tile {
   position: relative;
   display: grid;
+  grid-template-rows: 80px 34px 16px;
   justify-items: center;
-  gap: 4px;
-  width: 100%;
-  padding: 12px 8px 10px;
+  align-content: center;
+  gap: 8px;
+  width: 168px;
+  height: 188px;
+  padding: 10px 8px;
   border: 1px solid rgba(184, 149, 90, 0.3);
   border-radius: 10px;
   background: rgba(46, 30, 42, 0.7);
@@ -3098,10 +3115,21 @@ kbd {
   background: rgba(90, 58, 78, 0.7);
 }
 
+.weapon-tile .weapon-glyph {
+  width: 80px;
+  height: 80px;
+  font-size: 46px;
+}
+
 .weapon-tile-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  align-self: start;
   font-size: 14px;
   text-align: center;
-  line-height: 1.2;
+  line-height: 17px;
 }
 
 .weapon-tile-step {
@@ -3116,6 +3144,14 @@ kbd {
 .weapon-tile-wielder {
   font-size: 12px;
   opacity: 0.75;
+}
+
+.weapon-tile-wielder {
+  grid-row: 3;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .weapon-tile-lock {
@@ -3370,13 +3406,9 @@ kbd {
   text-shadow: none;
 }
 
-.banner-weapon-tile {
-  width: 220px;
-  padding: 20px 12px 16px;
-}
-
-.banner-weapon-tile .weapon-tile-name {
-  font-size: 18px;
+.team-picker-grid .weapon-tile .banner-focus-tag {
+  position: absolute;
+  bottom: -10px;
 }
 
 .banner-result-glyph {

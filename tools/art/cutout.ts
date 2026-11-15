@@ -1,4 +1,4 @@
-import { blank, crop, scaleArea, type Rgba } from './image.ts';
+import { blank, composite, crop, scaleArea, type Rgba } from './image.ts';
 
 export type Colour = readonly [number, number, number];
 
@@ -149,6 +149,20 @@ export function cutout(image: Rgba): Rgba {
  * drawn at (a front-row party member on a 4K screen); the stage downscales from there.
  */
 export const SPRITE_HEIGHT = 1024;
+
+/** Weapon icons are stored in a square this size, the object fitted inside with a margin. */
+export const ICON_SIZE = 256;
+const ICON_MARGIN = 12;
+
+/** A cut-out object fitted inside an ICON_SIZE square, centred, never enlarged, with a margin on every side. */
+export function iconise(image: Rgba): Rgba {
+  const room = ICON_SIZE - 2 * ICON_MARGIN;
+  const scale = Math.min(1, room / Math.max(image.width, image.height));
+  const fitted = scale < 1 ? scaleArea(image, Math.max(1, Math.round(image.width * scale)), Math.max(1, Math.round(image.height * scale))) : image;
+  const square = blank(ICON_SIZE, ICON_SIZE);
+  composite(square, fitted, Math.floor((ICON_SIZE - fitted.width) / 2), Math.floor((ICON_SIZE - fitted.height) / 2));
+  return square;
+}
 
 export function standardise(image: Rgba): Rgba {
   if (image.height <= SPRITE_HEIGHT) return image;
