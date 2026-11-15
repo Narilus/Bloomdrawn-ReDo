@@ -168,6 +168,8 @@ B gives little more Tentacles, Essence or Embryo: Shield, card flow, cost and a 
 - **Anthe's B P5 loses damage** (−10% in Spirit): cheaper Rituals let the lab's player cast Votive Candle sooner, on less Essence. A player who holds them would do better, but as a capstone it reads weak.
 - **Side finding:** Kibane's real P1 (Foxfire charges 15) costs her party 10–17% damage in the lab, likely because her ultimate fires sooner, on less Essence. Worth a look in M6.12.
 
+As built, the lab gives the same as B above. One difference: it now counts Shield from the first turn's start, so Agathe's P1 shows (+4% Shield at P5 in the starter party, +27% in Rapture).
+
 ### The owner's answers (15 Nov)
 
 1. Agathe: B.

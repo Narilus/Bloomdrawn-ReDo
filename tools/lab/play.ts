@@ -88,14 +88,17 @@ export function fight(seed: number, setup: Setup, registry: Registry, options: F
   const { turns, enemies, level = 1, ascensions = 0, dupes = 0, weapons } = options;
   const party = setup.party;
   const dupeLevels = Array.isArray(dupes) ? dupes : party.map((id) => (registry.characters[id]?.dupes?.length ? dupes : 0));
-  let state = startCombat(
+  const start = startCombat(
     { seed, party, enemies: Array<string>(enemies).fill(DUMMY), levels: party.map(() => level), ascensions: party.map(() => ascensions), dupes: dupeLevels, ...(weapons && { weapons }) },
     registry,
-  ).state;
+  );
+  let state = start.state;
   const perTurn = Array<number>(turns).fill(0);
   const ultimate = Array<number>(turns).fill(0);
   let cards = 0;
-  let shield = 0;
+  const shieldOf = (events: EngineEvent[]) => events.filter((e) => e.type === 'shieldGained' && e.target === PARTY).reduce((n, e) => n + (e.amount ?? 0), 0);
+  // Shield from the first turn's start (a passive that shields on turn 1) counts too.
+  let shield = shieldOf(start.events);
   let turn6: Record<string, number> = {};
   while (state.turn <= turns && state.phase === 'player') {
     const turn = state.turn;
@@ -107,7 +110,7 @@ export function fight(seed: number, setup: Setup, registry: Registry, options: F
     perTurn[turn - 1]! += dealt;
     if (command.type === 'fireUltimate') ultimate[turn - 1]! += dealt;
     if (command.type === 'playCard') cards += 1;
-    shield += result.events.filter((e) => e.type === 'shieldGained' && e.target === PARTY).reduce((n, e) => n + (e.amount ?? 0), 0);
+    shield += shieldOf(result.events);
     state = result.state;
   }
   return { perTurn, ultimate, cards, turn6, shield };

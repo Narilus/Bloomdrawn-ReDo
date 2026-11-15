@@ -54,6 +54,22 @@ Agathe builds the Tentacle count; Isadora raises the damage per hit and spends i
 
 **Dupes:** P1, Rapt gives +2. P3, Ecstatic Spin costs 3. P4, Dance of Bells also gains 2 Tentacles. P5, at the end of each turn, Tentacles attack twice.
 
+**P5, revisited (owner, 15 Nov; `npm run lab:potential -- --isadora`).** Her P5 makes the Rapture party (Agathe, Isadora, Leonora, Hester) deal +168% over 20 turns against everyone at P0; Virelle's whole set gives Flesh +59% and Kibane's Spirit +65%. P1–P4 alone already give +65% (P1's Rapt +29%), so no capstone brings her whole set down to theirs; what the P5 step itself adds is the lever. The alternatives, all from operations the engine has (level 40, every ascension, 30 seeds, one dummy; three dummies give the same, since her party hits one target at a time):
+
+| P5 | 20 turns, vs P0 | vs P4 | 10 turns, vs P0 | vs P4 |
+|---|---:|---:|---:|---:|
+| Now: Tentacles attack twice at end of turn | +168% | +63% | +151% | +71% |
+| The second attack at half damage | +116% | +31% | +99% | +36% |
+| The second attack only with 10 or more Tentacles | +166% | +61% | +140% | +64% |
+| Rapt answers every volley from a card, not only the first | +116% | +31% | +71% | +17% |
+| Ecstatic Spin triggers a volley three times | +95% | +18% | +61% | +10% |
+| Nothing, for comparison | +65% | 0% | +47% | 0% |
+
+- The second attack doubles the end-of-turn volley, Rapture's main damage, from turn 1 (+76% on turn 1 alone).
+- Gating it at 10 Tentacles changes little: the party passes 10 by about turn 5.
+- Rapt on every card volley grows with the fight (+18% on turn 1, +82% on turn 10, +205% on turn 20 against P0), so it snowballs as Rapture should, and it pays for playing her volley cards.
+- For the other P5 steps over P4: Kibane's about +49%, Hester's +7%, Virelle's none in the lab (Bleed keeping its stacks barely shows against one dummy).
+
 ## Kibane, the Nine-Tailed: Spirit, Ritual nuker
 
 | | Cost | Text |
