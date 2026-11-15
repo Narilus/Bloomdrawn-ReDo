@@ -1,5 +1,5 @@
-import { damage, draw, gainResource, gainShield, gte, mul, resource, stat, transcend, when } from '../../engine/index.ts';
-import { card, character } from '../define.ts';
+import { damage, draw, gainResource, gainShield, gte, mul, resource, stat, transcend, turn, when } from '../../engine/index.ts';
+import { card, character, p2, variant } from '../define.ts';
 import { tentacleVolley } from '../domains/rapture.ts';
 
 // Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning.
@@ -46,23 +46,56 @@ export const thuribleSwing = card({
   text: 'Deal {effects.0.amount} damage. If you have {effects.1.condition.gte.1} or more Tentacles, trigger a volley.',
 });
 
+// Potential, the lighter set (owner, 15 Nov; docs/notes/starter-kits.md, "Potential"): little more
+// Tentacles, Shield and card flow instead. Numbers are placeholders.
+
+// First Hymn at P0 gives 1 Tentacle; at P1 the party also gains Shield on the first turn (Shield from
+// combat start itself would be gone when that turn begins).
+const firstHymn = (shield: boolean) => ({
+  name: 'First Hymn', scope: 'combat' as const,
+  text: 'At combat start, gain {triggers.0.do.0.amount} Tentacle.' + (shield ? ' On the first turn, gain {triggers.1.do.0.branch.0.amount} Shield.' : ''),
+  triggers: [
+    { on: 'combatStart' as const, do: [gainResource('tentacles', 1)] },
+    ...(shield ? [{ on: 'turnStart' as const, do: [when(gte(1, turn()), [gainShield(mul(2, stat('defense')))])] }] : []),
+  ],
+});
+
+const hymn = (volley: boolean) => ({
+  name: 'Hymn of the Hundred Arms',
+  text: volley ? 'Gain {effects.0.amount} Tentacles, then trigger a volley.' : 'Gain {effects.0.amount} Tentacles.',
+  effects: volley ? [gainResource('tentacles', 3), tentacleVolley()] : [gainResource('tentacles', 3)],
+  transcended: {
+    text: 'Gain {effects.0.amount} Tentacles, then trigger a volley.',
+    effects: [gainResource('tentacles', 3), tentacleVolley()],
+  },
+});
+
+// P3: Call the Choir always draws its card.
+export const callTheChoirP3 = variant(callTheChoir, 3, {
+  effects: [gainResource('tentacles', 2), draw(1)],
+  text: 'Gain {effects.0.amount} Tentacles. Draw {effects.1.count} card.',
+});
+
+// P5: her Strike triggers a volley with 4 or more Tentacles.
+export const strikeP5 = variant(strike, 5, {
+  effects: [damage(mul(2.5, stat('attack'))), when(gte(resource('tentacles'), 4), [tentacleVolley()])],
+  text: 'Deal {effects.0.amount} damage. If you have {effects.1.condition.gte.1} or more Tentacles, trigger a volley.',
+});
+
+const STATS = { hp: 50, attack: 12, defense: 12 };
+
 export const agathe = character({
   id: 'agathe', name: 'Agathe', title: 'the Choir-Mother', domain: 'rapture',
   role: 'hybrid',
-  stats: { hp: 50, attack: 12, defense: 12 },
+  stats: STATS,
   cards: [strike, defense, theChoirAnswers, callTheChoir, censerRite],
-  passive: {
-    name: 'First Hymn', scope: 'combat',
-    text: 'At combat start, gain {triggers.0.do.0.amount} Tentacle.',
-    triggers: [{ on: 'combatStart', do: [gainResource('tentacles', 1)] }],
-  },
-  ultimate: {
-    name: 'Hymn of the Hundred Arms',
-    text: 'Gain {effects.0.amount} Tentacles.',
-    effects: [gainResource('tentacles', 3)],
-    transcended: {
-      text: 'Gain {effects.0.amount} Tentacles, then trigger a volley.',
-      effects: [gainResource('tentacles', 3), tentacleVolley()],
-    },
-  },
+  passive: firstHymn(false),
+  ultimate: hymn(false),
+  dupes: [
+    { text: 'First Hymn also gives Shield equal to twice her Defense on the first turn.', passive: firstHymn(true) },
+    p2(STATS),
+    { text: 'Call the Choir always draws its card.', cards: { [callTheChoir.id]: callTheChoirP3.id } },
+    { text: 'Hymn of the Hundred Arms also triggers a volley before she Transcends.', ultimate: hymn(true) },
+    { text: 'Her Strike triggers a volley with 4 or more Tentacles.', cards: { [strike.id]: strikeP5.id } },
+  ],
 });

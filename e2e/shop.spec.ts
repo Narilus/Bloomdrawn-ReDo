@@ -12,8 +12,9 @@ test('the shop sells a dupe for 100 Pollen after a confirm, and refuses past wha
   await page.goto('/');
   await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Shop' }).click();
-  // The four starters and Virelle.
+  // The four starters, with Potential levels of their own, and Virelle.
   await expect(page.locator('.shop-tile')).toHaveCount(5);
+  await expect(page.getByRole('button', { name: 'Agathe, P0' })).toBeVisible();
   const purse = page.locator('.currency-pollen strong');
   await expect(page.locator('.currency-pollen')).toHaveAttribute('data-tip', 'Pollen');
   await expect(purse).toHaveText('150');

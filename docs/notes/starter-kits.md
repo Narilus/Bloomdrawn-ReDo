@@ -88,9 +88,9 @@ New operations: `gainMana`, `manaDebt`, `chargeUltimate`, `volley`, `changeCost`
 
 Censer Rite's damage increase lasts the combat, so each cast ramps the Tentacles further.
 
-## Potential, P1–P5 (draft for the owner, 15 Nov)
+## Potential, P1–P5
 
-Status: **draft, modelled 15 Nov; waiting on the owner.** The owner judged the first draft (A, below) too generous with Tentacles, Essence and Embryo, and asked for the lab; a lighter set (B) and the results follow it. The Profile Shop (M6.9) sells the starters' dupes, but they have no Potential levels yet. These follow the banner four (`docs/notes/banner-kits.md`): P1 changes the passive, P2 the stats, P3 a Flavour card, P4 the ultimate, P5 a capstone. P2 is the shared rule (+10% HP, +3 Attack, +3 Defense). Numbers are placeholders for the lab. Every one is built from operations and triggers the engine already has.
+Status: **approved and built, 15 Nov.** The owner judged the first draft (A, below) too generous with Tentacles, Essence and Embryo, and asked for the lab, then chose the lighter set (B) for Agathe, Maelia and Anthe and kept Leonora's draft. They're content (`src/content/characters/`), proved in `src/content/scenarios/potential.test.ts`, and sold in the Profile Shop (M6.9). One change in the building: Agathe's P1 Shield comes on the first turn, since Shield gained at combat start is gone when that turn begins. These follow the banner four (`docs/notes/banner-kits.md`): P1 changes the passive, P2 the stats, P3 a Flavour card, P4 the ultimate, P5 a capstone. P2 is the shared rule (+10% HP, +3 Attack, +3 Defense). Numbers are placeholders for the lab. Every one is built from operations and triggers the engine already has.
 
 For comparison, the banner four: Virelle P1 Opened Vein gives 2 Embryo, P3 Open the Wound's detonation is three times the Bleed, P4 Thousand Cuts hits 2 more times, P5 Bleed on enemies stops losing stacks. Hester P1 Hunter's Patience gives 3 Vulnerable, P3 Weighted Net costs 1, P4 The Snare Closes also applies 2 Vulnerable, P5 her Weak and Vulnerable last a turn longer.
 
@@ -168,9 +168,11 @@ B gives little more Tentacles, Essence or Embryo: Shield, card flow, cost and a 
 - **Anthe's B P5 loses damage** (−10% in Spirit): cheaper Rituals let the lab's player cast Votive Candle sooner, on less Essence. A player who holds them would do better, but as a capstone it reads weak.
 - **Side finding:** Kibane's real P1 (Foxfire charges 15) costs her party 10–17% damage in the lab, likely because her ultimate fires sooner, on less Essence. Worth a look in M6.12.
 
-### Questions
+### The owner's answers (15 Nov)
 
-1. Agathe: take B? Or keep one stronger line from A, such as Censer Rite at 2?
-2. Maelia: B (Shield) or A (more Embryo; its damage sits below Virelle's)?
-3. Anthe: B with a new P5 (for example, Votive Candle deals 3 per Essence, A's P3, which raises damage without adding Essence), or A?
-4. Leonora: keep A?
+1. Agathe: B.
+2. Maelia: B.
+3. Anthe: B, its P5 as drafted.
+4. Leonora: her draft.
+
+Isadora's P5 is to be revisited (`banner-kits.md`; `npm run lab:potential` models alternatives).

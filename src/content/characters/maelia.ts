@@ -4,6 +4,7 @@ import {
   consumed,
   createCard,
   damage,
+  eventAmount,
   gainResource,
   gainShield,
   heal,
@@ -15,7 +16,7 @@ import {
   stat,
   transcend,
 } from '../../engine/index.ts';
-import { card, character } from '../define.ts';
+import { card, character, p2, variant } from '../define.ts';
 import { poison } from '../statuses/poison.ts';
 
 // Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning.
@@ -70,29 +71,61 @@ export const pollenDrift = card({
   text: 'Apply {effects.0.stacks} Poison to all enemies. Consume {effects.1.amount} Embryo: apply {effects.1.branch.0.stacks} more.',
 });
 
+// Potential, the lighter set (owner, 15 Nov; docs/notes/starter-kits.md, "Potential"): Shield and
+// Poison instead of more Embryo. Numbers are placeholders.
+
+// Midwife's Hands at P0 gives 1 more Embryo; at P1 also Shield; at P5 every Embryo consumed, by anyone,
+// poisons every enemy.
+const hands = (shield: boolean, poisons = false) => ({
+  name: "Midwife's Hands", scope: 'combat' as const,
+  text:
+    (shield
+      ? 'The first time each turn a card gains Embryo, gain {triggers.0.do.0.amount} more and {triggers.0.do.1.amount} Shield.'
+      : 'The first time each turn a card gains Embryo, gain {triggers.0.do.0.amount} more.') +
+    (poisons ? ' When Embryo is consumed, every enemy gains {triggers.1.do.0.stacks.mul.0} Poison for each.' : ''),
+  triggers: [
+    {
+      on: 'resourceGained' as const, filter: { resource: 'embryo', direct: true as const }, once: 'turn' as const,
+      do: [gainResource('embryo', 1), ...(shield ? [gainShield(stat('defense'))] : [])],
+    },
+    ...(poisons
+      ? [{ on: 'resourceConsumed' as const, filter: { resource: 'embryo' }, do: [applyStatus(poison, mul(mul(0.34, stat('attack')), eventAmount()), 'allEnemies')] }]
+      : []),
+  ],
+});
+
+// Birthing Bloom; P4 heals and Shields half as much again (1.5 ×).
+const BLOOM = 'Consume all Embryo. For each Embryo consumed, heal {effects.0.branch.0.amount.mul.0} and gain {effects.0.branch.1.amount.mul.0} Shield';
+const bloom = (x: number) => {
+  const mend = [heal(mul(percentOf(1.43 * x, 'maxHp'), consumed())), gainShield(mul(mul(0.8 * x, stat('defense')), consumed()))];
+  return {
+    name: 'Birthing Bloom',
+    text: `${BLOOM}.`,
+    effects: [ifConsume('embryo', resource('embryo'), mend)],
+    transcended: {
+      text: `${BLOOM}, and every enemy gains {effects.0.branch.2.stacks.mul.0} Poison.`,
+      effects: [ifConsume('embryo', resource('embryo'), [...mend, applyStatus(poison, mul(mul(0.34, stat('attack')), consumed()), 'allEnemies')])],
+    },
+  };
+};
+
+// P3: Bud Cutting costs 2.
+export const budCuttingP3 = variant(budCutting, 3, { cost: 2 });
+
+const STATS = { hp: 55, attack: 9, defense: 15 };
+
 export const maelia = character({
   id: 'maelia', name: 'Maelia', title: 'Midwife of the Bloom', domain: 'flesh',
   role: 'support',
-  stats: { hp: 55, attack: 9, defense: 15 },
+  stats: STATS,
   cards: [strike, defense, ripenedWomb, swollenPod, budCutting],
-  passive: {
-    name: "Midwife's Hands", scope: 'combat',
-    text: 'The first time each turn a card gains Embryo, gain {triggers.0.do.0.amount} more.',
-    triggers: [{ on: 'resourceGained', filter: { resource: 'embryo', direct: true }, once: 'turn', do: [gainResource('embryo', 1)] }],
-  },
-  ultimate: {
-    name: 'Birthing Bloom',
-    text: 'Consume all Embryo. For each Embryo consumed, heal {effects.0.branch.0.amount.mul.0} and gain {effects.0.branch.1.amount.mul.0} Shield.',
-    effects: [ifConsume('embryo', resource('embryo'), [heal(mul(percentOf(1.43, 'maxHp'), consumed())), gainShield(mul(mul(0.8, stat('defense')), consumed()))])],
-    transcended: {
-      text: 'Consume all Embryo. For each Embryo consumed, heal {effects.0.branch.0.amount.mul.0} and gain {effects.0.branch.1.amount.mul.0} Shield, and every enemy gains {effects.0.branch.2.stacks.mul.0} Poison.',
-      effects: [
-        ifConsume('embryo', resource('embryo'), [
-          heal(mul(percentOf(1.43, 'maxHp'), consumed())),
-          gainShield(mul(mul(0.8, stat('defense')), consumed())),
-          applyStatus(poison, mul(mul(0.34, stat('attack')), consumed()), 'allEnemies'),
-        ]),
-      ],
-    },
-  },
+  passive: hands(false),
+  ultimate: bloom(1),
+  dupes: [
+    { text: "Midwife's Hands also gives Shield equal to her Defense.", passive: hands(true) },
+    p2(STATS),
+    { text: 'Bud Cutting costs 2.', cards: { [budCutting.id]: budCuttingP3.id } },
+    { text: 'Birthing Bloom heals and Shields half as much again.', ultimate: bloom(1.5) },
+    { text: 'When Embryo is consumed, every enemy gains Poison for each.', passive: hands(true, true) },
+  ],
 });

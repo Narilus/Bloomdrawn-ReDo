@@ -1,5 +1,5 @@
 import { add, changeCost, damage, draw, gainResource, gainShield, handCount, heldTurns, mul, resource, stat, transcend } from '../../engine/index.ts';
-import { card, character } from '../define.ts';
+import { card, character, p2, variant } from '../define.ts';
 
 // Approved starter kit (docs/notes/starter-kits.md). Numbers are placeholders for tuning; Ritual damage
 // per Essence and Vigil's Essence were doubled from the lab curves (owner, 27 Oct).
@@ -45,23 +45,55 @@ export const longVigil = card({
   effects: [damage(mul(stat('attack'), add(3.34, mul(2, resource('essence')))), { target: 'allEnemies' })],
 });
 
+// Potential, the lighter set (owner, 15 Nov; docs/notes/starter-kits.md, "Potential"): Shield, cost
+// and card flow instead of more Essence. Numbers are placeholders.
+
+// Vigil at P0 gives 2 Essence per Ritual held; at P1 also Shield per Ritual; at P5 held Rituals also
+// get 1 cheaper again at cleanup, beside the Domain's own 1.
+const vigil = (shield: boolean, cheaper = false) => ({
+  name: 'Vigil', scope: 'combat' as const,
+  text:
+    (shield
+      ? 'At end of turn, for each Ritual in hand, gain 2 Essence and Shield equal to her Defense.'
+      : 'At end of turn, gain 2 Essence for each Ritual in hand.') + (cheaper ? ' Held Rituals cost 2 less each turn, not 1.' : ''),
+  triggers: [
+    { on: 'turnEnd' as const, do: [gainResource('essence', mul(2, handCount('ritual'))), ...(shield ? [gainShield(mul(stat('defense'), handCount('ritual')))] : [])] },
+    ...(cheaper ? [{ on: 'cleanup' as const, do: [changeCost(-1, 'hand', 'ritual')] }] : []),
+  ],
+});
+
+// Hours Kept; P4 also draws 1 card.
+const hoursKept = (draws: boolean) => {
+  const more = draws ? [draw(1)] : [];
+  const drawText = draws ? ' Draw {effects.1.count} card.' : '';
+  return {
+    name: 'Hours Kept',
+    text: `Gain 1 Essence for every turn your held Rituals have been held, in total.${drawText}`,
+    effects: [gainResource('essence', heldTurns('ritual')), ...more],
+    transcended: {
+      text: `Gain 2 Essence for every turn your held Rituals have been held, in total.${drawText}`,
+      effects: [gainResource('essence', mul(2, heldTurns('ritual'))), ...more],
+    },
+  };
+};
+
+// P3: Votive Candle costs 4.
+export const votiveCandleP3 = variant(votiveCandle, 3, { cost: 4 });
+
+const STATS = { hp: 60, attack: 9, defense: 15 };
+
 export const anthe = character({
   id: 'anthe', name: 'Anthe', title: "the Sphinx's Vigil", domain: 'spirit',
   role: 'hybrid',
-  stats: { hp: 60, attack: 9, defense: 15 },
+  stats: STATS,
   cards: [strike, defense, theRiddleAnswered, votiveCandle, gildedThread],
-  passive: {
-    name: 'Vigil', scope: 'combat',
-    text: 'At end of turn, gain 2 Essence for each Ritual in hand.',
-    triggers: [{ on: 'turnEnd', do: [gainResource('essence', mul(2, handCount('ritual')))] }],
-  },
-  ultimate: {
-    name: 'Hours Kept',
-    text: 'Gain 1 Essence for every turn your held Rituals have been held, in total.',
-    effects: [gainResource('essence', heldTurns('ritual'))],
-    transcended: {
-      text: 'Gain 2 Essence for every turn your held Rituals have been held, in total.',
-      effects: [gainResource('essence', mul(2, heldTurns('ritual')))],
-    },
-  },
+  passive: vigil(false),
+  ultimate: hoursKept(false),
+  dupes: [
+    { text: 'Vigil also gives Shield equal to her Defense for each Ritual in hand.', passive: vigil(true) },
+    p2(STATS),
+    { text: 'Votive Candle costs 4.', cards: { [votiveCandle.id]: votiveCandleP3.id } },
+    { text: 'Hours Kept also draws 1 card.', ultimate: hoursKept(true) },
+    { text: 'Held Rituals cost 2 less each turn, not 1.', passive: vigil(true, true) },
+  ],
 });

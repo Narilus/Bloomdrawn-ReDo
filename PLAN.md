@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.9 Profile Shop: built, waiting on the owner's feel check (M6.8 signed off 15 Nov)
+**Current task:** M6.9 Profile Shop: built with the starters' Potential, waiting on the owner's feel check and Isadora's P5 (M6.8 signed off 15 Nov)
 
 ## Milestones
 
@@ -401,7 +401,7 @@ _Built 15 Nov. Engine: `WeaponDef`, a member's `weapon` (main stat in `character
 Character dupes for 100 Pollen each, the starters' included.
 **Done when:** tests prove a purchase and its refusals, and e2e buys a dupe.
 
-_Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potential level for `DUPE_PRICE` Pollen, refusing a character not owned, one at her last level or without levels, and a short purse), the save action in `src/app/saves.ts`, and the Shop screen (`src/app/Shop.tsx`), from a new Shop item on the main menu, laid out like the inventory: owned characters as tiles, the chosen one's Potential levels and price, Buy after a confirm. The starters have no Potential levels yet, so the Shop lists them with none to buy until they're designed. Tests: `src/game/shop.test.ts`, `src/app/saves.test.ts`, `e2e/shop.spec.ts`. Pollen moved top right beside Ducats and Blooms (owner, 15 Nov). The starters' Potential levels are drafted in `docs/notes/starter-kits.md`, "Potential", waiting on the owner; once approved they're built, scenario-tested and sold here._
+_Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potential level for `DUPE_PRICE` Pollen, refusing a character not owned, one at her last level or without levels, and a short purse), the save action in `src/app/saves.ts`, and the Shop screen (`src/app/Shop.tsx`), from a new Shop item on the main menu, laid out like the inventory: owned characters as tiles, the chosen one's Potential levels and price, Buy after a confirm. Tests: `src/game/shop.test.ts`, `src/app/saves.test.ts`, `e2e/shop.spec.ts`. Pollen moved top right beside Ducats and Blooms (owner, 15 Nov). The starters' Potential levels (`docs/notes/starter-kits.md`, "Potential": the lighter set for Agathe, Maelia and Anthe, Leonora's draft; owner, 15 Nov) are content now, proved in `src/content/scenarios/potential.test.ts` and sold in the Shop. Isadora's P5 is being revisited (owner, 15 Nov)._
 
 ### M6.10 Accessibility and audio
 Options: text size, reduced motion and animation speed; keyword tooltips; a keyboard and screen-reader pass. CC0 sound effects for cards, hits and the UI, with volume and mute.
