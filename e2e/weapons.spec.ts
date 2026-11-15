@@ -77,9 +77,24 @@ test('the inventory holds each weapon once: reinforce with a spare, salvage spar
   await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Inventory' }).click();
   const kinds = page.getByRole('tablist', { name: 'Item kinds' });
-  await expect(kinds.getByRole('tab')).toHaveText(['All', 'Currencies', 'Memories', 'Materials', 'Weapons', 'Special']);
+  await expect(kinds.getByRole('tab')).toHaveText(['Currencies', 'Memories', 'Materials', 'Weapons', 'Special']);
   await kinds.getByRole('tab', { name: 'Weapons' }).click();
-  await expect(page.locator('.inventory-weapons .weapon-tile-name')).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier", "Surgeon's Scalpel"]);
+  const names = page.locator('.inventory-weapons .weapon-tile-name');
+  await expect(names).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier", "Surgeon's Scalpel"]);
+  // Filters by rarity and Domain (owner, 15 Nov); a signature's Domain is its character's.
+  const rarity = page.getByRole('group', { name: 'Rarity' });
+  const domain = page.getByRole('group', { name: 'Domain' });
+  await rarity.getByRole('button', { name: 'SR', exact: true }).click();
+  await expect(names).toHaveText(["Surgeon's Scalpel"]);
+  await rarity.getByRole('button', { name: 'SSR' }).click();
+  await domain.getByRole('button', { name: 'Flesh' }).click();
+  await expect(names).toHaveText(["Maelia's Seed-Orb Staff", "Virelle's Thorn Rapier"]);
+  await domain.getByRole('button', { name: 'Rapture' }).click();
+  await expect(page.getByText('No weapons held match.')).toBeVisible();
+  await page.screenshot({ path: 'test-results/screenshots/inventory-weapons-filtered.png' });
+  await rarity.getByRole('button', { name: 'All' }).click();
+  await domain.getByRole('button', { name: 'All' }).click();
+  await expect(names).toHaveCount(3);
   const detail = page.getByRole('complementary', { name: 'Weapon' });
   await page.getByRole('button', { name: "Surgeon's Scalpel +2, 2 spares" }).click();
   await expect(detail).toContainText('Attack +18%');

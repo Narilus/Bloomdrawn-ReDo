@@ -1939,9 +1939,63 @@ kbd {
 }
 
 .inventory-weapons {
-  max-height: 820px;
+  max-height: 740px;
   overflow-y: auto;
   padding: 4px;
+}
+
+/* The Weapons tab's Rarity and Domain filters, above the grid (owner, 15 Nov). */
+.inventory-column {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+  min-width: 0;
+}
+
+.inventory-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 36px;
+}
+
+.inventory-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-filter > span {
+  margin-right: 6px;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--parchment);
+  opacity: 0.8;
+}
+
+.filter-chip {
+  padding: 4px 14px;
+  border: 1px solid var(--mauve-shadow);
+  border-radius: 999px;
+  background: var(--aubergine);
+  color: var(--petal-ivory);
+  font-family: var(--sans);
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.filter-chip:hover,
+.filter-chip:focus-visible {
+  opacity: 1;
+}
+
+.filter-chip[aria-pressed='true'] {
+  border-color: var(--antique-gold);
+  background: var(--dusk-plum);
+  color: var(--blush);
+  opacity: 1;
 }
 
 .weapon-detail {

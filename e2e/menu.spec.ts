@@ -61,12 +61,11 @@ test('the inventory lists every item in a tab per kind, and shows what a chosen 
   await importSave(page, saveFile(backup));
   await page.getByRole('button', { name: 'Inventory' }).click();
   const tiles = page.locator('.inventory-item');
-  // Ten items and the SSR Selector (M6.6).
-  await expect(tiles).toHaveCount(11);
+  // No All tab (owner, 15 Nov): it opens on the currencies.
+  await expect(page.getByRole('tab', { name: 'Currencies' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.inventory-name')).toHaveText(['Purified Blooms', 'Ducats', 'Pollen']);
   await expect(page.getByRole('button', { name: 'Purified Blooms: 4' })).toHaveAttribute('aria-pressed', 'true');
   await page.screenshot({ path: 'test-results/screenshots/inventory.png' });
-  await page.getByRole('tab', { name: 'Currencies' }).click();
-  await expect(page.locator('.inventory-name')).toHaveText(['Purified Blooms', 'Ducats', 'Pollen']);
   await page.getByRole('tab', { name: 'Memories' }).click();
   await expect(page.locator('.inventory-name')).toHaveText(['Faint Memory', 'Clear Memory', 'Vivid Memory']);
   await page.getByRole('tab', { name: 'Materials' }).click();
