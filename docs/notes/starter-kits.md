@@ -87,3 +87,56 @@ New operations: `gainMana`, `manaDebt`, `chargeUltimate`, `volley`, `changeCost`
 4. Names are good as they are.
 
 Censer Rite's damage increase lasts the combat, so each cast ramps the Tentacles further.
+
+## Potential, P1–P5 (draft for the owner, 15 Nov)
+
+Status: **draft, waiting on the owner.** The Profile Shop (M6.9) sells the starters' dupes, but they have no Potential levels yet. These follow the banner four (`docs/notes/banner-kits.md`): P1 changes the passive, P2 the stats, P3 a Flavour card, P4 the ultimate, P5 a capstone. P2 is the shared rule (+10% HP, +3 Attack, +3 Defense). Numbers are placeholders for the lab. Every one is built from operations and triggers the engine already has.
+
+For comparison, the banner four: Virelle P1 Opened Vein gives 2 Embryo, P3 Open the Wound's detonation is three times the Bleed, P4 Thousand Cuts hits 2 more times, P5 Bleed on enemies stops losing stacks. Hester P1 Hunter's Patience gives 3 Vulnerable, P3 Weighted Net costs 1, P4 The Snare Closes also applies 2 Vulnerable, P5 her Weak and Vulnerable last a turn longer.
+
+### Agathe, the Choir-Mother (Rapture)
+
+| | Now | Draft |
+|---|---|---|
+| P1 | First Hymn: at combat start, gain 1 Tentacle. | First Hymn gives **2** Tentacles. |
+| P2 | | +10% HP, +3 Attack, +3 Defense. |
+| P3 | Censer Rite costs 3. | Censer Rite costs **2**. |
+| P4 | Hymn of the Hundred Arms gains 3 Tentacles (Transcended: then a volley). | Gains **5** Tentacles. |
+| P5 | | First Hymn also gains **1 Tentacle at the start of each turn**. |
+
+### Maelia, Midwife of the Bloom (Flesh)
+
+| | Now | Draft |
+|---|---|---|
+| P1 | Midwife's Hands: the first time each turn a card gains Embryo, gain 1 more. | Gain **2** more. |
+| P2 | | +10% HP, +3 Attack, +3 Defense. |
+| P3 | Bud Cutting costs 3. | Bud Cutting costs **2**. |
+| P4 | Birthing Bloom heals 1.43% of max HP and gives 0.8 × Defense Shield for each Embryo consumed. | Heals and Shields **half as much again** per Embryo. |
+| P5 | | Midwife's Hands works **every time** a card gains Embryo, not only the first each turn. |
+
+### Anthe, the Sphinx's Vigil (Spirit)
+
+| | Now | Draft |
+|---|---|---|
+| P1 | Vigil: at end of turn, gain 2 Essence for each Ritual in hand. | **3** Essence for each Ritual. |
+| P2 | | +10% HP, +3 Attack, +3 Defense. |
+| P3 | Votive Candle deals Attack × (2.67 + 2 per Essence). | **3** per Essence (Kibane's P3 is the same kind of change). |
+| P4 | Hours Kept: 1 Essence for every turn held Rituals have been held (Transcended: 2). | **2** per turn held (Transcended: **3**). |
+| P5 | | When she plays a Ritual, gain **1 Essence for each turn it was held**. |
+
+### Leonora, the Quartermaster (Unbound)
+
+| | Now | Draft |
+|---|---|---|
+| P1 | Running Tab: when a turn starts with Mana debt, draw 1 card. | Draw **2**. |
+| P2 | | +10% HP, +3 Attack, +3 Defense. |
+| P3 | Promissory Note: gain 4 Mana, take 2 Mana debt. | Gain **5** Mana, debt unchanged. |
+| P4 | Balance the Books: gain Mana equal to the Mana spent this turn (Transcended: and draw 2). | Also **draws 2** (Transcended: **4**). |
+| P5 | | Running Tab also makes **the next card she plays cost 1 less**. |
+
+### Questions
+
+1. Are these the right directions? Change any line you like.
+2. Maelia's P5 is the strongest here: with P1 every card that gains Embryo gains 2 more. Keep it and let the lab check it, or cap it (say, only the first two times each turn)?
+3. Agathe's P5 adds Tentacles every turn, which stacks with Isadora's P5 (Tentacles attack twice). Fine to let the lab measure that pair once it's built?
+4. Anthe's P5 and her signature weapon (Rituals deal more per turn held) both reward holding Rituals. Is that overlap welcome, or should P5 do something else?
