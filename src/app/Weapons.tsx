@@ -4,38 +4,10 @@ import { MAX_STEP, type OwnedWeapon } from '../game/weapons.ts';
 import { Icon } from './icons.tsx';
 
 // Weapon pieces shared by the character page, the inventory and the banner (docs/notes/weapons.md):
-// a glyph framed in its rarity colour (until the weapons have art), its +step pips, its card and its tile.
+// its icon framed in its rarity colour, its +step pips, its card and its tile.
 
 const RARITY: Record<WeaponDef['rarity'], string> = { ssr: 'SSR', sr: 'SR', r: 'R' };
 const STAT: Record<WeaponDef['main']['stat'], string> = { hp: 'HP', attack: 'Attack', defense: 'Defense', critRate: 'Crit Rate', critDamage: 'Crit Damage' };
-
-/** The glyph each weapon shows until the art pass. */
-const GLYPH: Record<string, string> = {
-  'weapon.seed-orb-staff': 'staff',
-  'weapon.chalk-circle-censer': 'lamp',
-  'weapon.vigil-lamp': 'lamp',
-  'weapon.sealed-ledger': 'book',
-  'weapon.thorn-rapier': 'blade',
-  'weapon.torn-veil': 'charm',
-  'weapon.foxfire-gauntlet': 'essence',
-  'weapon.snare-line': 'cord',
-  'weapon.surgeons-scalpel': 'blade',
-  'weapon.suture-hook': 'blade',
-  'weapon.womb-glass-lantern': 'lamp',
-  'weapon.pod-sling': 'cord',
-  'weapon.bone-rosary': 'cord',
-  'weapon.procession-bell': 'bell',
-  'weapon.wax-candle': 'essence',
-  'weapon.prayer-rope': 'cord',
-  'weapon.talisman-fan': 'charm',
-  'weapon.gold-leaf-lamp': 'lamp',
-  'weapon.paper-charm': 'charm',
-  'weapon.temple-bell': 'bell',
-  'weapon.iron-snare': 'cord',
-  'weapon.brass-hourglass': 'delay',
-  'weapon.whetstone': 'blade',
-  'weapon.tin-compass': 'shield',
-};
 
 export const rarityLabel = (def: WeaponDef) => RARITY[def.rarity];
 
@@ -50,12 +22,15 @@ const ART: Readonly<Record<string, string>> = Object.fromEntries(
   Object.entries(import.meta.glob<string>('../assets/weapons/*.png', { eager: true, import: 'default' })).map(([path, url]) => [`weapon.${path.replace(/^.*\/|\.png$/g, '')}`, url]),
 );
 
-/** A weapon's icon in a frame of its rarity colour: its art, or its glyph until it has art. */
+/** Whether a weapon has its picked icon. */
+export const hasWeaponArt = (id: string) => id in ART;
+
+/** A weapon's icon in a frame of its rarity colour: its art, or a plain blade until a new weapon has art. */
 export function WeaponGlyph({ def, className = '' }: { def: WeaponDef; className?: string }) {
   const art = ART[def.id];
   return (
     <span className={`weapon-glyph rarity-${def.rarity}${className ? ` ${className}` : ''}`} aria-hidden="true">
-      {art ? <img src={art} alt="" draggable={false} /> : <Icon name={GLYPH[def.id] ?? 'blade'} />}
+      {art ? <img src={art} alt="" draggable={false} /> : <Icon name="blade" />}
     </span>
   );
 }

@@ -5,6 +5,7 @@ import { registry } from '../content/registry.ts';
 import { M3_EXPEDITION } from '../game/expedition.ts';
 import { MEMORIES, MONEY } from '../game/levels.ts';
 import { hasIcon } from './icons.tsx';
+import { hasWeaponArt } from './Weapons.tsx';
 
 // Items on screen (M6.2): every item the game banks, gives or spends is defined, filed under an
 // inventory tab, drawn with an icon that exists, and says what it's for.
@@ -27,5 +28,9 @@ describe('items', () => {
   it('every item has an inventory tab, an icon and a line on what it is for', () => {
     const faults = Object.entries(ITEMS).filter(([, item]) => !ITEM_TAGS[item.tag] || !hasIcon(item.icon) || item.text.trim() === '');
     expect(faults.map(([id]) => id)).toEqual([]);
+  });
+
+  it('every weapon has its picked icon (M6.8)', () => {
+    expect(Object.keys(registry.weapons).filter((id) => !hasWeaponArt(id))).toEqual([]);
   });
 });
