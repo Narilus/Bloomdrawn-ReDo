@@ -107,7 +107,7 @@ describe('the SSR selector', () => {
     expect(result).toEqual({ ok: true, profile: { ...NEW_PROFILE, owned: ['b'], dupes: {}, items: {}, gacha }, dupe: 'new', pollen: 0 });
   });
 
-  it('a character owned is a dupe level, and past C5 Pollen', () => {
+  it('a character owned is a dupe level, and past P5 Pollen', () => {
     expect(useSelector(holding({ owned: ['b'] }), BANNER, 'b')).toMatchObject({ ok: true, dupe: 1, profile: { dupes: { b: 1 } } });
     const full = useSelector(holding({ owned: ['b'], dupes: { b: 5 } }), BANNER, 'b');
     expect(full).toMatchObject({ ok: true, dupe: 'overflow', pollen: POLLEN_PER_OVERFLOW, profile: { items: { pollen: POLLEN_PER_OVERFLOW } } });

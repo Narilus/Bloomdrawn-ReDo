@@ -14,7 +14,7 @@ export interface Profile {
   runs: number;
   /** Characters gained, in the order they came. Every profile also owns the starters, which aren't listed. */
   owned: string[];
-  /** Dupe levels (C1–C5) by character; a character gained once has none. */
+  /** Dupe levels (P1–P5) by character; a character gained once has none. */
   dupes?: Record<string, number>;
   /** Levels by character, above 1 (`levels.ts`); one never levelled is level 1. */
   levels?: Record<string, number>;

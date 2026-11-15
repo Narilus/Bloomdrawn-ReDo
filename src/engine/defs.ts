@@ -184,7 +184,7 @@ export interface CharacterDef {
   cards: string[];
   passive?: PassiveDef;
   ultimate?: UltimateDef;
-  /** Dupe levels C1 to C5, in order (DESIGN.md, "Character dupes"). */
+  /** Dupe levels P1 to P5, in order (DESIGN.md, "Character dupes"). */
   dupes?: DupeDef[];
 }
 

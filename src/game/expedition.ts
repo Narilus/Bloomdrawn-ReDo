@@ -100,7 +100,7 @@ export interface Outcome {
 export type BloomChoice = 'fight' | 'gamble' | 'symptom';
 
 /**
- * Dupe levels and levels by character, C0 and level 1 left out: a profile's, or a run's copy of them.
+ * Dupe levels and levels by character, P0 and level 1 left out: a profile's, or a run's copy of them.
  * A profile and an expedition are each one.
  */
 export interface Growth {
@@ -115,7 +115,7 @@ export interface Growth {
 export interface Expedition {
   party: string[];
   /**
-   * The party's dupe levels, levels and ascensions when the run began, by character (C0, level 1 and
+   * The party's dupe levels, levels and ascensions when the run began, by character (P0, level 1 and
    * none left out): a copy pulled, a level gained or an ascension made mid-run counts from the next run.
    */
   dupes?: Record<string, number>;

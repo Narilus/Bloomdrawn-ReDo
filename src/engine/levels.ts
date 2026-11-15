@@ -4,7 +4,7 @@ import type { CharacterDef, Role, Stats } from './defs.ts';
 // and card numbers are ratios of them, so every source of a stat feeds every card. About 70% of the
 // growth comes from levels, spread evenly from 1 to 40, and about 30% from the three ascensions,
 // 10% each when she ascends. Level 1 with no ascension is the character as written. Base is her
-// stats at her dupe level, so C2's stats grow too. Multipliers are placeholders for the lab.
+// stats at her dupe level, so P2's stats grow too. Multipliers are placeholders for the lab.
 
 /** Each role's stats at level 40 with every ascension made, as multiples of base; Attackers also gain crit per ascension. */
 export const ROLES: Record<Role, { hp: number; attack: number; defense: number; critRate: number; critDamage: number }> = {

@@ -1,5 +1,5 @@
 import { applyStatus, damage, draw, gainShield, mul, stat, transcend } from '../../engine/index.ts';
-import { c2, card, character, variant } from '../define.ts';
+import { p2, card, character, variant } from '../define.ts';
 import { delay, stun } from '../statuses/control.ts';
 import { vulnerable } from '../statuses/vulnerable.ts';
 import { weak } from '../statuses/weak.ts';
@@ -49,7 +49,7 @@ export const tangleLine = card({
   text: 'Gain {effects.0.amount} Shield. Apply {effects.1.stacks} Weak to all enemies.',
 });
 
-// Hunter's Patience at C0 gives 2 Vulnerable, at C1 3; at C5 every Weak and Vulnerable she applies lasts a turn longer.
+// Hunter's Patience at P0 gives 2 Vulnerable, at P1 3; at P5 every Weak and Vulnerable she applies lasts a turn longer.
 const huntersPatience = (stacks: number, capstone = false) => ({
   name: "Hunter's Patience", scope: 'combat' as const,
   text:
@@ -62,7 +62,7 @@ const huntersPatience = (stacks: number, capstone = false) => ({
 });
 
 const SNARE = 'Stun every enemy: each loses its shown action, and its next is revealed.';
-// Stun: the shown intent is lost; an enemy that retries does so in its own cycle (owner, 25 Oct). C4 adds 2 Vulnerable to all enemies.
+// Stun: the shown intent is lost; an enemy that retries does so in its own cycle (owner, 25 Oct). P4 adds 2 Vulnerable to all enemies.
 const snare = (vulnerableToo = false) => {
   const more = vulnerableToo ? [applyStatus(vulnerable, 2, 'allEnemies')] : [];
   const moreText = vulnerableToo ? ' Apply {effects.1.stacks} Vulnerable to all enemies.' : '';
@@ -77,7 +77,7 @@ const snare = (vulnerableToo = false) => {
   };
 };
 
-// C3: Weighted Net costs 1 (docs/notes/banner-kits.md).
+// P3: Weighted Net costs 1 (docs/notes/banner-kits.md).
 export const weightedNetC3 = variant(weightedNet, 3, { cost: 1 });
 
 const STATS = { hp: 55, attack: 12, defense: 12 };
@@ -91,7 +91,7 @@ export const hester = character({
   ultimate: snare(),
   dupes: [
     { text: "Hunter's Patience gives 3 Vulnerable.", passive: huntersPatience(3) },
-    c2(STATS),
+    p2(STATS),
     { text: 'Weighted Net costs 1.', cards: { [weightedNet.id]: weightedNetC3.id } },
     { text: 'The Snare Closes also applies 2 Vulnerable to all enemies.', ultimate: snare(true) },
     { text: 'The Weak and Vulnerable she applies last 1 turn longer.', passive: huntersPatience(3, true) },

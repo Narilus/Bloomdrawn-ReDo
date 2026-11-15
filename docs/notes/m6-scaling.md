@@ -85,7 +85,7 @@ Because numbers at level 1 are small, **rounding** matters (section 4.7).
 
   *Placeholder formula:* `stat = base × (1 + (M − 1) × (0.7 × (level − 1) / 39 + 0.1 × ascensions))`, where M is the role's multiplier for that stat at level 40. At level 40 with 3 ascensions this gives exactly base × M.
 - Base stats (level 1) stay each character's own, as written. **The role only shapes growth.**
-- C2's stat rule (`c2(STATS)`) raises base, so growth multiplies it as it does today.
+- P2's stat rule (`c2(STATS)`) raises base, so growth multiplies it as it does today.
 
 **Why ×5–9:** with a mixed team, party HP goes from about 205 to about 1,450 ("well over 1,000"). Damage from stats alone grows about ×8, and crit, weapons, dupes, relics and Domain snowballs carry well-built teams into the thousands. That matches the anchors without inflation.
 
@@ -172,8 +172,8 @@ The lab fits the curves to these targets against an **Average build** at that le
 | Elite | 5–6 | 2–3 | 25–35% |
 | Boss | 10–12 | 4–5 | 40–60% on telegraphed big hits; less otherwise |
 
-- **Average build:** party level equals depth, all ascensions due made, C0, no weapon (until weapons exist), the lab's simple player, averaged over the lab's four parties.
-- **Strong build:** the same plus C2, a single-Domain team, ultimates fired, and a weapon once weapons exist.
+- **Average build:** party level equals depth, all ascensions due made, P0, no weapon (until weapons exist), the lab's simple player, averaged over the lab's four parties.
+- **Strong build:** the same plus P2, a single-Domain team, ultimates fired, and a weapon once weapons exist.
 - **Past level 40,** characters stop levelling but enemies keep climbing. Depths 41–50 are where builds (weapons, dupes, relics) carry the party. Keep `PAST_TOP` as the mechanism, at a value the lab sets.
 
 **Why derive instead of typing HP per depth:** the owner's experience is turns and threat, not raw HP. If party power changes later (weapons, skill levels, new kits), the curves are refit instead of every table being hand-edited. Hand-typed tables drift; a fit to targets doesn't.

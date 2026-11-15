@@ -1,5 +1,5 @@
 import { applyStatus, damage, draw, gainResource, gainShield, mul, stat, transcend } from '../../engine/index.ts';
-import { c2, card, character, variant } from '../define.ts';
+import { p2, card, character, variant } from '../define.ts';
 import { tentacleVolley } from '../domains/rapture.ts';
 import { danceOfBells } from '../statuses/dance.ts';
 
@@ -48,7 +48,7 @@ export const ribbonLash = card({
   text: 'Deal {effects.0.amount} damage. Trigger a volley.',
 });
 
-// Rapt at C0 gives +1, at C1 +2; at C5 Tentacles also attack a second time at the end of each turn.
+// Rapt at P0 gives +1, at P1 +2; at P5 Tentacles also attack a second time at the end of each turn.
 const rapt = (potency: number, capstone = false) => ({
   name: 'Rapt', scope: 'combat' as const,
   text:
@@ -62,7 +62,7 @@ const rapt = (potency: number, capstone = false) => ({
 });
 
 const DANCE = 'This turn, every volley hits twice, the end-of-turn attack included.';
-// C4 adds 2 Tentacles, before the Transcended form's volley.
+// P4 adds 2 Tentacles, before the Transcended form's volley.
 const danceOf = (tentacles: number) => {
   const gain = tentacles ? [gainResource('tentacles', tentacles)] : [];
   const more = tentacles ? ' Gain {effects.1.amount} Tentacles.' : '';
@@ -74,7 +74,7 @@ const danceOf = (tentacles: number) => {
   };
 };
 
-// C3: Ecstatic Spin costs 3 (docs/notes/banner-kits.md).
+// P3: Ecstatic Spin costs 3 (docs/notes/banner-kits.md).
 export const ecstaticSpinC3 = variant(ecstaticSpin, 3, { cost: 3 });
 
 const STATS = { hp: 50, attack: 15, defense: 9 };
@@ -88,7 +88,7 @@ export const isadora = character({
   ultimate: danceOf(0),
   dupes: [
     { text: 'Rapt gives +2.', passive: rapt(2) },
-    c2(STATS),
+    p2(STATS),
     { text: 'Ecstatic Spin costs 3.', cards: { [ecstaticSpin.id]: ecstaticSpinC3.id } },
     { text: 'Dance of Bells also gains 2 Tentacles.', ultimate: danceOf(2) },
     { text: 'At the end of each turn, Tentacles attack twice.', passive: rapt(2, true) },

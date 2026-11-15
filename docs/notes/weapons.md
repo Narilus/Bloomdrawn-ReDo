@@ -95,7 +95,7 @@ They don't conflict. Reinforcing goes first, and salvage only takes what's left.
 **Recommendation: Pollen, at low values.** The owner's worry is an endless stream of salvage flooding Pollen. That can't happen: weapons come only from pulls, pulls come only from play at a fixed rate, and nothing else drops weapons. So salvage can never outpace pulls, and its values set exactly how much it adds.
 
 The sums per 100 pulls (SR about 16, R weapons about 41):
-- **Today, without weapons:** about 117 Pollen (1 a pull, plus 10 for each lost 50/50), before C5 overflow. A dupe in the shop is 100.
+- **Today, without weapons:** about 117 Pollen (1 a pull, plus 10 for each lost 50/50), before P5 overflow. A dupe in the shop is 100.
 - **Before anything is maxed:** salvage adds nothing. Maxing a weapon takes 6 copies, so all eight R weapons take about 120 pulls, and all eight SR weapons about 300.
 - **Once every SR and R weapon is maxed,** at R 1 and SR 2: about 73 more (41 + 32), about +60%, or one more dupe every 140 pulls. More generic weapons later stretch the time to max, so this ceiling only drops.
 
@@ -103,7 +103,7 @@ The sums per 100 pulls (SR about 16, R weapons about 41):
 |---|---:|
 | R duplicate | 1 |
 | SR duplicate | 2 |
-| SSR duplicate | 40, as a character past C5 |
+| SSR duplicate | 40, as a character past P5 |
 
 Salvage pays per spare copy.
 

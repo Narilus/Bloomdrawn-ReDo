@@ -5,17 +5,20 @@ import type { CardDef, CharacterDef, DomainDef, DupeDef, EncounterDef, EnemyDef,
 
 export const card = (def: CardDef) => ({ kind: 'card' as const, ...def });
 
-/** A dupe level's version of one of a character's five cards: the card with changes, under its own ID. */
+/**
+ * A Potential level's version of one of a character's five cards: the card with changes, under its own ID.
+ * The ID keeps the old `-c<level>` suffix (from when levels were C1–C5), since saved runs store card IDs.
+ */
 export const variant = (base: CardDef, level: number, changes: Partial<CardDef>) => {
   const { kind: _kind, ...def } = base as CardDef & { kind?: string };
   return card({ ...def, ...changes, id: `${base.id}-c${level}`, variantOf: base.id });
 };
 
 /**
- * C2 is one rule for everyone for now (owner, 25 Oct; docs/notes/banner-kits.md): +10% HP, rounded,
+ * P2 is one rule for everyone for now (owner, 25 Oct; docs/notes/banner-kits.md): +10% HP, rounded,
  * +3 Attack and +3 Defense. Both were +1 before level-1 Attack and Defense tripled in the M6 retune (owner, 31 Oct).
  */
-export const c2 = (stats: CharacterDef['stats']): DupeDef => ({
+export const p2 = (stats: CharacterDef['stats']): DupeDef => ({
   text: '+10% HP, +3 Attack and +3 Defense.',
   stats: { hp: Math.round(stats.hp * 1.1), attack: stats.attack + 3, defense: stats.defense + 3 },
 });

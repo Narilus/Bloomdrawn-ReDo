@@ -20,7 +20,7 @@ export const STARTER_PARTY = ['maelia', 'agathe', 'anthe', 'leonora'];
 
 export interface ScenarioSpec {
   party?: string[];
-  /** Dupe levels by character ID; others are C0. */
+  /** Dupe levels by character ID; others are P0. */
   dupes?: Record<string, number>;
   /** Levels by character ID; others are level 1. */
   levels?: Record<string, number>;

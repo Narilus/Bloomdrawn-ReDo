@@ -97,7 +97,7 @@ test("a character's Potential shows on the roster, and the page shows her at it,
   await expect(page.locator('.roster-tile[aria-label="Kibane"] .roster-level')).toHaveText('P3');
   await expect(page.locator('.roster-tile[aria-label="Maelia"] .roster-level')).toHaveCount(0);
   await page.getByRole('button', { name: 'Kibane', exact: true }).click();
-  // C2's +10% HP and +3 Attack; C3's Foxfire Rite at 80% of Attack 18 plus 240% of it per Essence.
+  // P2's +10% HP and +3 Attack; P3's Foxfire Rite at 80% of Attack 18 plus 240% of it per Essence.
   await expect(page.locator('.character-stats')).toContainText('HP55Attack18');
   await page.getByRole('tab', { name: 'Kit' }).click();
   await expect(page.locator('.character-cards').first()).toContainText('Deal 14 + 43 × Essence damage.');

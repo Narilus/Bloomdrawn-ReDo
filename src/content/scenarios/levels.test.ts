@@ -57,8 +57,8 @@ describe('a levelled character', () => {
     }
   }
 
-  // An Attacker at level 21, no ascension: C2's 21 Attack × (1 + 8 × 0.359) is 81, and her Strike 200% of it, 162; C2's 50 HP × (1 + 5 × 0.359) is 140.
-  scenario('growth starts from her stats at her dupe level: Virelle at C2 and level 21 has Attack 81', {
+  // An Attacker at level 21, no ascension: P2's 21 Attack × (1 + 8 × 0.359) is 81, and her Strike 200% of it, 162; P2's 50 HP × (1 + 5 × 0.359) is 140.
+  scenario('growth starts from her stats at her dupe level: Virelle at P2 and level 21 has Attack 81', {
     party: BANNER,
     dupes: { virelle: 2 },
     levels: { virelle: 21 },

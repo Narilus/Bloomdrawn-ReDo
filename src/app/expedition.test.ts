@@ -286,17 +286,17 @@ describe('card rewards', () => {
 
   it("a run fields its party at the dupe levels it began with: fights, max HP and card numbers (M5.4)", () => {
     const party = ['virelle', 'isadora', 'kibane', 'hester'];
-    // Leonora isn't fielded and Isadora is at C0, so neither is kept.
+    // Leonora isn't fielded and Isadora is at P0, so neither is kept.
     const exp = { ...startExpedition(3, party, M3_EXPEDITION, registry.motifs, { dupes: { virelle: 2, kibane: 5, isadora: 0, leonora: 3 } }), board: createBoard(row({ kind: 'entrance' }, HOUND), '0,0') };
     expect(exp.dupes).toEqual({ virelle: 2, kibane: 5 });
     const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
     expect(combat.members.map((m) => m.dupes)).toEqual([2, undefined, 5, undefined]);
-    // C2 adds 5 to Virelle's 45 and to Kibane's 50.
+    // P2 adds 5 to Virelle's 45 and to Kibane's 50.
     expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([210, 210]);
-    // Thorn Spur deals 150% of Attack twice: 27 at C0 (Attack 18), 31 at C2 (21).
+    // Thorn Spur deals 150% of Attack twice: 27 at P0 (Attack 18), 31 at P2 (21).
     const spur = { card: 'virelle.thorn-spur', owner: 'virelle' };
     expect([runCardText(spur, registry), runCardText(spur, registry, {}, exp)]).toEqual(['Deal 27 damage twice.', 'Deal 31 damage twice.']);
-    // A run at C0 has no levels to keep, so its save is as before.
+    // A run at P0 has no levels to keep, so its save is as before.
     expect(startExpedition(3, party, M3_EXPEDITION, registry.motifs)).not.toHaveProperty('dupes');
   });
 
@@ -308,7 +308,7 @@ describe('card rewards', () => {
     expect([exp.dupes, exp.levels, exp.ascensions]).toEqual([{ virelle: 2 }, { virelle: 21 }, { virelle: 2 }]);
     const combat = startCombat(expeditionFight(go(exp, '1,0').at(-1)!, registry), registry).state;
     expect(combat.members.map((m) => [m.dupes, m.level, m.ascensions])).toEqual([[2, 21, 2], [undefined, undefined, undefined], [undefined, undefined, undefined], [undefined, undefined, undefined]]);
-    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: C2's 50 HP becomes 190, its Attack 21 becomes 115,
+    // An Attacker at level 21 with two ascensions grows by 0.559 of her role's multipliers: P2's 50 HP becomes 190, its Attack 21 becomes 115,
     // so Thorn Spur's 150% of Attack is 172.
     expect([expeditionMaxHp(exp, registry), combat.party.maxHp]).toEqual([190 + 50 + 50 + 55, 190 + 50 + 50 + 55]);
     expect(runCardText({ card: 'virelle.thorn-spur', owner: 'virelle' }, registry, {}, exp)).toBe('Deal 172 damage twice.');

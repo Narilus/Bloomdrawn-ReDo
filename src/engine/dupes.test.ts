@@ -40,12 +40,12 @@ const duped: CharacterDef = {
   passive: { triggers: [{ on: 'turnEnd', do: [testGain('passive', 1)] }] },
   ultimate: { name: 'Ult', text: 'Gain.', effects: [testGain('ult', 1)], transcended: { text: 'Gain more.', effects: [testGain('ult', 2)] } },
   dupes: [
-    { text: 'C1', passive: { text: 'Gain {triggers.0.do.0.amount}.', triggers: [{ on: 'turnEnd', do: [testGain('passive', 2)] }] } },
-    { text: 'C2', stats: { hp: 22, attack: 4, defense: 3 } },
-    { text: 'C3', cards: { 'test.duped.mark': 'test.duped.mark-plus' } },
-    { text: 'C4', ultimate: { name: 'Ult', text: 'Gain lots.', effects: [testGain('ult', 10)], transcended: { text: 'Gain most.', effects: [testGain('ult', 20)] } } },
+    { text: 'P1', passive: { text: 'Gain {triggers.0.do.0.amount}.', triggers: [{ on: 'turnEnd', do: [testGain('passive', 2)] }] } },
+    { text: 'P2', stats: { hp: 22, attack: 4, defense: 3 } },
+    { text: 'P3', cards: { 'test.duped.mark': 'test.duped.mark-plus' } },
+    { text: 'P4', ultimate: { name: 'Ult', text: 'Gain lots.', effects: [testGain('ult', 10)], transcended: { text: 'Gain most.', effects: [testGain('ult', 20)] } } },
     {
-      text: 'C5',
+      text: 'P5',
       passive: {
         triggers: [{ on: 'turnEnd', do: [testGain('passive', 2)] }],
         modifiers: [
@@ -79,22 +79,22 @@ function play(state: CombatState, cardId: string, owner = 'm0') {
 const statusesOf = (state: CombatState) => Object.fromEntries(state.enemies[0]!.statuses.map((s) => [s.status, s.stacks]));
 
 describe('dupe levels', () => {
-  it('apply in order from C1, each replacing what it sets, and C0 is the character as written', () => {
+  it('apply in order from P1, each replacing what it sets, and P0 is the character as written', () => {
     expect(withDupes(duped, 0)).toBe(duped);
     expect(withDupes(duped, 1).passive?.triggers?.[0]?.do).toEqual([testGain('passive', 2)]);
     expect([withDupes(duped, 1).stats, withDupes(duped, 2).stats]).toEqual([duped.stats, { hp: 22, attack: 4, defense: 3 }]);
     expect([withDupes(duped, 2).cards, withDupes(duped, 3).cards]).toEqual([duped.cards, ['test.duped.hit', 'test.duped.mark-plus']]);
-    // C5 restates the passive, so its own replaces C1's; C2's stats and C4's ultimate stay.
+    // P5 restates the passive, so its own replaces P1's; P2's stats and P4's ultimate stay.
     expect(withDupes(duped, 5)).toMatchObject({ stats: { hp: 22 }, ultimate: { text: 'Gain lots.' }, passive: duped.dupes![4]!.passive });
   });
 
-  it('a member keeps her level in combat state; at C0 there is none, so older states read the same', () => {
+  it('a member keeps her level in combat state; at P0 there is none, so older states read the same', () => {
     expect(begin(0).members[0]).not.toHaveProperty('dupes');
     expect(begin(3).members[0]).toMatchObject({ character: 'test.duped', dupes: 3 });
     expect(characterOf(begin(3).members[0]!, registry)?.cards).toEqual(['test.duped.hit', 'test.duped.mark-plus']);
   });
 
-  it('C2 stats set the party HP and her numbers; C3 deals the variant in place of the card', () => {
+  it('P2 stats set the party HP and her numbers; P3 deals the variant in place of the card', () => {
     const [c1, c2] = [begin(1), begin(2)];
     expect(c2.party.maxHp - c1.party.maxHp).toBe(2);
     expect(c1.enemies[0]!.hp - play(c1, 'test.duped.hit').enemies[0]!.hp).toBe(4);
@@ -106,7 +106,7 @@ describe('dupe levels', () => {
     ]);
   });
 
-  it('C1 changes what her passive does and says; C4 her ultimate, Transcended too', () => {
+  it('P1 changes what her passive does and says; P4 her ultimate, Transcended too', () => {
     const ended = (level: number) => run(begin(level), { type: 'endTurn' }).resources.passive;
     expect([ended(0), ended(1)]).toEqual([1, 2]);
     expect(describeKit(begin(1), 'm0', registry).passive).toBe('Gain 2.');

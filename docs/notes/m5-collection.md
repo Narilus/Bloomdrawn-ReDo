@@ -40,9 +40,9 @@ DESIGN.md fixes the rules: SSR 3%, SR 15%, R 82%; hard pity at pull 30; no soft 
 
 ## Dupes and Pollen
 
-- A duplicate SSR adds a dupe level, C1 to C5: the passive, then stats, a Flavour card, the ultimate, and a capstone (DESIGN.md). C0 is complete; a dupe only deepens what is there. Dupe effects are drafted per character with the kits, for the owner's approval.
+- A duplicate SSR adds a dupe level, P1 to P5: the passive, then stats, a Flavour card, the ultimate, and a capstone (DESIGN.md). P0 is complete; a dupe only deepens what is there. Dupe effects are drafted per character with the kits, for the owner's approval.
 - **The starters never enter a banner.** Their dupes will be bought with **Pollen**, a currency every pull gives (a lost 50/50 more), spent in a shop on specific characters' dupes, so they don't pollute the Standard pool (owner).
-- **The shop is the Profile Shop, after M5.** In M5, Pollen and dupe overflow past C5 are counted in the profile and shown, then carried into the shop when it arrives (owner). So the starters stay at C0 in M5, and only the banner four need dupe effects now.
+- **The shop is the Profile Shop, after M5.** In M5, Pollen and dupe overflow past P5 are counted in the profile and shown, then carried into the shop when it arrives (owner). So the starters stay at P0 in M5, and only the banner four need dupe effects now.
 - **My call: one currency.** DESIGN.md converts overflow into "profile-shop currency"; I make that Pollen too, so overflow and pulls feed the same thing. Placeholders: 1 Pollen per pull, 40 per overflow dupe.
 
 ## Levels, Memories and ascension
@@ -62,14 +62,14 @@ DESIGN.md fixes the rules: SSR 3%, SR 15%, R 82%; hard pity at pull 30; no soft 
 
 ## The banner characters
 
-Virelle (Flesh, striker), Isadora (Rapture, spender and scaler), Kibane (Spirit, Ritual nuker) and Hester (Unbound, debuff and control) get full kits like the starters: five cards, a passive, an ultimate and a Transcend, plus two reward cards each and C1–C5 dupes, from the directions in DESIGN.md. They're drafted in their own note (`docs/notes/banner-kits.md`) for the owner's approval, and they get sprites and portraits through `npm run art` for him to pick. Gloomdrawn's Virelle and Kibane art can stand in until then.
+Virelle (Flesh, striker), Isadora (Rapture, spender and scaler), Kibane (Spirit, Ritual nuker) and Hester (Unbound, debuff and control) get full kits like the starters: five cards, a passive, an ultimate and a Transcend, plus two reward cards each and P1–P5 dupes, from the directions in DESIGN.md. They're drafted in their own note (`docs/notes/banner-kits.md`) for the owner's approval, and they get sprites and portraits through `npm run art` for him to pick. Gloomdrawn's Virelle and Kibane art can stand in until then.
 
 ## Tasks
 
 1. **M5.1 Roster and party select:** the profile owns characters; choose four before a run; the working names on screen.
 2. **M5.2 The banner four:** kits and dupe effects approved, then as content with scenario tests; their art.
 3. **M5.3 The gacha:** the character banner and its Focus (28 Oct), rates and pity, SR and R as materials, the audit history, the banner screen, Pollen counted.
-4. **M5.4 Dupes:** C1–C5 for the banner four, and overflow into Pollen.
+4. **M5.4 Dupes:** P1–P5 for the banner four, and overflow into Pollen.
 5. **M5.5 Levels, Memories and ascension:** Ducats, Memories, level up with refunds, ascension materials, banking them at run end.
 6. **M5.6 Collection (owner playtest):** pull, build up a character, and take a party of your choosing through a run.
 

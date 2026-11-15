@@ -3,9 +3,9 @@
 // where they are at Depth 1, and the reward multiplier (docs/notes/m6-depth.md). A measuring tool, not a test.
 // Run `npm run lab:depth -- [--seeds 20] [--fights 6] [--elites 2]`.
 //
-// - Average build: every member at the depth's level (40 at most) with every ascension due made, C0,
+// - Average build: every member at the depth's level (40 at most) with every ascension due made, P0,
 //   no ultimates, the lab's simple player, averaged over the four parties.
-// - Strong build: the same at C2 with ultimates fired. A single-Domain team needs four of a Domain and
+// - Strong build: the same at P2 with ultimates fired. A single-Domain team needs four of a Domain and
 //   the game has two each, so the three Domain pairs stand in for it.
 // - Enemy HP (with Shield and heals) follows the Average build's damage, and enemy damage its HP, each
 //   as a share of level 1, so every depth plays like Depth 1. Past 40 enemy HP climbs until a Strong

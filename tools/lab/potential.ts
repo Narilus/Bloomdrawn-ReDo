@@ -37,7 +37,7 @@ import {
   type Registry,
   type UltimateDef,
 } from '../../src/engine/index.ts';
-import { c2, variant } from '../../src/content/define.ts';
+import { p2, variant } from '../../src/content/define.ts';
 import { tentacleVolley } from '../../src/content/domains/rapture.ts';
 import { poison } from '../../src/content/statuses/poison.ts';
 import * as agathe from '../../src/content/characters/agathe.ts';
@@ -86,7 +86,7 @@ const hymn = (start: number, extra: Triggers = []) => passive(A_HYMN, [{ on: 'co
 const A_ULT = agathe.agathe.ultimate!;
 const agatheA: DupeDef[] = [
   level('First Hymn gives 2 Tentacles.', { passive: hymn(2) }),
-  c2(agathe.agathe.stats),
+  p2(agathe.agathe.stats),
   level('Censer Rite costs 2.', { cards: { [agathe.censerRite.id]: keep(variant(agathe.censerRite, 3, { cost: 2 })).id } }),
   level('Hymn gains 5 Tentacles.', { ultimate: ultimate(A_ULT, [gainResource('tentacles', 5)], [gainResource('tentacles', 5), tentacleVolley()]) }),
   level('First Hymn also gains 1 Tentacle each turn.', { passive: hymn(2, [{ on: 'turnStart', do: [gainResource('tentacles', 1)] }]) }),
@@ -100,7 +100,7 @@ const strikeB = keep(
 );
 const agatheB: DupeDef[] = [
   level('First Hymn also gives the party Shield equal to twice her Defense.', { passive: hymn(1, shieldHymn) }),
-  c2(agathe.agathe.stats),
+  p2(agathe.agathe.stats),
   level('Call the Choir always draws its card.', { cards: { [agathe.callTheChoir.id]: choirB.id } }),
   level('Hymn of the Hundred Arms also triggers a volley before it Transcends.', { ultimate: ultimate(A_ULT, [gainResource('tentacles', 3), tentacleVolley()], A_ULT.transcended!.effects) }),
   level('Her Strike triggers a volley with 4 or more Tentacles.', { cards: { [agathe.strike.id]: strikeB.id } }),
@@ -121,14 +121,14 @@ const bloom = (x: number, poisonToo: boolean) => [
 const budC3 = keep(variant(maelia.budCutting, 3, { cost: 2 }));
 const maeliaA: DupeDef[] = [
   level("Midwife's Hands gives 2 more.", { passive: hands(2) }),
-  c2(maelia.maelia.stats),
+  p2(maelia.maelia.stats),
   level('Bud Cutting costs 2.', { cards: { [maelia.budCutting.id]: budC3.id } }),
   level('Birthing Bloom heals and Shields half as much again.', { ultimate: ultimate(M_ULT, bloom(1.5, false), bloom(1.5, true)) }),
   level("Midwife's Hands works every time.", { passive: hands(2, true) }),
 ];
 const maeliaB: DupeDef[] = [
   level("Midwife's Hands also gives the party Shield equal to her Defense.", { passive: hands(1, false, [gainShield(stat('defense'))]) }),
-  c2(maelia.maelia.stats),
+  p2(maelia.maelia.stats),
   level('Bud Cutting costs 2.', { cards: { [maelia.budCutting.id]: budC3.id } }),
   level('Birthing Bloom heals and Shields half as much again.', { ultimate: ultimate(M_ULT, bloom(1.5, false), bloom(1.5, true)) }),
   level('When Embryo is consumed, every enemy gains Poison for each.', {
@@ -152,7 +152,7 @@ const candleC3 = keep(variant(anthe.votiveCandle, 3, { effects: [candle(3)] }));
 const candleC5 = keep({ ...variant(anthe.votiveCandle, 5, { effects: [candle(3), gainResource('essence', cardHeld())], text: 'Lab.' }) });
 const antheA: DupeDef[] = [
   level('Vigil gives 3 Essence per Ritual.', { passive: vigil(3) }),
-  c2(anthe.anthe.stats),
+  p2(anthe.anthe.stats),
   level('Votive Candle deals 3 per Essence.', { cards: { [anthe.votiveCandle.id]: candleC3.id } }),
   level('Hours Kept gives 2 per turn held.', { ultimate: ultimate(T_ULT, [gainResource('essence', mul(2, heldTurns('ritual')))], [gainResource('essence', mul(3, heldTurns('ritual')))]) }),
   // In the game this would be a trigger on any Ritual she plays; her only starting Ritual is Votive Candle.
@@ -161,7 +161,7 @@ const antheA: DupeDef[] = [
 const shieldVigil = [gainShield(mul(stat('defense'), handCount('ritual')))];
 const antheB: DupeDef[] = [
   level('Vigil also gives the party Shield equal to her Defense for each Ritual in hand.', { passive: vigil(2, shieldVigil) }),
-  c2(anthe.anthe.stats),
+  p2(anthe.anthe.stats),
   level('Votive Candle costs 4.', { cards: { [anthe.votiveCandle.id]: keep(variant(anthe.votiveCandle, 3, { cost: 4 })).id } }),
   level('Hours Kept also draws 1 card.', {
     ultimate: ultimate(T_ULT, [gainResource('essence', heldTurns('ritual')), draw(1)], [gainResource('essence', mul(2, heldTurns('ritual'))), draw(1)]),
@@ -175,7 +175,7 @@ const tab = (n: number, cheaper = false) => passive(L_TAB, [{ on: 'manaDebtPaid'
 const L_ULT = leonora.leonora.ultimate!;
 const leonoraA: DupeDef[] = [
   level('Running Tab draws 2.', { passive: tab(2) }),
-  c2(leonora.leonora.stats),
+  p2(leonora.leonora.stats),
   level('Promissory Note gains 5 Mana.', { cards: { [leonora.promissoryNote.id]: keep(variant(leonora.promissoryNote, 3, { effects: [gainMana(5), manaDebt(2)] })).id } }),
   level('Balance the Books also draws 2.', { ultimate: ultimate(L_ULT, [gainMana(manaSpent()), draw(2)], [gainMana(manaSpent()), draw(4)]) }),
   level('Running Tab also makes the next card cost 1 less.', { passive: tab(2, true) }),

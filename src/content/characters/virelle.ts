@@ -14,7 +14,7 @@ import {
   targetStacks,
   transcend,
 } from '../../engine/index.ts';
-import { c2, card, character, variant } from '../define.ts';
+import { p2, card, character, variant } from '../define.ts';
 import { bleed } from '../statuses/bleed.ts';
 
 // Banner kit reviewed by the owner (docs/notes/banner-kits.md). Numbers are placeholders for tuning.
@@ -78,7 +78,7 @@ const thousandCuts = (times: number) => ({
   transcended: { text: cutsText, effects: cuts(times + 2) },
 });
 
-// Opened Vein at C0 gives 1 Embryo, at C1 2; at C5 Bleed on enemies also stops losing stacks as it ticks.
+// Opened Vein at P0 gives 1 Embryo, at P1 2; at P5 Bleed on enemies also stops losing stacks as it ticks.
 const openedVein = (embryo: number, capstone = false) => ({
   name: 'Opened Vein', scope: 'combat' as const,
   // The 10% lives in her Strike's damage; the passive is where the owner placed it, so it's explained here.
@@ -90,7 +90,7 @@ const openedVein = (embryo: number, capstone = false) => ({
   ...(capstone && { modifiers: [{ value: 'stackLoss' as const, step: 'outgoingMul' as const, amount: 0, status: bleed.id, on: 'enemies' as const }] }),
 });
 
-// C3: the detonation is three times the Bleed (docs/notes/banner-kits.md).
+// P3: the detonation is three times the Bleed (docs/notes/banner-kits.md).
 export const openTheWoundC3 = variant(openTheWound, 3, {
   effects: [damage(mul(1.67, stat('attack'))), ifConsume('embryo', 2, [loseHp(mul(3, targetStacks(bleed)), { target: 'chosen' })])],
   text: 'Deal {effects.0.amount} damage. Consume {effects.1.amount} Embryo: the enemy loses HP equal to three times its Bleed.',
@@ -108,7 +108,7 @@ export const virelle = character({
   ultimate: thousandCuts(5),
   dupes: [
     { text: 'Opened Vein gains 2 Embryo.', passive: openedVein(2) },
-    c2(STATS),
+    p2(STATS),
     { text: "Open the Wound's detonation is three times the Bleed.", cards: { [openTheWound.id]: openTheWoundC3.id } },
     { text: 'Thousand Cuts hits 2 more times.', ultimate: thousandCuts(7) },
     { text: 'Bleed on enemies no longer loses a stack when it ticks, whoever applied it.', passive: openedVein(2, true) },

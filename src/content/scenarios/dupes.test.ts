@@ -6,10 +6,10 @@ import { scenario } from '../testing/scenario.ts';
 // The banner four's dupe levels (docs/notes/banner-kits.md, reviewed by the owner 25 Oct), one
 // scenario or more per level. A level holds every level below it, so each scenario sets the one it
 // tests and leans on the rest only where it says so. The party is one per Domain: Virelle (Attack 18,
-// Defense 6), Isadora (15, 9), Kibane (15, 9) and Hester (12, 12), 200 HP at C0, against 600-HP
+// Defense 6), Isadora (15, 9), Kibane (15, 9) and Hester (12, 12), 200 HP at P0, against 600-HP
 // training dummies. Mana starts at 6. Card numbers are ratios of her stats (docs/notes/m6-scaling.md),
-// so C2's raised stats (+3 Attack, +3 Defense) raise them all. Rapture's damage per hit starts at 80%
-// of the party's average Attack: 12 (12.6 with Isadora at C2).
+// so P2's raised stats (+3 Attack, +3 Defense) raise them all. Rapture's damage per hit starts at 80%
+// of the party's average Attack: 12 (12.6 with Isadora at P2).
 const BANNER = ['virelle', 'isadora', 'kibane', 'hester'];
 const DUMMY = 'enemy.training-dummy';
 const BIG = 'enemy.practice-dummy';
@@ -20,14 +20,14 @@ const HOUND = 'enemy.bloom-rib-hound';
 const marks = (state: CombatState) => state.enemies.map((e) => e.statuses.map((s) => [s.status.replace('status.', ''), s.stacks]));
 const manaSpent = (play: { before: CombatState; after: CombatState }) => play.before.mana - play.after.mana;
 
-describe('C2: +10% HP, rounded, and +1 Attack and +1 Defense, for everyone', () => {
+describe('P2: +10% HP, rounded, and +1 Attack and +1 Defense, for everyone', () => {
   const HP: Record<string, number> = { virelle: 45, isadora: 50, kibane: 50, hester: 55 };
-  // Strike and Defense at C2's stats: Virelle 200% of Attack 21 and 350% of Defense 9; Isadora and
+  // Strike and Defense at P2's stats: Virelle 200% of Attack 21 and 350% of Defense 9; Isadora and
   // Kibane 220% of 18 and 267% of 12; Hester 250% of 15 and 225% of 15; each rounded down.
   const SHIELD: Record<string, number> = { virelle: 31, isadora: 32, kibane: 32, hester: 33 };
   const STRIKE: Record<string, number> = { virelle: 42, isadora: 39, kibane: 39, hester: 37 };
   for (const who of BANNER) {
-    scenario(`${who} at C2: Strike and Defense read her raised Attack and Defense, and the party has her extra HP`, {
+    scenario(`${who} at P2: Strike and Defense read her raised Attack and Defense, and the party has her extra HP`, {
       party: BANNER,
       dupes: { [who]: 2 },
       setup: { hand: [`${who}.strike`, `${who}.defense`] },
@@ -39,7 +39,7 @@ describe('C2: +10% HP, rounded, and +1 Attack and +1 Defense, for everyone', () 
 });
 
 describe('Virelle', () => {
-  scenario('C1: the first Bleed each turn gives 2 Embryo', {
+  scenario('P1: the first Bleed each turn gives 2 Embryo', {
     party: BANNER,
     dupes: { virelle: 1 },
     setup: { hand: ['virelle.suture-cut'] },
@@ -48,12 +48,12 @@ describe('Virelle', () => {
     check: ({ state }) => expect(describeKit(state, 'm0', registry).passive).toMatch(/^The first time each turn you apply Bleed, gain 2 Embryo\./),
   });
 
-  scenario("C3: Open the Wound is dealt in its C3 form, and its detonation is three times the Bleed", {
+  scenario("P3: Open the Wound is dealt in its P3 form, and its detonation is three times the Bleed", {
     party: BANNER,
     dupes: { virelle: 3 },
     setup: { hand: ['virelle.suture-cut', 'virelle.open-the-wound-c3'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.open-the-wound-c3', target: 0 }],
-    // With C2's Attack 21. Suture Cut: 31 damage and 31 Bleed (150% each), and C1's 2 Embryo. Open the Wound: 35 damage (167%), then 3 × 31.
+    // With P2's Attack 21. Suture Cut: 31 damage and 31 Bleed (150% each), and P1's 2 Embryo. Open the Wound: 35 damage (167%), then 3 × 31.
     expect: { enemyHp: [600 - 31 - 35 - 93], resources: { embryo: 0 } },
     check: ({ state }) => {
       const cards = [...state.piles.draw, ...state.piles.hand, ...state.piles.discard].map((c) => c.card);
@@ -61,18 +61,18 @@ describe('Virelle', () => {
     },
   });
 
-  scenario('C4: Thousand Cuts hits 7 times, each applying 1 Bleed', {
+  scenario('P4: Thousand Cuts hits 7 times, each applying 1 Bleed', {
     party: BANNER,
     dupes: { virelle: 4 },
     enemies: [BIG],
     setup: { hand: [], gauges: { virelle: 100 } },
     play: [{ ultimate: 'virelle' }],
-    // 150% of Attack 21 (C2) a hit, 31, and 17% of it in Bleed, 3.
+    // 150% of Attack 21 (P2) a hit, 31, and 17% of it in Bleed, 3.
     expect: { enemyHp: [BIG_HP - 7 * 31] },
     check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 7 * 3]]]),
   });
 
-  scenario('C4: Transcended, Thousand Cuts hits 9 times', {
+  scenario('P4: Transcended, Thousand Cuts hits 9 times', {
     party: BANNER,
     dupes: { virelle: 4 },
     enemies: [BIG],
@@ -83,18 +83,18 @@ describe('Virelle', () => {
     check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 31 + 9 * 3]]]),
   });
 
-  scenario('C5: Bleed on enemies deals its damage at end of turn and keeps every stack', {
+  scenario('P5: Bleed on enemies deals its damage at end of turn and keeps every stack', {
     party: BANNER,
     dupes: { virelle: 5 },
     enemies: [BIG, BIG],
     setup: { hand: ['virelle.suture-cut', 'virelle.thorn-spur-bloom'] },
     play: [{ card: 'virelle.suture-cut', target: 0 }, { card: 'virelle.thorn-spur-bloom' }, { endTurn: true }, { endTurn: true }],
-    // Suture Cut 31 damage (Attack 21, C2); Bleed 62 and 31 (31 from each card) tick twice each, staying put.
+    // Suture Cut 31 damage (Attack 21, P2); Bleed 62 and 31 (31 from each card) tick twice each, staying put.
     expect: { enemyHp: [BIG_HP - 31 - 62 - 62, BIG_HP - 31 - 31] },
     check: ({ state }) => expect(marks(state)).toEqual([[['bleed', 62]], [['bleed', 31]]]),
   });
 
-  scenario('C4, for comparison: Bleed still loses a stack each tick', {
+  scenario('P4, for comparison: Bleed still loses a stack each tick', {
     party: BANNER,
     dupes: { virelle: 4 },
     enemies: [BIG],
@@ -105,16 +105,16 @@ describe('Virelle', () => {
 });
 
 describe('Isadora', () => {
-  scenario("C1: Rapt gives +2 damage per hit for the turn's first volley from a card", {
+  scenario("P1: Rapt gives +2 damage per hit for the turn's first volley from a card", {
     party: BANNER,
     dupes: { isadora: 1 },
     setup: { hand: ['isadora.ecstatic-spin'], resources: { tentacles: 1 } },
     play: [{ card: 'isadora.ecstatic-spin' }],
-    // Damage per hit starts at 12, and Rapt (40% of Attack 15) answers once the card has resolved, as at C0.
+    // Damage per hit starts at 12, and Rapt (40% of Attack 15) answers once the card has resolved, as at P0.
     expect: { resources: { potency: 18 }, enemyHp: [600 - 12 - 12] },
   });
 
-  scenario('C3: Ecstatic Spin costs 3', {
+  scenario('P3: Ecstatic Spin costs 3', {
     party: BANNER,
     dupes: { isadora: 3 },
     setup: { hand: ['isadora.ecstatic-spin-c3'], resources: { tentacles: 1 } },
@@ -122,7 +122,7 @@ describe('Isadora', () => {
     check: ({ plays }) => expect(manaSpent(plays[0]!)).toBe(3),
   });
 
-  scenario('C4: Dance of Bells also gains 2 Tentacles, and they hit twice at end of turn', {
+  scenario('P4: Dance of Bells also gains 2 Tentacles, and they hit twice at end of turn', {
     party: BANNER,
     dupes: { isadora: 4 },
     setup: { hand: [], gauges: { isadora: 100 } },
@@ -130,7 +130,7 @@ describe('Isadora', () => {
     expect: { resources: { tentacles: 2 }, enemyHp: [600 - 2 * 12 * 2] },
   });
 
-  scenario('C4: Transcended, the 2 Tentacles come before its volley, which hits twice', {
+  scenario('P4: Transcended, the 2 Tentacles come before its volley, which hits twice', {
     party: BANNER,
     dupes: { isadora: 4 },
     enemies: [BIG],
@@ -140,7 +140,7 @@ describe('Isadora', () => {
     expect: { resources: { tentacles: 5 }, enemyHp: [BIG_HP - 36 - 190] },
   });
 
-  scenario('C5: at the end of each turn, Tentacles attack twice', {
+  scenario('P5: at the end of each turn, Tentacles attack twice', {
     party: BANNER,
     dupes: { isadora: 5 },
     setup: { hand: [], resources: { tentacles: 2 } },
@@ -149,7 +149,7 @@ describe('Isadora', () => {
     check: ({ state }) => expect(state.resources['potency']).toBeCloseTo(12.6),
   });
 
-  scenario('C4, for comparison: once', {
+  scenario('P4, for comparison: once', {
     party: BANNER,
     dupes: { isadora: 4 },
     setup: { hand: [], resources: { tentacles: 2 } },
@@ -159,7 +159,7 @@ describe('Isadora', () => {
 });
 
 describe('Kibane', () => {
-  scenario('C1: playing a Ritual charges her ultimate by 15', {
+  scenario('P1: playing a Ritual charges her ultimate by 15', {
     party: BANNER,
     dupes: { kibane: 1 },
     setup: { hand: ['kibane.foxfire-rite'] },
@@ -167,8 +167,8 @@ describe('Kibane', () => {
     expect: { gauges: { kibane: 15 } },
   });
 
-  // At C2's Attack 18: 18 × (0.8 + 2.4 × 3).
-  scenario('C3: Foxfire Rite deals 80% of her Attack plus 240% per Essence', {
+  // At P2's Attack 18: 18 × (0.8 + 2.4 × 3).
+  scenario('P3: Foxfire Rite deals 80% of her Attack plus 240% per Essence', {
     party: BANNER,
     dupes: { kibane: 3 },
     setup: { hand: ['kibane.foxfire-rite-c3'], resources: { essence: 3 } },
@@ -177,7 +177,7 @@ describe('Kibane', () => {
     check: ({ plays }) => expect(describeCardLive(plays[0]!.before.piles.hand[0]!, plays[0]!.before, registry, { keywords: false })).toBe('Deal 144 damage.'),
   });
 
-  scenario("C4: Kyubi's Judgement deals 200% of her Attack plus 200% per Essence consumed to every enemy", {
+  scenario("P4: Kyubi's Judgement deals 200% of her Attack plus 200% per Essence consumed to every enemy", {
     party: BANNER,
     dupes: { kibane: 4 },
     enemies: [BIG, BIG],
@@ -187,7 +187,7 @@ describe('Kibane', () => {
     expect: { enemyHp: [BIG_HP - 216, BIG_HP - 216], resources: { essence: 0 } },
   });
 
-  scenario('C4: Transcended, 200% plus 280% per Essence consumed', {
+  scenario('P4: Transcended, 200% plus 280% per Essence consumed', {
     party: BANNER,
     dupes: { kibane: 4 },
     enemies: [BIG],
@@ -196,7 +196,7 @@ describe('Kibane', () => {
     expect: { enemyHp: [BIG_HP - (2 + 2.8 * 5) * 18] },
   });
 
-  scenario("C5: after Kyubi's Judgement, half the Essence consumed comes back, rounded down", {
+  scenario("P5: after Kyubi's Judgement, half the Essence consumed comes back, rounded down", {
     party: BANNER,
     dupes: { kibane: 5 },
     enemies: [BIG],
@@ -207,7 +207,7 @@ describe('Kibane', () => {
 });
 
 describe('Hester', () => {
-  scenario("C1: Hunter's Patience gives 3 Vulnerable", {
+  scenario("P1: Hunter's Patience gives 3 Vulnerable", {
     party: BANNER,
     dupes: { hester: 1 },
     enemies: [HOUND],
@@ -216,7 +216,7 @@ describe('Hester', () => {
     check: ({ state }) => expect(marks(state)).toEqual([[['vulnerable', 3]]]),
   });
 
-  scenario('C3: Weighted Net costs 1', {
+  scenario('P3: Weighted Net costs 1', {
     party: BANNER,
     dupes: { hester: 3 },
     enemies: [HOUND],
@@ -228,7 +228,7 @@ describe('Hester', () => {
     },
   });
 
-  scenario('C4: The Snare Closes also applies 2 Vulnerable to every enemy', {
+  scenario('P4: The Snare Closes also applies 2 Vulnerable to every enemy', {
     party: BANNER,
     dupes: { hester: 4 },
     enemies: [HOUND, HOUND],
@@ -237,7 +237,7 @@ describe('Hester', () => {
     check: ({ state }) => expect(marks(state)).toEqual([[['stun', 1], ['vulnerable', 2]], [['stun', 1], ['vulnerable', 2]]]),
   });
 
-  scenario('C4: Transcended, 2 Vulnerable and then 2 Weak', {
+  scenario('P4: Transcended, 2 Vulnerable and then 2 Weak', {
     party: BANNER,
     dupes: { hester: 4 },
     enemies: [HOUND],
@@ -246,7 +246,7 @@ describe('Hester', () => {
     check: ({ state }) => expect(marks(state)).toEqual([[['vulnerable', 4], ['stun', 1], ['weak', 2]]]),
   });
 
-  scenario('C5: the Weak and Vulnerable she applies last a turn longer, her cards say so, and others are untouched', {
+  scenario('P5: the Weak and Vulnerable she applies last a turn longer, her cards say so, and others are untouched', {
     party: BANNER,
     dupes: { hester: 5 },
     enemies: [DUMMY, DUMMY],
@@ -259,7 +259,7 @@ describe('Hester', () => {
     },
   });
 
-  scenario("C5: Hunter's Patience gives 4 Vulnerable, and Weighted Net's Weak outlasts the Hound's turn", {
+  scenario("P5: Hunter's Patience gives 4 Vulnerable, and Weighted Net's Weak outlasts the Hound's turn", {
     party: BANNER,
     dupes: { hester: 5 },
     enemies: [HOUND],

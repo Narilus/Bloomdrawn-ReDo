@@ -224,6 +224,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - M6.8 signed off (owner, 15 Nov).
 - Shop screen (owner, 15 Nov): Pollen shows top right beside Ducats and Purified Blooms. Draft the starters' Potential levels next.
 - Starter Potential, first draft (owner, 15 Nov): Agathe's looks far too strong for Rapture, and the extra Tentacles, Embryo and Essence across Agathe, Maelia and Anthe may be excessive; model it in the lab (`npm run lab:potential`, `docs/notes/starter-kits.md`).
+- Starter Potential (owner, 15 Nov): the lighter set B for Agathe, Maelia and Anthe; Leonora keeps her draft (`docs/notes/starter-kits.md`). Revisit Isadora's P5. Docs and code say P0–P5 for dupe levels, not C0–C5.
 
 ## Open
 - Gear at launch or later (recommendation: later).

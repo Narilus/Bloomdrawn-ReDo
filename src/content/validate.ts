@@ -148,7 +148,7 @@ export function validateContent(modules: Modules): { registry: Registry; errors:
       else if (base?.slot !== card.slot) fail(at, card.id, `a variant keeps the slot of "${card.variantOf}"`);
       if (!owner.dupes?.some((d) => d.cards?.[card.variantOf!] === card.id)) fail(at, card.id, `no dupe level of ${card.owner} deals it`);
     } else if (!card.generated && !owner.cards.includes(card.id)) fail(at, card.id, `not listed in ${card.owner}'s cards`);
-    // A dupe's variant may leave its slot's band (Weighted Net costs 1 at C3; owner, 25 Oct).
+    // A dupe's variant may leave its slot's band (Weighted Net costs 1 at P3; owner, 25 Oct).
     if (card.slot && card.variantOf === undefined) {
       const [min, max] = COST_BANDS[card.slot];
       if (card.cost < min || card.cost > max) {

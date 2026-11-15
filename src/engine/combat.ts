@@ -55,7 +55,7 @@ export interface CombatSetup {
   partyHp?: number;
   /** Ultimate gauges carried in from the run, in slot order; default 0. */
   gauges?: number[];
-  /** Dupe levels from the profile, in slot order; default 0 (C0). */
+  /** Dupe levels from the profile, in slot order; default 0 (P0). */
   dupes?: number[];
   /** Levels from the profile, in slot order; default 1. */
   levels?: number[];

@@ -131,14 +131,14 @@ const VARIANTS: Record<string, (r: Registry) => Registry> = {
       const again = c.effects.filter((call) => call.op === 'applyStatus');
       return { ...c, effects: [...c.effects, { op: 'ifConsume', resource: 'embryo', amount: 2, branch: again }] };
     }),
-  // Bleed never loses stacks (Virelle's C5, at C0).
+  // Bleed never loses stacks (Virelle's P5, at P0).
   'bleed-stays': (r) => {
     const bleed = r.statuses['status.bleed'];
     if (!bleed?.triggers) return r;
     const triggers = bleed.triggers.map((t) => ({ ...t, do: t.do.filter((call) => call.op !== 'reduceStacks') }));
     return { ...r, statuses: { ...r.statuses, 'status.bleed': { ...bleed, triggers } } };
   },
-  // Kyubi's Judgement gives back half the Essence it consumed (her C5 draft, at C0).
+  // Kyubi's Judgement gives back half the Essence it consumed (her P5 draft, at P0).
   'keep-half': (r) => {
     const kibane = r.characters['kibane'];
     const keep = (calls: CardDef['effects']) =>

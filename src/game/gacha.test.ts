@@ -126,7 +126,7 @@ describe('the gacha', () => {
     expect(pull({ ...START, pulls: 9 }, BANNER, 10, 1)).toEqual({ ok: false, reason: 'This needs 10 Purified Blooms.' });
   });
 
-  it('an SSR gains the character, then dupe levels C1 to C5, then Pollen', () => {
+  it('an SSR gains the character, then dupe levels P1 to P5, then Pollen', () => {
     // Pity one short of the guarantee makes the next pull an SSR; a one-character banner makes it hers.
     const solo: BannerDef = { ...BANNER, pool: ['a'] };
     let profile: Profile = { ...START, pulls: 7 };

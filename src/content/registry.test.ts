@@ -95,10 +95,10 @@ describe('content registry', () => {
   });
 
   it("dupe levels: a variant takes one of her cards' place, dealt by her dupe, in the same slot; a dupe swaps only her cards for their variants", () => {
-    // A variant may leave its slot's cost band (Weighted Net costs 1 at C3).
+    // A variant may leave its slot's cost band (Weighted Net costs 1 at P3).
     const cheap = variant(kit.flavourA, 3, { cost: 1 });
     const dupes = (cards: Record<string, string>, modifiers = {}) =>
-      character({ ...tester, cards: Object.values(kit), dupes: [{ text: 'C1', cards, passive: { name: 'P', scope: 'combat', text: 'P.', ...modifiers } }] });
+      character({ ...tester, cards: Object.values(kit), dupes: [{ text: 'P1', cards, passive: { name: 'P', scope: 'combat', text: 'P.', ...modifiers } }] });
     const ok = validateContent({ './characters/tester.ts': { ...kit, cheap, tester: dupes({ [kit.flavourA.id]: cheap.id }) }, './domains/flesh.ts': { flesh } });
     expect(ok.errors).toEqual([]);
     const orphan = variant(kit.flavourB, 3, {});

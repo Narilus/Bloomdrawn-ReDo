@@ -1,12 +1,12 @@
 # Banner kits: draft for owner review (M5.2)
 
-Status: **reviewed by the owner, 25 Oct** (his answers are folded in below; the choices left to me are marked "my call"). Built from the kit directions in DESIGN.md ("Kits and looks") and shaped like the approved starter kits (`docs/notes/starter-kits.md`). Numbers are placeholders for tuning, and Spirit's are to be checked against Rapture before he plays them (below).
+Status: **reviewed by the owner, 25 Oct** (his answers are folded in below; the choices left to me are marked "my call"). Built from the kit directions in DESIGN.md ("Kits and looks") and shaped like the approved starter kits (`docs/notes/starter-kits.md`). Dupe levels are Potential, P1–P5 (called C1–C5 when this was written; owner, 15 Nov); card variant IDs keep the old suffix (`virelle.open-the-wound-c3`). Numbers are placeholders for tuning, and Spirit's are to be checked against Rapture before he plays them (below).
 
 ## Shared rules (as for the starters)
 
 - Strike: 1 Mana, deal 6 + Attack damage. Defense: 1 Mana, gain 5 + Defense Shield. Both charge their owner's ultimate by 10.
 - Transcend: exhausts, charges its owner's ultimate by 35, and upgrades the ultimate for the combat.
-- Dupes: C1 changes the passive, C2 the stats, C3 a Flavour card, C4 the ultimate, and C5 is a capstone (DESIGN.md). **C2 is one rule for everyone for now:** +10% HP (rounded) and +1 Attack and +1 Defense. It will likely be revised as characters gain features and stats (owner).
+- Dupes: P1 changes the passive, P2 the stats, P3 a Flavour card, P4 the ultimate, and P5 is a capstone (DESIGN.md). **P2 is one rule for everyone for now:** +10% HP (rounded) and +1 Attack and +1 Defense. It will likely be revised as characters gain features and stats (owner).
 
 ## Stats (placeholder)
 
@@ -35,7 +35,7 @@ All four together have 200 HP (the starters have 210).
 
 Bleed stacks on her cards were tripled and her Strike became a combo in the Flesh tuning (owner, 27 Oct; below). Her Bleed feeds her Embryo, and the Embryo spent detonates it, so she runs her own loop and grows with Maelia. The detonation leaves the Bleed in place (owner). Her ultimate hits every enemy, for some wow factor, since ultimates fire rarely (owner).
 
-**Dupes:** C1, Opened Vein gains 2 Embryo. C3, Open the Wound's detonation is three times its Bleed. C4, Thousand Cuts hits 2 more times. C5, Bleed on enemies no longer loses a stack when it ticks, whoever applied it (owner).
+**Dupes:** P1, Opened Vein gains 2 Embryo. P3, Open the Wound's detonation is three times its Bleed. P4, Thousand Cuts hits 2 more times. P5, Bleed on enemies no longer loses a stack when it ticks, whoever applied it (owner).
 
 ## Isadora, the Ecstatic: Rapture, spender and scaler
 
@@ -52,7 +52,7 @@ Bleed stacks on her cards were tripled and her Strike became a combo in the Fles
 
 Agathe builds the Tentacle count; Isadora raises the damage per hit and spends it in volleys, so the two multiply. A volley that hits twice fires as two volleys, one after the other: every hit takes whichever enemy has the lowest HP at that moment, so the second pass picks its targets from the HP the first left, and passes the dead by.
 
-**Dupes:** C1, Rapt gives +2. C3, Ecstatic Spin costs 3. C4, Dance of Bells also gains 2 Tentacles. C5, at the end of each turn, Tentacles attack twice.
+**Dupes:** P1, Rapt gives +2. P3, Ecstatic Spin costs 3. P4, Dance of Bells also gains 2 Tentacles. P5, at the end of each turn, Tentacles attack twice.
 
 ## Kibane, the Nine-Tailed: Spirit, Ritual nuker
 
@@ -70,7 +70,7 @@ Agathe builds the Tentacle count; Isadora raises the damage per hit and spends i
 
 Her ultimate is Spirit's one exception: it spends the shared Essence, Anthe's included, so firing it is a real choice in a Spirit party. Foxfire Rite scales harder than Votive Candle but starts weaker. Her passive pays her for holding, so she grows her own nukes and rewards the delay; with Anthe beside her, each held Ritual gives 4 Essence a turn (owner; doubled from 2 after the lab, 27 Oct). Her ultimate hits every enemy, as Virelle's does (owner).
 
-**Dupes:** C1, Foxfire charges 15. C3, Foxfire Rite deals more per Essence (drafted as 4 + 6 × against the old 5 ×; in M5.4 12 × against today's 10 ×, the same fifth more; the owner kept it for now, 29 Oct). C4, Kyubi's Judgement deals +2 per Essence consumed. C5, after Kyubi's Judgement, gain back half the Essence consumed (rounded down).
+**Dupes:** P1, Foxfire charges 15. P3, Foxfire Rite deals more per Essence (drafted as 4 + 6 × against the old 5 ×; in M5.4 12 × against today's 10 ×, the same fifth more; the owner kept it for now, 29 Oct). P4, Kyubi's Judgement deals +2 per Essence consumed. P5, after Kyubi's Judgement, gain back half the Essence consumed (rounded down).
 
 ## Hester, the Snare-Warden (w): Unbound, debuff and control
 
@@ -87,7 +87,7 @@ Her ultimate is Spirit's one exception: it spends the shared Essence, Anthe's in
 
 Elites and bosses resist control, so on them Delay and Stun land as Falter, and her passive still pays. She makes any team's damage land harder, as Unbound should. The Snare uses the Stun status the game already has (a badge on the enemy, its intent skipped); an enemy that should retry a lost action does so in its own intent cycle (owner).
 
-**Dupes:** C1, Hunter's Patience gives 3 Vulnerable. C3, Weighted Net costs 1. C4, The Snare Closes also applies 2 Vulnerable to all enemies. C5, the Weak and Vulnerable she applies last 1 turn longer.
+**Dupes:** P1, Hunter's Patience gives 3 Vulnerable. P3, Weighted Net costs 1. P4, The Snare Closes also applies 2 Vulnerable to all enemies. P5, the Weak and Vulnerable she applies last 1 turn longer.
 
 ## Spirit against Rapture
 
@@ -95,7 +95,7 @@ The owner's concern: Spirit gives up hand space for a delayed payoff, so play fo
 
 A rough count with the drafted numbers agrees. By turn 6 a Rapture pair might hold about 13 Tentacles at 6 damage per hit: about 78 every end of turn, and 156 more from an Ecstatic Spin. A Spirit pair holding two Rituals might have about 20 Essence, so a Foxfire Rite deals about 104. Spirit's numbers look too low, but this count ignores the draw, the hand limit and short fights, so it can't set numbers.
 
-**Plan (my call):** once the four are content, a lab script (`tools/lab/`) plays seeded fights against a large dummy with a simple player, for a Flesh, a Rapture and a Spirit pair, each with Leonora and Hester. Spirit is played two ways, firing Rituals at once and holding them until cheap. It reports damage per turn over turns 1–10 and damage per card played. I bring you the curves and proposed numbers before you play them. Levers if Spirit trails: more damage per Essence on Rituals, Kibane's ultimate keeping some Essence at C0, or more Essence for held Rituals. It's a measuring tool, not a test.
+**Plan (my call):** once the four are content, a lab script (`tools/lab/`) plays seeded fights against a large dummy with a simple player, for a Flesh, a Rapture and a Spirit pair, each with Leonora and Hester. Spirit is played two ways, firing Rituals at once and holding them until cheap. It reports damage per turn over turns 1–10 and damage per card played. I bring you the curves and proposed numbers before you play them. Levers if Spirit trails: more damage per Essence on Rituals, Kibane's ultimate keeping some Essence at P0, or more Essence for held Rituals. It's a measuring tool, not a test.
 
 **Lab results (26 Oct, `npm run lab`, 200 seeds, ultimates fired when charged).** Mean damage dealt; the full per-turn tables come from the command. The player is simple and the dummy never attacks, so read the shape, not the exact numbers.
 
@@ -164,10 +164,10 @@ With every change, Flesh reaches about 40% of Rapture against one enemy and abou
 None of these branch on a character.
 - **Ultimates that hit every enemy** (Thousand Cuts, Kyubi's Judgement): `damage` to all enemies, as Long Vigil already does. No ultimate needs a target yet. **Later (owner):** an ultimate can be aimed like a card, with the arrow from its actor and Esc to cancel.
 - **A target's stacks** in formulas (Open the Wound reads the enemy's Bleed; `stacks` reads only the source's today).
-- **A turn-long volley multiplier** (Dance of Bells, Isadora's C5): each volley fires again, choosing targets afresh.
+- **A turn-long volley multiplier** (Dance of Bells, Isadora's P5): each volley fires again, choosing targets afresh.
 - **Trigger filters and events:** by status (Bleed applied), by keyword (a Ritual played), a volley a card triggered, and an enemy's skipped or Faltered action.
 - **Repeated hits** on `damage` (Thousand Cuts, Thorn Spur), so the text reads "5 times".
-- **A rule against a status losing stacks** (Virelle's C5): a modifier on Bleed's stack loss while she is in the party. Re-adding a stack after the tick would count as applying Bleed and set off Opened Vein, so it's a modifier, not a trigger.
+- **A rule against a status losing stacks** (Virelle's P5): a modifier on Bleed's stack loss while she is in the party. Re-adding a stack after the tick would count as applying Bleed and set off Opened Vein, so it's a modifier, not a trigger.
 - **Dupe levels** pick a character's passive, card, stats and ultimate variants (M5.4); the other C5s (a second Tentacle attack, longer statuses) become triggers or modifiers.
 
 ## Art
@@ -176,7 +176,7 @@ Sprites and portraits through `npm run art` once the kits are content, from the 
 
 ## Owner's answers (25 Oct)
 
-1. The kits are right as directions, with these changes: Virelle's C5 stops all Bleed on enemies from losing stacks, whoever applied it. Isadora's double volleys, the end-of-turn attack included, are fine if built correctly, with each pass choosing targets by HP. Kibane's passive also gives 1 Essence per Ritual held at end of turn. Check that Spirit competes with Rapture's snowball, by simulation or by checking damage growth across turns.
+1. The kits are right as directions, with these changes: Virelle's P5 stops all Bleed on enemies from losing stacks, whoever applied it. Isadora's double volleys, the end-of-turn attack included, are fine if built correctly, with each pass choosing targets by HP. Kibane's passive also gives 1 Essence per Ritual held at end of turn. Check that Spirit competes with Rapture's snowball, by simulation or by checking damage growth across turns.
 2. Aiming an ultimate like a card can come later (the arrow from the actor, or the party, with Esc to cancel). Kibane's and Virelle's ultimates hit every enemy instead.
 3. Keep the Bleed.
 4. Stun: the intent is lost. An enemy that wants to retry handles it in its own intent cycle.

@@ -25,9 +25,9 @@ Status: **answered by the owner, 31 Oct** (his answers are in his `docs/notes/m6
 **Decided (owner, 31 Oct):** stats are the multiplier (`docs/notes/m6-scaling.md`), replacing options A and B. Card numbers are ratios of stats, stats grow ×5 to ×9 by role, and crit joins the party's stats. The first model, before that change, found a level 40 party dealt only 13% more than level 1.
 
 **Retuned (owner, 31 Oct: "completely retune all level 1 stats so you can reach expected targets"; every initial stat is a placeholder).**
-- **Characters:** level-1 Attack and Defense are tripled. Damage then outweighs HP enough that elite and Boss pools grow toward the owner's anchors, and Shield keeps pace with harder-hitting enemies. HP is unchanged, since party HP at 40 already meets its anchor. C2 gives +3 Attack and +3 Defense, keeping its share. Card ratios are unchanged.
+- **Characters:** level-1 Attack and Defense are tripled. Damage then outweighs HP enough that elite and Boss pools grow toward the owner's anchors, and Shield keeps pace with harder-hitting enemies. HP is unchanged, since party HP at 40 already meets its anchor. P2 gives +3 Attack and +3 Defense, keeping its share. Card ratios are unchanged.
 - **Enemies:** level-1 HP, Shield, heals and damage are retuned per enemy. The Average build plays the real encounters at Depth 1 against the targets, and single hits are capped near half the party's HP. The training dummy goes from 60 HP to 600, since it is only a lab and test target.
-- **The curve, in the engine:** HP is 1 + 0.13 × (level − 1) + 0.86 × ascensions due; damage is 1 + 0.1144 × (level − 1) + 0.639 × ascensions due. The steps land at 10, 20 and 30. Past 40, HP rises 9.6% of level 40's a level. Damage rises 4.8%: half HP's rate, a placeholder, since the fit gives almost nothing (a C2 Strong build has barely more HP).
+- **The curve, in the engine:** HP is 1 + 0.13 × (level − 1) + 0.86 × ascensions due; damage is 1 + 0.1144 × (level − 1) + 0.639 × ascensions due. The steps land at 10, 20 and 30. Past 40, HP rises 9.6% of level 40's a level. Damage rises 4.8%: half HP's rate, a placeholder, since the fit gives almost nothing (a P2 Strong build has barely more HP).
 
 Real encounters, the Average build at the depth's level (`npm run lab:depth`):
 

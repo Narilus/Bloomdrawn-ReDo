@@ -18,7 +18,7 @@ export const RATES: Record<Rarity, number> = { ssr: 0.03, sr: 0.15, r: 0.82 };
 /** The pull that is always an SSR, counting from the last one. */
 export const HARD_PITY = 30;
 export const TEN_PULL = 10;
-/** Dupe levels C1 to C5; another copy past C5 becomes Pollen (m5-collection.md). */
+/** Dupe levels P1 to P5; another copy past P5 becomes Pollen (m5-collection.md). */
 export const MAX_DUPES = 5;
 /** The chance an SSR is the Focus, and the losses after which the next SSR is. */
 export const FOCUS_CHANCE = 0.5;
@@ -41,7 +41,7 @@ export interface PullRecord {
   copy?: CopyOutcome | 'kept';
   /** Everything the pull gave, by item, Pollen included. */
   items: Record<string, number>;
-  /** An SSR's dupe handling: a new character, the dupe level reached, or past C5 into Pollen. */
+  /** An SSR's dupe handling: a new character, the dupe level reached, or past P5 into Pollen. */
   dupe?: 'new' | 'overflow' | number;
   /** The Focus when pulled; none on the old Standard banner's pulls. */
   focus?: string;
@@ -201,7 +201,7 @@ export function pull(profile: Profile, banner: BannerDef, count: 1 | typeof TEN_
 }
 
 /**
- * A copy of an SSR character joins the profile: new, a dupe level up to C5, or past C5 Pollen into
+ * A copy of an SSR character joins the profile: new, a dupe level up to P5, or past P5 Pollen into
  * `items`. Changes the tables it is given and says which.
  */
 export function gainCopy(character: string, owned: string[], dupes: Record<string, number>, items: Record<string, number>): 'new' | 'overflow' | number {
@@ -218,7 +218,7 @@ export type SelectResult = { ok: true; profile: Profile; dupe: 'new' | 'overflow
 
 /**
  * Spends an SSR selector (profile levels 25 and 50) on a character from the banner's pool, gained as
- * a pulled copy would be: new, a dupe level, or Pollen past C5. Pity, 50/50 losses and pull history
+ * a pulled copy would be: new, a dupe level, or Pollen past P5. Pity, 50/50 losses and pull history
  * are untouched (owner, 31 Oct), and it is no pull, so it gives no profile EXP.
  */
 export function useSelector(profile: Profile, banner: BannerDef, character: string): SelectResult {

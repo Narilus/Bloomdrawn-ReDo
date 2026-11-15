@@ -2,7 +2,7 @@ import type { CharacterDef, Registry, Stats, WeaponDef, WeaponStep } from './def
 import { critOf, CRIT_RATE_MAX, withGrowth } from './levels.ts';
 import type { Member } from './state.ts';
 
-// Dupe levels (DESIGN.md, "Character dupes"): C1 to C5 each replace parts of a character from that
+// Dupe levels (DESIGN.md, "Character dupes"): P1 to P5 each replace parts of a character from that
 // level up. Combat reads a member's character only through `characterOf`, so her dupe level and her
 // level and ascensions (`levels.ts`) apply everywhere: stats, passive, ultimate and the cards dealt.
 

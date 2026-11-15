@@ -28,7 +28,7 @@ Bloomdrawn has no real-money transactions of any kind, and nothing in the game e
 - **Visible odds.** At the banner, the pity count is always on screen, and rates, guarantee state, pool contents and pull history are one click away (Rules, History, Switch; owner, 29 Oct).
 - **No walls.** No energy, stamina or daily caps. Progression systems create goals and challenges, never gates on play time.
 - **No pressure.** No expiring offers, streak punishments or login chores. A character never becomes permanently unobtainable.
-- **C0 is complete.** A character at zero dupes fully performs her role. Dupes deepen an investment; they never fix a broken kit.
+- **P0 is complete.** A character at zero dupes fully performs her role. Dupes deepen an investment; they never fix a broken kit.
 - **Honest previews.** Every mechanical consequence (a Symptom's card, a Collapsing tile, an upgrade's cost) is shown before the player commits.
 
 ## Combat
@@ -317,7 +317,7 @@ Bloomdrawn keeps a Morimens-style RPG layer: characters level, ascend, take dupe
 | EXP bank | EXP items in three tiers accumulate passively from all play; low tiers cover early levels and refund excess | A newly pulled character can be levelled at once, with no regrinding |
 | Ascension | Every 10 levels needs Domain materials plus money, and each gives 1 pull (owner, 30 Oct) | Build checks and challenges between bands |
 | Skill levels | Skill items level each personal card, the ultimate and the passive individually; levels raise numbers only, with mechanical changes reserved for bespoke kit designs | Targeted investment in a favourite |
-| Character dupes | Potential, P1–P5 (owner, 15 Nov; the screens still say C until the character page pass): passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
+| Character dupes | Potential, P1–P5 (owner, 15 Nov; called C1–C5 before): passive, stats, a Flavour card, ultimate, a capstone. Overflow converts to profile-shop currency | Pull sink; vertical investment |
 | Weapons | Equipped in team presets, one under each member, and a weapon at most once per preset, so each weapon's effect counts once in a team; one weapon may sit in any number of presets, and a run copies its preset's weapons at the start (owner, 15 Nov). SSR, SR or R; a main stat (a share of the wielder's stat, so no weapon levels, on trial: owner, 14 Nov) and an effect; duplicates reinforce it from +0 to +5. Signature weapons are SSR (`docs/notes/weapons.md`) | Pull sink; stats and build options |
 | Gear | Six slots, set bonuses, main stats, substats, rerolls | Deep build tuning; recommended for a later phase |
 | Profile level | Earned by play (fights, Trials, first Trial clears, SSR pulls), never by EXP items; 1 to 50 on an exponential curve. Profile levels 5, 10 and 15 allow the ascensions at 10, 20 and 30, and each level gives 1 pull (owner, 31 Oct) | Paces raw power behind real play |
@@ -370,7 +370,7 @@ Tutorial completion (enough for an early multi-pull), run milestones, boss clear
 
 ### Audit
 
-Every pull records banner, Focus, pity and the 50/50 loss count before and after, the result, dupe handling and the pull count before and after. The banner screen warns when the Focus is at C5, since further copies become Pollen (owner, 28 Oct). The full history is in-game, behind History. Gacha randomness uses its own seeded stream and never touches run randomness.
+Every pull records banner, Focus, pity and the 50/50 loss count before and after, the result, dupe handling and the pull count before and after. The banner screen warns when the Focus is at P5, since further copies become Pollen (owner, 28 Oct). The full history is in-game, behind History. Gacha randomness uses its own seeded stream and never touches run randomness.
 
 ## Identity and art direction
 

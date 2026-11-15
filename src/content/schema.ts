@@ -99,7 +99,7 @@ export const schemas = {
     cards: z.array(id),
     passive: passive.optional(),
     ultimate: ultimate.optional(),
-    // C1 to C5 (DESIGN.md).
+    // P1 to P5 (DESIGN.md).
     dupes: z.array(dupe).max(5).optional(),
   }),
   enemy: z.strictObject({

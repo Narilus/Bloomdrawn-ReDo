@@ -154,7 +154,7 @@ export const selectedText = (id: string, result: Extract<SelectResult, { ok: tru
   result.dupe === 'new'
     ? `${characterName(id)} joins the roster.`
     : result.dupe === 'overflow'
-      ? `${characterName(id)} is past C5: ${result.pollen} Pollen instead.`
+      ? `${characterName(id)} is past P5: ${result.pollen} Pollen instead.`
       : `${characterName(id)} reaches C${result.dupe}.`;
 
 /** Choosing the banner character an SSR Selector gives: a tile each, then Take. */
@@ -179,7 +179,7 @@ export function SelectorPicker({ profile, busy, onTake, onCancel }: { profile: P
           </button>
         ))}
       </div>
-      <p className="banner-dialog-note">A pulled copy: new, a dupe level, or Pollen past C5. Pity is untouched.</p>
+      <p className="banner-dialog-note">A pulled copy: new, a dupe level, or Pollen past P5. Pity is untouched.</p>
       <div className="panel-buttons">
         <button className="ghost" onClick={onCancel}>
           Cancel

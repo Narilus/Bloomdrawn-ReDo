@@ -42,7 +42,7 @@ describe('saves', () => {
     expect(boot.profile.run).toEqual({ id: 'run-1', elites: 0 });
   });
 
-  it('a run at dupe levels resumes at them, mid-fight with its variant cards; a level outside C1 to C5 is refused (M5.4)', async () => {
+  it('a run at dupe levels resumes at them, mid-fight with its variant cards; a level outside P1 to P5 is refused (M5.4)', async () => {
     const { saves, adapter } = setup();
     const party = ['virelle', 'isadora', 'kibane', 'hester'];
     const save: RunSave = { id: 'run-1', seed: 4, exp: { ...startExpedition(4, party, M3_EXPEDITION, registry.motifs, { dupes: { kibane: 3 } }), phase: 'fight', fightSeed: 9 } };
