@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.9 Profile Shop: built with the starters' Potential, waiting on the owner's feel check (M6.8 signed off 15 Nov)
+**Current task:** M6.10 Accessibility and audio (M6.9 signed off 15 Nov)
 
 ## Milestones
 
@@ -397,11 +397,11 @@ Designed in `docs/notes/weapons.md` (accepted 15 Nov): eight signature SSR weapo
 _Built 15 Nov. Engine: `WeaponDef`, a member's `weapon` (main stat in `characterOf`, effect held like a passive via `weaponOf`), modifier scope filters and an `on: 'party'` side (`src/engine/modifiers.ts`). Content: `src/content/weapons/`. Profile: `src/game/weapons.ts` (one entry per weapon with spares, reinforce, salvage, what a pulled copy becomes, the preset rules), save v12 (v11's copies migrate). Screens: `src/app/Roster.tsx` (character page, party select's weapon sub-slots), `src/app/Inventory.tsx`, `src/app/Banner.tsx`, `src/app/Weapons.tsx`. Lab: `npm run lab:weapons`. Tests: `src/content/scenarios/weapons.test.ts` (every weapon), `src/game/weapons.test.ts`, `src/save/profile.test.ts`, `e2e/weapons.spec.ts`. Rebuilt 15 Nov in presets with one entry per weapon, as the owner decided; the weapon picker previews the chosen weapon; every weapon has the owner's picked icon (`src/assets/weapons`, `npm run art -- gen <weapon> --stem icon`, `pick --icon`). Signed off 15 Nov; the SR-versus-signature gap is left for the balance pass._
 **Done when:** every weapon passive has a scenario test, tests prove the weapon banner's pity is its own and the new pull results, and e2e equips a weapon.
 
-### M6.9 Profile Shop
+### M6.9 Profile Shop ✅ (signed off by the owner 15 Nov)
 Character dupes for 100 Pollen each, the starters' included.
 **Done when:** tests prove a purchase and its refusals, and e2e buys a dupe.
 
-_Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potential level for `DUPE_PRICE` Pollen, refusing a character not owned, one at her last level or without levels, and a short purse), the save action in `src/app/saves.ts`, and the Shop screen (`src/app/Shop.tsx`), from a new Shop item on the main menu, laid out like the inventory: owned characters as tiles, the chosen one's Potential levels and price, Buy after a confirm. Tests: `src/game/shop.test.ts`, `src/app/saves.test.ts`, `e2e/shop.spec.ts`. Pollen moved top right beside Ducats and Blooms (owner, 15 Nov). The starters' Potential levels (`docs/notes/starter-kits.md`, "Potential": the lighter set for Agathe, Maelia and Anthe, Leonora's draft; owner, 15 Nov) are content now, proved in `src/content/scenarios/potential.test.ts` and sold in the Shop. Isadora's P5 is now Rapt on every volley from a card (owner, 15 Nov)._
+_Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potential level for `DUPE_PRICE` Pollen, refusing a character not owned, one at her last level or without levels, and a short purse), the save action in `src/app/saves.ts`, and the Shop screen (`src/app/Shop.tsx`), from a new Shop item on the main menu, laid out like the inventory: owned characters as tiles, the chosen one's Potential levels and price, Buy after a confirm. Tests: `src/game/shop.test.ts`, `src/app/saves.test.ts`, `e2e/shop.spec.ts`. Pollen moved top right beside Ducats and Blooms (owner, 15 Nov). The starters' Potential levels (`docs/notes/starter-kits.md`, "Potential": the lighter set for Agathe, Maelia and Anthe, Leonora's draft; owner, 15 Nov) are content now, proved in `src/content/scenarios/potential.test.ts` and sold in the Shop. Isadora's P5 is now Rapt on every volley from a card (owner, 15 Nov). Signed off 15 Nov, with the starters' Potential and Isadora's P5._
 
 ### M6.10 Accessibility and audio
 Options: text size, reduced motion and animation speed; keyword tooltips; a keyboard and screen-reader pass. CC0 sound effects for cards, hits and the UI, with volume and mute.
