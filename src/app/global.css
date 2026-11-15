@@ -1829,7 +1829,8 @@ kbd {
   color: var(--antique-gold);
 }
 
-.currency-bloom .icon {
+.currency-bloom .icon,
+.currency-pollen .icon {
   color: var(--flesh-pink);
 }
 
@@ -2098,26 +2099,6 @@ kbd {
 
 .shop-tile[aria-pressed='true'] {
   box-shadow: 0 0 0 4px var(--antique-gold);
-}
-
-.shop-purse {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 22px;
-}
-
-.shop-purse .item-icon {
-  width: 36px;
-  height: 36px;
-}
-
-.shop-purse strong {
-  font-family: var(--serif);
-  font-size: 28px;
-  color: var(--antique-gold);
-  font-variant-numeric: lining-nums;
 }
 
 .shop-detail {

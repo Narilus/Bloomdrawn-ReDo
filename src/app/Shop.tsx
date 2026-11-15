@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { ITEMS } from '../content/items.ts';
 import { registry } from '../content/registry.ts';
 import type { Profile } from '../game/profile.ts';
 import { buyDupe, DUPE_PRICE, type ShopResult } from '../game/shop.ts';
-import { Icon } from './icons.tsx';
 import { Currencies } from './MainMenu.tsx';
 import { Art } from './Roster.tsx';
 import { SideList } from './SideList.tsx';
@@ -28,7 +26,6 @@ export function Shop({ profile: initial, owned, onBuy, onBack }: ShopProps) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string>();
-  const pollen = profile.items?.pollen ?? 0;
   const id = chosen && owned.includes(chosen) ? chosen : owned[0];
   const def = id ? registry.characters[id] : undefined;
   const level = id ? (profile.dupes?.[id] ?? 0) : 0;
@@ -53,14 +50,9 @@ export function Shop({ profile: initial, owned, onBuy, onBack }: ShopProps) {
 
   return (
     <div className="inventory-screen shop-screen">
-      <Currencies profile={profile} />
+      <Currencies profile={profile} pollen />
       <nav className="inventory-nav" aria-label="Shop">
         <h2 className="panel-title">Shop</h2>
-        <p className="shop-purse" aria-label={`Pollen: ${pollen.toLocaleString('en-GB')}`}>
-          <Icon name={ITEMS.pollen!.icon} className={`item-icon item-${ITEMS.pollen!.icon}`} />
-          <span>Pollen</span>
-          <strong>{pollen.toLocaleString('en-GB')}</strong>
-        </p>
         <SideList label="Wares" items={[['dupes', 'Character dupes']] as const} chosen="dupes" onChoose={() => undefined} />
         <button className="ghost side-back" onClick={onBack}>
           Back

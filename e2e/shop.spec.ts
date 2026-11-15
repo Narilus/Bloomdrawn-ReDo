@@ -14,7 +14,8 @@ test('the shop sells a dupe for 100 Pollen after a confirm, and refuses past wha
   await page.getByRole('button', { name: 'Shop' }).click();
   // The four starters and Virelle.
   await expect(page.locator('.shop-tile')).toHaveCount(5);
-  const purse = page.locator('.shop-purse strong');
+  const purse = page.locator('.currency-pollen strong');
+  await expect(page.locator('.currency-pollen')).toHaveAttribute('data-tip', 'Pollen');
   await expect(purse).toHaveText('150');
 
   await page.getByRole('button', { name: 'Virelle, P0' }).click();

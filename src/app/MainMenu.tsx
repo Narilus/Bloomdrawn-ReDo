@@ -12,9 +12,10 @@ import type { Boot } from './saves.ts';
 // Banners, Inventory, Options and Exit down the left, the chosen team's front character on the
 // right, Ducats and Purified Blooms top right, and the profile level badge top left (M6.6). Expedition and Banners open a sub-menu in place.
 
-/** Ducats and Purified Blooms (or just one) as icons and numbers, each named in a tooltip, top right. */
-export function Currencies({ profile, only }: { profile: Profile; only?: 'ducat' | 'bloom' }) {
+/** Ducats and Purified Blooms (or just one) as icons and numbers, each named in a tooltip, top right; Pollen beside them where it's spent (the Shop). */
+export function Currencies({ profile, only, pollen = false }: { profile: Profile; only?: 'ducat' | 'bloom'; pollen?: boolean }) {
   const counts = [
+    ...(pollen ? [{ icon: 'pollen', name: 'Pollen', n: profile.items?.pollen ?? 0 }] : []),
     { icon: 'ducat', name: 'Ducats', n: profile.items?.money ?? 0 },
     { icon: 'bloom', name: `${BLOOM}s`, n: profile.pulls },
   ].filter((c) => !only || c.icon === only);
@@ -22,7 +23,7 @@ export function Currencies({ profile, only }: { profile: Profile; only?: 'ducat'
     <div className="currencies">
       {counts.map(({ icon, name, n }) => (
         <p key={icon} className={`currency currency-${icon}`} data-tip={name} tabIndex={0}>
-          <Icon name={icon} />
+          <Icon name={icon === 'pollen' ? ITEMS.pollen!.icon : icon} />
           <span className="sr-only">{name}</span>
           <strong>{n.toLocaleString('en-GB')}</strong>
         </p>
