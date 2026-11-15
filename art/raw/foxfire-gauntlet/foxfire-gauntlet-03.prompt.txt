@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a1dc86-6bb0-75e3-a761-1e6ad00a4476
+
+High-resolution pixel art item icon for a turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading, matching side-view battle sprites. Gothic fantasy horror. One single object and nothing else, whole, in a three-quarter view, centred in a square frame with empty margin on every side. One bold, simple silhouette that reads at small size, with fine detail inside it. Every join between materials is drawn as a seam: stitching, wrapped cord, petal collars, rivets. Any glow is soft and comes from the object's own petals, wax, pods or flame, with no glints or points of light. The object is solid and opaque. No hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Kibane's gauntlet: a clawed gauntlet of black iron with red-lacquered plates over the back of the hand and white cord bindings at the wrist, five long curved claw tips, two small pale-orange flames floating above the knuckles. Red, white and black iron palette. No petals, no flowers.
+
+Background: fully transparent.

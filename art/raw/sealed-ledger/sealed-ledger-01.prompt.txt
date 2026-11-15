@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a1dc84-29fc-7283-96bc-dfdd62ebb1c8
+
+High-resolution pixel art item icon for a turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading, matching side-view battle sprites. Gothic fantasy horror. One single object and nothing else, whole, in a three-quarter view, centred in a square frame with empty margin on every side. One bold, simple silhouette that reads at small size, with fine detail inside it. Every join between materials is drawn as a seam: stitching, wrapped cord, petal collars, rivets. Any glow is soft and comes from the object's own petals, wax, pods or flame, with no glints or points of light. The object is solid and opaque. No hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Leonora's ledger: a closed account book bound in oxblood leather with brass corner plates and a brass clasp, a round red wax seal pressed across the clasp, a narrow oxblood ribbon bookmark hanging from the pages. Oxblood and brass palette. The cover is plain, with no writing.
+
+Background: fully transparent.

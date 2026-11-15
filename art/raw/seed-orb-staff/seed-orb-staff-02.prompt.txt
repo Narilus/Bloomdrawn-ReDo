@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a1dc84-2a17-7400-872a-4263179304f7
+
+High-resolution pixel art item icon for a turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading, matching side-view battle sprites. Gothic fantasy horror. One single object and nothing else, whole, in a three-quarter view, centred in a square frame with empty margin on every side. One bold, simple silhouette that reads at small size, with fine detail inside it. Every join between materials is drawn as a seam: stitching, wrapped cord, petal collars, rivets. Any glow is soft and comes from the object's own petals, wax, pods or flame, with no glints or points of light. The object is solid and opaque. No hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Maelia's staff: the upper half of a tall brass staff, held diagonally, ending in a clear glass orb with a curled pink embryo bud inside; a collar of blush skin-petals with fine veins where the orb meets the brass; three small seed pods hang from the head on thin brass chains like rosary beads. Brass, blush and ivory palette.
+
+Background: fully transparent.

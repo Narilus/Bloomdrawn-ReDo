@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a1dc84-e1a5-7cb3-98e3-d544c570e12e
+
+High-resolution pixel art item icon for a turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading, matching side-view battle sprites. Gothic fantasy horror. One single object and nothing else, whole, in a three-quarter view, centred in a square frame with empty margin on every side. One bold, simple silhouette that reads at small size, with fine detail inside it. Every join between materials is drawn as a seam: stitching, wrapped cord, petal collars, rivets. Any glow is soft and comes from the object's own petals, wax, pods or flame, with no glints or points of light. The object is solid and opaque. No hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Agathe's censer: a green-gold brass censer hanging from a short chain, its domed lid pierced with rings of small circles, a thin ribbon of pale smoke rising from it; a bruise-violet cloth tassel tied to the chain; white chalk dust caked on its base; one small flesh-pink tentacle tip curling out of a vent in the lid. Bruise violet, green-gold and candle-wax ivory palette.
+
+Background: fully transparent.

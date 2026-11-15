@@ -1,0 +1,8 @@
+Background: transparent
+Codex thread: 01a1dc85-04ef-7091-a8f5-f46957e45d4f
+
+High-resolution pixel art item icon for a turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading, matching side-view battle sprites. Gothic fantasy horror. One single object and nothing else, whole, in a three-quarter view, centred in a square frame with empty margin on every side. One bold, simple silhouette that reads at small size, with fine detail inside it. Every join between materials is drawn as a seam: stitching, wrapped cord, petal collars, rivets. Any glow is soft and comes from the object's own petals, wax, pods or flame, with no glints or points of light. The object is solid and opaque. No hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
+
+Virelle's rapier: a slender duelling rapier, held diagonally, with a swept guard made of curved pink thorn-spurs, its grip wrapped in black surgical thread, one rose skin-petal flower with fine veins opening at the guard; a narrow steel blade. Rose, raw pink, arterial red and steel palette.
+
+Background: fully transparent.
