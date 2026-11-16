@@ -7,7 +7,7 @@ import { wieldedOf } from '../game/weapons.ts';
 import { DEPTH_MAX, depthOf, depthOpen } from '../game/depth.ts';
 import type { Growth } from '../game/expedition.ts';
 import { ASCENSIONS, MAX_LEVEL } from '../game/levels.ts';
-import { ownedCharacters, presetCost, runBanking, teamsOf, type Profile } from '../game/profile.ts';
+import { ownedCharacters, presetCost, runBanking, soundOf, teamsOf, type Profile } from '../game/profile.ts';
 import { trialFight } from '../game/trials.ts';
 import { TRIALS } from '../content/trials.ts';
 import type { RunSave } from '../save/run.ts';
@@ -21,6 +21,7 @@ import { PartySelect, Roster } from './Roster.tsx';
 import { Shop } from './Shop.tsx';
 import { TrialFight, Trials } from './Trials.tsx';
 import { browserSaves, type Boot } from './saves.ts';
+import { configureSound } from './sound.ts';
 
 // The game's screens (docs/notes/m4-run.md, "Save and resume"; m5-collection.md; m6-depth.md): the
 // main menu, and the run, party select, roster, banner, inventory, shop, options, profile page and Trials it leads to.
@@ -65,7 +66,11 @@ const ownedBy = (profile: Profile) =>
 export function Game() {
   const saves = browserSaves();
   const [screen, setScreen] = useState<Screen>({ kind: 'loading' });
-  const load = () => saves.boot(DEF).then((boot) => setScreen({ kind: 'title', boot }));
+  const load = () =>
+    saves.boot(DEF).then((boot) => {
+      configureSound(soundOf(boot.profile));
+      setScreen({ kind: 'title', boot });
+    });
   // Boot once: a second boot would find an unreadable run already banked and lose the notice.
   const booted = useRef(false);
   useEffect(() => {
@@ -237,6 +242,10 @@ export function Game() {
         onReset={async () => {
           await saves.reset();
           toTitle();
+        }}
+        onSound={async (settings) => {
+          configureSound(settings);
+          await saves.sound(settings);
         }}
         onBack={toTitle}
       />

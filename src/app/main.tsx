@@ -6,7 +6,10 @@ import '@fontsource/nunito-sans/800.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
+import { listenForClicks } from './sound.ts';
 import './global.css';
+
+listenForClicks();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root element');

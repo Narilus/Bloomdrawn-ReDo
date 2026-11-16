@@ -45,7 +45,7 @@ src/
   content/       typed definitions: characters, cards, statuses, relics, enemies, motifs
     registry.ts  builds and validates the content registry at startup and in tests
   stage/         PixiJS battlefield: actors, VFX, animation registry
-  app/           React: screens, hand, HUD, menus
+  app/           React: screens, hand, HUD, menus; sound (cues from events, played in step with the stage)
   save/          versioned save format, migrations, storage adapters
 tools/
   lab/           dev-only content lab (spawn any party, enemy, card)

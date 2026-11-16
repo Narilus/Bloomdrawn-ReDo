@@ -48,6 +48,8 @@ export interface Profile {
   trials?: Record<string, number>;
   /** What the profile page shows, counted from M6.6 on. */
   stats?: ProfileStats;
+  /** Volume (0–100; absent is `SOUND_VOLUME`) and mute, set in Options (M6.10). */
+  sound?: SoundSettings;
   /**
    * The run in progress: its ID and its banking tally, kept here as it changes so a run whose own
    * save can't be read can still bank its share (owner, 24 Oct).
@@ -56,6 +58,25 @@ export interface Profile {
 }
 
 /** Runs won and lost (abandoned counts as lost), and fights won by tier. Absent counts are 0. */
+export interface SoundSettings {
+  volume?: number;
+  muted?: true;
+}
+
+/** Volume out of 100 until the player sets one (a placeholder for the owner). */
+export const SOUND_VOLUME = 70;
+
+/** Keeps volume and mute, leaving defaults out of the save. */
+export function setSound(profile: Profile, settings: { volume: number; muted: boolean }): Profile {
+  const { sound: _s, ...rest } = profile;
+  const volume = Math.min(100, Math.max(0, Math.round(settings.volume)));
+  const next: SoundSettings = { ...(volume !== SOUND_VOLUME && { volume }), ...(settings.muted && { muted: true }) };
+  return Object.keys(next).length > 0 ? { ...rest, sound: next } : rest;
+}
+
+/** The profile's sound settings with defaults filled in. */
+export const soundOf = (profile: Profile) => ({ volume: profile.sound?.volume ?? SOUND_VOLUME, muted: profile.sound?.muted === true });
+
 export interface ProfileStats {
   won?: number;
   lost?: number;

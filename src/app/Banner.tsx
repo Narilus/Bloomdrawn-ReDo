@@ -23,6 +23,7 @@ import { MAX_STEP, SALVAGE, type WeaponSettings } from '../game/weapons.ts';
 import { Icon } from './icons.tsx';
 import { Currencies } from './MainMenu.tsx';
 import { Art } from './Roster.tsx';
+import { playCue } from './sound.ts';
 import { WeaponCard, WeaponGlyph } from './Weapons.tsx';
 
 // The banner screen (docs/notes/m5-collection.md, "The gacha"; owner, 29 Oct): the Focus large,
@@ -125,6 +126,7 @@ export function Banner({ banner, profile: initial, onPull, onFocus, onSettings, 
       setProfile(result.profile);
       setLast(result.records);
       setOpen('results');
+      playCue(result.records.some((r) => r.rarity === 'ssr') ? 'ssr' : 'pull');
     });
   // The box shows its new state at once; the saved profile follows.
   const tick = (key: keyof WeaponSettings, on: boolean) => {

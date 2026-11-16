@@ -2200,6 +2200,34 @@ kbd {
   color: var(--blush);
 }
 
+.options-panels {
+  display: grid;
+  gap: 20px;
+  align-self: start;
+}
+
+.options-sound {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.options-volume {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.options-volume input {
+  width: 360px;
+  accent-color: var(--antique-gold);
+}
+
+.options-volume output {
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+}
+
 .options-panel {
   width: 900px;
   align-self: start;

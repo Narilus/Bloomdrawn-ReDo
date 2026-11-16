@@ -168,6 +168,19 @@ describe('the profile save', () => {
     });
   });
 
+  it('keeps volume and mute; a v12 profile (M6.8) has the defaults (M6.10)', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, sound: { volume: 35, muted: true as const } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 12, contentVersion: 1, data: { ...NEW_PROFILE, runs: 4 } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, runs: 4 }, savedSchemaVersion: 12 });
+    // Mute is kept only when on; `false` is never written.
+    for (const bad of [{ sound: { volume: 101 } }, { sound: { volume: -1 } }, { sound: { volume: 2.5 } }, { sound: { muted: false } }]) {
+      await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad } as typeof NEW_PROFILE), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     for (const bad of [

@@ -17,6 +17,7 @@ import type { Battlefield } from '../stage/Battlefield.ts';
 import { StageView } from '../stage/StageView.tsx';
 import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
+import { cuesOf, playCues } from './sound.ts';
 import { DomainCounters, EnemyPlate, PartyBar, Pile, Portraits, RelicBar, UltimatePanel } from './Hud.tsx';
 
 interface Props {
@@ -54,7 +55,8 @@ export function Combat({ setup, resume, label, onChange, onEnd }: Props) {
 
   /** Plays a resolution on the field and steps the bars with its hits. Returns how long it runs. */
   const present = useCallback((before: Vitals, events: EngineEvent[], vitals: Vitals[], after: CombatState) => {
-    const { times, duration } = field.current?.play(events, after) ?? { times: [], duration: 0 };
+    const { times, starts, duration } = field.current?.play(events, after) ?? { times: [], starts: [], duration: 0 };
+    playCues(cuesOf(events, starts, times));
     // A new sequence finishes the previous one's bars at once, then steps through its own.
     for (const t of timers.current) window.clearTimeout(t);
     timers.current = [];

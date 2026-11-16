@@ -56,17 +56,18 @@ const profileSchema = z.strictObject({
   exp: count.optional(),
   claimed: z.int().min(2).max(PROFILE_MAX).optional(),
   stats: z.strictObject({ won: count, lost: count, fights: count, elites: count, bosses: count, trials: count }).partial().optional(),
+  sound: z.strictObject({ volume: z.int().min(0).max(100).optional(), muted: z.literal(true).optional() }).optional(),
   run: z.strictObject({ id, elites: z.int().nonnegative(), fights: z.int().positive().optional(), depth: z.int().min(2).max(DEPTH_MAX).optional() }).optional(),
 });
 
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
  * gained and their dupes, levels and ascensions, items, the Focus and the gacha, the team presets and
- * the run in progress's tally, profile EXP, claims and stats, the Trial tiers won, and weapons.
+ * the run in progress's tally, profile EXP, claims and stats, the Trial tiers won, weapons, and sound settings.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 12,
+  schemaVersion: 13,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -136,6 +137,8 @@ export const profileSave: SaveKind<Profile> = {
       });
       return { ...rest, ...(teams && { teams }), ...(Object.keys(weapons).length > 0 && { weapons }) };
     },
+    // v13 added sound settings (M6.10): a v12 profile has the defaults.
+    12: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;

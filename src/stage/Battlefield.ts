@@ -133,21 +133,26 @@ export class Battlefield {
    * Animates one command's events. Results are already final; this only shows them, in order:
    * end-of-turn beats (Tentacles, then damage over time, then each enemy action) play one after
    * another, never merged. Returns when each event lands (seconds from now, never decreasing),
-   * so the HUD can move its bars in step, and how long the whole sequence runs.
+   * so the HUD can move its bars in step, when each event's move starts (a lunge begins before it
+   * lands; sound plays from these), and how long the whole sequence runs.
    */
-  play(events: readonly EngineEvent[], state: CombatState): { times: number[]; duration: number } {
+  play(events: readonly EngineEvent[], state: CombatState): { times: number[]; starts: number[]; duration: number } {
     let clock = 0; // when the current beat starts
     let impact = 0; // when its hits land
     const times: number[] = [];
+    const starts: number[] = [];
     for (const event of events) {
+      let begins: number | undefined;
       switch (event.type) {
         case 'cardPlayed': {
           const actor = this.actor(event.source);
+          begins = clock;
           impact = actor ? actor.lunge(this.actor(event.target)?.home, 1, clock) : clock;
           break;
         }
         case 'ultimateFired': {
           const actor = this.actor(event.source);
+          begins = clock;
           actor?.burst(clock);
           impact = actor ? actor.lunge(undefined, 1, clock + 0.25) : clock;
           break;
@@ -165,6 +170,7 @@ export class Battlefield {
           break;
         case 'enemyActed': {
           clock = Math.max(clock, impact) + BEAT.enemyAction;
+          begins = clock;
           const actor = this.actor(event.source);
           impact = actor ? actor.lunge(this.targets(PARTY)[0]?.home, -1, clock) : clock;
           break;
@@ -236,8 +242,9 @@ export class Battlefield {
       }
       const lifecycle = event.type === 'turnEnd' || event.type === 'enemyPhaseStart' || event.type === 'turnStart';
       times.push(Math.max(times.at(-1) ?? 0, lifecycle ? clock : impact));
+      starts.push(Math.min(begins ?? times.at(-1)!, times.at(-1)!));
     }
-    return { times, duration: Math.max(clock, impact) };
+    return { times, starts, duration: Math.max(clock, impact) };
   }
 
   /** Every actor's position against its home point (used by the settle check). */

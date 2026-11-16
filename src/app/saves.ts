@@ -12,7 +12,7 @@ import { claimLevels } from '../game/profileLevel.ts';
 import { buyDupe } from '../game/shop.ts';
 import { endTrial } from '../game/trials.ts';
 import { reinforce, salvage, setWeaponSettings, type WeaponSettings } from '../game/weapons.ts';
-import { bank, buyPreset, lossBanking, NEW_PROFILE, ownedCharacters, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
+import { bank, buyPreset, lossBanking, NEW_PROFILE, ownedCharacters, setSound, type ActiveRun, type Banked, type Profile, type Team } from '../game/profile.ts';
 import { idbAdapter, requestPersistentStorage } from '../save/adapters.ts';
 import { profileSave } from '../save/profile.ts';
 import { runSave, type RunSave } from '../save/run.ts';
@@ -190,6 +190,8 @@ export function createSaves(adapter: SaveAdapter) {
     /** Weapons (docs/notes/weapons.md): a spare reinforces a weapon a step, or spares are salvaged; a refusal writes nothing. */
     reinforce: (weapon: string) => enqueue(async () => keep(reinforce(await readProfile(), weapon))),
     salvage: (weapon: string, count: number) => enqueue(async () => keep(salvage(await readProfile(), weapon, count, registry))),
+    /** Keeps volume and mute (M6.10). */
+    sound: (settings: { volume: number; muted: boolean }) => enqueue(async () => keep({ ok: true as const, profile: setSound(await readProfile(), settings) })),
     /** Keeps the banners' two tickboxes. */
     weaponSettings: (settings: WeaponSettings) => enqueue(async () => keep({ ok: true as const, profile: setWeaponSettings(await readProfile(), settings) })),
 

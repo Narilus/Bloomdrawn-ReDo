@@ -38,7 +38,7 @@ test('the main menu opens each screen, and Reset needs the box ticked and RESET 
   await expect(confirm).toBeDisabled();
   await typed.fill('RESET');
   await expect(confirm).toBeDisabled();
-  await page.getByRole('checkbox').check();
+  await page.getByRole('checkbox', { name: /I understand/ }).check();
   await typed.fill('reset');
   await expect(confirm).toBeDisabled();
   await typed.fill('RESET');

@@ -258,6 +258,14 @@ describe('saves', () => {
     expect([...adapter.data.keys()].filter((key) => key.startsWith('run:'))).toEqual([]);
   });
 
+  it('keeps volume and mute, leaving the defaults out of the save (M6.10)', async () => {
+    const { saves, store } = setup();
+    await saves.sound({ volume: 40, muted: true });
+    expect((await profileOf(store))?.sound).toEqual({ volume: 40, muted: true });
+    await saves.sound({ volume: 70, muted: false });
+    expect(await profileOf(store)).not.toHaveProperty('sound');
+  });
+
   it('a file that fails validation changes nothing', async () => {
     const { saves } = setup();
     await saves.start(run());
