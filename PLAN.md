@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.10 Accessibility and audio (M6.9 signed off 15 Nov)
+**Current task:** M6.10 Audio (M6.9 signed off 15 Nov; accessibility removed from the plan, owner, 16 Nov)
 
 ## Milestones
 
@@ -15,7 +15,7 @@ Each milestone ends with the owner playing the build. **Bold** milestones are ga
 | M3 | The Labyrinth | Hex tiles, motifs and validator, temptation loop, fog, Bloom clock, Shops, Camps, Symptoms |
 | **M4** | **First winnable run** | Rewards, Boss, banking, save and resume. Owner wins, quits and resumes a full run |
 | M5 | Collection | Profile, levels, EXP bank, ascension, gacha and dupes; the four banner characters |
-| M6 | Depth and polish | Weapons, Trials, depth tiers, art pass, audio, accessibility, balance |
+| M6 | Depth and polish | Weapons, Trials, depth tiers, art pass, audio, balance |
 | Later | | Gear, desktop packaging, more characters, authoring tool |
 
 ## M0 tasks
@@ -403,9 +403,9 @@ Character dupes for 100 Pollen each, the starters' included.
 
 _Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potential level for `DUPE_PRICE` Pollen, refusing a character not owned, one at her last level or without levels, and a short purse), the save action in `src/app/saves.ts`, and the Shop screen (`src/app/Shop.tsx`), from a new Shop item on the main menu, laid out like the inventory: owned characters as tiles, the chosen one's Potential levels and price, Buy after a confirm. Tests: `src/game/shop.test.ts`, `src/app/saves.test.ts`, `e2e/shop.spec.ts`. Pollen moved top right beside Ducats and Blooms (owner, 15 Nov). The starters' Potential levels (`docs/notes/starter-kits.md`, "Potential": the lighter set for Agathe, Maelia and Anthe, Leonora's draft; owner, 15 Nov) are content now, proved in `src/content/scenarios/potential.test.ts` and sold in the Shop. Isadora's P5 is now Rapt on every volley from a card (owner, 15 Nov). Signed off 15 Nov, with the starters' Potential and Isadora's P5._
 
-### M6.10 Accessibility and audio
-Options: text size, reduced motion and animation speed; keyword tooltips; a keyboard and screen-reader pass. CC0 sound effects for cards, hits and the UI, with volume and mute.
-**Done when:** settings persist and apply, and e2e plays a fight with reduced motion and sound muted.
+### M6.10 Audio
+CC0 sound effects for cards, hits and the UI, with volume and mute in Options. Accessibility is out of the plan until there are real options to offer (owner, 16 Nov).
+**Done when:** the settings persist and apply, and e2e plays a fight with sound muted.
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.

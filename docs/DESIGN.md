@@ -448,7 +448,7 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 
 Content with strong horror motifs carries descriptive warning tags, such as body horror, blood, surgical imagery and ritual harm. These drive an intensity setting. The tone is curiosity and unease, never cheap cruelty, and characters are treated with compassion.
 
-## UI, feel and accessibility
+## UI and feel
 
 The combat screen shows the party on the left, enemies on the right and a fanned hand at the bottom centre. Feel is judged by the owner playing it, never by an automated gate.
 
@@ -481,11 +481,7 @@ Simple transforms are enough; they must never drift.
 
 ### Accessibility
 
-- Readable card text at desktop and handheld resolutions; scalable text.
-- No information carried by colour alone; colourblind-safe gameplay colours.
-- Reduced motion, screen-shake and animation-speed settings.
-- Full keyboard play and screen-reader labels.
-- Plain-language rules tooltips on every keyword.
+Accessibility options come when there is something real to make accessible, never to tick a box (owner, 16 Nov). Idles and animations are part of the game and no setting turns them off.
 
 ## Technical approach and build plan
 
@@ -534,7 +530,7 @@ Playable first: a fight at M1, a winnable run at M4.
 | M3 The Labyrinth | Tiles, motifs, the temptation loop, fog of war, the Bloom clock, Shops, Camps and Symptoms |
 | **M4 First winnable run (gate)** | Rewards, the Boss, banking, save and resume; owner wins, closes and resumes a full run |
 | M5 Collection | Profile, levels, EXP bank, ascension, gacha and dupes; the four banner characters |
-| M6 Depth and polish | Weapons, Trials, depth tiers, art pass, audio, accessibility, balance |
+| M6 Depth and polish | Weapons, Trials, depth tiers, art pass, audio, balance |
 | Later | Gear, desktop packaging, more characters |
 
 The two highlighted gates matter most: the hand must feel right at M1 before anything is built on it, and M4 is the first complete game.

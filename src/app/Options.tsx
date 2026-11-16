@@ -3,7 +3,7 @@ import { plural, type Profile } from '../game/profile.ts';
 
 // Options (docs/notes/m6-depth.md, "Main menu"; owner, 31 Oct). Profile management moves saves
 // between browsers with a file and resets the profile. A reset can't be undone, so it waits for a
-// ticked box and "RESET" typed before Confirm works. Sound and accessibility settings join it in M6.10.
+// ticked box and "RESET" typed before Confirm works. Sound settings join it in M6.10.
 
 export const RESET_WORD = 'RESET';
 

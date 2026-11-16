@@ -7,7 +7,7 @@ Status: **answered by the owner, 31 Oct** (his answers are in his `docs/notes/m6
 - **The menu:** Expedition (the player-facing name for a run), Trials, Roster, Banners (a sub-menu: the character banner, then the weapon banner), Inventory, Options, Exit. It gets a professional layout pass.
 - **Top right:** Ducats and Purified Blooms, each as an icon and a number, the name in a tooltip.
 - **Top left:** the profile level badge. It opens the profile page.
-- **Options:** settings (volume and mute, accessibility) and Profile management: export, import, and Reset. Reset wipes the profile and any run. It needs a ticked confirmation box, "RESET" typed, then Confirm.
+- **Options:** settings (volume and mute) and Profile management: export, import, and Reset. Reset wipes the profile and any run. It needs a ticked confirmation box, "RESET" typed, then Confirm.
 - **Inventory:** every item the profile holds, in sub-menus by item tag (such as resources and weapons).
 - My reading: with a run saved, Expedition opens Continue or a new expedition (which abandons the saved one, as now). A browser can't close its own tab, so Exit closes the window where it can and otherwise says the tab can be closed; the desktop wrapper will quit properly.
 
@@ -109,7 +109,7 @@ _Built 1 Nov (M6.6), in `src/game/profileLevel.ts`; the numbers are placeholders
 7. **M6.7 Trials:** four Domain bosses with art, five tiers, rewards and first clears.
 8. **M6.8 Weapons:** the weapons note, then weapons, equipping, refining and the weapon banner.
 9. **M6.9 Profile Shop:** dupes for Pollen.
-10. **M6.10 Accessibility and audio:** settings in Options; sound effects with volume and mute.
+10. **M6.10 Audio:** sound effects with volume and mute in Options (accessibility removed, owner, 16 Nov).
 11. **M6.11 Art pass.**
 12. **M6.12 Balance.**
 13. **M6.13 The owner's playtest.**
