@@ -61,6 +61,18 @@ describe('cuesOf', () => {
     ]);
   });
 
+  it('a status a hit applies is silent under the hit; one applied alone sounds (owner, 21 Nov)', () => {
+    const events: EngineEvent[] = [
+      { type: 'damageDealt', target: 'e0', amount: 12 },
+      { type: 'statusApplied', target: 'e0', status: 'status.bleed', amount: 3 },
+      { type: 'statusApplied', target: 'e0', status: 'status.weak', amount: 1 },
+    ];
+    expect(cuesOf(events, [0.3, 0.3, 0.8], [0.3, 0.3, 0.8])).toEqual([
+      { cue: 'hit', at: 0.3 },
+      { cue: 'status', at: 0.8 },
+    ]);
+  });
+
   it('bookkeeping is silent', () => {
     const events: EngineEvent[] = [{ type: 'turnStart' }, { type: 'resourceGained', resource: 'tentacles', amount: 1 }, { type: 'deckShuffled' }];
     expect(cuesOf(events, [0, 0, 0], [0, 0, 0])).toEqual([]);

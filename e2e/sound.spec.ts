@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-// Sound (M6.10): volume and mute in Options are kept with the profile, and a fight with sound muted
-// never starts the browser's audio at all.
+// Sound (M6.10): volume and mute in Options are kept with the profile; a button opens the browser's
+// audio, and a fight with sound muted never does.
 
 test('volume and mute are kept across a reload, and a Trial fight plays with sound muted', async ({ page }) => {
   test.setTimeout(60_000);
@@ -26,6 +26,8 @@ test('volume and mute are kept across a reload, and a Trial fight plays with sou
   const mute = page.getByRole('checkbox', { name: 'Mute' });
   await expect(volume).toHaveValue('70');
   await expect(mute).not.toBeChecked();
+  // Unmuted, the menu's clicks have opened the audio.
+  expect(await page.evaluate(() => (window as unknown as { audioContexts: number }).audioContexts)).toBeGreaterThan(0);
   await volume.fill('40');
   await mute.check();
   await expect(volume).toBeDisabled();

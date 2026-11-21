@@ -64,10 +64,14 @@ function cueOf(event: EngineEvent): { cue: Cue; start?: true } | undefined {
   }
 }
 
+/** Cues a status yields to: a status a hit applies lands with the hit, and the hit is heard alone (owner, 21 Nov). */
+const HITS: ReadonlySet<Cue> = new Set(['hit', 'crit', 'tentacle', 'tick', 'hurt', 'block']);
+
 /**
  * The cues for a sequence of events, given when each event's beat starts and when it lands (the
  * battlefield's `play`). A card, an ultimate and an enemy's action sound as the lunge begins; the
- * rest as they land. One cue sounds once at a moment, however many events share it.
+ * rest as they land. One cue sounds once at a moment, however many events share it, and a status
+ * is silent at a moment a hit sounds.
  */
 export function cuesOf(events: readonly EngineEvent[], starts: readonly number[], lands: readonly number[]): Scheduled[] {
   const out: Scheduled[] = [];
@@ -81,7 +85,8 @@ export function cuesOf(events: readonly EngineEvent[], starts: readonly number[]
     seen.add(key);
     out.push({ cue: found.cue, at });
   });
-  return out;
+  const struck = new Set(out.filter((c) => HITS.has(c.cue)).map((c) => Math.round(c.at * 1000)));
+  return out.filter((c) => c.cue !== 'status' || !struck.has(Math.round(c.at * 1000)));
 }
 
 /** Volume out of 100 to gain, on a square curve so the slider's middle sounds like the middle. */

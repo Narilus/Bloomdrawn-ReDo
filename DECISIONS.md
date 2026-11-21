@@ -229,6 +229,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - M6.9 signed off (owner, 15 Nov): the Shop, the starters' Potential and Isadora's P5 accepted.
 - Inventory (owner, 15 Nov): no All tab, only categories, as gacha inventories have; rarity and Domain filters where a category has enough to sort (Weapons, for now). Bleed and Poison tick previews stay off the enemy plates.
 - Accessibility (owner, 16 Nov): out of the plan until reasonable options make sense; nothing is added just to tick a box. No setting turns off idles and animations, which few games offer. M6.10 is audio alone, accepted next.
+- Sound picks (owner, 21 Nov): the first set from Kenney's CC0 packs (`docs/notes/audio.md`). Heal is silent for now; ultimate, transcend, enemy and fall are weak fits to revisit. A status applied by a hit shouldn't be heard over the hit, and the enemy's swish shouldn't run into Hurt or Block.
 
 ## Open
 - Gear at launch or later (recommendation: later).

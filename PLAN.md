@@ -407,7 +407,7 @@ _Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potentia
 CC0 sound effects for cards, hits and the UI, with volume and mute in Options. Accessibility is out of the plan until there are real options to offer (owner, 16 Nov).
 **Done when:** the settings persist and apply, and e2e plays a fight with sound muted.
 
-_Plumbing built 16 Nov (`docs/notes/audio.md`): the cues and their timing in `src/app/sound.ts` (`cuesOf`, from the battlefield's beat starts and landings; any button clicks; banner results), a Web Audio mixer that plays whatever is in `src/assets/sound/` (a cue with no file is silent), volume and mute in the profile (save v13) and on Options. Tests: `src/app/sound.test.ts`, `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. Next: the sounds themselves, which the owner downloads (the CC0 site refuses scripted downloads) and picks._
+_Plumbing built 16 Nov (`docs/notes/audio.md`): the cues and their timing in `src/app/sound.ts` (`cuesOf`, from the battlefield's beat starts and landings; any button clicks; banner results), a Web Audio mixer that plays whatever is in `src/assets/sound/` (a cue with no file is silent), volume and mute in the profile (save v13) and on Options. Tests: `src/app/sound.test.ts`, `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. The owner's picks from Kenney's CC0 packs are in `src/assets/sound/` (21 Nov; the note lists them); round 2 offers edits for the weak fits, then the owner judges the mix in play._
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
