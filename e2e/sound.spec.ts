@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-// Sound (M6.10): volume and mute in Options are kept with the profile; a button opens the browser's
-// audio, and a fight with sound muted never does.
+// Sound (M6.10): volume, mute and the kinds muted in Options' Sound tab are kept with the profile; a
+// button opens the browser's audio, and a fight with sound muted never does.
 
-test('volume and mute are kept across a reload, and a Trial fight plays with sound muted', async ({ page }) => {
+test('volume, mute and a kind muted are kept across a reload, and a Trial fight plays with sound muted', async ({ page }) => {
   test.setTimeout(60_000);
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
@@ -22,13 +22,18 @@ test('volume and mute are kept across a reload, and a Trial fight plays with sou
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Options' }).click();
+  await page.getByRole('tab', { name: 'Sound' }).click();
   const volume = page.getByRole('slider', { name: /Volume/ });
-  const mute = page.getByRole('checkbox', { name: 'Mute' });
+  const mute = page.getByRole('checkbox', { name: 'Mute all' });
+  const combat = page.getByRole('checkbox', { name: /Combat/ });
   await expect(volume).toHaveValue('70');
   await expect(mute).not.toBeChecked();
+  await expect(page.getByRole('group', { name: 'Mute kinds of sound' }).getByRole('checkbox')).toHaveCount(5);
+  await expect(combat).not.toBeChecked();
   // Unmuted, the menu's clicks have opened the audio.
   expect(await page.evaluate(() => (window as unknown as { audioContexts: number }).audioContexts)).toBeGreaterThan(0);
   await volume.fill('40');
+  await combat.check();
   await mute.check();
   await expect(volume).toBeDisabled();
   await page.screenshot({ path: 'test-results/screenshots/options-sound.png' });
@@ -37,8 +42,11 @@ test('volume and mute are kept across a reload, and a Trial fight plays with sou
 
   await page.reload();
   await page.getByRole('button', { name: 'Options' }).click();
+  await page.getByRole('tab', { name: 'Sound' }).click();
   await expect(volume).toHaveValue('40');
   await expect(mute).toBeChecked();
+  await expect(combat).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: /Cards/ })).not.toBeChecked();
   await page.getByRole('button', { name: 'Back' }).click();
 
   await page.getByRole('button', { name: 'Trials' }).click();

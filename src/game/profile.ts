@@ -48,7 +48,7 @@ export interface Profile {
   trials?: Record<string, number>;
   /** What the profile page shows, counted from M6.6 on. */
   stats?: ProfileStats;
-  /** Volume (0–100; absent is `SOUND_VOLUME`) and mute, set in Options (M6.10). */
+  /** Volume (0–100; absent is `SOUND_VOLUME`), mute, and the kinds of sound turned off, set in Options (M6.10). */
   sound?: SoundSettings;
   /**
    * The run in progress: its ID and its banking tally, kept here as it changes so a run whose own
@@ -61,21 +61,35 @@ export interface Profile {
 export interface SoundSettings {
   volume?: number;
   muted?: true;
+  /** Kinds of sound turned off, in `SOUND_GROUPS` order; absent is none. */
+  off?: SoundGroup[];
+}
+
+/** Kinds of sound the player can turn off one by one in Options (owner, 27 Nov). */
+export const SOUND_GROUPS = ['interface', 'cards', 'combat', 'moments', 'banners'] as const;
+export type SoundGroup = (typeof SOUND_GROUPS)[number];
+
+/** Sound settings with the defaults filled in. */
+export interface Sound {
+  volume: number;
+  muted: boolean;
+  off: readonly SoundGroup[];
 }
 
 /** Volume out of 100 until the player sets one (a placeholder for the owner). */
 export const SOUND_VOLUME = 70;
 
-/** Keeps volume and mute, leaving defaults out of the save. */
-export function setSound(profile: Profile, settings: { volume: number; muted: boolean }): Profile {
+/** Keeps volume, mute and the kinds turned off, leaving defaults out of the save. */
+export function setSound(profile: Profile, settings: Sound): Profile {
   const { sound: _s, ...rest } = profile;
   const volume = Math.min(100, Math.max(0, Math.round(settings.volume)));
-  const next: SoundSettings = { ...(volume !== SOUND_VOLUME && { volume }), ...(settings.muted && { muted: true }) };
+  const off = SOUND_GROUPS.filter((g) => settings.off.includes(g));
+  const next: SoundSettings = { ...(volume !== SOUND_VOLUME && { volume }), ...(settings.muted && { muted: true }), ...(off.length > 0 && { off }) };
   return Object.keys(next).length > 0 ? { ...rest, sound: next } : rest;
 }
 
 /** The profile's sound settings with defaults filled in. */
-export const soundOf = (profile: Profile) => ({ volume: profile.sound?.volume ?? SOUND_VOLUME, muted: profile.sound?.muted === true });
+export const soundOf = (profile: Profile): Sound => ({ volume: profile.sound?.volume ?? SOUND_VOLUME, muted: profile.sound?.muted === true, off: profile.sound?.off ?? [] });
 
 export interface ProfileStats {
   won?: number;

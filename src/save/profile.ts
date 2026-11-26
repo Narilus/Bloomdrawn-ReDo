@@ -4,7 +4,7 @@ import { ASCENSIONS, levelCap, MAX_LEVEL } from '../game/levels.ts';
 import { PROFILE_MAX, profileLevelOf } from '../game/profileLevel.ts';
 import { TRIAL_TIERS } from '../game/trials.ts';
 import { MAX_STEP } from '../game/weapons.ts';
-import { emptyTeam, PARTY_SIZE, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
+import { emptyTeam, PARTY_SIZE, SOUND_GROUPS, TEAM_NAME_LENGTH, TEAM_PRESETS, type Profile } from '../game/profile.ts';
 import type { SaveKind } from './store.ts';
 
 const id = z.string().min(1);
@@ -56,7 +56,17 @@ const profileSchema = z.strictObject({
   exp: count.optional(),
   claimed: z.int().min(2).max(PROFILE_MAX).optional(),
   stats: z.strictObject({ won: count, lost: count, fights: count, elites: count, bosses: count, trials: count }).partial().optional(),
-  sound: z.strictObject({ volume: z.int().min(0).max(100).optional(), muted: z.literal(true).optional() }).optional(),
+  sound: z
+    .strictObject({
+      volume: z.int().min(0).max(100).optional(),
+      muted: z.literal(true).optional(),
+      off: z
+        .array(z.enum(SOUND_GROUPS))
+        .min(1)
+        .refine((off) => new Set(off).size === off.length, 'a kind of sound is listed twice')
+        .optional(),
+    })
+    .optional(),
   run: z.strictObject({ id, elites: z.int().nonnegative(), fights: z.int().positive().optional(), depth: z.int().min(2).max(DEPTH_MAX).optional() }).optional(),
 });
 
@@ -67,7 +77,7 @@ const profileSchema = z.strictObject({
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 13,
+  schemaVersion: 14,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -139,6 +149,8 @@ export const profileSave: SaveKind<Profile> = {
     },
     // v13 added sound settings (M6.10): a v12 profile has the defaults.
     12: (data) => data,
+    // v14 added kinds of sound turned off (owner, 27 Nov): a v13 profile has them all on.
+    13: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;

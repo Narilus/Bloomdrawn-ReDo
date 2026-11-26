@@ -6,7 +6,7 @@ CC0 sound effects for cards, hits and the UI, with volume and mute in Options (`
 
 - `src/app/sound.ts` turns engine events into cues. The battlefield's `play` says when each event's move starts and when it lands. A card, an ultimate and an enemy's action sound as the lunge starts, and everything else as it lands. A cue sounds once at each moment, so a hit on three enemies is one sound, while each Tentacle hit in a volley gets its own.
 - A cue's sound is a file in `src/assets/sound/` named after it: `hit.ogg`, or `hit-1.ogg`, `hit-2.ogg`… to take turns. A cue with no file is silent, so sounds can arrive one at a time.
-- Volume (0–100, default 70, a placeholder) and Mute are kept in the profile and set on Options. Muted, the game never opens the browser's audio.
+- Volume (0–100, default 70, a placeholder), Mute all, and each kind of sound muted on its own (interface, cards, combat, big moments, banners; `GROUP_OF` in `sound.ts`) are kept in the profile and set on Options' Sound tab (owner, 27 Nov). Muted, the game never opens the browser's audio.
 
 ## The cues
 
@@ -68,6 +68,7 @@ Kenney's packs are CC0 (no credit needed) and cover most of this: Interface Soun
 
 ## Open
 
+- Accepted as a first pass (owner, 27 Nov). Later: steps while crossing the map, and music: the map, normal fights, Elite fights, a generic Boss track, and some Bosses' own. A Music slider joins Volume then.
 - Round 2 done (owner, 27 Nov): enemy and fall replaced; ultimate kept. Transcend and heal still have no good fit in the Kenney packs, and enemy isn't an attack yet. These need other sources.
 - Long Tentacle volleys sound every hit, 0.11s apart (owner to judge). Options if that's too much: quieter hits deeper into a volley, every second or third hit, or one rolling sound.
 - The mix between cues, judged in play.

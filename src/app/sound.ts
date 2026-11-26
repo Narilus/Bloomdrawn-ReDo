@@ -1,5 +1,5 @@
 import { PARTY, type EngineEvent } from '../engine/index.ts';
-import { SOUND_VOLUME } from '../game/profile.ts';
+import { SOUND_VOLUME, type Sound, type SoundGroup } from '../game/profile.ts';
 
 // Sound (M6.10; docs/notes/audio.md): CC0 effects for cards, hits and the UI. Each cue is a file in
 // `src/assets/sound/` named after it (`hit.ogg`, or `hit-1.ogg`, `hit-2.ogg` to take turns); a cue
@@ -21,6 +21,34 @@ export const CUES = [
 ] as const;
 
 export type Cue = (typeof CUES)[number];
+
+/** The kind each cue belongs to, which Options can turn off (owner, 27 Nov). */
+export const GROUP_OF: Record<Cue, SoundGroup> = {
+  click: 'interface',
+  card: 'cards',
+  draw: 'cards',
+  ultimate: 'moments',
+  transcend: 'moments',
+  enemy: 'combat',
+  hit: 'combat',
+  crit: 'combat',
+  tentacle: 'combat',
+  tick: 'combat',
+  hurt: 'combat',
+  block: 'combat',
+  shield: 'combat',
+  heal: 'combat',
+  status: 'combat',
+  fall: 'combat',
+  phase: 'moments',
+  victory: 'moments',
+  loss: 'moments',
+  pull: 'banners',
+  ssr: 'banners',
+};
+
+/** The cues that sound under these settings: none muted, and none of a kind turned off. */
+export const audible = (cues: readonly Scheduled[], { muted, volume, off }: Sound) => (gainOf({ muted, volume }) === 0 ? [] : cues.filter((c) => !off.includes(GROUP_OF[c.cue])));
 
 export interface Scheduled {
   cue: Cue;
@@ -100,14 +128,14 @@ for (const [path, url] of Object.entries(FILES)) {
   if (cue) BY_CUE.set(cue, [...(BY_CUE.get(cue) ?? []), url]);
 }
 
-let settings = { volume: SOUND_VOLUME, muted: false };
+let settings: Sound = { volume: SOUND_VOLUME, muted: false, off: [] };
 let context: AudioContext | undefined;
 let master: GainNode | undefined;
 const buffers = new Map<string, Promise<AudioBuffer | undefined>>();
 const turn = new Map<string, number>();
 
-/** Applies volume and mute from now on. */
-export function configureSound(next: { volume: number; muted: boolean }) {
+/** Applies volume, mute and the kinds turned off from now on. */
+export function configureSound(next: Sound) {
   settings = next;
   if (master) master.gain.value = gainOf(settings);
 }
@@ -137,10 +165,9 @@ function load(ctx: AudioContext, url: string): Promise<AudioBuffer | undefined> 
   return buffer;
 }
 
-/** Plays cues at their times from now. Nothing happens while muted or for a cue with no file. */
+/** Plays cues at their times from now. Nothing happens while muted, for a kind turned off, or for a cue with no file. */
 export function playCues(cues: readonly Scheduled[]) {
-  if (gainOf(settings) === 0) return;
-  const heard = cues.filter((c) => BY_CUE.has(c.cue));
+  const heard = audible(cues, settings).filter((c) => BY_CUE.has(c.cue));
   if (heard.length === 0) return;
   const out = audio();
   if (!out) return;

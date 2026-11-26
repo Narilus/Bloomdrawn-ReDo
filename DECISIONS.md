@@ -231,6 +231,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Accessibility (owner, 16 Nov): out of the plan until reasonable options make sense; nothing is added just to tick a box. No setting turns off idles and animations, which few games offer. M6.10 is audio alone, accepted next.
 - Sound picks (owner, 21 Nov): the first set from Kenney's CC0 packs (`docs/notes/audio.md`). Heal is silent for now; ultimate, transcend, enemy and fall are weak fits to revisit. A status applied by a hit shouldn't be heard over the hit, and the enemy's swish shouldn't run into Hurt or Block.
 - Sound picks, round 2 (owner, 27 Nov): enemy is a knife draw (not an attack, but better, for now) and fall is a dropped leather sound. Ultimate keeps its bell for now. Transcend stays as it is: the closest option, a rising sweep, sounded sci-fi. Heal stays silent: glass chimes are too sharp and the tones are sci-fi.
+- Audio (owner, 27 Nov): sufficient for a first pass; to revisit later. Gaps for then: steps while crossing the map, and music (the map, normal fights, Elite fights, a generic Boss track, and some Bosses' own).
+- Options (owner, 27 Nov): tabs, for now Profile (the current profile options) and Sound (volume, and a checkbox to mute each kind of sound: UI presses, cards, combat and so on).
 
 ## Open
 - Gear at launch or later (recommendation: later).

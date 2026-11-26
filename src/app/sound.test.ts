@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PARTY, type EngineEvent } from '../engine/index.ts';
-import { cuesOf, gainOf } from './sound.ts';
+import { audible, CUES, cuesOf, gainOf, GROUP_OF } from './sound.ts';
 
 // Sound cues (M6.10): which events sound, and when, from the battlefield's beat starts and landings.
 
@@ -76,6 +76,24 @@ describe('cuesOf', () => {
   it('bookkeeping is silent', () => {
     const events: EngineEvent[] = [{ type: 'turnStart' }, { type: 'resourceGained', resource: 'tentacles', amount: 1 }, { type: 'deckShuffled' }];
     expect(cuesOf(events, [0, 0, 0], [0, 0, 0])).toEqual([]);
+  });
+});
+
+describe('audible', () => {
+  const cues = CUES.map((cue, i) => ({ cue, at: i }));
+  it('every cue sounds by default; muted, none do', () => {
+    expect(audible(cues, { volume: 70, muted: false, off: [] })).toEqual(cues);
+    expect(audible(cues, { volume: 70, muted: true, off: [] })).toEqual([]);
+    expect(audible(cues, { volume: 0, muted: false, off: [] })).toEqual([]);
+  });
+
+  it('a kind muted on its own silences its cues and only those (owner, 27 Nov)', () => {
+    const heard = audible(cues, { volume: 70, muted: false, off: ['interface', 'combat'] }).map((c) => c.cue);
+    expect(heard).not.toContain('click');
+    expect(heard).not.toContain('hit');
+    expect(heard).not.toContain('enemy');
+    expect(heard).toEqual(CUES.filter((cue) => GROUP_OF[cue] !== 'interface' && GROUP_OF[cue] !== 'combat'));
+    expect(heard).toEqual(expect.arrayContaining(['card', 'draw', 'ultimate', 'victory', 'pull', 'ssr']));
   });
 });
 

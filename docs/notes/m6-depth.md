@@ -7,7 +7,7 @@ Status: **answered by the owner, 31 Oct** (his answers are in his `docs/notes/m6
 - **The menu:** Expedition (the player-facing name for a run), Trials, Roster, Banners (a sub-menu: the character banner, then the weapon banner), Inventory, Options, Exit. It gets a professional layout pass.
 - **Top right:** Ducats and Purified Blooms, each as an icon and a number, the name in a tooltip.
 - **Top left:** the profile level badge. It opens the profile page.
-- **Options:** settings (volume and mute) and Profile management: export, import, and Reset. Reset wipes the profile and any run. It needs a ticked confirmation box, "RESET" typed, then Confirm.
+- **Options:** in tabs (owner, 27 Nov): Sound (volume, mute, and each kind of sound muted on its own) and Profile: export, import, and Reset. Reset wipes the profile and any run. It needs a ticked confirmation box, "RESET" typed, then Confirm.
 - **Inventory:** every item the profile holds, in sub-menus by item tag (such as resources and weapons).
 - My reading: with a run saved, Expedition opens Continue or a new expedition (which abandons the saved one, as now). A browser can't close its own tab, so Exit closes the window where it can and otherwise says the tab can be closed; the desktop wrapper will quit properly.
 

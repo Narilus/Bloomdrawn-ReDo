@@ -258,11 +258,14 @@ describe('saves', () => {
     expect([...adapter.data.keys()].filter((key) => key.startsWith('run:'))).toEqual([]);
   });
 
-  it('keeps volume and mute, leaving the defaults out of the save (M6.10)', async () => {
+  it('keeps volume, mute and the kinds muted, leaving the defaults out of the save (M6.10)', async () => {
     const { saves, store } = setup();
-    await saves.sound({ volume: 40, muted: true });
+    await saves.sound({ volume: 40, muted: true, off: [] });
     expect((await profileOf(store))?.sound).toEqual({ volume: 40, muted: true });
-    await saves.sound({ volume: 70, muted: false });
+    // Kinds are kept in one order, whichever was muted first.
+    await saves.sound({ volume: 70, muted: false, off: ['banners', 'interface'] });
+    expect((await profileOf(store))?.sound).toEqual({ off: ['interface', 'banners'] });
+    await saves.sound({ volume: 70, muted: false, off: [] });
     expect(await profileOf(store)).not.toHaveProperty('sound');
   });
 

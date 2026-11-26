@@ -181,6 +181,19 @@ describe('the profile save', () => {
     }
   });
 
+  it('keeps the kinds of sound muted; a v13 profile has them all on (owner, 27 Nov)', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, sound: { off: ['interface' as const, 'combat' as const] } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 13, contentVersion: 1, data: { ...NEW_PROFILE, sound: { volume: 35 } } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, sound: { volume: 35 } }, savedSchemaVersion: 13 });
+    // An empty list is never written, and no kind twice or unknown.
+    for (const bad of [{ sound: { off: [] } }, { sound: { off: ['cards', 'cards'] } }, { sound: { off: ['music'] } }]) {
+      await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad } as typeof NEW_PROFILE), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     for (const bad of [

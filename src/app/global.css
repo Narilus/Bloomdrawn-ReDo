@@ -2184,38 +2184,33 @@ kbd {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  justify-items: center;
-  gap: 24px;
-  padding: 48px 0 44px;
+  grid-template-columns: 260px 1fr;
+  gap: 40px;
+  padding: 48px 56px;
   background:
     radial-gradient(ellipse at 50% 30%, rgba(122, 79, 160, 0.14), transparent 60%),
     var(--charcoal-plum);
 }
 
+.options-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .options-screen h2.panel-title {
   margin: 0;
   font-family: var(--serif);
-  font-size: 72px;
+  font-size: 56px;
   color: var(--blush);
-}
-
-.options-panels {
-  display: grid;
-  gap: 20px;
-  align-self: start;
-}
-
-.options-sound {
-  display: flex;
-  align-items: center;
-  gap: 48px;
+  text-align: left;
 }
 
 .options-volume {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin: 12px 0 18px;
 }
 
 .options-volume input {
@@ -2228,9 +2223,26 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 
+.options-kinds {
+  display: grid;
+  gap: 14px;
+}
+
+.options-kinds span {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.options-kinds small {
+  font-size: 17px;
+  opacity: 0.7;
+}
+
 .options-panel {
   width: 900px;
   align-self: start;
+  margin-top: 96px;
   padding: 24px 40px 32px;
   border: 1px solid rgba(184, 149, 90, 0.7);
   border-radius: 12px;
