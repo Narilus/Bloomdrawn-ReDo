@@ -41,9 +41,9 @@ All from Kenney (kenney.nl), CC0: no credit needed. The packs sit in `.external/
 | click | click_001 | Interface Sounds |
 | card | card-slide-3 | Casino Audio |
 | draw | card-slide-5 | Casino Audio |
-| ultimate | impactBell_heavy_000 (none fit well; round 2) | Impact Sounds |
-| transcend | impactBell_heavy_003 (as ultimate) | Impact Sounds |
-| enemy | cloth2, cut at 0.17s so it ends as the lunge connects (round 2: other swipes) | RPG Audio |
+| ultimate | impactBell_heavy_000 (none fit well; kept after round 2) | Impact Sounds |
+| transcend | impactBell_heavy_003 (round 2's rising sweep came closest but sounded sci-fi) | Impact Sounds |
+| enemy | drawKnife3, cut to 0.30s (round 2; not an attack yet, but better) | RPG Audio |
 | hit | impactSoft_heavy_000 | Impact Sounds |
 | crit | impactPlate_heavy_000 | Impact Sounds |
 | tentacle | footstep_grass_000, and _001–_004 taking turns (judge in game) | Impact Sounds |
@@ -51,16 +51,16 @@ All from Kenney (kenney.nl), CC0: no credit needed. The packs sit in `.external/
 | hurt | impactSoft_heavy_002 | Impact Sounds |
 | block | impactPlate_medium_000 | Impact Sounds |
 | shield | impactPlate_light_000 | Impact Sounds |
-| heal | none: every option was too sharp (round 2) | |
+| heal | none: glass chimes too sharp, the tones sci-fi (rounds 1 and 2) | |
 | status | handleSmallLeather; silent when a hit sounds at the same moment | RPG Audio |
-| fall | impactWood_heavy_003 (none evoke a fall; round 2) | Impact Sounds |
+| fall | dropLeather, lowered: a body hitting the floor (round 2) | RPG Audio |
 | phase | impactBell_heavy_002 | Impact Sounds |
 | victory | handleCoins | RPG Audio |
 | loss | minimize_008 | Interface Sounds |
 | pull | cards-pack-open-1 | Casino Audio |
 | ssr | confirmation_002 | Interface Sounds |
 
-The owner asked about overlaps. An enemy's lunge connects 0.13s after it starts, which is why its swish is cut to end there, before Hurt or Block lands. Block replaces Hurt, never both. A status applied by a hit lands with it, so the status stays silent at that moment.
+The owner asked about overlaps. An enemy's lunge connects 0.13s after it starts. Round 1's swish was cut to end there; round 2's knife draw (0.30s) runs on under Hurt or Block, which the owner judges in play. Block replaces Hurt, never both. A status applied by a hit lands with it, so the status stays silent at that moment.
 
 ## Sourcing
 
@@ -68,5 +68,6 @@ Kenney's packs are CC0 (no credit needed) and cover most of this: Interface Soun
 
 ## Open
 
-- Round 2 (`.external/sound-sheet-2.html`): edited options for enemy, ultimate, transcend, fall and heal.
-- The mix between cues, once there are sounds to hear.
+- Round 2 done (owner, 27 Nov): enemy and fall replaced; ultimate kept. Transcend and heal still have no good fit in the Kenney packs, and enemy isn't an attack yet. These need other sources.
+- Long Tentacle volleys sound every hit, 0.11s apart (owner to judge). Options if that's too much: quieter hits deeper into a volley, every second or third hit, or one rolling sound.
+- The mix between cues, judged in play.
