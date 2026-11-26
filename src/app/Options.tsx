@@ -7,7 +7,7 @@ import { playCue } from './sound.ts';
 // (owner, 27 Nov). Profile moves saves between browsers with a file and resets the profile. A reset
 // can't be undone, so it waits for a ticked box and "RESET" typed before Confirm works. Sound:
 // volume, mute, and each kind of sound muted on its own (M6.10), kept a moment after the last
-// change, with a click at the new volume.
+// change, with a click at the new volume, or at once if Options closes first.
 
 export const RESET_WORD = 'RESET';
 
@@ -40,17 +40,32 @@ interface OptionsProps {
 export function Options({ profile, onExport, onImport, onReset, onSound, onBack }: OptionsProps) {
   const [tab, setTab] = useState<Tab>('profile');
   const [sound, setSound] = useState(() => soundOf(profile));
-  const first = useRef(true);
+  // Saved from the change itself, not an effect: StrictMode runs effects twice on mount, which
+  // saved and clicked once more with nothing changed.
+  const pending = useRef<{ timer: number; next: Sound } | null>(null);
+  const keep = useRef(onSound);
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
+    keep.current = onSound;
+  });
+  // A change still waiting when Options closes is kept, without the click.
+  useEffect(
+    () => () => {
+      if (!pending.current) return;
+      window.clearTimeout(pending.current.timer);
+      void keep.current(pending.current.next);
+      pending.current = null;
+    },
+    [],
+  );
+  const change = (next: Sound) => {
+    setSound(next);
+    if (pending.current) window.clearTimeout(pending.current.timer);
     const timer = window.setTimeout(() => {
-      void onSound(sound).then(() => playCue('click'));
+      pending.current = null;
+      void keep.current(next).then(() => playCue('click'));
     }, 250);
-    return () => window.clearTimeout(timer);
-  }, [sound, onSound]);
+    pending.current = { timer, next };
+  };
   const [busy, setBusy] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [understood, setUnderstood] = useState(false);
@@ -64,7 +79,7 @@ export function Options({ profile, onExport, onImport, onReset, onSound, onBack 
   const canReset = understood && typed === RESET_WORD && !busy;
 
   const toggle = (kind: SoundGroup, muted: boolean) =>
-    setSound((s) => ({ ...s, off: muted ? SOUND_GROUPS.filter((g) => g === kind || s.off.includes(g)) : s.off.filter((g) => g !== kind) }));
+    change({ ...sound, off: muted ? SOUND_GROUPS.filter((g) => g === kind || sound.off.includes(g)) : sound.off.filter((g) => g !== kind) });
 
   return (
     <div className="options-screen">
@@ -80,11 +95,11 @@ export function Options({ profile, onExport, onImport, onReset, onSound, onBack 
           <h3>Sound</h3>
           <label className="options-volume">
             Volume
-            <input type="range" min={0} max={100} step={5} value={sound.volume} disabled={sound.muted} onChange={(e) => setSound((s) => ({ ...s, volume: Number(e.target.value) }))} />
+            <input type="range" min={0} max={100} step={5} value={sound.volume} disabled={sound.muted} onChange={(e) => change({ ...sound, volume: Number(e.target.value) })} />
             <output>{sound.volume}</output>
           </label>
           <label className="options-check">
-            <input type="checkbox" checked={sound.muted} onChange={(e) => setSound((s) => ({ ...s, muted: e.target.checked }))} />
+            <input type="checkbox" checked={sound.muted} onChange={(e) => change({ ...sound, muted: e.target.checked })} />
             Mute all
           </label>
           <h4>Mute</h4>

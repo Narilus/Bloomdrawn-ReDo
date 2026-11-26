@@ -66,3 +66,32 @@ test('volume, mute and a kind muted are kept across a reload, and a Trial fight 
   expect(await page.evaluate(() => (window as unknown as { audioContexts: number }).audioContexts)).toBe(0);
   expect(errors).toEqual([]);
 });
+
+test('a button sounds once, Options included, and a change made just before Back is kept', async ({ page }) => {
+  // Counts the sounds started.
+  await page.addInitScript(() => {
+    const w = window as unknown as { sounds: number };
+    w.sounds = 0;
+    const start = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args: Parameters<typeof start>) {
+      w.sounds++;
+      return start.apply(this, args);
+    };
+  });
+  const sounds = () => page.evaluate(() => (window as unknown as { sounds: number }).sounds);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Options' }).click();
+  await expect.poll(sounds).toBe(1);
+  // Opening Options plays nothing more of its own.
+  await page.waitForTimeout(800);
+  expect(await sounds()).toBe(1);
+
+  await page.getByRole('tab', { name: 'Sound' }).click();
+  await page.getByRole('checkbox', { name: /Banners/ }).check();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.waitForTimeout(300);
+  await page.reload();
+  await page.getByRole('button', { name: 'Options' }).click();
+  await page.getByRole('tab', { name: 'Sound' }).click();
+  await expect(page.getByRole('checkbox', { name: /Banners/ })).toBeChecked();
+});
