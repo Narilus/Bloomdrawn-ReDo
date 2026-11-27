@@ -98,7 +98,7 @@ Where a "Pattern" entry names an ability, it uses one that exists unless section
 
 ### 4.1 Band 2, Depths 11–20: the Thicket (Hybrid)
 
-**Background (separate art):** an overgrown wood of flesh-coloured trunks with visible muscle striation, tangled with blush skin-petal blooms, with pale pollen motes in the air. Deep plum ground.
+**Background (separate art):** an old forest of pale-brown trunks, moss and green leaves that the Bloom is mingling into: flesh-vines up the trunks, blush skin-petal blooms among the leaves, pale pollen motes (owner, 27 Nov; the all-pink wood of flesh trunks first drafted here is kept for a future biome).
 
 | Enemy | Tier, role | Pattern | Look | Size |
 |---|---|---|---|---|
@@ -113,7 +113,7 @@ Where a "Pattern" entry names an ability, it uses one that exists unless section
 
 ### 4.2 Band 3, Depths 21–30: the Lost Expedition (Remade)
 
-**Background (separate art):** a ruined expedition camp: torn canvas tents, survey stakes, overturned crates and hanging lanterns, all overgrown with flesh-vines. Deep plum ground, pink lantern light.
+**Background (separate art):** a ruined expedition camp in arctic cold (owner, 27 Nov): snow, ice, torn canvas tents, survey stakes, overturned crates and hanging lanterns, with flesh-vines frozen into the ice. Pink lantern light.
 
 **The band's story (decided).** The crew are monsters, and **the Boss is the man who made them**. The Expedition Leader is still mostly human. The Bloom drove him mad, and every crew member's form is something he did to them: the Surgeon's grafted arms, the Porter swallowed by his pack, the Tent-Walker's legs. The contrast is the point. A band of monstrosities ends in a man who looks almost ordinary, and he is the worst of them.
 

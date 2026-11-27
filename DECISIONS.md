@@ -236,6 +236,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - M6.10 signed off (owner, 27 Nov): audio as a first pass and Options in tabs. M6.11 Art pass is next.
 - Battle backgrounds (owner, 27 Nov): each band of depths has a biome. Normal fights and elites draw from a pool of its scenes for variety; Bosses get richer or wholly custom scenes. Band 1 is the cathedral, and all four nave options are its pool. A Bloom-stage tell comes later, as more-bloomed versions of the pool scenes. Actors must never seem to stand on a wall or the wrong plane.
 
+- Battle backgrounds, Bands 2 and 3 (owner, 27 Nov): Band 2's pool is the four greener woods, pale-brown trunks and green leaves with the Bloom mingling in. The all-pink flesh-trunk set is kept for a future biome. Band 3's Expedition camp is arctic: snow, ice, a hostile frozen place.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

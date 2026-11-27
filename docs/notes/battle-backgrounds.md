@@ -7,8 +7,8 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 | Band | Depths | Biome | Pool |
 |---|---|---|---|
 | 1 | 1–10 | The cathedral (its Boss is the Hollow Abbess) | the four naves, in the game |
-| 2 | 11–20 | The Thicket: a wood of flesh-coloured trunks (`bestiary-direction.md` 4.1) | next |
-| 3 | 21–30 | The Lost Expedition's ruined camp (4.2) | |
+| 2 | 11–20 | The Thicket: an old forest of pale-brown trunks and green leaves that the Bloom is mingling into (`bestiary-direction.md` 4.1) | the four green woods (`bg-thicket-green`), in the game |
+| 3 | 21–30 | The Lost Expedition's ruined camp, frozen: snow, ice and bitter cold (4.2) | next |
 | 4 | 31–40 | The Calyx, inside the Bloom (4.3) | |
 | 5 | 41–50 | The source: a root-heart chamber (to brief) | |
 
@@ -44,6 +44,6 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 ## Open
 
 - **Style:** painted, per DESIGN.md's prompt stem, behind pixel-art sprites. The owner found all four naves good; whether the mix holds in play is his call.
-- **The Thicket's colour** (owner, 27 Nov): a trial set with pale-brown trunks and more green, a forest the Bloom is mingling into (`bg-thicket-green`), to compare with the all-pink set (`bg-thicket`) before picking Band 2's pool.
+- **Spare scenes:** the all-pink wood of flesh trunks (`art/raw/bg-thicket/`) lost Band 2 to the greener set but is kept for a future biome (owner, 27 Nov).
 - **Band 5's biome** needs a brief the owner approves.
 - **The wall line** came in at about half way rather than 40%, so the back slot stands near the foot of the wall. It reads as floor; briefs keep asking for 40%.
