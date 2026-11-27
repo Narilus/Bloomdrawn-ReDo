@@ -248,6 +248,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - The Gathered Beast's scene (owner, 27 Nov): all four lairs in the heart of the wood, picked by seed.
 
+- The Expedition Leader's scene (owner, 27 Nov): the frozen ship with his surgeon's tent, made again without the forceps on the ice; all four, picked by seed.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

@@ -16,6 +16,7 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 - The 6 run Bosses and 4 Trial Bosses get richer or wholly custom scenes, named after their encounter: one (`hollow-abbess.webp`) or a pool of their own picked by seed (`hollow-abbess-1.webp`, `-2`…). Until one exists, a Boss stands in its band's pool. Its Full Bloom bar stays in the same scene.
 - **The Hollow Abbess** (owner, 27 Nov): the cathedral's candlelit sanctuary, checkered marble before an altar of candles, amber glass and a rose window, her root-tree broken through the wall; all four options, picked by seed (`bg-hollow-abbess`).
 - **The Gathered Beast** (owner, 27 Nov): its lair at the heart of the green wood, a trampled clearing under colossal trees hung with antlers, skulls and ribs, lit by a shaft of gold daylight; all four options, picked by seed (`bg-gathered-beast`).
+- **The Expedition Leader** (owner, 27 Nov): the expedition's ship frozen side-on in the sea ice, his lantern-lit surgeon's tent against its hull; the second round (05–08), made without the oversized forceps the first round left on the ice, picked by seed (`bg-expedition-leader`).
 - Later: a more-bloomed version of each pool scene, made from the original so its layout holds, as a tell of the Bloom clock's stage.
 
 ## Where the actors stand
