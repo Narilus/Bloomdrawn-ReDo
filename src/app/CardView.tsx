@@ -1,4 +1,4 @@
-import { cardCost, cardKeywords, cardKind, describeCardLive, type CardDef, type CardInstance, type CardTarget, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
+import { cardCost, cardKeywords, describeCardLive, type CardDef, type CardInstance, type CardTarget, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { cardArt } from '../stage/cardArt.ts';
 
@@ -62,7 +62,7 @@ const TARGET_LABEL: Record<CardTarget, string> = {
 /**
  * A card face, in combat or offered as a reward (DESIGN.md "Cards"; owner, 28 Nov). The caller works
  * out its text and cost. The layout never changes: down the left the cost, the owner's medallion,
- * her name and the Domain sigil; the art window; the title; the type and target; the rules on parchment.
+ * her name and the Domain sigil; the art window; the title; the tags and target; the rules on parchment.
  * The frame is drawn around them from separate ornament pieces.
  */
 export function CardFace({ id, def, owner, text, cost, registry, playable, keyHint, highlight }: FaceProps) {
@@ -75,9 +75,10 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
   const plain = text.replace(MARK, '$2');
   const length = plain.length > 130 ? ' text-xlong' : plain.length > 90 ? ' text-long' : '';
   const name = def?.name ?? id;
-  const type = def
+  // The type line's tags: what kind of card it is beyond its effect. Most cards have none.
+  const tags = def
     ? [
-        ownerless ? 'Symptom' : cardKind(def) === 'attack' ? 'Attack' : 'Skill',
+        ...(ownerless ? ['Symptom'] : []),
         ...(def.slot === 'transcend' ? ['Transcend'] : []),
         ...(def.keywords ?? []).map((k) => k.charAt(0).toUpperCase() + k.slice(1)),
       ].join(' · ')
@@ -105,7 +106,7 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
         <span className="card-name">{name}</span>
       </div>
       <div className="card-typeline">
-        <span className="card-type">{type}</span>
+        <span className="card-type">{tags}</span>
         <span className="card-target">{def ? TARGET_LABEL[def.target] : ''}</span>
       </div>
       <div className="card-text">

@@ -1113,8 +1113,8 @@ kbd {
   white-space: nowrap;
 }
 
-.card-type { color: var(--accent); }
-.card-target { color: var(--parchment); opacity: 0.85; }
+.card-type { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--accent); }
+.card-target { flex-shrink: 0; margin-left: auto; color: var(--parchment); opacity: 0.85; }
 
 /* Rules on solid parchment, live numbers in colour. */
 .card-text {

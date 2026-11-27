@@ -268,6 +268,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card frames (owner, 28 Nov): four Domain frames built in the UI from generated ornament pieces (corners, crest, side vines or other ornament fitting the Domain) around fixed text areas, never one generated image of a whole card. Ownerless cards (Symptoms, Curses) carry a Bloom emblem in place of the medallion.
 - Strike and Defense art is shared per Domain (owner, 28 Nov): one Strike and one Defense picture for each Domain, eight in all. Every Transcend, Flavour, reward and generated card gets its own art.
 - Order of work for cards (owner, 28 Nov): the layout in the game with placeholder art and frames, shown fanned in the hand at 1080p and the smallest supported size for sign-off; then the ornament pieces; then the card art.
+- Card hand size (owner, 28 Nov): at 18px a unit a raised card hid the card to its right, so you had to go two right and back. Made smaller, with room made beside the raised card.
+- No card types (owner, 28 Nov): no Attack or Skill; the line under the title holds tags (Ritual, Transcend and so on) and the target.
 
 ## Open
 - Gear at launch or later (recommendation: later).
