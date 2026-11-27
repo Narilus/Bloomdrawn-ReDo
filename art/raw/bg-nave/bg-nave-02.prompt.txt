@@ -1,0 +1,12 @@
+Background: scene
+Codex thread: 01a21a68-2dd1-7e90-9a3b-122651d8a3e1
+
+Painterly gothic fantasy illustration, fine linework, anime-influenced faces. Deep plum and charcoal background with soft vignette. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac as the main light source. Antique gold filigree accents. No text, no letters, no logos.
+
+A wide landscape battle background for a side-view turn-based RPG: an empty place with no people, no creatures and no figures of any kind. The view is from standing eye height, looking straight ahead and a little down, square on to the far wall.
+
+The floor: one broad, level plane of cracked grey flagstones that fills the lower 60% of the image from the left edge to the right edge, receding gently toward the far wall. Nothing stands on the floor: no steps, stairs, ledges, pillars, plinths, altars, pews, railings, rubble, roots, puddles or changes in level anywhere in the lower 60%. A few loose blush petals and thin flesh-coloured roots lie flat in the cracks.
+
+The far wall: it meets the floor in one straight, unbroken horizontal line about 40% of the way down from the top, running the full width of the image. Above that line stands the wall of a ruined gothic cathedral nave: three tall pointed arches with dark recesses, a round rose window of dark stone tracery above the middle arch, flesh-coloured vines with visible muscle striation growing through the stonework, and clusters of skin-petal flowers glowing blush pink and lilac along the base of the wall. Any columns are carved into the far wall itself; nothing stands in front of the wall line.
+
+Light: the glowing flowers along the wall base are the main light, laying two soft pools of pink light on the floor at the centre-left and the centre-right. The bottom fifth of the image is darker flagstone falling into shadow, and the top corners fall into deep vignette. The middle of the image stays calm and low in detail; ornament lives at the top and along the wall.

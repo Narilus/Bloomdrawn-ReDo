@@ -112,3 +112,43 @@ export function composite(base: Rgba, top: Rgba, x: number, y: number): void {
 export function fill(image: Rgba, [r, g, b]: readonly [number, number, number]): void {
   for (let i = 0; i < image.data.length; i += 4) image.data.set([r, g, b, 255], i);
 }
+
+/** Bilinear resize of an opaque image, used to bring a scene up to the 1920×1080 frame. */
+export function scaleBilinear(image: Rgba, width: number, height: number): Rgba {
+  const out = blank(width, height);
+  const fx = image.width / width;
+  const fy = image.height / height;
+  for (let y = 0; y < height; y++) {
+    const sy = Math.min(image.height - 1, Math.max(0, (y + 0.5) * fy - 0.5));
+    const y0 = Math.floor(sy);
+    const y1 = Math.min(image.height - 1, y0 + 1);
+    const ty = sy - y0;
+    for (let x = 0; x < width; x++) {
+      const sx = Math.min(image.width - 1, Math.max(0, (x + 0.5) * fx - 0.5));
+      const x0 = Math.floor(sx);
+      const x1 = Math.min(image.width - 1, x0 + 1);
+      const tx = sx - x0;
+      const o = (y * width + x) * 4;
+      for (let c = 0; c < 4; c++) {
+        const at = (px: number, py: number) => image.data[(py * image.width + px) * 4 + c] ?? 0;
+        const top = at(x0, y0) * (1 - tx) + at(x1, y0) * tx;
+        const bottom = at(x0, y1) * (1 - tx) + at(x1, y1) * tx;
+        out.data[o + c] = Math.round(top * (1 - ty) + bottom * ty);
+      }
+    }
+  }
+  return out;
+}
+
+/** Darkens an ellipse centred on (cx, cy) by `alpha`, as the battlefield's shadow under each actor. */
+export function shade(image: Rgba, cx: number, cy: number, rx: number, ry: number, [r, g, b]: readonly [number, number, number], alpha: number): void {
+  for (let y = Math.max(0, Math.floor(cy - ry)); y <= Math.min(image.height - 1, Math.ceil(cy + ry)); y++) {
+    for (let x = Math.max(0, Math.floor(cx - rx)); x <= Math.min(image.width - 1, Math.ceil(cx + rx)); x++) {
+      if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 > 1) continue;
+      const o = (y * image.width + x) * 4;
+      image.data[o] = Math.round((image.data[o] ?? 0) * (1 - alpha) + r * alpha);
+      image.data[o + 1] = Math.round((image.data[o + 1] ?? 0) * (1 - alpha) + g * alpha);
+      image.data[o + 2] = Math.round((image.data[o + 2] ?? 0) * (1 - alpha) + b * alpha);
+    }
+  }
+}

@@ -18,6 +18,10 @@ describe('prompts', () => {
     expect(prompt).toBe(`${STYLE_REFERENCE}\n\nSTEM.\n\nBRIEF.\n\nBackground: fully transparent.\n`);
   });
 
+  it('a scene has no background line: it fills its own canvas', () => {
+    expect(composePrompt({ stem: 'STEM.', brief: 'BRIEF.', styleReference: false })).toBe('STEM.\n\nBRIEF.\n');
+  });
+
   it('refuses banned words, Domain names, and the key colour on the figure', () => {
     const prompt = composePrompt({ stem: 'A cosmic Rapture priestess.', brief: 'Blue sash.', background: 'blue', styleReference: false });
     expect(promptProblems(prompt, 'blue')).toEqual(['banned word "cosmic"', 'Domain name "Rapture"', 'the figure mentions "blue", the key colour']);

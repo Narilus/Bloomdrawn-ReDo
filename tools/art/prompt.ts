@@ -26,12 +26,12 @@ export function stemFrom(design: string, label: string): string {
 }
 
 /** Every rule a prompt breaks, as readable messages. Empty means the prompt may be sent. */
-export function promptProblems(prompt: string, background: Background): string[] {
+export function promptProblems(prompt: string, background?: Background): string[] {
   const problems: string[] = [];
   const lower = prompt.toLowerCase();
   for (const word of BANNED) if (new RegExp(`\\b${word}`).test(lower)) problems.push(`banned word "${word}"`);
   for (const domain of DOMAINS) if (new RegExp(`\\b${domain}\\b`, 'i').test(prompt)) problems.push(`Domain name "${domain}"`);
-  if (background !== 'transparent') {
+  if (background && background !== 'transparent') {
     // The key colour is cut out of the image, so the figure must not use it.
     const body = prompt.replace(backgroundLine(background), '');
     if (new RegExp(`\\b${background}\\b`, 'i').test(body)) problems.push(`the figure mentions "${background}", the key colour`);
@@ -42,7 +42,8 @@ export function promptProblems(prompt: string, background: Background): string[]
 export interface PromptParts {
   stem: string;
   brief: string;
-  background: Background;
+  /** Absent for a scene, which fills its own canvas. */
+  background?: Background | undefined;
   /** True when a style reference image is attached. */
   styleReference: boolean;
 }
@@ -51,5 +52,5 @@ export const STYLE_REFERENCE =
   'Image 1 is a style reference only: match its pixel density, outline weight, shading and proportions. Do not copy its character, costume, colours or pose.';
 
 export function composePrompt({ stem, brief, background, styleReference }: PromptParts): string {
-  return [...(styleReference ? [STYLE_REFERENCE] : []), stem, brief.trim(), backgroundLine(background)].join('\n\n') + '\n';
+  return [...(styleReference ? [STYLE_REFERENCE] : []), stem, brief.trim(), ...(background ? [backgroundLine(background)] : [])].join('\n\n') + '\n';
 }

@@ -1,20 +1,25 @@
-// Art pipeline: generate battle sprite and weapon icon options with `codex exec`, cut them out, and
-// lay them out for the owner to pick. Run `npm run art` for usage.
+// Art pipeline: generate battle sprite, weapon icon and battle background options with `codex exec`,
+// cut them out, and lay them out for the owner to pick. Run `npm run art` for usage.
 import { spawn } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { cutout, iconise, standardise } from './cutout.ts';
-import { blank, composite, fill, readPng, scaleArea, scaleNearest, writePng, type Rgba } from './image.ts';
+import { blank, composite, crop, fill, readPng, scaleArea, scaleBilinear, scaleNearest, shade, writePng, type Rgba } from './image.ts';
+import { enemyDepth, enemyHeight, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type EnemySize } from '../../src/stage/layout.ts';
 import { composePrompt, promptProblems, stemFrom, type Background } from './prompt.ts';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 const CODEX_HOME = process.env.CODEX_HOME ?? join(homedir(), '.codex');
 const USAGE = `Usage:
-  npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>] [--stem battle|enemy|icon]
+  npm run art -- gen <character> [--n 3] [--bg transparent|blue|green] [--ref <png>] [--stem battle|enemy|icon|scene]
       Stem from DESIGN.md + art/briefs/<character>.txt -> art/raw/<character>/<character>-NN.png
-      (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down; --stem icon: a weapon icon)
+      (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down; --stem icon: a weapon icon;
+      --stem scene: a battle background, wide and opaque, from the prompt stem)
+  npm run art -- stage <out.png> <raw.png...>
+      Each background at 1920×1080 with the real sprites at their in-game feet positions: the party with
+      three enemies, and the party facing a Boss alone (out: art/cut/<name>-stage.png)
   npm run art -- cut <raw.png...>
       Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
@@ -40,12 +45,14 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle, enemy or icon');
-    await generate(rest[0], Number(values.n), background, stem, values.ref);
+    if (!stem) throw new Error('--stem must be battle, enemy, icon or scene');
+    await generate(rest[0], Number(values.n), values.stem === 'scene' ? undefined : background, stem, values.ref);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
   } else if (command === 'pick' && rest[0]) {
     pick(rest[0], values.icon);
+  } else if (command === 'stage' && rest.length > 1) {
+    stage(rest[0] as string, rest.slice(1));
   } else if (command === 'sheet' && rest.length > 1) {
     sheet(rest[0] as string, rest.slice(1), Number(values.height));
   } else {
@@ -55,9 +62,10 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem' } as const;
 
-async function generate(character: string, count: number, background: Background, label: string, reference?: string) {
+/** `background` is absent for a scene: opaque and wide. */
+async function generate(character: string, count: number, background: Background | undefined, label: string, reference?: string) {
   if (count < 1 || count > 4) throw new Error('--n must be 1 to 4');
   const stem = stemFrom(readFileSync(join(ROOT, 'docs/DESIGN.md'), 'utf8'), label);
   const brief = readFileSync(join(ROOT, 'art/briefs', `${character}.txt`), 'utf8');
@@ -72,16 +80,16 @@ async function generate(character: string, count: number, background: Background
   const taken = readdirSync(dir).map((f) => Number(/-(\d+)\.png$/.exec(f)?.[1] ?? 0));
   const first = Math.max(0, ...taken) + 1;
   const names = Array.from({ length: count }, (_, i) => `${character}-${String(first + i).padStart(2, '0')}`);
-  console.log(`Generating ${names.join(', ')} (${background} background${reference ? `, style reference ${reference}` : ''})…`);
+  console.log(`Generating ${names.join(', ')} (${background ? `${background} background` : 'scene'}${reference ? `, style reference ${reference}` : ''})…`);
 
   await Promise.all(
     names.map(async (name) => {
       try {
         // A run occasionally ends without calling the image tool; one retry covers it.
-        const run = () => codexImage(prompt, background === 'transparent', referencePath);
+        const run = () => codexImage(prompt, background === 'transparent', referencePath, !background);
         const { image, thread } = await run().catch(run);
         copyFileSync(image, join(dir, `${name}.png`));
-        const header = [`Background: ${background}`, ...(reference ? [`Reference: ${reference}`] : []), `Codex thread: ${thread}`];
+        const header = [`Background: ${background ?? 'scene'}`, ...(reference ? [`Reference: ${reference}`] : []), `Codex thread: ${thread}`];
         writeFileSync(join(dir, `${name}.prompt.txt`), `${header.join('\n')}\n\n${prompt}`);
         console.log(`  ${relative(ROOT, join(dir, `${name}.png`))}`);
       } catch (error) {
@@ -97,13 +105,13 @@ async function generate(character: string, count: number, background: Background
  * thread ID (generated_images/<thread>/), because the agent's reply can name another run's file
  * when several run at once.
  */
-function codexImage(prompt: string, transparent: boolean, reference?: string): Promise<{ image: string; thread: string }> {
+function codexImage(prompt: string, transparent: boolean, reference?: string, landscape = false): Promise<{ image: string; thread: string }> {
   const references = reference
     ? `referenced_image_paths = ["${reference}"] (a style reference)`
     : 'no referenced_image_paths and no num_last_images_to_include';
   const instruction = [
     'Make exactly one call to your image generation tool, then stop. Do not edit, copy or create any files.',
-    `Arguments: transparent_background = ${transparent}; ${references}; prompt = the text between <prompt> and </prompt> below, verbatim.`,
+    `Arguments: transparent_background = ${transparent}; ${references};${landscape ? ' if the tool takes a size or aspect ratio, the widest landscape one (1536x1024);' : ''} prompt = the text between <prompt> and </prompt> below, verbatim.`,
     `<prompt>\n${prompt}</prompt>`,
   ].join('\n\n');
   return new Promise((resolve, reject) => {
@@ -145,6 +153,53 @@ function save(out: string, image: Rgba) {
   mkdirSync(dirname(out), { recursive: true });
   writePng(out, image);
   console.log(`${relative(ROOT, out)} (${image.width}×${image.height})`);
+}
+
+/** A background cropped to 16:9 from its centre and brought to the 1920×1080 frame. */
+export function frame(image: Rgba): Rgba {
+  const width = Math.min(image.width, Math.round((image.height * WIDTH) / HEIGHT));
+  const height = Math.round((width * HEIGHT) / WIDTH);
+  const cut = crop(image, Math.round((image.width - width) / 2), Math.round((image.height - height) / 2), width, height);
+  return width >= WIDTH ? scaleArea(cut, WIDTH, HEIGHT) : scaleBilinear(cut, WIDTH, HEIGHT);
+}
+
+const SHADOW: [number, number, number] = [18, 12, 16];
+/** The starters, front to back, and the enemies each preview stands against a background. */
+const PARTY = ['maelia', 'agathe', 'anthe', 'leonora'];
+const LINEUPS: readonly (readonly [string, EnemySize | undefined][])[] = [
+  [['hound-mother', 'large'], ['garden-husk', undefined], ['petal-horror', undefined]],
+  [['hollow-abbess', 'huge']],
+];
+
+/** One actor as the battlefield draws it: a shadow at the feet, the sprite anchored 97% down. */
+function place(canvas: Rgba, name: string, x: number, y: number, height: number, shadowRadius: number) {
+  shade(canvas, x, y, shadowRadius, shadowRadius * 0.22, SHADOW, 0.45);
+  const sprite = fitHeight(readPng(join(ROOT, 'src/assets/battle', `${name}.png`)), Math.round(height));
+  composite(canvas, sprite, Math.round(x - sprite.width / 2), Math.round(y - sprite.height * 0.97));
+}
+
+function stage(out: string, files: string[]) {
+  const shots = files.flatMap((file) => {
+    const scene = frame(readPng(file));
+    return LINEUPS.map((enemies) => {
+      const canvas = { ...scene, data: new Uint8Array(scene.data) };
+      // Back to front, as the battlefield draws them.
+      for (let slot = PARTY.length - 1; slot >= 0; slot--) {
+        const home = PARTY_HOMES[slot]!;
+        place(canvas, PARTY[slot]!, home.x, home.y, PARTY_HEIGHT * home.scale, 120 * home.scale);
+      }
+      const placed = enemies.map(([name, size], slot) => ({ name, size, home: enemyHome(slot, enemies.length)! }));
+      for (const { name, size, home } of placed.sort((a, b) => enemyDepth(a.home, a.size) - enemyDepth(b.home, b.size))) place(canvas, name, home.x, home.y, enemyHeight(size), enemyHeight(size) * 0.5);
+      return canvas;
+    });
+  });
+  // Each background is a row: three enemies, then a Boss, at half size.
+  const half = (image: Rgba) => scaleArea(image, WIDTH / 2, HEIGHT / 2);
+  const gap = 24;
+  const canvas = blank(WIDTH + gap * 3, (HEIGHT / 2 + gap) * files.length + gap);
+  fill(canvas, STAGE);
+  shots.forEach((shot, i) => composite(canvas, half(shot), gap + (i % 2) * (WIDTH / 2 + gap), gap + Math.floor(i / 2) * (HEIGHT / 2 + gap)));
+  save(out, canvas);
 }
 
 /** Stage colour behind the party (the backdrop's mid plum). */
