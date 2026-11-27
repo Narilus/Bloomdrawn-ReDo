@@ -44,7 +44,8 @@ export class Battlefield {
   private fit: Fit | undefined;
   private breath: () => { duration: number; delay: number } = () => ({ duration: 3, delay: 0 });
 
-  static async create(app: Application, state: CombatState): Promise<Battlefield> {
+  /** `scene` is the background's URL (`scenes.ts`); without one the drawn backdrop stands in. */
+  static async create(app: Application, state: CombatState, scene?: string): Promise<Battlefield> {
     const field = new Battlefield();
     await document.fonts.load('800 54px "Nunito Sans"');
     const load = (key: string) => (battleArt[key] ? Assets.load<Texture>(battleArt[key] as string) : undefined);
@@ -52,6 +53,7 @@ export class Battlefield {
     // Summonable enemies too, so a summon appears at once.
     const kinds = [...new Set([...state.enemies.map((e) => e.enemy), ...summonable(state)])];
     await Promise.all(kinds.map(load));
+    const background = scene ? await Assets.load<Texture>(scene) : undefined;
 
     const cosmetic = createStreams(7, ['idle']);
     const breath = () => ({ duration: 2.8 + nextFloat(cosmetic, 'idle') * 0.9, delay: nextFloat(cosmetic, 'idle') * 1.5 });
@@ -60,7 +62,7 @@ export class Battlefield {
     // Bodies sort by depth (Actor; enemyDepth for enemies), so a summon that arrives later still
     // takes its place; shadows stay at 0, under everyone.
     world.sortableChildren = true;
-    app.stage.addChild(backdrop(), world);
+    app.stage.addChild(background ? field.scene(background) : backdrop(), world);
 
     // Party: back slot first.
     for (let slot = state.members.length - 1; slot >= 0; slot--) {
@@ -118,6 +120,13 @@ export class Battlefield {
       // The actor's depth scale is applied by the actor, so undo it here.
       entry.sprite.scale.set(entry.height / entry.depth / height);
     }
+  }
+
+  /** The background, filling the frame, resampled to its on-screen size like every sprite. */
+  private scene(texture: Texture): Sprite {
+    const sprite = this.sizedSprite(texture, HEIGHT, 1);
+    sprite.anchor.set(0, 0);
+    return sprite;
   }
 
   /** A sprite drawn `height` tall on screen inside an actor scaled by `depth`. */

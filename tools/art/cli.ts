@@ -1,8 +1,8 @@
 // Art pipeline: generate battle sprite, weapon icon and battle background options with `codex exec`,
 // cut them out, and lay them out for the owner to pick. Run `npm run art` for usage.
-import { spawn } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { spawn, spawnSync } from 'node:child_process';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { cutout, iconise, standardise } from './cutout.ts';
@@ -24,9 +24,11 @@ const USAGE = `Usage:
       Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
       The cut sprites side by side at in-game height on the stage colour (out: art/cut/<character>-sheet.png)
-  npm run art -- pick <raw.png> [--icon]
+  npm run art -- pick <raw.png> [--icon] [--scene <name>]
       The owner's pick, cut and stored at the standard height -> src/assets/battle/<character>.png
-      (--icon: fitted in a square instead -> src/assets/weapons/<weapon>.png)`;
+      (--icon: fitted in a square instead -> src/assets/weapons/<weapon>.png;
+      --scene: a background, framed to 1920×1080 as WebP -> src/assets/scenes/<name>.webp, where <name> is
+      band<N>-<n> for a band's pool or a Boss's enemy ID without "enemy.")`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -38,6 +40,7 @@ async function main() {
       height: { type: 'string', default: '400' },
       stem: { type: 'string', default: 'battle' },
       icon: { type: 'boolean', default: false },
+      scene: { type: 'string' },
     },
   });
   const [command, ...rest] = positionals;
@@ -49,6 +52,8 @@ async function main() {
     await generate(rest[0], Number(values.n), values.stem === 'scene' ? undefined : background, stem, values.ref);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
+  } else if (command === 'pick' && rest[0] && values.scene) {
+    pickScene(rest[0], values.scene);
   } else if (command === 'pick' && rest[0]) {
     pick(rest[0], values.icon);
   } else if (command === 'stage' && rest.length > 1) {
@@ -147,6 +152,20 @@ function pick(file: string, icon = false) {
   const name = `${basename(dirname(file))}.png`;
   if (icon) save(join(ROOT, 'src/assets/weapons', name), iconise(cutout(readPng(file))));
   else save(join(ROOT, 'src/assets/battle', name), standardise(cutout(readPng(file))));
+}
+
+/** A background framed to 1920×1080 and stored as WebP (a PNG that size is several megabytes). */
+function pickScene(file: string, name: string) {
+  if (!/^(band\d-\d+|[a-z-]+)$/.test(name)) throw new Error('--scene must be band<N>-<n> or a Boss ID such as hollow-abbess');
+  const scratch = mkdtempSync(join(tmpdir(), 'scene-'));
+  const png = join(scratch, 'frame.png');
+  writePng(png, frame(readPng(file)));
+  const out = join(ROOT, 'src/assets/scenes', `${name}.webp`);
+  mkdirSync(dirname(out), { recursive: true });
+  const run = spawnSync('ffmpeg', ['-nostdin', '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '88', out], { stdio: 'inherit' });
+  rmSync(scratch, { recursive: true, force: true });
+  if (run.status !== 0) throw new Error('ffmpeg failed');
+  console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
 }
 
 function save(out: string, image: Rgba) {

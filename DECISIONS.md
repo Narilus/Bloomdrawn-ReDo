@@ -234,6 +234,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Audio (owner, 27 Nov): sufficient for a first pass; to revisit later. Gaps for then: steps while crossing the map, and music (the map, normal fights, Elite fights, a generic Boss track, and some Bosses' own).
 - Options (owner, 27 Nov): tabs, for now Profile (the current profile options) and Sound (volume, and a checkbox to mute each kind of sound: UI presses, cards, combat and so on).
 - M6.10 signed off (owner, 27 Nov): audio as a first pass and Options in tabs. M6.11 Art pass is next.
+- Battle backgrounds (owner, 27 Nov): each band of depths has a biome. Normal fights and elites draw from a pool of its scenes for variety; Bosses get richer or wholly custom scenes. Band 1 is the cathedral, and all four nave options are its pool. A Bloom-stage tell comes later, as more-bloomed versions of the pool scenes. Actors must never seem to stand on a wall or the wrong plane.
 
 ## Open
 - Gear at launch or later (recommendation: later).

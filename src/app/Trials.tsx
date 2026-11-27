@@ -107,6 +107,8 @@ interface TrialFightProps {
   domain: string;
   tier: number;
   setup: CombatSetup;
+  /** The boss's encounter ID, for its own background. */
+  encounter: string;
   /** Settles the fight: pays a win, and refuses a tier not open. */
   onEnd: (won: boolean) => Promise<TrialResult>;
   onAgain: () => void;
@@ -114,7 +116,7 @@ interface TrialFightProps {
 }
 
 /** A Trial's one fight, then what it paid. "Give up" leaves it as a defeat. */
-export function TrialFight({ domain, tier, setup, onEnd, onAgain, onBack }: TrialFightProps) {
+export function TrialFight({ domain, tier, setup, encounter, onEnd, onAgain, onBack }: TrialFightProps) {
   const [result, setResult] = useState<TrialResult | null>(null);
   const [leaving, setLeaving] = useState(false);
   const settle = useCallback((won: boolean) => void onEnd(won).then(setResult), [onEnd]);
@@ -122,7 +124,7 @@ export function TrialFight({ domain, tier, setup, onEnd, onAgain, onBack }: Tria
 
   return (
     <>
-      <Combat setup={setup} label={trialLabel(domain, tier)} onEnd={ended} />
+      <Combat setup={setup} label={trialLabel(domain, tier)} onEnd={ended} boss={encounter} />
       {!result && (
         <button className="trial-leave plaque" onClick={() => setLeaving(true)}>
           Give up

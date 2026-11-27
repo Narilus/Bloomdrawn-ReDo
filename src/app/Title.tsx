@@ -169,6 +169,7 @@ export function Game() {
         key={seed}
         domain={domain}
         tier={tier}
+        encounter={encounter.id}
         setup={trialFight(seed, party, { ...growthOf(profile), weapons: wieldedOf(profile, party, weapons, registry) }, encounter.enemies, tier)}
         onEnd={(won) => saves.trial(domain, tier, won)}
         onAgain={() => setScreen({ ...screen, seed: Math.floor(Math.random() * 2 ** 31) })}

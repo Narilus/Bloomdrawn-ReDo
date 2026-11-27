@@ -176,6 +176,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
         label={label}
         onChange={onFightChange}
         onEnd={onFightEnd}
+        boss={tile?.kind === 'boss' ? tile.content : undefined}
       />
     );
   }

@@ -19,6 +19,7 @@ import { useFrame } from './Frame.tsx';
 import { Hand, type Aim } from './Hand.tsx';
 import { cuesOf, playCues } from './sound.ts';
 import { DomainCounters, EnemyPlate, PartyBar, Pile, Portraits, RelicBar, UltimatePanel } from './Hud.tsx';
+import { sceneUrl } from '../stage/scenes.ts';
 
 interface Props {
   /** Read once at mount; remount (change `key`) for the next fight. */
@@ -31,10 +32,12 @@ interface Props {
   onChange?: (state: CombatState) => void;
   /** Called once the fight has ended and its last hits have played out. */
   onEnd: (state: CombatState) => void;
+  /** A Boss fight's encounter ID, for its own background (`scenes.ts`). */
+  boss?: string | undefined;
 }
 
 /** One fight: the battlefield, the HUD and the hand. */
-export function Combat({ setup, resume, label, onChange, onEnd }: Props) {
+export function Combat({ setup, resume, label, onChange, onEnd, boss }: Props) {
   const { fit, stageHost } = useFrame();
   // A resumed fight has no opening events to play: its bars show it as it stands.
   const [opening] = useState(() => (resume ? { state: resume, before: vitalsOf(resume), events: [], vitals: [] } : startCombat(setup, registry)));
@@ -180,7 +183,7 @@ export function Combat({ setup, resume, label, onChange, onEnd }: Props) {
 
   return (
     <div className="combat">
-      {stageHost && <StageView initialState={state} fit={fit} host={stageHost} onReady={onReady} />}
+      {stageHost && <StageView initialState={state} fit={fit} host={stageHost} onReady={onReady} scene={sceneUrl({ depth: setup.enemyLevel ?? 1, boss, seed: setup.seed })} />}
       <Portraits state={state} choosing={ultimateFor !== null} onUltimate={(m) => !busy && setUltimateFor(m)} />
       <DomainCounters state={state} />
       <RelicBar relics={state.relics.map((r) => r.relic)} />

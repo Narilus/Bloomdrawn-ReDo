@@ -13,19 +13,21 @@ interface Props {
   /** A screen-space element outside any CSS transform, so the canvas is never resampled. */
   host: HTMLElement;
   onReady: (field: Battlefield | null) => void;
+  /** The background's URL, read once at mount. */
+  scene?: string | undefined;
 }
 
 /** Mounts the PixiJS battlefield directly inside a React component. */
-export function StageView({ initialState, fit, host, onReady }: Props) {
+export function StageView({ initialState, fit, host, onReady, scene }: Props) {
   const mount = useRef<HTMLDivElement>(null);
   const appRef = useRef<Application | null>(null);
   const fieldRef = useRef<Battlefield | null>(null);
-  const init = useRef({ initialState, fit, onReady });
+  const init = useRef({ initialState, fit, onReady, scene });
   // The latest fit, for an app that finishes starting after a resize.
   const latest = useRef(fit);
 
   useEffect(() => {
-    const { initialState: state, fit: f, onReady: ready } = init.current;
+    const { initialState: state, fit: f, onReady: ready, scene: background } = init.current;
     const app = new Application();
     let field: Battlefield | null = null;
     let cancelled = false;
@@ -36,7 +38,7 @@ export function StageView({ initialState, fit, host, onReady }: Props) {
         applyFit(app, latest.current);
         mount.current?.appendChild(app.canvas);
         appRef.current = app;
-        field = await Battlefield.create(app, state);
+        field = await Battlefield.create(app, state, background);
         if (cancelled) return;
         field.fitTo(latest.current);
         fieldRef.current = field;
