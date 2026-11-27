@@ -1,0 +1,17 @@
+Background: scene
+Reference (likeness): src/assets/battle/maelia.png
+Codex thread: 01a21ce0-c202-70f0-957f-2198587d12a6
+
+Image 1 is this exact character, drawn as a small pixel-art battle sprite. Paint the same person: keep her face, age, hair colour and style, skin tone, eye colour, costume, every colour and every prop and ornament exactly as Image 1 shows them, and add nothing to her design. Only the medium and framing change: a painted portrait, not pixel art.
+
+Painterly gothic fantasy illustration, fine linework, anime-influenced faces. Deep plum and charcoal background with soft vignette. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac as the main light source. Antique gold filigree accents. No text, no letters, no logos.
+
+A square character portrait, head and shoulders, of the woman in Image 1: a tall woman in her 40s, a midwife-priestess, seen straight from the front. Her face, shoulders and body face the viewer directly and squarely, not turned to either side, her head level, her eyes looking straight into the viewer's, gentle and watchful, with a faint warm smile. Image 1 shows her from the side; turn her to face the viewer while keeping every detail of her face, hair and costume the same, with both sides of the hood and robes drawn to match.
+
+Her face, exactly as Image 1: fair skin, soft features, calm grey-hazel eyes. Her long pale ash-blonde hair falls past her shoulders from under the hood, with one loose braid over her shoulder.
+
+Her costume, exactly as Image 1: a deep hood of blush-pink and ivory petal-membrane, with fine darker pink veins running through it like a leaf, its edge trimmed with small clusters of blush skin-petal flowers. Under it, robes of the same layered blush and ivory petal-membrane, a gold braided-cord bodice set with an oval pink gem, and a thin gold necklace with a small pink teardrop gem. Beside her right shoulder, on the left of the image, rises the top of her staff: twisted brass wound with gold vine, ending in a clear glass orb holding a curled pink embryo bud, with small ivory seed pods hanging from it on cords.
+
+Framing: her face is centred left to right and is the centre of the image, the top of the hood near the top edge, the chin a little above the middle, the shoulders and the top of the bodice at the bottom edge. Plain soft background of deep plum fading to charcoal at the edges, with a faint blush glow behind her head. No other figures and no scenery.
+
+Palette: blush pink, ivory, pale ash-blonde, warm gold and brass, a little raw pink in the gems and the embryo bud, on deep plum.

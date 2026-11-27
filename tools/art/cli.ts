@@ -21,7 +21,8 @@ const USAGE = `Usage:
       A square painted bust from art/briefs/portrait-<character>.txt, with her battle sprite attached as the
       likeness to keep (face, hair, costume, colours, props) -> art/raw/portrait-<character>/
   npm run art -- faces <out.png> <character> <raw.png...>
-      Each portrait option beside her battle sprite, and as the game shows it: the combat ring (at 1× and 2×)
+      Each portrait option beside her battle sprite, and as the game shows it: the combat ring, whole and as a
+      close crop of the face (each at 2× and 1×),
       and the card's art window (out: art/cut/portrait-<character>-faces.png)
   npm run art -- stage <out.png> <raw.png...> [--boss hollow-abbess]
       Each background at 1920×1080 with the real sprites at their in-game feet positions: the party with
@@ -216,6 +217,13 @@ const FACE = 72;
 /** The card's art window (`.card-art`): the card's inner width by 104px, the image covered from 25% down. */
 const CARD_ART: readonly [number, number] = [190, 104];
 const GOLD: [number, number, number] = [184, 149, 90];
+/** A close crop for the ring, centred on the face: the briefs centre it left to right, with the chin a little above the middle. */
+const CLOSE = { side: 0.56, top: 0.06 };
+
+function closeCrop(square: Rgba): Rgba {
+  const side = Math.round(square.width * CLOSE.side);
+  return crop(square, Math.round((square.width - side) / 2), Math.round(square.height * CLOSE.top), side, side);
+}
 
 /** `image` drawn into a circle of radius r centred at (cx, cy), over whatever is there. */
 function disc(canvas: Rgba, image: Rgba, cx: number, cy: number, r: number) {
@@ -248,7 +256,7 @@ function cardCrop(square: Rgba, scale: number): Rgba {
 function faces(out: string, character: string, files: string[]) {
   const sprite = fitHeight(readPng(join(ROOT, 'src/assets/battle', `${character}.png`)), 480);
   const gap = 24;
-  const columns = [400, 480, RING * 2, RING, CARD_ART[0] * 2];
+  const columns = [400, 480, RING * 2, RING, RING * 2, RING, CARD_ART[0] * 2];
   const width = columns.reduce((sum, w) => sum + w + gap, gap);
   const canvas = blank(width, (480 + gap) * files.length + gap);
   fill(canvas, STAGE);
@@ -263,12 +271,15 @@ function faces(out: string, character: string, files: string[]) {
     x += columns[0]! + gap;
     composite(canvas, scaleArea(square, 480, 480), x, top);
     x += 480 + gap;
-    for (const scale of [2, 1]) {
-      const cx = x + RING * scale / 2;
-      const cy = top + 60 + RING;
-      ring(canvas, cx, cy, (RING * scale) / 2);
-      disc(canvas, square, cx, cy, (FACE * scale) / 2);
-      x += RING * scale + gap;
+    // The ring with the whole portrait, then with the close crop, each at 2× and 1×.
+    for (const face of [square, closeCrop(square)]) {
+      for (const scale of [2, 1]) {
+        const cx = x + (RING * scale) / 2;
+        const cy = top + 60 + RING;
+        ring(canvas, cx, cy, (RING * scale) / 2);
+        disc(canvas, face, cx, cy, (FACE * scale) / 2);
+        x += RING * scale + gap;
+      }
     }
     composite(canvas, cardCrop(square, 2), x, top + 60);
   });
