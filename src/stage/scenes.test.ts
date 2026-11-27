@@ -21,6 +21,14 @@ describe('sceneName', () => {
     expect(sceneName(names, { depth: 10, boss: 'encounter.gathered-beast', seed: 2 })).toBe('band1-3');
   });
 
+  it("a Boss with a pool of its own draws from it by seed, and never from another Boss's or its band's", () => {
+    const pools = ['band2-1', 'mother-root-1', 'mother-root-2', 'mother-root-3', 'mother-root-full-bloom', 'mother-roots'];
+    const seen = new Set(Array.from({ length: 30 }, (_, seed) => sceneName(pools, { depth: 15, boss: 'encounter.mother-root', seed })));
+    expect([...seen].sort()).toEqual(['mother-root-1', 'mother-root-2', 'mother-root-3']);
+    expect(sceneName(pools, { depth: 15, boss: 'encounter.mother-root', seed: 4 })).toBe('mother-root-2');
+    expect(sceneName(pools, { depth: 15, boss: 'encounter.mother', seed: 0 })).toBe('band2-1');
+  });
+
   it('a band with no art yet has none, so the drawn backdrop stays', () => {
     expect(sceneName(names, { depth: 25, seed: 0 })).toBeUndefined();
     expect(sceneName([], { depth: 1, seed: 0 })).toBeUndefined();

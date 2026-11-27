@@ -13,7 +13,8 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 | 5 | 41–50 | The source: the crater where the Bloom took root, black basalt, grey ash and bone roots around a red heart, for contrast | the four craters (`bg-source`), in the game |
 
 - Normal fights and elites draw from their band's pool, about four scenes each, picked by the fight's seed so a resumed fight keeps its scene (`src/stage/scenes.ts`). The band is the run's depth (a Trial's level), not the enemies' own band.
-- The 6 run Bosses and 4 Trial Bosses get richer or wholly custom scenes, named after their encounter (`hollow-abbess.webp`). Until one exists, a Boss stands in its band's pool.
+- The 6 run Bosses and 4 Trial Bosses get richer or wholly custom scenes, named after their encounter: one (`hollow-abbess.webp`) or a pool of their own picked by seed (`hollow-abbess-1.webp`, `-2`…). Until one exists, a Boss stands in its band's pool. Its Full Bloom bar stays in the same scene.
+- **The Hollow Abbess** (owner, 27 Nov): the cathedral's candlelit sanctuary, checkered marble before an altar of candles, amber glass and a rose window, her root-tree broken through the wall; all four options, picked by seed (`bg-hollow-abbess`).
 - Later: a more-bloomed version of each pool scene, made from the original so its layout holds, as a tell of the Bloom clock's stage.
 
 ## Where the actors stand
@@ -39,7 +40,7 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 
 ## How a background is made and checked
 
-`npm run art -- gen bg-<scene> --stem scene --n 4` makes wide options. `npm run art -- stage art/cut/bg-<scene>-stage.png art/raw/bg-<scene>/*.png` crops each option to 16:9 and puts the real sprites on it at their feet positions, with the game's shadows and draw order: the starters against three enemies (a large anchor and two flanks), and against a Boss alone. The owner picks from that sheet, so a floor line in the wrong place is seen with the actors on it, not guessed at. `npm run art -- pick <raw.png> --scene band<N>-<n>` (or a Boss's name) frames the pick to 1920×1080 as WebP in `src/assets/scenes/`, about 270 KB each, and the game finds it by name.
+`npm run art -- gen bg-<scene> --stem scene --n 4` makes wide options. `npm run art -- stage art/cut/bg-<scene>-stage.png art/raw/bg-<scene>/*.png` crops each option to 16:9 and puts the real sprites on it at their feet positions, with the game's shadows and draw order: the starters against three enemies (a large anchor and two flanks), and against a Boss alone. The owner picks from that sheet, so a floor line in the wrong place is seen with the actors on it, not guessed at. `npm run art -- pick <raw.png> --scene band<N>-<n>` (or a Boss's name, alone or with `-<n>`) frames the pick to 1920×1080 as WebP in `src/assets/scenes/`, about 270 KB each, and the game finds it by name.
 
 ## Open
 

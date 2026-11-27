@@ -244,6 +244,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Band 5's backgrounds (owner, 27 Nov): the crater where the Bloom took root, for contrast (grey ash, black basalt, bone-white roots, a red heart, an overcast sky); all four options.
 
+- The Hollow Abbess's scene (owner, 27 Nov): all four candlelit sanctuaries, the game picking between them by seed. A Boss may have a pool of its own scenes.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

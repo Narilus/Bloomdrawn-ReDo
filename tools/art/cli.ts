@@ -156,7 +156,7 @@ function pick(file: string, icon = false) {
 
 /** A background framed to 1920×1080 and stored as WebP (a PNG that size is several megabytes). */
 function pickScene(file: string, name: string) {
-  if (!/^(band\d-\d+|[a-z-]+)$/.test(name)) throw new Error('--scene must be band<N>-<n> or a Boss ID such as hollow-abbess');
+  if (!/^(band\d-\d+|[a-z]+(-[a-z]+)*(-\d+)?)$/.test(name)) throw new Error('--scene must be band<N>-<n>, or a Boss ID such as hollow-abbess, alone or with -<n>');
   const scratch = mkdtempSync(join(tmpdir(), 'scene-'));
   const png = join(scratch, 'frame.png');
   writePng(png, frame(readPng(file)));
