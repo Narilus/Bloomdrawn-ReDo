@@ -17,6 +17,7 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 - **The Hollow Abbess** (owner, 27 Nov): the cathedral's candlelit sanctuary, checkered marble before an altar of candles, amber glass and a rose window, her root-tree broken through the wall; all four options, picked by seed (`bg-hollow-abbess`).
 - **The Gathered Beast** (owner, 27 Nov): its lair at the heart of the green wood, a trampled clearing under colossal trees hung with antlers, skulls and ribs, lit by a shaft of gold daylight; all four options, picked by seed (`bg-gathered-beast`).
 - **The Expedition Leader** (owner, 27 Nov): the expedition's ship frozen side-on in the sea ice, his lantern-lit surgeon's tent against its hull; the second round (05–08), made without the oversized forceps the first round left on the ice, picked by seed (`bg-expedition-leader`).
+- **The Crowned Pistil** (owner, 27 Nov): a throne room at the flower's centre, a lacquered plum-black floor and a ring of black-violet petal columns edged in gold, lit from one opening of pale gold sky; all four options, picked by seed (`bg-crowned-pistil`). Dark-clad characters lose a little contrast here, the reverse of the pink scenes.
 - Later: a more-bloomed version of each pool scene, made from the original so its layout holds, as a tell of the Bloom clock's stage.
 
 ## Where the actors stand
