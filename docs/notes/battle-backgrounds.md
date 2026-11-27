@@ -44,5 +44,6 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 ## Open
 
 - **Style:** painted, per DESIGN.md's prompt stem, behind pixel-art sprites. The owner found all four naves good; whether the mix holds in play is his call.
+- **The Thicket's colour** (owner, 27 Nov): a trial set with pale-brown trunks and more green, a forest the Bloom is mingling into (`bg-thicket-green`), to compare with the all-pink set (`bg-thicket`) before picking Band 2's pool.
 - **Band 5's biome** needs a brief the owner approves.
 - **The wall line** came in at about half way rather than 40%, so the back slot stands near the foot of the wall. It reads as floor; briefs keep asking for 40%.
