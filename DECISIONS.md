@@ -238,6 +238,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Battle backgrounds, Bands 2 and 3 (owner, 27 Nov): Band 2's pool is the four greener woods, pale-brown trunks and green leaves with the Bloom mingling in. The all-pink flesh-trunk set is kept for a future biome. Band 3's Expedition camp is arctic: snow, ice, a hostile frozen place.
 
+- Band 3's backgrounds (owner, 27 Nov): all four frozen camps, as generated; their ragged painted vignette is right.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

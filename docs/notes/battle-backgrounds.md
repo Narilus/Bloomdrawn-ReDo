@@ -8,8 +8,8 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 |---|---|---|---|
 | 1 | 1–10 | The cathedral (its Boss is the Hollow Abbess) | the four naves, in the game |
 | 2 | 11–20 | The Thicket: an old forest of pale-brown trunks and green leaves that the Bloom is mingling into (`bestiary-direction.md` 4.1) | the four green woods (`bg-thicket-green`), in the game |
-| 3 | 21–30 | The Lost Expedition's ruined camp, frozen: snow, ice and bitter cold (4.2) | next |
-| 4 | 31–40 | The Calyx, inside the Bloom (4.3) | |
+| 3 | 21–30 | The Lost Expedition's ruined camp, frozen: snow, ice and bitter cold (4.2) | the four frozen camps (`bg-camp`), in the game |
+| 4 | 31–40 | The Calyx, inside the Bloom (4.3) | next |
 | 5 | 41–50 | The source: a root-heart chamber (to brief) | |
 
 - Normal fights and elites draw from their band's pool, about four scenes each, picked by the fight's seed so a resumed fight keeps its scene (`src/stage/scenes.ts`). The band is the run's depth (a Trial's level), not the enemies' own band.
