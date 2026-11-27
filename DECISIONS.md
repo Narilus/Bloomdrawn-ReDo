@@ -254,6 +254,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - The Mother Root's scene (owner, 27 Nov): all four root hollows as generated, pink-mauve roots included, picked by seed.
 
+- The Open-Hearted Queen's scene (owner, 27 Nov): all four dusk courts, picked by seed. Every run Boss now has its own scenes.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

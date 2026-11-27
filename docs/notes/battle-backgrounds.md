@@ -19,6 +19,7 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 - **The Expedition Leader** (owner, 27 Nov): the expedition's ship frozen side-on in the sea ice, his lantern-lit surgeon's tent against its hull; the second round (05–08), made without the oversized forceps the first round left on the ice, picked by seed (`bg-expedition-leader`).
 - **The Crowned Pistil** (owner, 27 Nov): a throne room at the flower's centre, a lacquered plum-black floor and a ring of black-violet petal columns edged in gold, lit from one opening of pale gold sky; all four options, picked by seed (`bg-crowned-pistil`). Dark-clad characters lose a little contrast here, the reverse of the pink scenes.
 - **The Mother Root** (owner, 27 Nov): the hollow beneath the crater, a black earth floor before a wall of knotted roots glowing pink in their seams, lit by one shaft of white daylight; all four options, picked by seed (`bg-mother-root`). The roots came out pink-mauve rather than the bone-white asked for; the owner found them fine.
+- **The Open-Hearted Queen** (owner, 27 Nov): her court open to a deep blue dusk, a dark polished floor inlaid with an ivory petal star, a balustrade and a colonnade of bone pillars under broken arches; all four options, picked by seed (`bg-open-hearted-queen`). The game's only blue sky, for the run's last fight.
 - Later: a more-bloomed version of each pool scene, made from the original so its layout holds, as a tell of the Bloom clock's stage.
 
 ## Where the actors stand
