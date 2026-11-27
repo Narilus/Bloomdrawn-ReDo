@@ -21,7 +21,7 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 - **The Mother Root** (owner, 27 Nov): the hollow beneath the crater, a black earth floor before a wall of knotted roots glowing pink in their seams, lit by one shaft of white daylight; all four options, picked by seed (`bg-mother-root`). The roots came out pink-mauve rather than the bone-white asked for; the owner found them fine.
 - **The Open-Hearted Queen** (owner, 27 Nov): her court open to a deep blue dusk, a dark polished floor inlaid with an ivory petal star, a balustrade and a colonnade of bone pillars under broken arches; all four options, picked by seed (`bg-open-hearted-queen`). The game's only blue sky, for the run's last fight.
 - **The Trial Bosses** (owner, 27 Nov), each in its Domain's look: the Grand Anatomist in an anatomy theatre under a glass dome, the Veiled Hierophant in a green-black sanctum walled with candle niches, the Kirin Oracle in a mountain shrine courtyard at dawn, all four options each; the Ringmaster inside a blue-and-gold big top under crossed spotlights, options 01 and 04 only (`ringmaster-1`, `-2`). Options 02 and 03 put the back slot's feet and shadow on the ring's edge, the wall plane, and were dropped rather than made again.
-- Later: a more-bloomed version of each pool scene, made from the original so its layout holds, as a tell of the Bloom clock's stage.
+- ~~Later: a more-bloomed version of each pool scene.~~ Replaced (owner, 27 Nov): after the art pass, subtle particle effects over the stage, such as falling pollen, never over the top, with a Visual tab in Options to turn them off.
 
 ## Where the actors stand
 
@@ -51,7 +51,7 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 ## Open
 
 - **Check the back slot on every option.** The wall's foot keeps coming in lower than the 40% asked for, and where it reaches the back slot's feet (y 568), Leonora stands on the wall. Two of the Ringmaster's options did; I missed it and the owner caught it. Look at her feet and shadow first on each staged option.
-- **Sweep of every scene in the game (27 Nov):** most clear the back slot's feet easily (`art/cut/back-slot-check.png`, a red tick at her feet in each). Borderline, with her boots right at the foot of the wall rather than on it (`art/cut/back-slot-suspects.png`): the Grand Anatomist's 3 and 4 and the Queen's 4, and more narrowly the Crowned Pistil's four. For the owner to judge in play.
+- **Sweep of every scene in the game (27 Nov):** most clear the back slot's feet easily (`art/cut/back-slot-check.png`, a red tick at her feet in each). Borderline, with her boots right at the foot of the wall rather than on it (`art/cut/back-slot-suspects.png`): the Grand Anatomist's 3 and 4 and the Queen's 4, and more narrowly the Crowned Pistil's four. The owner removed six from their pools (27 Nov): nave 4 (`band1-4`), the Crowned Pistil's 1 and 4, the Grand Anatomist's 3 and 4, and the Queen's 4. Their raw options stay in `art/raw/`.
 
 - **Style:** painted, per DESIGN.md's prompt stem, behind pixel-art sprites. The owner found all four naves good; whether the mix holds in play is his call.
 - **Spare scenes:** the all-pink wood of flesh trunks (`art/raw/bg-thicket/`) lost Band 2 to the greener set but is kept for a future biome (owner, 27 Nov).

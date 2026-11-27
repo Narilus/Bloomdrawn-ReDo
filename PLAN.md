@@ -16,7 +16,7 @@ Each milestone ends with the owner playing the build. **Bold** milestones are ga
 | **M4** | **First winnable run** | Rewards, Boss, banking, save and resume. Owner wins, quits and resumes a full run |
 | M5 | Collection | Profile, levels, EXP bank, ascension, gacha and dupes; the four banner characters |
 | M6 | Depth and polish | Weapons, Trials, depth tiers, art pass, audio, balance |
-| Later | | Gear, desktop packaging, more characters, authoring tool; audio round 2: map steps, music (owner, 27 Nov) |
+| Later | | Gear, desktop packaging, more characters, authoring tool; audio round 2: map steps, music (owner, 27 Nov); subtle stage particles such as falling pollen, with a Visual tab in Options to turn them off (owner, 27 Nov) |
 
 ## M0 tasks
 
@@ -414,7 +414,9 @@ Options in tabs (owner, 27 Nov): Profile (the backup and reset that were there) 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 
-_Battle backgrounds first (owner, 27 Nov; `docs/notes/battle-backgrounds.md`): one level floor in the lower 60% and the far wall's foot in a straight line across, so no actor seems to stand on a wall. `npm run art -- gen <scene> --stem scene` makes options; `npm run art -- stage` previews each with the real sprites at their feet positions. A biome per band of depths, with a pool for normal fights and elites and richer scenes for Bosses (owner, 27 Nov). All five bands' pools are in the game (the naves, the greener woods, the frozen camps, the petal chambers, the craters; `src/stage/scenes.ts`, `src/assets/scenes/`). Boss scenes have begun: the Hollow Abbess's, the Gathered Beast's, every run Boss and Trial Boss has its own (the Ringmaster two, the rest four each). Bloom-stage variants come later._
+_Battle backgrounds first (owner, 27 Nov; `docs/notes/battle-backgrounds.md`): one level floor in the lower 60% and the far wall's foot in a straight line across, so no actor seems to stand on a wall. `npm run art -- gen <scene> --stem scene` makes options; `npm run art -- stage` previews each with the real sprites at their feet positions. A biome per band of depths, with a pool for normal fights and elites and richer scenes for Bosses (owner, 27 Nov). All five bands' pools are in the game (the naves, the greener woods, the frozen camps, the petal chambers, the craters; `src/stage/scenes.ts`, `src/assets/scenes/`). Boss scenes have begun: the Hollow Abbess's, the Gathered Beast's, every run Boss and Trial Boss has its own. Six were removed after a sweep of the back slot's feet (owner, 27 Nov). Bloom-stage variants are dropped for subtle particle effects (falling pollen) after the art pass, with a Visual tab in Options to turn them off._
+
+_Portraits next (owner, 27 Nov): they need a lot of care; colours and details must match each character._
 
 ### M6.12 Balance
 A pass with the lab and the owner over depths, Trials and weapons.
