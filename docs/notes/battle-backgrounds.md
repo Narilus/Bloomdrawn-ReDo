@@ -51,6 +51,7 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 ## Open
 
 - **Check the back slot on every option.** The wall's foot keeps coming in lower than the 40% asked for, and where it reaches the back slot's feet (y 568), Leonora stands on the wall. Two of the Ringmaster's options did; I missed it and the owner caught it. Look at her feet and shadow first on each staged option.
+- **Sweep of every scene in the game (27 Nov):** most clear the back slot's feet easily (`art/cut/back-slot-check.png`, a red tick at her feet in each). Borderline, with her boots right at the foot of the wall rather than on it (`art/cut/back-slot-suspects.png`): the Grand Anatomist's 3 and 4 and the Queen's 4, and more narrowly the Crowned Pistil's four. For the owner to judge in play.
 
 - **Style:** painted, per DESIGN.md's prompt stem, behind pixel-art sprites. The owner found all four naves good; whether the mix holds in play is his call.
 - **Spare scenes:** the all-pink wood of flesh trunks (`art/raw/bg-thicket/`) lost Band 2 to the greener set but is kept for a future biome (owner, 27 Nov).
