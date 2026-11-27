@@ -271,6 +271,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card hand size (owner, 28 Nov): at 18px a unit a raised card hid the card to its right, so you had to go two right and back. Made smaller, with room made beside the raised card.
 - No card types (owner, 28 Nov): no Attack or Skill; the line under the title holds tags (Ritual, Transcend and so on) and the target.
 - Card layout signed off (owner, 28 Nov): the smaller hand card with room beside the raised one. Frame ornament next.
+- Card category line (owner, 28 Nov): the line under the title always shows a broad category (Attack, Shield, Skill, Transcend, Symptom) with the target, never half empty; the category follows from what the card does. Keywords (Ritual, Exhaust, Retain, Fleeting) move to a gold, centred line at the foot of the rules, so nothing is cut off.
+- Transcend cards (owner, 28 Nov) break the silhouette: each Domain's frame adds a raised crest above the top edge, drawn as an overhang outside the card's box, so size, spacing, hover and hit areas are unchanged.
 
 ## Open
 - Gear at launch or later (recommendation: later).

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { add, stat } from './formula.ts';
-import { damage, draw, gainResource, gainShield } from './ops/index.ts';
+import { applyStatus, damage, draw, gainResource, gainShield, ifConsume, volley } from './ops/index.ts';
 import { mul, resource } from './formula.ts';
-import { describeCard, describeCardLive, showStats, slotAt, templateSlots } from './text.ts';
+import { cardCategory, describeCard, describeCardLive, showStats, slotAt, templateSlots } from './text.ts';
 import { fixtureCombat, withCardInHand, withCards } from './testing/fixtures.ts';
 
 const card = {
@@ -57,3 +57,22 @@ describe('authored text', () => {
   });
 });
 
+
+describe('card category', () => {
+  const base = { id: 'test.a.x', name: 'X', owner: 'test.a', cost: 1, target: 'none' as const };
+  it('a card that deals damage is an Attack: a hit, a volley, or a hit inside a branch', () => {
+    expect(cardCategory({ ...base, effects: [damage(6)] })).toBe('attack');
+    expect(cardCategory({ ...base, effects: [volley(2, 3)] })).toBe('attack');
+    expect(cardCategory({ ...base, effects: [gainShield(4), ifConsume('embryo', 1, [draw(1), damage(4)])] })).toBe('attack');
+  });
+  it('one that gains Shield and deals no damage is a Shield; any other is a Skill', () => {
+    expect(cardCategory({ ...base, effects: [gainShield(4), applyStatus({ id: 'status.weak' }, 1)] })).toBe('shield');
+    expect(cardCategory({ ...base, effects: [draw(1), ifConsume('embryo', 1, [gainResource('embryo', 1)])] })).toBe('skill');
+  });
+  it('a Transcend card is a Transcend, and the party\'s own cards are Symptoms, whatever they do', () => {
+    expect(cardCategory({ ...base, slot: 'transcend', effects: [damage(6)] })).toBe('transcend');
+    const { owner: _, ...ownerless } = base;
+    expect(cardCategory({ ...ownerless, effects: [damage(6)] })).toBe('symptom');
+    expect(cardCategory({ ...ownerless, domain: 'flesh', effects: [damage(6)] })).toBe('attack');
+  });
+});

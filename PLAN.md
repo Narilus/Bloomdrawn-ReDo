@@ -422,6 +422,8 @@ _Step 1 built 28 Nov, waiting on the owner: `CardFace` in `src/app/CardView.tsx`
 
 _Step 1 signed off 28 Nov (owner). Step 2 under way: kits from `art/briefs/frame-<frame>.txt` with the shared `frame-layout.txt` and the Ornament stem; `npm run art -- frames` cuts each into corner, crest and side (`tools/art/kit.ts`) and photographs the dev card gallery (`?cards`, `src/app/CardGallery.tsx`). Four options for each frame made 28 Nov, waiting on the owner's picks. The game draws a frame's pieces from `src/assets/frames/` (`src/stage/frameArt.ts`), the stand-ins until then._
 
+_Owner feedback on the first pass, 28 Nov, done: the line under the title always holds a category (`cardCategory`, `src/engine/text.ts`) beside the target; keywords moved to a gold line at the foot of the rules; Transcend cards wear a raised crest above the top edge (a stand-in until each Domain's own is generated from its picked kit, `<frame>-transcend.png`)._
+
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 

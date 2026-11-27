@@ -12,13 +12,13 @@ const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.
 
 export const galleryRequested = params().has('cards');
 
-/** Two cards per frame, shown as if held for a turn, so a Ritual shows its lower cost. */
+/** Two cards per frame, shown as if held for a turn so a Ritual shows its lower cost; the second is a Transcend card. */
 const SAMPLES: Record<string, readonly [string, string]> = {
-  flesh: ['maelia.strike', 'virelle.open-the-wound'],
+  flesh: ['maelia.strike', 'maelia.ripened-womb'],
   rapture: ['agathe.censer-rite', 'isadora.the-veil-torn'],
-  spirit: ['kibane.foxfire-rite', 'anthe.defense'],
-  unbound: ['leonora.promissory-note', 'hester.iron-hooks'],
-  bloom: ['symptom.pollen-lung', 'symptom.sweet-rot'],
+  spirit: ['kibane.foxfire-rite', 'kibane.the-ninth-tail'],
+  unbound: ['leonora.promissory-note', 'leonora.call-in-the-debts'],
+  bloom: ['symptom.pollen-lung', 'symptom.fevered-pulse'],
 };
 
 interface Option {

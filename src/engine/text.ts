@@ -38,6 +38,29 @@ export function slotAt(root: unknown, path: string): Slot | undefined {
   return value === 'stacks' && typeof call?.status === 'string' ? { formula: node as Formula, value, status: call.status } : { formula: node as Formula, value };
 }
 
+/** Every operation call in a list, with the calls nested inside them (a branch, a repeat). */
+function allCalls(calls: readonly unknown[]): OpCall[] {
+  return calls.flatMap((call) =>
+    typeof call === 'object' && call !== null && typeof (call as OpCall).op === 'string'
+      ? [call as OpCall, ...Object.values(call).flatMap((arg) => (Array.isArray(arg) ? allCalls(arg) : []))]
+      : [],
+  );
+}
+
+export type CardCategory = 'symptom' | 'transcend' | 'attack' | 'shield' | 'skill';
+
+/**
+ * The card's broad category, shown under its title (DESIGN.md "Cards"; owner, 28 Nov). The party's
+ * own cards are Symptoms and a Transcend card is a Transcend; otherwise a card that deals damage is
+ * an Attack, one that gains Shield is a Shield, and any other is a Skill. No rule reads it.
+ */
+export function cardCategory(def: CardDef): CardCategory {
+  if (def.owner === undefined && def.domain === undefined) return 'symptom';
+  if (def.slot === 'transcend') return 'transcend';
+  const values = allCalls(def.effects).flatMap((call) => Object.values(VALUE_OF[call.op] ?? {}));
+  return values.includes('damage') ? 'attack' : values.includes('shield') ? 'shield' : 'skill';
+}
+
 /** The `{path}` slots in a template. */
 export const templateSlots = (template: string): string[] => [...template.matchAll(/\{([\w.]+)\}/g)].map((m) => m[1] as string);
 

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { cardCost, cardKeywords, describeCardLive, type CardDef, type CardInstance, type CardTarget, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
+import { cardCategory, cardCost, cardKeywords, describeCardLive, type CardCategory, type CardDef, type CardInstance, type CardTarget, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { cardArt } from '../stage/cardArt.ts';
 import { frameArt, type FramePieces } from '../stage/frameArt.ts';
@@ -53,6 +53,14 @@ interface FaceProps {
   highlight?: boolean | undefined;
 }
 
+const CATEGORY_LABEL: Record<CardCategory, string> = {
+  symptom: 'Symptom',
+  transcend: 'Transcend',
+  attack: 'Attack',
+  shield: 'Shield',
+  skill: 'Skill',
+};
+
 const TARGET_LABEL: Record<CardTarget, string> = {
   none: 'No target',
   self: 'Self',
@@ -64,7 +72,8 @@ const TARGET_LABEL: Record<CardTarget, string> = {
 /**
  * A card face, in combat or offered as a reward (DESIGN.md "Cards"; owner, 28 Nov). The caller works
  * out its text and cost. The layout never changes: down the left the cost, the owner's medallion,
- * her name and the Domain sigil; the art window; the title; the tags and target; the rules on parchment.
+ * her name and the Domain sigil; the art window; the title; the category and target; the rules on
+ * parchment with the keywords at their foot. A Transcend card's crest rises above the top edge.
  * The frame is drawn around them from separate ornament pieces.
  */
 export function CardFace({ id, def, owner, text, cost, registry, playable, keyHint, highlight }: FaceProps) {
@@ -77,16 +86,11 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
   const plain = text.replace(MARK, '$2');
   const length = plain.length > 130 ? ' text-xlong' : plain.length > 90 ? ' text-long' : '';
   const name = def?.name ?? id;
-  // The type line's tags: what kind of card it is beyond its effect. Most cards have none.
-  const tags = def
-    ? [
-        ...(ownerless ? ['Symptom'] : []),
-        ...(def.slot === 'transcend' ? ['Transcend'] : []),
-        ...(def.keywords ?? []).map((k) => k.charAt(0).toUpperCase() + k.slice(1)),
-      ].join(' · ')
-    : '';
+  // Its keywords (Ritual, Exhaust…) sit in gold at the foot of the rules.
+  const keywords = (def?.keywords ?? []).map((k) => k.charAt(0).toUpperCase() + k.slice(1)).join(' · ');
+  const transcend = def?.slot === 'transcend';
   return (
-    <div className={`card frame-${domain}${playable ? '' : ' unplayable'}${highlight ? ' highlight' : ''}${length}`}>
+    <div className={`card frame-${domain}${transcend ? ' transcend' : ''}${playable ? '' : ' unplayable'}${highlight ? ' highlight' : ''}${length}`}>
       <div className="card-art">{art ? <img src={art} alt="" draggable={false} /> : <ArtPlaceholder domain={domain} />}</div>
       <div className="card-column">
         <CostGem printed={def?.cost} now={cost} />
@@ -108,18 +112,21 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
         <span className="card-name">{name}</span>
       </div>
       <div className="card-typeline">
-        <span className="card-type">{tags}</span>
+        <span className="card-type">{def ? CATEGORY_LABEL[cardCategory(def)] : ''}</span>
         <span className="card-target">{def ? TARGET_LABEL[def.target] : ''}</span>
       </div>
       <div className="card-text">
-        <RulesText text={text} registry={registry} />
+        <div className="card-rules">
+          <RulesText text={text} registry={registry} />
+        </div>
+        {keywords && <div className="card-keywords">{keywords}</div>}
       </div>
       {def?.charge && (
         <div className="card-charge" title={`Charges its owner's ultimate by ${def.charge}`}>
           Ult +{def.charge}
         </div>
       )}
-      <CardFrame frame={domain} />
+      <CardFrame frame={domain} transcend={transcend} />
       {keyHint && <div className="card-key">{keyHint}</div>}
     </div>
   );
@@ -130,10 +137,11 @@ export const FrameArtContext = createContext<(frame: string) => FramePieces>(fra
 
 /**
  * The frame, built from pieces around the fixed text areas: the rim, the inner rule, both sides,
- * three corners (the cost gem holds the fourth) and the crest. A piece without ornament art yet
- * keeps its drawn stand-in.
+ * three corners (the cost gem holds the fourth) and the crest. A Transcend card adds a raised crest
+ * above its top edge, outside the card's box, so its size, hand spacing and hit area never change.
+ * A piece without ornament art yet keeps its drawn stand-in.
  */
-function CardFrame({ frame }: { frame: string }) {
+function CardFrame({ frame, transcend }: { frame: string; transcend: boolean }) {
   const art = useContext(FrameArtContext)(frame);
   const piece = (url: string) => ({ backgroundImage: `url(${url})` });
   return (
@@ -153,6 +161,15 @@ function CardFrame({ frame }: { frame: string }) {
         ),
       )}
       {art.crest ? <div className="frame-crest art" style={piece(art.crest)} /> : <div className="frame-crest" />}
+      {transcend &&
+        (art.transcend ? (
+          <div className="frame-transcend art" style={piece(art.transcend)} />
+        ) : (
+          <svg className="frame-transcend" viewBox="0 0 80 28">
+            <path d="M4 27 C 18 27, 22 14, 32 10 L 40 2 L 48 10 C 58 14, 62 27, 76 27 Z" />
+            <path className="inner" d="M40 8 L 46 15 L 40 22 L 34 15 Z" />
+          </svg>
+        ))}
     </div>
   );
 }

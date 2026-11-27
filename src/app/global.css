@@ -1113,7 +1113,7 @@ kbd {
   white-space: nowrap;
 }
 
-.card-type { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--accent); }
+.card-type { color: var(--accent); }
 .card-target { flex-shrink: 0; margin-left: auto; color: var(--parchment); opacity: 0.85; }
 
 /* Rules on solid parchment, live numbers in colour. */
@@ -1124,9 +1124,10 @@ kbd {
   top: 13.65em;
   bottom: 0.55em;
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  padding: 0.4em 0.7em;
+  display: flex;
+  flex-direction: column;
+  /* Room at the foot for the keywords, clear of the frame's crest. */
+  padding: 0.4em 0.7em 0.75em;
   border-radius: 0.35em;
   background: var(--parchment);
   box-shadow: inset 0 0 0 0.05em rgba(140, 110, 67, 0.6);
@@ -1134,14 +1135,30 @@ kbd {
   text-align: center;
 }
 
-.card-text > span {
+.card-rules {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.card-rules > span {
   font-size: 0.9em;
   font-weight: 400;
   line-height: 1.3;
 }
 
-.text-long .card-text > span { font-size: 0.8em; line-height: 1.25; }
-.text-xlong .card-text > span { font-size: 0.72em; line-height: 1.22; }
+.text-long .card-rules > span { font-size: 0.8em; line-height: 1.25; }
+.text-xlong .card-rules > span { font-size: 0.72em; line-height: 1.22; }
+
+/* Keywords in deep gold at the foot of the rules, centred. */
+.card-keywords {
+  margin-top: 0.1em;
+  font-size: 0.6em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a5a14;
+}
 
 .card-text b { font-weight: 800; }
 .card-text .num-damage { color: var(--arterial); }
@@ -1226,11 +1243,35 @@ kbd {
 .frame-crest.art {
   width: 3.6em;
   height: 2.4em;
-  bottom: -0.9em;
+  bottom: -1.3em;
   margin-left: -1.8em;
   transform: none;
   background: no-repeat center / contain;
   box-shadow: none;
+}
+
+/* A Transcend card's raised crest: an overhang above the top edge, outside the card's box. */
+.frame-transcend {
+  position: absolute;
+  left: 50%;
+  top: -1.25em;
+  width: 4.6em;
+  height: 1.6em;
+  margin-left: -2.3em;
+  fill: var(--accent);
+  stroke: var(--antique-gold);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 -0.1em 0.25em rgba(0, 0, 0, 0.45));
+}
+
+.frame-transcend .inner { fill: var(--glow); }
+
+.frame-transcend.art {
+  top: -2em;
+  width: 6em;
+  height: 2.6em;
+  margin-left: -3em;
+  background: no-repeat center bottom / contain;
 }
 
 .frame-side {
@@ -4492,9 +4533,10 @@ kbd {
 .card-gallery {
   position: absolute;
   inset: 0;
+  overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
-  align-content: center;
+  align-content: safe center;
   justify-content: center;
   gap: 28px 56px;
   padding: 24px;
