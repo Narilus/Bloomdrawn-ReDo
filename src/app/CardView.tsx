@@ -1,6 +1,8 @@
+import { createContext, useContext } from 'react';
 import { cardCost, cardKeywords, describeCardLive, type CardDef, type CardInstance, type CardTarget, type CharacterDef, type CombatState, type Registry } from '../engine/index.ts';
 import { portraitArt } from '../stage/art.ts';
 import { cardArt } from '../stage/cardArt.ts';
+import { frameArt, type FramePieces } from '../stage/frameArt.ts';
 
 const DOMAIN_LABEL: Record<string, string> = { flesh: 'Flesh', rapture: 'Rapture', spirit: 'Spirit', unbound: 'Unbound' };
 
@@ -117,29 +119,40 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
           Ult +{def.charge}
         </div>
       )}
-      <CardFrame />
+      <CardFrame frame={domain} />
       {keyHint && <div className="card-key">{keyHint}</div>}
     </div>
   );
 }
 
+/** The frame pieces to draw: the game's own, or options under review in the dev card gallery. */
+export const FrameArtContext = createContext<(frame: string) => FramePieces>(frameArt);
+
 /**
- * The frame, built from pieces around the fixed text areas: the rim, the inner rule, three corners
- * and the crest. Each is its own element so the generated ornament for a Domain can replace it.
+ * The frame, built from pieces around the fixed text areas: the rim, the inner rule, both sides,
+ * three corners (the cost gem holds the fourth) and the crest. A piece without ornament art yet
+ * keeps its drawn stand-in.
  */
-function CardFrame() {
+function CardFrame({ frame }: { frame: string }) {
+  const art = useContext(FrameArtContext)(frame);
+  const piece = (url: string) => ({ backgroundImage: `url(${url})` });
   return (
     <div className="card-frame" aria-hidden="true">
       <div className="frame-rim" />
       <div className="frame-rule" />
-      {(['tr', 'bl', 'br'] as const).map((corner) => (
-        <svg key={corner} className={`frame-corner ${corner}`} viewBox="0 0 40 40">
-          <path d="M3 37 C3 15, 15 3, 37 3" />
-          <path d="M9 37 C9 20, 20 9, 37 9" />
-          <circle cx="9" cy="9" r="2.6" />
-        </svg>
-      ))}
-      <div className="frame-crest" />
+      {art.side && (['left', 'right'] as const).map((side) => <div key={side} className={`frame-side ${side}`} style={piece(art.side!)} />)}
+      {(['tr', 'bl', 'br'] as const).map((corner) =>
+        art.corner ? (
+          <div key={corner} className={`frame-corner art ${corner}`} style={piece(art.corner)} />
+        ) : (
+          <svg key={corner} className={`frame-corner ${corner}`} viewBox="0 0 40 40">
+            <path d="M3 37 C3 15, 15 3, 37 3" />
+            <path d="M9 37 C9 20, 20 9, 37 9" />
+            <circle cx="9" cy="9" r="2.6" />
+          </svg>
+        ),
+      )}
+      {art.crest ? <div className="frame-crest art" style={piece(art.crest)} /> : <div className="frame-crest" />}
     </div>
   );
 }

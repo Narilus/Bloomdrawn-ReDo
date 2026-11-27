@@ -1212,6 +1212,38 @@ kbd {
   box-shadow: 0 0 0 0.06em var(--antique-gold);
 }
 
+/* Generated ornament, where a frame has it: the corner is drawn for the top left and mirrored. */
+.frame-corner.art {
+  width: 4.8em;
+  height: 4.8em;
+  background: no-repeat 0 0 / contain;
+}
+
+.frame-corner.art.tr { right: -0.35em; top: -0.35em; }
+.frame-corner.art.bl { left: -0.35em; bottom: -0.35em; }
+.frame-corner.art.br { right: -0.35em; bottom: -0.35em; }
+
+.frame-crest.art {
+  width: 3.6em;
+  height: 2.4em;
+  bottom: -0.9em;
+  margin-left: -1.8em;
+  transform: none;
+  background: no-repeat center / contain;
+  box-shadow: none;
+}
+
+.frame-side {
+  position: absolute;
+  top: 4em;
+  bottom: 4em;
+  width: 1.1em;
+  background: no-repeat center / 100% 100%;
+}
+
+.frame-side.right { right: -0.45em; }
+.frame-side.left { left: -0.45em; transform: scaleX(-1); }
+
 .card-key {
   position: absolute;
   bottom: -0.6em;
@@ -4454,4 +4486,31 @@ kbd {
   font-weight: 700;
   color: var(--petal-ivory);
   cursor: pointer;
+}
+
+/* The dev card gallery (`?cards`): frames on sample cards, or frame-kit options to pick from. */
+.card-gallery {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 28px 56px;
+  padding: 24px;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 0%, var(--mauve-shadow), var(--aubergine) 45%, var(--charcoal-plum) 85%);
+}
+
+.card-gallery-option h3 {
+  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-size: 26px;
+  text-transform: capitalize;
+}
+
+.card-gallery-cards {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
 }

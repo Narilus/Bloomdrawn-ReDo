@@ -270,6 +270,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Order of work for cards (owner, 28 Nov): the layout in the game with placeholder art and frames, shown fanned in the hand at 1080p and the smallest supported size for sign-off; then the ornament pieces; then the card art.
 - Card hand size (owner, 28 Nov): at 18px a unit a raised card hid the card to its right, so you had to go two right and back. Made smaller, with room made beside the raised card.
 - No card types (owner, 28 Nov): no Attack or Skill; the line under the title holds tags (Ritual, Transcend and so on) and the target.
+- Card layout signed off (owner, 28 Nov): the smaller hand card with room beside the raised one. Frame ornament next.
 
 ## Open
 - Gear at launch or later (recommendation: later).

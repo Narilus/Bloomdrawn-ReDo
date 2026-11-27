@@ -442,6 +442,10 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 
 > High-resolution pixel art item icon for a turn-based RPG: crisp visible square pixels, clean dark outlines, a limited palette and soft cel shading, matching side-view battle sprites. Gothic fantasy horror. One single object and nothing else, whole, in a three-quarter view, centred in a square frame with empty margin on every side. One bold, simple silhouette that reads at small size, with fine detail inside it. Every join between materials is drawn as a seam: stitching, wrapped cord, petal collars, rivets. Any glow is soft and comes from the object's own petals, wax, pods or flame, with no glints or points of light. The object is solid and opaque. No hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
 
+**Ornament stem**, used instead of the prompt stem for card-frame ornament (M6.11a; owner, 28 Nov). The game builds each Domain's frame from separate pieces around the card's fixed text areas, so one image holds a kit of pieces set apart: a corner, a crest and a long border strip. The brief gives the Domain's materials and colours:
+
+> Painterly gothic fantasy ornament for a game card frame, fine linework and crisp edges, drawn as separate decorative pieces lit softly from the upper left. Each piece is a single solid object with wide empty space all around it, and no piece touches another. Bold, simple silhouettes that still read when shown very small, with fine detail inside them. Antique gold filigree accents. No card, no panel, no frame behind the pieces, no scenery, no faces, no figures, no text, no letters, no logos.
+
 **Never in any prompt or image:** starfields, galaxies or nebulae; underwater scenes, fish, coral or shells; crystal sparkle; neon; glitch effects; fractals or mirrors; any text baked into the image (all words are added by the game).
 
 ### Content warnings

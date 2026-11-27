@@ -420,6 +420,8 @@ The new card from the owner's mockup (`.external/card-mockup/`, a layout referen
 
 _Step 1 built 28 Nov, waiting on the owner: `CardFace` in `src/app/CardView.tsx` and the card styles in `global.css`. First pass at 18px a unit; the owner found a raised card hid the next one, so the hand is now 15px a unit (225 × 315), a raised card grows to 1.3×, and the cards to its right move clear of it while those to its left keep their column in view (`fan.ts`, tested in `fan.test.ts`). Rewards stay at 18px, the kit page 14px. The left of the tags line holds tags only (Symptom, Transcend, Ritual, Exhaust, Retain, Fleeting), no Attack or Skill. Art is looked up by `src/stage/cardArt.ts` (`strike-<domain>`, `defense-<domain>`, else the card's ID; a dupe level's version shares its card's). The medallion and the ultimate ring share one crop (`.face-crop`). Frame pieces are separate elements (rim, rule, three corners, crest) waiting for ornament art. Screenshots: `art/cut/cards/`._
 
+_Step 1 signed off 28 Nov (owner). Step 2 under way: kits from `art/briefs/frame-<frame>.txt` with the shared `frame-layout.txt` and the Ornament stem; `npm run art -- frames` cuts each into corner, crest and side (`tools/art/kit.ts`) and photographs the dev card gallery (`?cards`, `src/app/CardGallery.tsx`). Four options for each frame made 28 Nov, waiting on the owner's picks. The game draws a frame's pieces from `src/assets/frames/` (`src/stage/frameArt.ts`), the stand-ins until then._
+
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 

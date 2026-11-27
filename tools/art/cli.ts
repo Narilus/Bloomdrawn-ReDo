@@ -6,6 +6,7 @@ import { homedir, tmpdir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { cutout, iconise, standardise } from './cutout.ts';
+import { splitKit, type Kit } from './kit.ts';
 import { blank, composite, crop, fill, readPng, scaleArea, scaleBilinear, scaleNearest, shade, writePng, type Rgba } from './image.ts';
 import { enemyDepth, enemyHeight, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type EnemySize } from '../../src/stage/layout.ts';
 import { composePrompt, promptProblems, stemFrom, type Background } from './prompt.ts';
@@ -36,7 +37,14 @@ const USAGE = `Usage:
       (--icon: fitted in a square instead -> src/assets/weapons/<weapon>.png;
       --scene: a background, framed to 1920×1080 as WebP -> src/assets/scenes/<name>.webp, where <name> is
       band<N>-<n> for a band's pool or a Boss's enemy ID without "enemy.";
-      --portrait <character>: a portrait, squared to 512px as WebP -> src/assets/portraits/<character>.webp)`;
+      --portrait <character>: a portrait, squared to 512px as WebP -> src/assets/portraits/<character>.webp;
+      --frame <frame>: a frame kit's corner, crest and side -> src/assets/frames/<frame>-<piece>.png)
+  npm run art -- gen frame-<frame> --stem ornament [--n 4]
+      A card-frame kit (a corner, a crest and a border strip, set apart on a transparent canvas) from
+      art/briefs/frame-<frame>.txt and the shared layout in art/briefs/frame-layout.txt -> art/raw/frame-<frame>/
+  npm run art -- frames <raw.png...>
+      Each kit cut into its pieces (art/cut/frames/<name>/), then shown on sample cards in the game's own
+      card gallery, one sheet per frame (out: art/cut/frames-<frame>.png)`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -52,6 +60,7 @@ async function main() {
       icon: { type: 'boolean', default: false },
       scene: { type: 'string' },
       boss: { type: 'string', default: 'hollow-abbess' },
+      frame: { type: 'string' },
     },
   });
   const [command, ...rest] = positionals;
@@ -59,13 +68,19 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene or portrait');
+    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait or ornament');
     if (values.ref && values.like) throw new Error('--ref and --like are different references; give one');
-    const shape = values.stem === 'scene' ? 'landscape' : values.stem === 'portrait' ? 'square' : 'sprite';
+    const shape = values.stem === 'scene' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' ? 'square' : 'sprite';
+    // Ornament is a kit of pieces cut apart by their transparency, so it is always transparent.
+    const kept = shape === 'sprite' ? background : values.stem === 'ornament' ? 'transparent' : undefined;
     const reference = values.like ? { path: values.like, kind: 'likeness' as const } : values.ref ? { path: values.ref, kind: 'style' as const } : undefined;
-    await generate(rest[0], Number(values.n), shape === 'sprite' ? background : undefined, stem, shape, reference);
+    await generate(rest[0], Number(values.n), kept, stem, shape, reference);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
+  } else if (command === 'frames' && rest.length > 0) {
+    await frames(rest);
+  } else if (command === 'pick' && rest[0] && values.frame) {
+    pickFrame(rest[0], values.frame);
   } else if (command === 'pick' && rest[0] && values.portrait) {
     pickPortrait(rest[0], values.portrait);
   } else if (command === 'faces' && rest.length > 2) {
@@ -85,7 +100,7 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem' } as const;
 
 /** `background` is absent for a scene: opaque and wide. */
 type Shape = 'sprite' | 'landscape' | 'square';
@@ -97,7 +112,9 @@ interface Reference {
 async function generate(character: string, count: number, background: Background | undefined, label: string, shape: Shape, reference?: Reference) {
   if (count < 1 || count > 4) throw new Error('--n must be 1 to 4');
   const stem = stemFrom(readFileSync(join(ROOT, 'docs/DESIGN.md'), 'utf8'), label);
-  const brief = readFileSync(join(ROOT, 'art/briefs', `${character}.txt`), 'utf8');
+  // A frame kit's brief gives its materials; the layout of its three pieces is shared.
+  const layout = label === 'Ornament stem' ? `\n\n${readFileSync(join(ROOT, 'art/briefs/frame-layout.txt'), 'utf8')}` : '';
+  const brief = readFileSync(join(ROOT, 'art/briefs', `${character}.txt`), 'utf8') + layout;
   const prompt = composePrompt({ stem, brief, background, reference: reference?.kind });
   const problems = promptProblems(prompt, background);
   if (problems.length > 0) throw new Error(`Prompt refused:\n- ${problems.join('\n- ')}`);
@@ -284,6 +301,54 @@ function faces(out: string, character: string, files: string[]) {
     composite(canvas, cardCrop(square, 2), x, top + 60);
   });
   save(out, canvas);
+}
+
+const PIECES: readonly (keyof Kit)[] = ['corner', 'crest', 'side'];
+/** Kits are generated at about 1250px; half that is still sharper than a raised card on a 4K screen. */
+const half = (image: Rgba) => scaleArea(image, Math.max(1, Math.round(image.width / 2)), Math.max(1, Math.round(image.height / 2)));
+
+function pickFrame(file: string, frame: string) {
+  if (!['flesh', 'rapture', 'spirit', 'unbound', 'bloom'].includes(frame)) throw new Error('--frame must be flesh, rapture, spirit, unbound or bloom');
+  const kit = splitKit(readPng(file));
+  for (const piece of PIECES) save(join(ROOT, 'src/assets/frames', `${frame}-${piece}.png`), half(kit[piece]));
+}
+
+/** Cuts each kit into art/cut/frames/<name>/, then photographs the dev card gallery with each frame's options. */
+async function frames(files: string[]) {
+  const groups = new Map<string, string[]>();
+  for (const file of files) {
+    const name = basename(file, '.png');
+    const frame = /^frame-([a-z]+)-\d+$/.exec(name)?.[1];
+    if (!frame) throw new Error(`${file} is not a frame kit (frame-<frame>-NN.png)`);
+    const kit = splitKit(readPng(file));
+    for (const piece of PIECES) save(join(ROOT, 'art/cut/frames', name, `${piece}.png`), half(kit[piece]));
+    groups.set(frame, [...(groups.get(frame) ?? []), name]);
+  }
+  const port = 5181;
+  const server = spawn(process.execPath, [join(ROOT, 'node_modules/vite/bin/vite.js'), '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'ignore' });
+  try {
+    const url = `http://localhost:${port}/`;
+    for (let tries = 0; ; tries++) {
+      if (await fetch(url).then((r) => r.ok, () => false)) break;
+      if (tries > 100) throw new Error('the dev server did not start');
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    const { chromium } = await import('playwright');
+    const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=gl', '--enable-gpu', '--ignore-gpu-blocklist'] });
+    const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+    for (const [frame, names] of groups) {
+      await page.goto(`${url}?cards&kit=${names.join(',')}`);
+      await page.waitForSelector('.card-gallery-option');
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(300);
+      const out = join(ROOT, 'art/cut', `frames-${frame}.png`);
+      await page.screenshot({ path: out });
+      console.log(relative(ROOT, out));
+    }
+    await browser.close();
+  } finally {
+    server.kill();
+  }
 }
 
 function save(out: string, image: Rgba) {
