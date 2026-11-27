@@ -240,6 +240,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - Band 3's backgrounds (owner, 27 Nov): all four frozen camps, as generated; their ragged painted vignette is right.
 
+- Band 4's backgrounds (owner, 27 Nov): all four petal chambers. The backgrounds so far chase purple and pink with little contrast. That has uses and more biomes will dilute it, but for now Band 5's brief should allow more contrast.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

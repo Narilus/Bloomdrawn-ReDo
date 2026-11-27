@@ -414,7 +414,7 @@ Options in tabs (owner, 27 Nov): Profile (the backup and reset that were there) 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 
-_Battle backgrounds first (owner, 27 Nov; `docs/notes/battle-backgrounds.md`): one level floor in the lower 60% and the far wall's foot in a straight line across, so no actor seems to stand on a wall. `npm run art -- gen <scene> --stem scene` makes options; `npm run art -- stage` previews each with the real sprites at their feet positions. A biome per band of depths, with a pool for normal fights and elites and richer scenes for Bosses (owner, 27 Nov). Bands 1 to 3 are in the game (the naves, the greener woods, the frozen camps; `src/stage/scenes.ts`, `src/assets/scenes/`); Band 4, the Calyx, is next._
+_Battle backgrounds first (owner, 27 Nov; `docs/notes/battle-backgrounds.md`): one level floor in the lower 60% and the far wall's foot in a straight line across, so no actor seems to stand on a wall. `npm run art -- gen <scene> --stem scene` makes options; `npm run art -- stage` previews each with the real sprites at their feet positions. A biome per band of depths, with a pool for normal fights and elites and richer scenes for Bosses (owner, 27 Nov). Bands 1 to 4 are in the game (the naves, the greener woods, the frozen camps, the petal chambers; `src/stage/scenes.ts`, `src/assets/scenes/`); Band 5, the source, is next, its brief for the owner's approval._
 
 ### M6.12 Balance
 A pass with the lab and the owner over depths, Trials and weapons.
