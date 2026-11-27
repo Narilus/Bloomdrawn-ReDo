@@ -10,7 +10,7 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 | 2 | 11–20 | The Thicket: an old forest of pale-brown trunks and green leaves that the Bloom is mingling into (`bestiary-direction.md` 4.1) | the four green woods (`bg-thicket-green`), in the game |
 | 3 | 21–30 | The Lost Expedition's ruined camp, frozen: snow, ice and bitter cold (4.2) | the four frozen camps (`bg-camp`), in the game |
 | 4 | 31–40 | The Calyx, inside the Bloom (4.3) | the four petal chambers (`bg-calyx`), in the game |
-| 5 | 41–50 | The source: a root-heart chamber (to brief, with more contrast) | next |
+| 5 | 41–50 | The source: the crater where the Bloom took root, black basalt, grey ash and bone roots around a red heart, for contrast | the four craters (`bg-source`), in the game |
 
 - Normal fights and elites draw from their band's pool, about four scenes each, picked by the fight's seed so a resumed fight keeps its scene (`src/stage/scenes.ts`). The band is the run's depth (a Trial's level), not the enemies' own band.
 - The 6 run Bosses and 4 Trial Bosses get richer or wholly custom scenes, named after their encounter (`hollow-abbess.webp`). Until one exists, a Boss stands in its band's pool.
@@ -45,5 +45,5 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 
 - **Style:** painted, per DESIGN.md's prompt stem, behind pixel-art sprites. The owner found all four naves good; whether the mix holds in play is his call.
 - **Spare scenes:** the all-pink wood of flesh trunks (`art/raw/bg-thicket/`) lost Band 2 to the greener set but is kept for a future biome (owner, 27 Nov).
-- **Contrast** (owner, 27 Nov): Bands 1–4 lean on purple and pink with little contrast. That has its uses, and more biomes will dilute it, but Band 5's brief should allow more contrast. Band 5's biome needs a brief the owner approves.
+- **Contrast** (owner, 27 Nov): Bands 1–4 lean on purple and pink with little contrast. That has its uses, and more biomes will dilute it, but Band 5's brief should allow more contrast. Band 5 does that with value rather than hue: grey ash, black stone, a pale sky and red only from the heart (owner, 27 Nov).
 - **The wall line** came in at about half way rather than 40%, so the back slot stands near the foot of the wall. It reads as floor; briefs keep asking for 40%.
