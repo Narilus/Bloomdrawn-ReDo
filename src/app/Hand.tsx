@@ -3,7 +3,7 @@ import { useEffect, useEffectEvent, useState } from 'react';
 import { isAlive, previewCard, validate, type CombatState, type EntityId, type Preview, type Registry } from '../engine/index.ts';
 import { enemyHeight, enemyHome, enemyUnder, PLAY_LINE, type Point } from '../stage/layout.ts';
 import { CardView } from './CardView.tsx';
-import { AIM_ORIGIN, AIM_POSE, CARD_H, CARD_W, fanPose, type Pose } from './fan.ts';
+import { AIM_ORIGIN, AIM_POSE, CARD_EM, CARD_H, CARD_W, fanPose, type Pose } from './fan.ts';
 import { useFrame } from './Frame.tsx';
 
 /**
@@ -207,7 +207,7 @@ export function Hand({ state, registry, onPlay, onAim }: Props) {
                 key={card.uid}
                 className="hand-card"
                 data-card={card.card}
-                style={{ left: -CARD_W / 2, top: -CARD_H / 2, zIndex: pose.z }}
+                style={{ left: -CARD_W / 2, top: -CARD_H / 2, zIndex: pose.z, ['--card-em' as string]: `${CARD_EM}px` }}
                 initial={{ x: 140, y: 1010, rotate: -25, scale: 0.4, opacity: 0 }}
                 animate={{ x: pose.x, y: pose.y, rotate: pose.rotate, scale: pose.scale, opacity: 1 }}
                 exit={{ opacity: 0, y: pose.y - 90, scale: pose.scale * 0.9, transition: { duration: 0.22 } }}

@@ -47,7 +47,7 @@ export function Portraits({ state, choosing, onUltimate }: { state: CombatState;
             aria-label={`${def?.name}: ultimate ${m.gauge} of ${GAUGE_MAX}${ready ? ', ready' : ''}${m.transcended ? ', Transcended' : ''}`}
           >
             <div className="portrait-ring" style={{ '--gauge': `${(m.gauge / GAUGE_MAX) * 360}deg` } as React.CSSProperties}>
-              <div className="portrait-face">{art ? <img src={art} alt="" /> : <span>{def?.name.charAt(0)}</span>}</div>
+              <div className="portrait-face face-crop">{art ? <img src={art} alt="" /> : <span>{def?.name.charAt(0)}</span>}</div>
             </div>
             <span className="portrait-name">{def?.name}</span>
             <span className="portrait-gauge">{ready ? <>Ready <kbd>⇧{slot + 1}</kbd></> : `${m.gauge}`}</span>

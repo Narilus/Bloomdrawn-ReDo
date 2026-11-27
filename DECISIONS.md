@@ -262,6 +262,13 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Bloom-stage tell (owner, 27 Nov): not more-bloomed backgrounds but subtle particle effects over the stage, such as falling pollen, after the art pass; a Visual tab in Options turns pollen effects off.
 - Portraits next (owner, 27 Nov), with a lot of care: colours and details must match each character.
 
+- Card layout (owner, 28 Nov; mockup in `.external/card-mockup/`, a layout reference only): a 15 × 21 em card; down the left the cost gem, the owner medallion (her ultimate ring's face crop), her name plate and the Domain sigil, over the art window's left edge; then a wide art window, a centred title band, a type and target line, and rules on solid parchment. No see-through text over art; no rarity or set code; one owner label. Inserted as M6.11a, before the rest of the art pass; portraits paused.
+- A held Ritual's cost (owner, 28 Nov): the gem turns gold with a soft glow at its current cost; the printed cost sits in a round badge at the gem's lower right, in the same serif, with a thin diagonal pink strike.
+- Card art (owner, 28 Nov) shows the card's effect, never a playable character; a loose prop motif is allowed. Only portraits must match a character exactly, so they are tight head-and-shoulders crops built for a circle.
+- Card frames (owner, 28 Nov): four Domain frames built in the UI from generated ornament pieces (corners, crest, side vines or other ornament fitting the Domain) around fixed text areas, never one generated image of a whole card. Ownerless cards (Symptoms, Curses) carry a Bloom emblem in place of the medallion.
+- Strike and Defense art is shared per Domain (owner, 28 Nov): one Strike and one Defense picture for each Domain, eight in all. Every Transcend, Flavour, reward and generated card gets its own art.
+- Order of work for cards (owner, 28 Nov): the layout in the game with placeholder art and frames, shown fanned in the hand at 1080p and the smallest supported size for sign-off; then the ornament pieces; then the card art.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

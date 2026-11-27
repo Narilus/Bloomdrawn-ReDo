@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.11 Art pass (M6.10 signed off 27 Nov)
+**Current task:** M6.11a Card layout, before the rest of the art pass (owner, 28 Nov; portraits paused)
 
 ## Milestones
 
@@ -411,12 +411,21 @@ _Plumbing built 16 Nov (`docs/notes/audio.md`): the cues and their timing in `sr
 
 Options in tabs (owner, 27 Nov): Profile (the backup and reset that were there) and Sound (volume, Mute all, and five kinds of sound muted one by one: interface, cards, combat, big moments, banners; save v14). Built 27 Nov, laid out like the inventory. Tests: `src/app/sound.test.ts` (`audible`), `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. Signed off 27 Nov after two fixes: one click when Options opens, and the kinds' descriptions all in lower case.
 
+### M6.11a Card layout (owner, 28 Nov: done first, portraits paused)
+The new card from the owner's mockup (`.external/card-mockup/`, a layout reference only: its art, portraits, ornaments and numbers are stand-ins). A card is 15 × 21 em, so one font size scales it. Down the left: the cost gem, the owner's medallion (her ultimate ring's face crop), her name plate and the Domain sigil, overlapping the art window. Then the wide art window, a centred title band, the type and target line, and the rules on solid parchment. A held Ritual's gem turns gold at its current cost, with the printed cost struck in a badge. Frames are built in the UI from ornament pieces per Domain; Symptoms carry a Bloom emblem for the medallion. DESIGN.md "Cards" has the rules.
+1. The layout in the game with placeholder art and frames, fanned in the hand. Owner signs it off at 1080p and at the smallest supported size (1280×600).
+2. The ornament pieces for the four Domain frames and the party's, generated; the owner picks.
+3. Card art: one Strike and one Defense picture per Domain (eight), and its own picture for every Transcend, Flavour, reward and generated card; the owner picks.
+**Done when:** the owner signs off the layout, the frames and the card art in the hand.
+
+_Step 1 built 28 Nov, waiting on the owner: `CardFace` in `src/app/CardView.tsx` and the card styles in `global.css`; 18px a unit in the hand (270 × 378) and on rewards, 14px on the kit page. The fan rests with the centre card's rules in view and raises a card whole; spacing keeps covered cards' left column showing (`fan.ts`). The type label comes from `cardKind` (`src/engine/text.ts`): an Attack deals damage, anything else is a Skill. Art is looked up by `src/stage/cardArt.ts` (`strike-<domain>`, `defense-<domain>`, else the card's ID; a dupe level's version shares its card's). The medallion and the ultimate ring share one crop (`.face-crop`). Frame pieces are separate elements (rim, rule, three corners, crest) waiting for ornament art. Screenshots: `art/cut/cards/`._
+
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 
 _Battle backgrounds first (owner, 27 Nov; `docs/notes/battle-backgrounds.md`): one level floor in the lower 60% and the far wall's foot in a straight line across, so no actor seems to stand on a wall. `npm run art -- gen <scene> --stem scene` makes options; `npm run art -- stage` previews each with the real sprites at their feet positions. A biome per band of depths, with a pool for normal fights and elites and richer scenes for Bosses (owner, 27 Nov). All five bands' pools are in the game (the naves, the greener woods, the frozen camps, the petal chambers, the craters; `src/stage/scenes.ts`, `src/assets/scenes/`). Boss scenes have begun: the Hollow Abbess's, the Gathered Beast's, every run Boss and Trial Boss has its own. Six were removed after a sweep of the back slot's feet (owner, 27 Nov). Bloom-stage variants are dropped for subtle particle effects (falling pollen) after the art pass, with a Visual tab in Options to turn them off._
 
-_Portraits next (owner, 27 Nov): they need a lot of care; colours and details must match each character._
+_Portraits next (owner, 27 Nov): they need a lot of care; colours and details must match each character. Maelia's options 01–08 are made (01–04 turned to the right with her gaze on the player, 05–08 facing the player, all kept); paused 28 Nov for M6.11a, with the owner's pick still to come. Portraits are tight head-and-shoulders crops built for a circle (the ring and the card medallion)._
 
 ### M6.12 Balance
 A pass with the lab and the owner over depths, Trials and weapons.

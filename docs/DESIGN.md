@@ -458,14 +458,28 @@ The combat screen shows the party on the left, enemies on the right and a fanned
 - **Party:** four full-body sprites on a diagonal from the bottom-left slot (front) to the top-right slot (back), drawn front-last so no one is hidden, with the shared HP and Shield bar under them, including incoming-damage, Safe and skull markers.
 - **Top centre:** the run's relics. The Bloom clock lives on the map screen, not in combat.
 - **Enemies:** right side, each with exact HP, Shield, intent and statuses.
-- **Hand:** a fan around a fixed centre. Hover raises a card. Drag it up past the play line to arm it; release to cast, or pick a target for single-target cards. Drag back down, Escape or right-click cancels with nothing spent.
+- **Hand:** a fan of cards (see Cards) around a fixed centre. Covered cards still show their cost, owner and Domain down the left edge. Hover raises a card. Drag it up past the play line to arm it; release to cast, or pick a target for single-target cards. Drag back down, Escape or right-click cancels with nothing spent.
 - **Click and keys:** every drag action also works by click and keyboard (number keys select, Enter confirms, Escape cancels).
 - **Bottom corners:** Mana as current/max, the piles (draw, discard, Graveyard) and End Turn.
 - **Combat log:** collapsed by default, filterable, never a permanent panel.
 
+### Cards
+
+The layout is fixed, so every card reads the same way (owner, 28 Nov; the mockup in `.external/card-mockup/` is a layout reference, and its art, ornaments and numbers are stand-ins).
+
+- **Size:** 15 × 21 em, so the whole card scales from one font size.
+- **Left column**, from the top, overlapping the art window's left edge: the cost gem; the owner's medallion, the same face crop as her ultimate ring; her name plate, the card's one owner label; the Domain sigil, so shape and not only colour says the Domain. Ownerless cards (Symptoms, Curses) carry a Bloom emblem in place of the medallion and "Party" on the plate.
+- **Art window:** wide, across the top. It shows what the card does (an effect, a material, a motif), never a playable character; a loose prop motif is allowed. Its subject sits right of centre, clear of the column. Strike and Defense share one picture per Domain (eight in all); every Transcend, Flavour, reward and generated card has its own.
+- **Title band:** the name, centred.
+- **Type and target line:** the type and its tags (Attack or Skill, Symptom, Ritual, Exhaust, Retain, Fleeting, Transcend) on the left, who it hits on the right. A card that deals damage is an Attack and any other is a Skill; the label is only a label, and no rule reads it.
+- **Rules:** on solid parchment, with live numbers in colour. No text ever sits see-through over art. No rarity, no set code.
+- **Cost:** a gem. A held Ritual's gem turns gold with a soft glow at its current cost, and the printed cost sits in a round badge at the gem's lower right, in the same serif, with a thin diagonal pink strike.
+- **Frames:** one per Domain, built in the UI from generated ornament pieces (corners, a crest, side vines or other ornament fitting the Domain) around the fixed text areas, never one generated image of a whole card. The party's cards have a Bloom frame.
+- **Portraits** are the only card art that must match a character exactly, so they are tight head-and-shoulders crops built for a circle.
+
 ### Readability hooks
 
-- **Rituals:** a Ritual tag on the card, and its cost field marks the reduction (current cost highlighted beside the printed cost).
+- **Rituals:** a Ritual tag on the card's type line; a held Ritual's cost gem turns gold at its current cost, with the printed cost struck in a badge (see Cards).
 - **Previews:** card numbers, target highlights and the incoming-damage bar come from the same rules code that resolves the play.
 - **Enemy actions:** play one at a time and may be sped up, but never merged.
 

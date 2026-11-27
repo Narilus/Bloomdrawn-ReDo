@@ -38,6 +38,19 @@ export function slotAt(root: unknown, path: string): Slot | undefined {
   return value === 'stacks' && typeof call?.status === 'string' ? { formula: node as Formula, value, status: call.status } : { formula: node as Formula, value };
 }
 
+/** Every operation call in a list, with the calls nested inside them (a branch, a repeat). */
+function allCalls(calls: readonly unknown[]): OpCall[] {
+  return calls.flatMap((call) =>
+    typeof call === 'object' && call !== null && typeof (call as OpCall).op === 'string'
+      ? [call as OpCall, ...Object.values(call).flatMap((arg) => (Array.isArray(arg) ? allCalls(arg) : []))]
+      : [],
+  );
+}
+
+/** The card's type label (DESIGN.md "Cards"): an Attack deals damage, anything else is a Skill. No rule reads it. */
+export const cardKind = (def: CardDef): 'attack' | 'skill' =>
+  allCalls(def.effects).some((call) => Object.values(VALUE_OF[call.op] ?? {}).includes('damage')) ? 'attack' : 'skill';
+
 /** The `{path}` slots in a template. */
 export const templateSlots = (template: string): string[] => [...template.matchAll(/\{([\w.]+)\}/g)].map((m) => m[1] as string);
 

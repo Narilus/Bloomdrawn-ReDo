@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { add, stat } from './formula.ts';
-import { damage, draw, gainResource, gainShield } from './ops/index.ts';
+import { damage, draw, gainResource, gainShield, ifConsume, volley } from './ops/index.ts';
 import { mul, resource } from './formula.ts';
-import { describeCard, describeCardLive, showStats, slotAt, templateSlots } from './text.ts';
+import { cardKind, describeCard, describeCardLive, showStats, slotAt, templateSlots } from './text.ts';
 import { fixtureCombat, withCardInHand, withCards } from './testing/fixtures.ts';
 
 const card = {
@@ -54,5 +54,17 @@ describe('authored text', () => {
     expect(slotAt(pod, 'effects.0.resource')).toBeUndefined();
     expect(slotAt(pod, 'effects.9.amount')).toBeUndefined();
     expect(templateSlots(pod.text)).toEqual(['effects.0.amount', 'effects.1.amount']);
+  });
+});
+
+describe('card type label', () => {
+  const base = { id: 'test.a.x', name: 'X', owner: 'test.a', cost: 1, target: 'none' as const };
+  it('a card that deals damage is an Attack, by a hit, a volley or a hit inside a branch', () => {
+    expect(cardKind({ ...base, effects: [damage(6)] })).toBe('attack');
+    expect(cardKind({ ...base, effects: [volley(2, 3)] })).toBe('attack');
+    expect(cardKind({ ...base, effects: [ifConsume('embryo', 1, [draw(1), damage(4)])] })).toBe('attack');
+  });
+  it('any other card is a Skill', () => {
+    expect(cardKind({ ...base, effects: [gainShield(4), draw(1), ifConsume('embryo', 1, [gainResource('embryo', 1)])] })).toBe('skill');
   });
 });

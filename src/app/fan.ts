@@ -1,9 +1,15 @@
 import type { Point } from '../stage/layout.ts';
 
-export const CARD_W = 210;
-export const CARD_H = 290;
+/** The card's font size in the hand: a card is 15 × 21 of it (DESIGN.md "Cards"). */
+export const CARD_EM = 18;
+export const CARD_W = 15 * CARD_EM;
+export const CARD_H = 21 * CARD_EM;
 const CENTER_X = 960;
-const BASE_Y = 938;
+// The resting fan's centre card ends just below the screen's bottom edge, its rules in view.
+const BASE_Y = 1080 + 15 - CARD_H / 2;
+// A raised card sits whole on screen.
+const RAISED_SCALE = 1.16;
+const RAISED_Y = 1080 - 8 - (CARD_H / 2) * RAISED_SCALE;
 
 export interface Pose {
   x: number;
@@ -18,7 +24,8 @@ export interface Pose {
  * hovered index. Recomputed on every change, so offsets can never accumulate.
  */
 export function fanPose(index: number, count: number, hovered: number | null): Pose {
-  const spacing = Math.min(150, 1000 / Math.max(count, 1));
+  // Covered cards keep their left column (cost, owner, Domain) in view.
+  const spacing = Math.min(125, 1000 / Math.max(count, 1));
   const offset = index - (count - 1) / 2;
   const pose: Pose = {
     x: CENTER_X + offset * spacing,
@@ -28,7 +35,7 @@ export function fanPose(index: number, count: number, hovered: number | null): P
     z: index,
   };
   if (hovered === null) return pose;
-  if (index === hovered) return { x: pose.x, y: BASE_Y - 105, rotate: 0, scale: 1.16, z: 100 };
+  if (index === hovered) return { x: pose.x, y: RAISED_Y, rotate: 0, scale: RAISED_SCALE, z: 100 };
   pose.x += Math.sign(index - hovered) * (Math.abs(index - hovered) === 1 ? 55 : 30);
   return pose;
 }
