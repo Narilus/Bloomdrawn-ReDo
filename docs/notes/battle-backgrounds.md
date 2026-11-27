@@ -40,7 +40,7 @@ The briefs (`art/briefs/bg-*.txt`) say all this in words, after the DESIGN.md pr
 
 ## How a background is made and checked
 
-`npm run art -- gen bg-<scene> --stem scene --n 4` makes wide options. `npm run art -- stage art/cut/bg-<scene>-stage.png art/raw/bg-<scene>/*.png` crops each option to 16:9 and puts the real sprites on it at their feet positions, with the game's shadows and draw order: the starters against three enemies (a large anchor and two flanks), and against a Boss alone. The owner picks from that sheet, so a floor line in the wrong place is seen with the actors on it, not guessed at. `npm run art -- pick <raw.png> --scene band<N>-<n>` (or a Boss's name, alone or with `-<n>`) frames the pick to 1920×1080 as WebP in `src/assets/scenes/`, about 270 KB each, and the game finds it by name.
+`npm run art -- gen bg-<scene> --stem scene --n 4` makes wide options. `npm run art -- stage art/cut/bg-<scene>-stage.png art/raw/bg-<scene>/*.png [--boss <name>]` crops each option to 16:9 and puts the real sprites on it at their feet positions, with the game's shadows and draw order: the starters against three enemies (a large anchor and two flanks), and against a Boss alone (the Hollow Abbess, or the scene's own Boss with `--boss`). The owner picks from that sheet, so a floor line in the wrong place is seen with the actors on it, not guessed at. `npm run art -- pick <raw.png> --scene band<N>-<n>` (or a Boss's name, alone or with `-<n>`) frames the pick to 1920×1080 as WebP in `src/assets/scenes/`, about 270 KB each, and the game finds it by name.
 
 ## Open
 

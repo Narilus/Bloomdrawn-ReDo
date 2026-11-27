@@ -17,9 +17,9 @@ const USAGE = `Usage:
       Stem from DESIGN.md + art/briefs/<character>.txt -> art/raw/<character>/<character>-NN.png
       (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down; --stem icon: a weapon icon;
       --stem scene: a battle background, wide and opaque, from the prompt stem)
-  npm run art -- stage <out.png> <raw.png...>
+  npm run art -- stage <out.png> <raw.png...> [--boss hollow-abbess]
       Each background at 1920×1080 with the real sprites at their in-game feet positions: the party with
-      three enemies, and the party facing a Boss alone (out: art/cut/<name>-stage.png)
+      three enemies, and the party facing a Boss alone, by default the Hollow Abbess (out: art/cut/<name>-stage.png)
   npm run art -- cut <raw.png...>
       Background removal and trim -> art/cut/<character>/<name>.png
   npm run art -- sheet <out.png> <cut.png...> [--height 400]
@@ -41,6 +41,7 @@ async function main() {
       stem: { type: 'string', default: 'battle' },
       icon: { type: 'boolean', default: false },
       scene: { type: 'string' },
+      boss: { type: 'string', default: 'hollow-abbess' },
     },
   });
   const [command, ...rest] = positionals;
@@ -57,7 +58,7 @@ async function main() {
   } else if (command === 'pick' && rest[0]) {
     pick(rest[0], values.icon);
   } else if (command === 'stage' && rest.length > 1) {
-    stage(rest[0] as string, rest.slice(1));
+    stage(rest[0] as string, rest.slice(1), values.boss);
   } else if (command === 'sheet' && rest.length > 1) {
     sheet(rest[0] as string, rest.slice(1), Number(values.height));
   } else {
@@ -185,9 +186,9 @@ export function frame(image: Rgba): Rgba {
 const SHADOW: [number, number, number] = [18, 12, 16];
 /** The starters, front to back, and the enemies each preview stands against a background. */
 const PARTY = ['maelia', 'agathe', 'anthe', 'leonora'];
-const LINEUPS: readonly (readonly [string, EnemySize | undefined][])[] = [
+const lineups = (boss: string): readonly (readonly [string, EnemySize | undefined][])[] => [
   [['hound-mother', 'large'], ['garden-husk', undefined], ['petal-horror', undefined]],
-  [['hollow-abbess', 'huge']],
+  [[boss, 'huge']],
 ];
 
 /** One actor as the battlefield draws it: a shadow at the feet, the sprite anchored 97% down. */
@@ -197,10 +198,10 @@ function place(canvas: Rgba, name: string, x: number, y: number, height: number,
   composite(canvas, sprite, Math.round(x - sprite.width / 2), Math.round(y - sprite.height * 0.97));
 }
 
-function stage(out: string, files: string[]) {
+function stage(out: string, files: string[], boss: string) {
   const shots = files.flatMap((file) => {
     const scene = frame(readPng(file));
-    return LINEUPS.map((enemies) => {
+    return lineups(boss).map((enemies) => {
       const canvas = { ...scene, data: new Uint8Array(scene.data) };
       // Back to front, as the battlefield draws them.
       for (let slot = PARTY.length - 1; slot >= 0; slot--) {
