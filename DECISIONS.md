@@ -246,6 +246,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - The Hollow Abbess's scene (owner, 27 Nov): all four candlelit sanctuaries, the game picking between them by seed. A Boss may have a pool of its own scenes.
 
+- The Gathered Beast's scene (owner, 27 Nov): all four lairs in the heart of the wood, picked by seed.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).

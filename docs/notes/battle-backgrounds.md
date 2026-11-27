@@ -15,6 +15,7 @@ The first part of the art pass (owner, 27 Nov). Painted backgrounds replace the 
 - Normal fights and elites draw from their band's pool, about four scenes each, picked by the fight's seed so a resumed fight keeps its scene (`src/stage/scenes.ts`). The band is the run's depth (a Trial's level), not the enemies' own band.
 - The 6 run Bosses and 4 Trial Bosses get richer or wholly custom scenes, named after their encounter: one (`hollow-abbess.webp`) or a pool of their own picked by seed (`hollow-abbess-1.webp`, `-2`…). Until one exists, a Boss stands in its band's pool. Its Full Bloom bar stays in the same scene.
 - **The Hollow Abbess** (owner, 27 Nov): the cathedral's candlelit sanctuary, checkered marble before an altar of candles, amber glass and a rose window, her root-tree broken through the wall; all four options, picked by seed (`bg-hollow-abbess`).
+- **The Gathered Beast** (owner, 27 Nov): its lair at the heart of the green wood, a trampled clearing under colossal trees hung with antlers, skulls and ribs, lit by a shaft of gold daylight; all four options, picked by seed (`bg-gathered-beast`).
 - Later: a more-bloomed version of each pool scene, made from the original so its layout holds, as a tell of the Bloom clock's stage.
 
 ## Where the actors stand
