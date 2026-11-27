@@ -252,6 +252,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - The Crowned Pistil's scene (owner, 27 Nov): all four dark throne rooms lit from above, picked by seed.
 
+- The Mother Root's scene (owner, 27 Nov): all four root hollows as generated, pink-mauve roots included, picked by seed.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
