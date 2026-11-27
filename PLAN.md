@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.10 Options in tabs (audio accepted as a first pass 27 Nov), then M6.11 Art pass
+**Current task:** M6.11 Art pass (M6.10 signed off 27 Nov)
 
 ## Milestones
 
@@ -403,13 +403,13 @@ Character dupes for 100 Pollen each, the starters' included.
 
 _Built 15 Nov: `src/game/shop.ts` (`buyDupe`: an owned character's next Potential level for `DUPE_PRICE` Pollen, refusing a character not owned, one at her last level or without levels, and a short purse), the save action in `src/app/saves.ts`, and the Shop screen (`src/app/Shop.tsx`), from a new Shop item on the main menu, laid out like the inventory: owned characters as tiles, the chosen one's Potential levels and price, Buy after a confirm. Tests: `src/game/shop.test.ts`, `src/app/saves.test.ts`, `e2e/shop.spec.ts`. Pollen moved top right beside Ducats and Blooms (owner, 15 Nov). The starters' Potential levels (`docs/notes/starter-kits.md`, "Potential": the lighter set for Agathe, Maelia and Anthe, Leonora's draft; owner, 15 Nov) are content now, proved in `src/content/scenarios/potential.test.ts` and sold in the Shop. Isadora's P5 is now Rapt on every volley from a card (owner, 15 Nov). Signed off 15 Nov, with the starters' Potential and Isadora's P5._
 
-### M6.10 Audio ✅ (accepted by the owner 27 Nov as a first pass)
+### M6.10 Audio ✅ (signed off by the owner 27 Nov, with Options in tabs)
 CC0 sound effects for cards, hits and the UI, with volume and mute in Options. Accessibility is out of the plan until there are real options to offer (owner, 16 Nov).
 **Done when:** the settings persist and apply, and e2e plays a fight with sound muted.
 
 _Plumbing built 16 Nov (`docs/notes/audio.md`): the cues and their timing in `src/app/sound.ts` (`cuesOf`, from the battlefield's beat starts and landings; any button clicks; banner results), a Web Audio mixer that plays whatever is in `src/assets/sound/` (a cue with no file is silent), volume and mute in the profile (save v13) and on Options. Tests: `src/app/sound.test.ts`, `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. The owner's picks from Kenney's CC0 packs are in `src/assets/sound/` (21 Nov; the note lists them); round 2 replaced enemy and fall (27 Nov). Accepted 27 Nov as sufficient for a first pass; to revisit later with map steps and music: map, normal, Elite and generic Boss tracks, and some Bosses' own (owner)._
 
-Options in tabs (owner, 27 Nov): Profile (the backup and reset that were there) and Sound (volume, Mute all, and five kinds of sound muted one by one: interface, cards, combat, big moments, banners; save v14). Built 27 Nov, laid out like the inventory. Tests: `src/app/sound.test.ts` (`audible`), `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. Waiting for the owner's look.
+Options in tabs (owner, 27 Nov): Profile (the backup and reset that were there) and Sound (volume, Mute all, and five kinds of sound muted one by one: interface, cards, combat, big moments, banners; save v14). Built 27 Nov, laid out like the inventory. Tests: `src/app/sound.test.ts` (`audible`), `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. Signed off 27 Nov after two fixes: one click when Options opens, and the kinds' descriptions all in lower case.
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.

@@ -22,7 +22,7 @@ const KINDS: Record<SoundGroup, [string, string]> = {
   interface: ['Interface', 'button presses'],
   cards: ['Cards', 'played and drawn'],
   combat: ['Combat', 'hits, blocks, statuses, enemies acting and falling'],
-  moments: ['Big moments', 'ultimates, Transcends, Boss phases, wins and losses'],
+  moments: ['Big moments', 'ultimates, transcends, boss phases, wins and losses'],
   banners: ['Banners', 'pull results'],
 };
 

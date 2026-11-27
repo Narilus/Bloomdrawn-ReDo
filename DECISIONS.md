@@ -233,6 +233,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Sound picks, round 2 (owner, 27 Nov): enemy is a knife draw (not an attack, but better, for now) and fall is a dropped leather sound. Ultimate keeps its bell for now. Transcend stays as it is: the closest option, a rising sweep, sounded sci-fi. Heal stays silent: glass chimes are too sharp and the tones are sci-fi.
 - Audio (owner, 27 Nov): sufficient for a first pass; to revisit later. Gaps for then: steps while crossing the map, and music (the map, normal fights, Elite fights, a generic Boss track, and some Bosses' own).
 - Options (owner, 27 Nov): tabs, for now Profile (the current profile options) and Sound (volume, and a checkbox to mute each kind of sound: UI presses, cards, combat and so on).
+- M6.10 signed off (owner, 27 Nov): audio as a first pass and Options in tabs. M6.11 Art pass is next.
 
 ## Open
 - Gear at launch or later (recommendation: later).
