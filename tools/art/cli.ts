@@ -17,6 +17,12 @@ const USAGE = `Usage:
       Stem from DESIGN.md + art/briefs/<character>.txt -> art/raw/<character>/<character>-NN.png
       (--stem enemy: the enemy sprite stem, for the creatures from Depth 11 down; --stem icon: a weapon icon;
       --stem scene: a battle background, wide and opaque, from the prompt stem)
+  npm run art -- gen portrait-<character> --stem portrait --like src/assets/battle/<character>.png [--n 4]
+      A square painted bust from art/briefs/portrait-<character>.txt, with her battle sprite attached as the
+      likeness to keep (face, hair, costume, colours, props) -> art/raw/portrait-<character>/
+  npm run art -- faces <out.png> <character> <raw.png...>
+      Each portrait option beside her battle sprite, and as the game shows it: the combat ring (at 1× and 2×)
+      and the card's art window (out: art/cut/portrait-<character>-faces.png)
   npm run art -- stage <out.png> <raw.png...> [--boss hollow-abbess]
       Each background at 1920×1080 with the real sprites at their in-game feet positions: the party with
       three enemies, and the party facing a Boss alone, by default the Hollow Abbess (out: art/cut/<name>-stage.png)
@@ -28,7 +34,8 @@ const USAGE = `Usage:
       The owner's pick, cut and stored at the standard height -> src/assets/battle/<character>.png
       (--icon: fitted in a square instead -> src/assets/weapons/<weapon>.png;
       --scene: a background, framed to 1920×1080 as WebP -> src/assets/scenes/<name>.webp, where <name> is
-      band<N>-<n> for a band's pool or a Boss's enemy ID without "enemy.")`;
+      band<N>-<n> for a band's pool or a Boss's enemy ID without "enemy.";
+      --portrait <character>: a portrait, squared to 512px as WebP -> src/assets/portraits/<character>.webp)`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -37,6 +44,8 @@ async function main() {
       n: { type: 'string', default: '3' },
       bg: { type: 'string', default: 'transparent' },
       ref: { type: 'string' },
+      like: { type: 'string' },
+      portrait: { type: 'string' },
       height: { type: 'string', default: '400' },
       stem: { type: 'string', default: 'battle' },
       icon: { type: 'boolean', default: false },
@@ -49,10 +58,17 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle, enemy, icon or scene');
-    await generate(rest[0], Number(values.n), values.stem === 'scene' ? undefined : background, stem, values.ref);
+    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene or portrait');
+    if (values.ref && values.like) throw new Error('--ref and --like are different references; give one');
+    const shape = values.stem === 'scene' ? 'landscape' : values.stem === 'portrait' ? 'square' : 'sprite';
+    const reference = values.like ? { path: values.like, kind: 'likeness' as const } : values.ref ? { path: values.ref, kind: 'style' as const } : undefined;
+    await generate(rest[0], Number(values.n), shape === 'sprite' ? background : undefined, stem, shape, reference);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
+  } else if (command === 'pick' && rest[0] && values.portrait) {
+    pickPortrait(rest[0], values.portrait);
+  } else if (command === 'faces' && rest.length > 2) {
+    faces(rest[0] as string, rest[1] as string, rest.slice(2));
   } else if (command === 'pick' && rest[0] && values.scene) {
     pickScene(rest[0], values.scene);
   } else if (command === 'pick' && rest[0]) {
@@ -68,34 +84,40 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem' } as const;
 
 /** `background` is absent for a scene: opaque and wide. */
-async function generate(character: string, count: number, background: Background | undefined, label: string, reference?: string) {
+type Shape = 'sprite' | 'landscape' | 'square';
+interface Reference {
+  path: string;
+  kind: 'style' | 'likeness';
+}
+
+async function generate(character: string, count: number, background: Background | undefined, label: string, shape: Shape, reference?: Reference) {
   if (count < 1 || count > 4) throw new Error('--n must be 1 to 4');
   const stem = stemFrom(readFileSync(join(ROOT, 'docs/DESIGN.md'), 'utf8'), label);
   const brief = readFileSync(join(ROOT, 'art/briefs', `${character}.txt`), 'utf8');
-  const prompt = composePrompt({ stem, brief, background, styleReference: reference !== undefined });
+  const prompt = composePrompt({ stem, brief, background, reference: reference?.kind });
   const problems = promptProblems(prompt, background);
   if (problems.length > 0) throw new Error(`Prompt refused:\n- ${problems.join('\n- ')}`);
-  const referencePath = reference ? join(process.cwd(), reference) : undefined;
-  if (referencePath && !existsSync(referencePath)) throw new Error(`No reference image at ${reference}`);
+  const referencePath = reference ? join(process.cwd(), reference.path) : undefined;
+  if (referencePath && !existsSync(referencePath)) throw new Error(`No reference image at ${reference?.path}`);
 
   const dir = join(ROOT, 'art/raw', character);
   mkdirSync(dir, { recursive: true });
   const taken = readdirSync(dir).map((f) => Number(/-(\d+)\.png$/.exec(f)?.[1] ?? 0));
   const first = Math.max(0, ...taken) + 1;
   const names = Array.from({ length: count }, (_, i) => `${character}-${String(first + i).padStart(2, '0')}`);
-  console.log(`Generating ${names.join(', ')} (${background ? `${background} background` : 'scene'}${reference ? `, style reference ${reference}` : ''})…`);
+  console.log(`Generating ${names.join(', ')} (${background ? `${background} background` : 'scene'}${reference ? `, ${reference.kind} reference ${reference.path}` : ''})…`);
 
   await Promise.all(
     names.map(async (name) => {
       try {
         // A run occasionally ends without calling the image tool; one retry covers it.
-        const run = () => codexImage(prompt, background === 'transparent', referencePath, !background);
+        const run = () => codexImage(prompt, background === 'transparent', shape, referencePath && reference ? { path: referencePath, kind: reference.kind } : undefined);
         const { image, thread } = await run().catch(run);
         copyFileSync(image, join(dir, `${name}.png`));
-        const header = [`Background: ${background ?? 'scene'}`, ...(reference ? [`Reference: ${reference}`] : []), `Codex thread: ${thread}`];
+        const header = [`Background: ${background ?? 'scene'}`, ...(reference ? [`Reference (${reference.kind}): ${reference.path}`] : []), `Codex thread: ${thread}`];
         writeFileSync(join(dir, `${name}.prompt.txt`), `${header.join('\n')}\n\n${prompt}`);
         console.log(`  ${relative(ROOT, join(dir, `${name}.png`))}`);
       } catch (error) {
@@ -111,13 +133,14 @@ async function generate(character: string, count: number, background: Background
  * thread ID (generated_images/<thread>/), because the agent's reply can name another run's file
  * when several run at once.
  */
-function codexImage(prompt: string, transparent: boolean, reference?: string, landscape = false): Promise<{ image: string; thread: string }> {
+function codexImage(prompt: string, transparent: boolean, shape: Shape, reference?: Reference): Promise<{ image: string; thread: string }> {
   const references = reference
-    ? `referenced_image_paths = ["${reference}"] (a style reference)`
+    ? `referenced_image_paths = ["${reference.path}"] (${reference.kind === 'likeness' ? 'the character to portray' : 'a style reference'})`
     : 'no referenced_image_paths and no num_last_images_to_include';
+  const size = shape === 'landscape' ? ' if the tool takes a size or aspect ratio, the widest landscape one (1536x1024);' : shape === 'square' ? ' if the tool takes a size or aspect ratio, the square one (1024x1024);' : '';
   const instruction = [
     'Make exactly one call to your image generation tool, then stop. Do not edit, copy or create any files.',
-    `Arguments: transparent_background = ${transparent}; ${references};${landscape ? ' if the tool takes a size or aspect ratio, the widest landscape one (1536x1024);' : ''} prompt = the text between <prompt> and </prompt> below, verbatim.`,
+    `Arguments: transparent_background = ${transparent}; ${references};${size} prompt = the text between <prompt> and </prompt> below, verbatim.`,
     `<prompt>\n${prompt}</prompt>`,
   ].join('\n\n');
   return new Promise((resolve, reject) => {
@@ -167,6 +190,89 @@ function pickScene(file: string, name: string) {
   rmSync(scratch, { recursive: true, force: true });
   if (run.status !== 0) throw new Error('ffmpeg failed');
   console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
+}
+
+/** A portrait squared from its centre to 512px and stored as WebP: the combat ring shows it at 72px, the card window wider. */
+function pickPortrait(file: string, name: string) {
+  if (!/^[a-z]+(-[a-z]+)*$/.test(name)) throw new Error('--portrait must be a character ID such as maelia');
+  const image = readPng(file);
+  const side = Math.min(image.width, image.height);
+  const square = scaleArea(crop(image, Math.round((image.width - side) / 2), Math.round((image.height - side) / 2), side, side), PORTRAIT, PORTRAIT);
+  const scratch = mkdtempSync(join(tmpdir(), 'portrait-'));
+  const png = join(scratch, 'square.png');
+  writePng(png, square);
+  const out = join(ROOT, 'src/assets/portraits', `${name}.webp`);
+  mkdirSync(dirname(out), { recursive: true });
+  const run = spawnSync('ffmpeg', ['-nostdin', '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '90', out], { stdio: 'inherit' });
+  rmSync(scratch, { recursive: true, force: true });
+  if (run.status !== 0) throw new Error('ffmpeg failed');
+  console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
+}
+
+const PORTRAIT = 512;
+/** The combat ring (`.portrait-ring` in global.css): 82px with a 5px gold band round a 72px face. */
+const RING = 82;
+const FACE = 72;
+/** The card's art window (`.card-art`): the card's inner width by 104px, the image covered from 25% down. */
+const CARD_ART: readonly [number, number] = [190, 104];
+const GOLD: [number, number, number] = [184, 149, 90];
+
+/** `image` drawn into a circle of radius r centred at (cx, cy), over whatever is there. */
+function disc(canvas: Rgba, image: Rgba, cx: number, cy: number, r: number) {
+  const face = scaleArea(image, r * 2, r * 2);
+  for (let y = 0; y < r * 2; y++) {
+    for (let x = 0; x < r * 2; x++) {
+      if ((x + 0.5 - r) ** 2 + (y + 0.5 - r) ** 2 > r * r) continue;
+      const px = cx - r + x;
+      const py = cy - r + y;
+      if (px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) continue;
+      canvas.data.set(face.data.subarray((y * face.width + x) * 4, (y * face.width + x) * 4 + 4), (py * canvas.width + px) * 4);
+    }
+  }
+}
+
+/** A solid disc of one colour. */
+function ring(canvas: Rgba, cx: number, cy: number, r: number) {
+  const solid = blank(1, 1);
+  solid.data.set([...GOLD, 255]);
+  disc(canvas, scaleNearest(solid, 2, 2), cx, cy, r);
+}
+
+/** The card window's crop: the square covered to the window's width and cut from 25% of the spare height. */
+function cardCrop(square: Rgba, scale: number): Rgba {
+  const [w, h] = [CARD_ART[0] * scale, CARD_ART[1] * scale];
+  const wide = scaleArea(square, w, w);
+  return crop(wide, 0, Math.round((w - h) * 0.25), w, h);
+}
+
+function faces(out: string, character: string, files: string[]) {
+  const sprite = fitHeight(readPng(join(ROOT, 'src/assets/battle', `${character}.png`)), 480);
+  const gap = 24;
+  const columns = [400, 480, RING * 2, RING, CARD_ART[0] * 2];
+  const width = columns.reduce((sum, w) => sum + w + gap, gap);
+  const canvas = blank(width, (480 + gap) * files.length + gap);
+  fill(canvas, STAGE);
+  files.forEach((file, row) => {
+    const top = gap + row * (480 + gap);
+    const image = readPng(file);
+    const side = Math.min(image.width, image.height);
+    const square = crop(image, Math.round((image.width - side) / 2), Math.round((image.height - side) / 2), side, side);
+    let x = gap;
+    const cut = sprite.width > columns[0]! ? crop(sprite, Math.round((sprite.width - columns[0]!) / 2), 0, columns[0]!, sprite.height) : sprite;
+    composite(canvas, cut, x + Math.round((columns[0]! - cut.width) / 2), top);
+    x += columns[0]! + gap;
+    composite(canvas, scaleArea(square, 480, 480), x, top);
+    x += 480 + gap;
+    for (const scale of [2, 1]) {
+      const cx = x + RING * scale / 2;
+      const cy = top + 60 + RING;
+      ring(canvas, cx, cy, (RING * scale) / 2);
+      disc(canvas, square, cx, cy, (FACE * scale) / 2);
+      x += RING * scale + gap;
+    }
+    composite(canvas, cardCrop(square, 2), x, top + 60);
+  });
+  save(out, canvas);
 }
 
 function save(out: string, image: Rgba) {

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { composePrompt, promptProblems, stemFrom, STYLE_REFERENCE } from './prompt.ts';
+import { composePrompt, LIKENESS_REFERENCE, promptProblems, stemFrom, STYLE_REFERENCE } from './prompt.ts';
 
 const design = readFileSync(new URL('../../docs/DESIGN.md', import.meta.url), 'utf8');
 
@@ -14,16 +14,22 @@ describe('prompts', () => {
   });
 
   it('is the stem, then the brief, then the background, with the style note first if a reference is attached', () => {
-    const prompt = composePrompt({ stem: 'STEM.', brief: ' BRIEF.\n', background: 'transparent', styleReference: true });
+    const prompt = composePrompt({ stem: 'STEM.', brief: ' BRIEF.\n', background: 'transparent', reference: 'style' });
     expect(prompt).toBe(`${STYLE_REFERENCE}\n\nSTEM.\n\nBRIEF.\n\nBackground: fully transparent.\n`);
   });
 
+  it('a portrait leads with the likeness note: the sprite decides her colours and details', () => {
+    const prompt = composePrompt({ stem: 'STEM.', brief: 'BRIEF.', reference: 'likeness' });
+    expect(prompt).toBe(`${LIKENESS_REFERENCE}\n\nSTEM.\n\nBRIEF.\n`);
+    expect(prompt).not.toContain(STYLE_REFERENCE);
+  });
+
   it('a scene has no background line: it fills its own canvas', () => {
-    expect(composePrompt({ stem: 'STEM.', brief: 'BRIEF.', styleReference: false })).toBe('STEM.\n\nBRIEF.\n');
+    expect(composePrompt({ stem: 'STEM.', brief: 'BRIEF.', reference: undefined })).toBe('STEM.\n\nBRIEF.\n');
   });
 
   it('refuses banned words, Domain names, and the key colour on the figure', () => {
-    const prompt = composePrompt({ stem: 'A cosmic Rapture priestess.', brief: 'Blue sash.', background: 'blue', styleReference: false });
+    const prompt = composePrompt({ stem: 'A cosmic Rapture priestess.', brief: 'Blue sash.', background: 'blue', reference: undefined });
     expect(promptProblems(prompt, 'blue')).toEqual(['banned word "cosmic"', 'Domain name "Rapture"', 'the figure mentions "blue", the key colour']);
     expect(promptProblems(prompt.replace('Blue sash.', 'Violet sash.'), 'blue')).toHaveLength(2);
   });

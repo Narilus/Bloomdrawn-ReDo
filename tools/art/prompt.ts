@@ -44,13 +44,18 @@ export interface PromptParts {
   brief: string;
   /** Absent for a scene, which fills its own canvas. */
   background?: Background | undefined;
-  /** True when a style reference image is attached. */
-  styleReference: boolean;
+  /** What an attached image is for: a style to match, or the character herself to portray. */
+  reference?: 'style' | 'likeness' | undefined;
 }
 
 export const STYLE_REFERENCE =
   'Image 1 is a style reference only: match its pixel density, outline weight, shading and proportions. Do not copy its character, costume, colours or pose.';
 
-export function composePrompt({ stem, brief, background, styleReference }: PromptParts): string {
-  return [...(styleReference ? [STYLE_REFERENCE] : []), stem, brief.trim(), ...(background ? [backgroundLine(background)] : [])].join('\n\n') + '\n';
+/** For a portrait: the battle sprite is the source of truth for who she is and what she wears. */
+export const LIKENESS_REFERENCE =
+  'Image 1 is this exact character, drawn as a small pixel-art battle sprite. Paint the same person: keep her face, age, hair colour and style, skin tone, eye colour, costume, every colour and every prop and ornament exactly as Image 1 shows them, and add nothing to her design. Only the medium and framing change: a painted portrait, not pixel art.';
+
+export function composePrompt({ stem, brief, background, reference }: PromptParts): string {
+  const lead = reference === 'style' ? [STYLE_REFERENCE] : reference === 'likeness' ? [LIKENESS_REFERENCE] : [];
+  return [...lead, stem, brief.trim(), ...(background ? [backgroundLine(background)] : [])].join('\n\n') + '\n';
 }
