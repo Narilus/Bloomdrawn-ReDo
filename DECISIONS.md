@@ -256,6 +256,8 @@ An append-only log. One line per decision: date, what was decided, and why if it
 
 - The Open-Hearted Queen's scene (owner, 27 Nov): all four dusk courts, picked by seed. Every run Boss now has its own scenes.
 
+- The Trial Bosses' scenes (owner, 27 Nov): all four of the Anatomist's, the Hierophant's and the Oracle's; the Ringmaster's 01 and 04 only, since 02 and 03 put Leonora's feet and shadow on the wall plane. Kept as two rather than made again. Every fight now has its own background.
+
 ## Open
 - Gear at launch or later (recommendation: later).
 - Bloom clock ticks and effects per stage; whether Camp use ticks it (lean: yes).
