@@ -424,7 +424,7 @@ _Step 1 signed off 28 Nov (owner). Step 2 under way: kits from `art/briefs/frame
 
 _Owner feedback on the first pass, 28 Nov, done: the line under the title always holds a category (`cardCategory`, `src/engine/text.ts`) beside the target; keywords moved to a gold line at the foot of the rules; Transcend cards wear a raised crest above the top edge (a stand-in until each Domain's own is generated from its picked kit, `<frame>-transcend.png`)._
 
-_Frames picked 28 Nov (owner): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloom 04, in `src/assets/frames/`. Transcend crests: four per Domain from `art/briefs/transcend-<frame>.txt`, each generated with its picked kit attached as the set to match (`--ref`, the set note in `tools/art/prompt.ts`)._
+_Frames picked 28 Nov (owner): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloom 04, in `src/assets/frames/`. Transcend crests: four per Domain from `art/briefs/transcend-<frame>.txt`, each generated with its picked kit attached as the set to match (`--ref`, the set note in `tools/art/prompt.ts`). Made 28 Nov (`art/raw/transcend-*`), waiting on the owner's picks._
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.

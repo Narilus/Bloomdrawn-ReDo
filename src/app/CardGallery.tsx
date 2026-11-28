@@ -26,6 +26,8 @@ interface Option {
   label: string;
   frame: string;
   pieces?: FramePieces;
+  /** A Transcend-crest option: its Transcend card is the one shown raised. */
+  crest?: boolean;
 }
 
 function options(): Option[] {
@@ -36,7 +38,7 @@ function options(): Option[] {
     const at = (piece: string) => `/art/cut/frames/${kit}/${piece}.png`;
     // A Transcend crest joins its frame's picked pieces; a kit replaces them.
     const pieces = kind === 'transcend' ? { ...frameArt(frame), transcend: at('transcend') } : { corner: at('corner'), crest: at('crest'), side: at('side') };
-    return { label: kit.replace(/^frame-/, ''), frame, pieces };
+    return { label: kit.replace(/^frame-/, ''), frame, pieces, crest: kind === 'transcend' };
   });
 }
 
@@ -63,7 +65,7 @@ function Sample({ id, em, held }: { id: string; em: number; held?: boolean }) {
 export function CardGallery() {
   return (
     <div className="card-gallery">
-      {options().map(({ label, frame, pieces }) => {
+      {options().map(({ label, frame, pieces, crest }) => {
         const [plain, tagged] = SAMPLES[frame] ?? (SAMPLES.bloom as readonly [string, string]);
         return (
           <FrameArtContext.Provider key={label} value={(f) => (pieces && f === frame ? pieces : frameArt(f))}>
@@ -72,7 +74,7 @@ export function CardGallery() {
               <div className="card-gallery-cards">
                 <Sample id={plain} em={CARD_EM} held />
                 <Sample id={tagged} em={CARD_EM} held />
-                <Sample id={plain} em={CARD_EM * RAISED_SCALE} held />
+                <Sample id={crest ? tagged : plain} em={CARD_EM * RAISED_SCALE} held />
               </div>
             </section>
           </FrameArtContext.Provider>

@@ -1,0 +1,16 @@
+Background: transparent
+Reference (set): art/raw/frame-flesh/frame-flesh-01.png
+Codex thread: 01a21f82-2bb6-7eb3-9895-e72020fc0efb
+
+Image 1 is the set of frame ornament this new piece joins. Match its materials, colours, linework, lighting and level of detail exactly, so the new piece belongs to the same set. Do not copy its pieces or repeat them; make only the new piece described below.
+
+Painterly gothic fantasy ornament for a game card frame, fine linework and crisp edges, drawn as separate decorative pieces lit softly from the upper left. Each piece is a single solid object with wide empty space all around it, and no piece touches another. Bold, simple silhouettes that still read when shown very small, with fine detail inside them. Antique gold filigree accents. No card, no panel, no frame behind the pieces, no scenery, no faces, no figures, no text, no letters, no logos.
+
+A crown of stitched flesh: a fan of rose-pink and blush skin petals with fine darker veins, sewn with neat black surgical thread onto an antique gold filigree base, rising to one tall closed embryo bud at the peak, with small ivory seed pods and curls of raw pink umbilical vine at the two low ends.
+
+Colours: rose #C9566A, blush, raw pink, ivory and a little arterial red, with antique gold.
+
+
+One single piece only, centred on the canvas with wide empty space all around it: a raised crest that crowns the top edge of a card. It is symmetrical left to right, about two and a half times as wide as it is tall, and its bottom edge is one straight, flat horizontal line where it sits on the card's top edge; everything rises from that line into a peak at the centre. One bold, simple silhouette that still reads very small, with fine detail inside it.
+
+Background: fully transparent.

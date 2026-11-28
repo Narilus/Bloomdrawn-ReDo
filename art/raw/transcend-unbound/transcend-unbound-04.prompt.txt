@@ -1,0 +1,16 @@
+Background: transparent
+Reference (set): art/raw/frame-unbound/frame-unbound-04.png
+Codex thread: 01a21f84-3eff-7162-98d7-1d1dc2c80706
+
+Image 1 is the set of frame ornament this new piece joins. Match its materials, colours, linework, lighting and level of detail exactly, so the new piece belongs to the same set. Do not copy its pieces or repeat them; make only the new piece described below.
+
+Painterly gothic fantasy ornament for a game card frame, fine linework and crisp edges, drawn as separate decorative pieces lit softly from the upper left. Each piece is a single solid object with wide empty space all around it, and no piece touches another. Bold, simple silhouettes that still read when shown very small, with fine detail inside them. Antique gold filigree accents. No card, no panel, no frame behind the pieces, no scenery, no faces, no figures, no text, no letters, no logos.
+
+A traveller's crest: an engraved dark brass cartouche with fine scrollwork, riveted over a fan of worn oxblood leather with neat cream saddle stitching, its peak a closed brass pocket-watch case set upright like a jewel, with a small closed flower bud worked into the brass beneath it and short brass buckles at the two low ends.
+
+Colours: oxblood #8A4038, dark brass, cream, a little antique gold. No clock faces with numbers, no glass reflections.
+
+
+One single piece only, centred on the canvas with wide empty space all around it: a raised crest that crowns the top edge of a card. It is symmetrical left to right, about two and a half times as wide as it is tall, and its bottom edge is one straight, flat horizontal line where it sits on the card's top edge; everything rises from that line into a peak at the centre. One bold, simple silhouette that still reads very small, with fine detail inside it.
+
+Background: fully transparent.

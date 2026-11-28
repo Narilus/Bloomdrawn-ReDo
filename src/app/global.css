@@ -1267,10 +1267,10 @@ kbd {
 .frame-transcend .inner { fill: var(--glow); }
 
 .frame-transcend.art {
-  top: -2em;
-  width: 6em;
-  height: 2.6em;
-  margin-left: -3em;
+  top: -2.5em;
+  width: 7.2em;
+  height: 3.1em;
+  margin-left: -3.6em;
   background: no-repeat center bottom / contain;
 }
 
