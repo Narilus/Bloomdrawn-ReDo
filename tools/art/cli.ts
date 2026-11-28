@@ -49,7 +49,15 @@ const USAGE = `Usage:
   npm run art -- frames <raw.png...>
       Each kit cut into its pieces, or each Transcend crest cut out (art/cut/frames/<name>/), then shown on
       sample cards in the game's own card gallery, one sheet per frame (out: art/cut/frames-<frame>.png,
-      or art/cut/transcend-<frame>.png)`;
+      or art/cut/transcend-<frame>.png)
+  npm run art -- gen card-<name> --stem card [--n 4]
+      Card art from art/briefs/card-<name>.txt, wide and opaque -> art/raw/card-<name>/, where <name> is
+      strike-<domain> or defense-<domain> (one picture a Domain), or the card's ID with a dash for the dot
+  npm run art -- cards <raw.png...>
+      Each card-art option on its card in the game's own card gallery, at the hand's size and raised
+      (out: art/cut/card-<name>.png)
+  npm run art -- pick <raw.png> --card
+      Card art cropped to the art window's shape as WebP -> src/assets/cards/<name>.webp`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -67,6 +75,7 @@ async function main() {
       boss: { type: 'string', default: 'hollow-abbess' },
       frame: { type: 'string' },
       transcend: { type: 'string' },
+      card: { type: 'boolean', default: false },
     },
   });
   const [command, ...rest] = positionals;
@@ -74,9 +83,9 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait or ornament');
+    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait, ornament or card');
     if (values.ref && values.like) throw new Error('--ref and --like are different references; give one');
-    const shape = values.stem === 'scene' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' ? 'square' : 'sprite';
+    const shape = values.stem === 'scene' || values.stem === 'card' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' ? 'square' : 'sprite';
     // Ornament is a kit of pieces cut apart by their transparency, so it is always transparent.
     const kept = shape === 'sprite' ? background : values.stem === 'ornament' ? 'transparent' : undefined;
     // With the ornament stem, an attached image is the frame kit a new piece joins.
@@ -85,6 +94,10 @@ async function main() {
     await generate(rest[0], Number(values.n), kept, stem, shape, reference);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
+  } else if (command === 'cards' && rest.length > 0) {
+    await cards(rest);
+  } else if (command === 'pick' && rest[0] && values.card) {
+    pickCard(rest[0]);
   } else if (command === 'frames' && rest.length > 0) {
     await frames(rest);
   } else if (command === 'pick' && rest[0] && values.frame) {
@@ -110,7 +123,7 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem', card: 'Card art stem' } as const;
 
 /** `background` is absent for a scene: opaque and wide. */
 type Shape = 'sprite' | 'landscape' | 'square';
@@ -221,6 +234,29 @@ function pickScene(file: string, name: string) {
   if (run.status !== 0) throw new Error('ffmpeg failed');
   console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
 }
+
+/** Card art cropped from its centre to the art window's shape (14 × 9.3 em) and stored as WebP. */
+function pickCard(file: string) {
+  const dir = basename(dirname(file));
+  const name = /^card-([a-z0-9]+(-[a-z0-9]+)*)$/.exec(dir)?.[1];
+  if (!name) throw new Error(`${file} is not card art (art/raw/card-<name>/card-<name>-NN.png)`);
+  const image = readPng(file);
+  const width = Math.min(image.width, Math.round((image.height * CARD_PICTURE.width) / CARD_PICTURE.height));
+  const height = Math.round((width * CARD_PICTURE.height) / CARD_PICTURE.width);
+  const cut = scaleArea(crop(image, Math.round((image.width - width) / 2), Math.round((image.height - height) / 2), width, height), CARD_PICTURE.width, CARD_PICTURE.height);
+  const scratch = mkdtempSync(join(tmpdir(), 'card-'));
+  const png = join(scratch, 'card.png');
+  writePng(png, cut);
+  const out = join(ROOT, 'src/assets/cards', `${name}.webp`);
+  mkdirSync(dirname(out), { recursive: true });
+  const run = spawnSync('ffmpeg', ['-nostdin', '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '88', out], { stdio: 'inherit' });
+  rmSync(scratch, { recursive: true, force: true });
+  if (run.status !== 0) throw new Error('ffmpeg failed');
+  console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
+}
+
+/** The art window is 14 × 9.3 em; a raised hand card shows it about 270px wide, so this covers 2× screens. */
+const CARD_PICTURE = { width: 720, height: 478 };
 
 /** A portrait squared from its centre to 512px and stored as WebP: the combat ring shows it at 72px, the card window wider. */
 function pickPortrait(file: string, name: string) {
@@ -347,6 +383,23 @@ async function frames(files: string[]) {
     const sheet = `${kind === 'transcend' ? 'transcend' : 'frames'}-${frame}`;
     groups.set(sheet, [...(groups.get(sheet) ?? []), name]);
   }
+  await shootGallery([...groups].map(([sheet, names]) => [`kit=${names.join(',')}`, sheet]));
+}
+
+/** Shows each card-art option on its card in the dev gallery, one sheet per picture. */
+async function cards(files: string[]) {
+  const groups = new Map<string, string[]>();
+  for (const file of files) {
+    const name = basename(file, '.png');
+    const dir = /^(card-[a-z0-9-]+)-\d+$/.exec(name)?.[1];
+    if (!dir || basename(dirname(file)) !== dir) throw new Error(`${file} is not card art (art/raw/card-<name>/card-<name>-NN.png)`);
+    groups.set(dir, [...(groups.get(dir) ?? []), name]);
+  }
+  await shootGallery([...groups].map(([dir, names]) => [`art=${names.join(',')}`, dir]));
+}
+
+/** Photographs the dev card gallery (`?cards&<query>`) into art/cut/<sheet>.png for each pair. */
+async function shootGallery(shots: [query: string, sheet: string][]) {
   const port = 5181;
   const server = spawn(process.execPath, [join(ROOT, 'node_modules/vite/bin/vite.js'), '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'ignore' });
   try {
@@ -359,8 +412,8 @@ async function frames(files: string[]) {
     const { chromium } = await import('playwright');
     const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=gl', '--enable-gpu', '--ignore-gpu-blocklist'] });
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-    for (const [sheet, names] of groups) {
-      await page.goto(`${url}?cards&kit=${names.join(',')}`);
+    for (const [query, sheet] of shots) {
+      await page.goto(`${url}?cards&${query}`);
       await page.waitForSelector('.card-gallery-option');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(300);

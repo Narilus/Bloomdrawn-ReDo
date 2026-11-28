@@ -1,13 +1,16 @@
 import { registry } from '../content/registry.ts';
 import { runCardText } from '../game/expedition.ts';
+import type { CardDef } from '../engine/index.ts';
+import { cardArtName } from '../stage/cardArt.ts';
 import { frameArt, type FramePieces } from '../stage/frameArt.ts';
-import { CardFace, FrameArtContext, markNumber } from './CardView.tsx';
+import { CardArtContext, CardFace, FrameArtContext, markNumber } from './CardView.tsx';
 import { CARD_EM, RAISED_SCALE } from './fan.ts';
 
 // Dev builds only: `?cards` shows each frame on sample cards, at the hand's size and raised, with
 // the game's own ornament. `?cards&kit=frame-flesh-01,transcend-flesh-02` shows frame-kit or
 // Transcend-crest options instead, from their pieces in art/cut/frames/ (`npm run art -- frames`),
-// for the owner to pick.
+// for the owner to pick. `?cards&art=card-strike-flesh-01,card-strike-flesh-02` shows card-art options
+// from art/raw/ (`npm run art -- cards`), each on a card that uses that picture.
 
 const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.search) : new URLSearchParams());
 
@@ -62,7 +65,41 @@ function Sample({ id, em, held }: { id: string; em: number; held?: boolean }) {
   );
 }
 
+/** The domain a card's picture is filed under, as CardFace works it out. */
+function artDomain(def: CardDef): string | undefined {
+  if (def.owner === undefined && def.domain === undefined) return undefined;
+  return def.domain ?? (def.owner ? registry.characters[def.owner]?.domain : undefined);
+}
+
+/** Card-art options: each picture on the first card that uses it, at the hand's size and raised. */
+function ArtOptions({ names }: { names: string[] }) {
+  return (
+    <div className="card-gallery">
+      {names.map((name) => {
+        const dir = name.replace(/-\d+$/, '');
+        const url = `/art/raw/${dir}/${name}.png`;
+        const wanted = dir.replace(/^card-/, '');
+        const card = Object.values(registry.cards).find((def) => cardArtName(def, artDomain(def)) === wanted);
+        if (!card) return <p key={name}>No card uses {wanted}.</p>;
+        return (
+          <CardArtContext.Provider key={name} value={(def, domain) => (cardArtName(def, domain) === wanted ? url : undefined)}>
+            <section className="card-gallery-option">
+              <h3>{name.replace(/^card-/, '')}</h3>
+              <div className="card-gallery-cards">
+                <Sample id={card.id} em={CARD_EM} />
+                <Sample id={card.id} em={CARD_EM * RAISED_SCALE} />
+              </div>
+            </section>
+          </CardArtContext.Provider>
+        );
+      })}
+    </div>
+  );
+}
+
 export function CardGallery() {
+  const art = params().get('art')?.split(',').filter(Boolean) ?? [];
+  if (art.length > 0) return <ArtOptions names={art} />;
   return (
     <div className="card-gallery">
       {options().map(({ label, frame, pieces, crest }) => {

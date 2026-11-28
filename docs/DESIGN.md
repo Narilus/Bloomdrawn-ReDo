@@ -446,6 +446,10 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 
 > Painterly gothic fantasy ornament for a game card frame, fine linework and crisp edges, drawn as separate decorative pieces lit softly from the upper left. Each piece is a single solid object with wide empty space all around it, and no piece touches another. Bold, simple silhouettes that still read when shown very small, with fine detail inside them. Antique gold filigree accents. No card, no panel, no frame behind the pieces, no scenery, no faces, no figures, no text, no letters, no logos.
 
+**Card art stem**, used instead of the prompt stem for card art (M6.11a; owner, 28 Nov: it shows what the card does, never a playable character). The picture fills the card's art window, about three wide by two tall, with the card's left column over its left edge. The brief gives the subject, its materials and colours:
+
+> Painterly gothic fantasy card illustration, fine linework and crisp edges, a wide landscape picture. One clear subject shown large and close: an object, a material or a burst of force caught mid-motion, set right of centre, with the left third of the picture darker and quieter. Deep plum and charcoal background with soft vignette. The glow is soft and comes from flesh, petals, pods, wax or flame, with no glints or points of light; everything is solid and opaque. Antique gold filigree accents where they fit. No people, no faces, no figures, no text, no letters, no logos, no border, no frame.
+
 **Never in any prompt or image:** starfields, galaxies or nebulae; underwater scenes, fish, coral or shells; crystal sparkle; neon; glitch effects; fractals or mirrors; any text baked into the image (all words are added by the game).
 
 ### Content warnings

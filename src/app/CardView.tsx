@@ -83,7 +83,8 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
   // A Domain's generic card shows its own Domain, whoever owns it.
   const domain = ownerless ? 'bloom' : (def?.domain ?? owner?.domain ?? 'bloom');
   const portrait = owner && !ownerless ? portraitArt[owner.id] : undefined;
-  const art = def ? cardArt(def, ownerless ? undefined : domain) : undefined;
+  const artOf = useContext(CardArtContext);
+  const art = def ? artOf(def, ownerless ? undefined : domain) : undefined;
   const plain = text.replace(MARK, '$2');
   const length = plain.length > 130 ? ' text-xlong' : plain.length > 90 ? ' text-long' : '';
   const name = def?.name ?? id;
@@ -135,6 +136,9 @@ export function CardFace({ id, def, owner, text, cost, registry, playable, keyHi
 
 /** The frame pieces to draw: the game's own, or options under review in the dev card gallery. */
 export const FrameArtContext = createContext<(frame: string) => FramePieces>(frameArt);
+
+/** A card's picture: the game's own, or an option under review in the dev card gallery. */
+export const CardArtContext = createContext<(def: CardDef, domain: string | undefined) => string | undefined>(cardArt);
 
 /**
  * The frame, built from pieces around the fixed text areas: the rim, the inner rule, both sides,
