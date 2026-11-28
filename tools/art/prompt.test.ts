@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { composePrompt, LIKENESS_REFERENCE, promptProblems, stemFrom, STYLE_REFERENCE } from './prompt.ts';
+import { composePrompt, LIKENESS_REFERENCE, promptProblems, SET_REFERENCE, stemFrom, STYLE_REFERENCE } from './prompt.ts';
 
 const design = readFileSync(new URL('../../docs/DESIGN.md', import.meta.url), 'utf8');
 
 describe('prompts', () => {
   it('reads every stem from DESIGN.md, and none breaks a rule', () => {
-    for (const label of ['Prompt stem', 'Battle sprite stem', 'Enemy sprite stem']) {
+    for (const label of ['Prompt stem', 'Battle sprite stem', 'Enemy sprite stem', 'Weapon icon stem', 'Ornament stem']) {
       const stem = stemFrom(design, label);
       expect(stem.length).toBeGreaterThan(100);
       expect(promptProblems(stem, 'blue')).toEqual([]);
@@ -22,6 +22,12 @@ describe('prompts', () => {
     const prompt = composePrompt({ stem: 'STEM.', brief: 'BRIEF.', reference: 'likeness' });
     expect(prompt).toBe(`${LIKENESS_REFERENCE}\n\nSTEM.\n\nBRIEF.\n`);
     expect(prompt).not.toContain(STYLE_REFERENCE);
+  });
+
+  it('a piece of ornament joining a picked frame leads with the set note: the kit decides its materials and colours', () => {
+    const prompt = composePrompt({ stem: 'STEM.', brief: 'BRIEF.', background: 'transparent', reference: 'set' });
+    expect(prompt).toBe(`${SET_REFERENCE}\n\nSTEM.\n\nBRIEF.\n\nBackground: fully transparent.\n`);
+    expect(promptProblems(prompt)).toEqual([]);
   });
 
   it('a scene has no background line: it fills its own canvas', () => {

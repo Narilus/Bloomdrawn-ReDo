@@ -62,7 +62,8 @@ const CATEGORY_LABEL: Record<CardCategory, string> = {
 };
 
 const TARGET_LABEL: Record<CardTarget, string> = {
-  none: 'No target',
+  // A card without a target acts for the party: it draws, gains Mana, makes cards (owner, 28 Nov).
+  none: 'Party',
   self: 'Self',
   party: 'Party',
   chosenEnemy: 'Single enemy',

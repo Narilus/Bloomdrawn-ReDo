@@ -273,6 +273,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card layout signed off (owner, 28 Nov): the smaller hand card with room beside the raised one. Frame ornament next.
 - Card category line (owner, 28 Nov): the line under the title always shows a broad category (Attack, Shield, Skill, Transcend, Symptom) with the target, never half empty; the category follows from what the card does. Keywords (Ritual, Exhaust, Retain, Fleeting) move to a gold, centred line at the foot of the rules, so nothing is cut off.
 - Transcend cards (owner, 28 Nov) break the silhouette: each Domain's frame adds a raised crest above the top edge, drawn as an overhang outside the card's box, so size, spacing, hover and hit areas are unchanged.
+- Card frames picked (owner, 28 Nov): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloom 04. A card without a target reads "Party", not "No target".
 
 ## Open
 - Gear at launch or later (recommendation: later).

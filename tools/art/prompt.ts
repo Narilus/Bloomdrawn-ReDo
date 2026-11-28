@@ -44,8 +44,8 @@ export interface PromptParts {
   brief: string;
   /** Absent for a scene, which fills its own canvas. */
   background?: Background | undefined;
-  /** What an attached image is for: a style to match, or the character herself to portray. */
-  reference?: 'style' | 'likeness' | undefined;
+  /** What an attached image is for: a style to match, the character herself to portray, or the ornament set a piece joins. */
+  reference?: 'style' | 'likeness' | 'set' | undefined;
 }
 
 export const STYLE_REFERENCE =
@@ -55,7 +55,11 @@ export const STYLE_REFERENCE =
 export const LIKENESS_REFERENCE =
   'Image 1 is this exact character, drawn as a small pixel-art battle sprite. Paint the same person: keep her face, age, hair colour and style, skin tone, eye colour, costume, every colour and every prop and ornament exactly as Image 1 shows them, and add nothing to her design. Only the medium and framing change: a painted portrait, not pixel art.';
 
+/** For a piece of ornament that joins a frame already picked: the kit decides its materials and colours. */
+export const SET_REFERENCE =
+  'Image 1 is the set of frame ornament this new piece joins. Match its materials, colours, linework, lighting and level of detail exactly, so the new piece belongs to the same set. Do not copy its pieces or repeat them; make only the new piece described below.';
+
 export function composePrompt({ stem, brief, background, reference }: PromptParts): string {
-  const lead = reference === 'style' ? [STYLE_REFERENCE] : reference === 'likeness' ? [LIKENESS_REFERENCE] : [];
+  const lead = reference === 'style' ? [STYLE_REFERENCE] : reference === 'likeness' ? [LIKENESS_REFERENCE] : reference === 'set' ? [SET_REFERENCE] : [];
   return [...lead, stem, brief.trim(), ...(background ? [backgroundLine(background)] : [])].join('\n\n') + '\n';
 }

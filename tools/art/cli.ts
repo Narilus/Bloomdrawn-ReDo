@@ -38,13 +38,18 @@ const USAGE = `Usage:
       --scene: a background, framed to 1920×1080 as WebP -> src/assets/scenes/<name>.webp, where <name> is
       band<N>-<n> for a band's pool or a Boss's enemy ID without "enemy.";
       --portrait <character>: a portrait, squared to 512px as WebP -> src/assets/portraits/<character>.webp;
-      --frame <frame>: a frame kit's corner, crest and side -> src/assets/frames/<frame>-<piece>.png)
+      --frame <frame>: a frame kit's corner, crest and side -> src/assets/frames/<frame>-<piece>.png;
+      --transcend <frame>: a Transcend crest -> src/assets/frames/<frame>-transcend.png)
   npm run art -- gen frame-<frame> --stem ornament [--n 4]
       A card-frame kit (a corner, a crest and a border strip, set apart on a transparent canvas) from
       art/briefs/frame-<frame>.txt and the shared layout in art/briefs/frame-layout.txt -> art/raw/frame-<frame>/
+  npm run art -- gen transcend-<frame> --stem ornament --ref art/raw/frame-<frame>/<picked kit>.png [--n 4]
+      A Transcend card's raised crest, matched to the picked kit, from art/briefs/transcend-<frame>.txt and
+      the shared shape in art/briefs/transcend-layout.txt -> art/raw/transcend-<frame>/
   npm run art -- frames <raw.png...>
-      Each kit cut into its pieces (art/cut/frames/<name>/), then shown on sample cards in the game's own
-      card gallery, one sheet per frame (out: art/cut/frames-<frame>.png)`;
+      Each kit cut into its pieces, or each Transcend crest cut out (art/cut/frames/<name>/), then shown on
+      sample cards in the game's own card gallery, one sheet per frame (out: art/cut/frames-<frame>.png,
+      or art/cut/transcend-<frame>.png)`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -61,6 +66,7 @@ async function main() {
       scene: { type: 'string' },
       boss: { type: 'string', default: 'hollow-abbess' },
       frame: { type: 'string' },
+      transcend: { type: 'string' },
     },
   });
   const [command, ...rest] = positionals;
@@ -73,7 +79,9 @@ async function main() {
     const shape = values.stem === 'scene' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' ? 'square' : 'sprite';
     // Ornament is a kit of pieces cut apart by their transparency, so it is always transparent.
     const kept = shape === 'sprite' ? background : values.stem === 'ornament' ? 'transparent' : undefined;
-    const reference = values.like ? { path: values.like, kind: 'likeness' as const } : values.ref ? { path: values.ref, kind: 'style' as const } : undefined;
+    // With the ornament stem, an attached image is the frame kit a new piece joins.
+    const refKind = values.stem === 'ornament' ? ('set' as const) : ('style' as const);
+    const reference = values.like ? { path: values.like, kind: 'likeness' as const } : values.ref ? { path: values.ref, kind: refKind } : undefined;
     await generate(rest[0], Number(values.n), kept, stem, shape, reference);
   } else if (command === 'cut' && rest.length > 0) {
     for (const file of rest) cut(file);
@@ -81,6 +89,8 @@ async function main() {
     await frames(rest);
   } else if (command === 'pick' && rest[0] && values.frame) {
     pickFrame(rest[0], values.frame);
+  } else if (command === 'pick' && rest[0] && values.transcend) {
+    pickTranscend(rest[0], values.transcend);
   } else if (command === 'pick' && rest[0] && values.portrait) {
     pickPortrait(rest[0], values.portrait);
   } else if (command === 'faces' && rest.length > 2) {
@@ -106,14 +116,16 @@ const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 
 type Shape = 'sprite' | 'landscape' | 'square';
 interface Reference {
   path: string;
-  kind: 'style' | 'likeness';
+  kind: 'style' | 'likeness' | 'set';
 }
 
 async function generate(character: string, count: number, background: Background | undefined, label: string, shape: Shape, reference?: Reference) {
   if (count < 1 || count > 4) throw new Error('--n must be 1 to 4');
   const stem = stemFrom(readFileSync(join(ROOT, 'docs/DESIGN.md'), 'utf8'), label);
-  // A frame kit's brief gives its materials; the layout of its three pieces is shared.
-  const layout = label === 'Ornament stem' ? `\n\n${readFileSync(join(ROOT, 'art/briefs/frame-layout.txt'), 'utf8')}` : '';
+  // A frame kit's brief gives its materials and the layout of its three pieces is shared; so is the
+  // shape of a Transcend crest (`transcend-<frame>`), the one piece added to a picked frame.
+  const shared = label !== 'Ornament stem' ? undefined : character.startsWith('frame-') ? 'frame-layout' : character.startsWith('transcend-') ? 'transcend-layout' : undefined;
+  const layout = shared ? `\n\n${readFileSync(join(ROOT, 'art/briefs', `${shared}.txt`), 'utf8')}` : '';
   const brief = readFileSync(join(ROOT, 'art/briefs', `${character}.txt`), 'utf8') + layout;
   const prompt = composePrompt({ stem, brief, background, reference: reference?.kind });
   const problems = promptProblems(prompt, background);
@@ -307,22 +319,33 @@ const PIECES: readonly (keyof Kit)[] = ['corner', 'crest', 'side'];
 /** Kits are generated at about 1250px; half that is still sharper than a raised card on a 4K screen. */
 const half = (image: Rgba) => scaleArea(image, Math.max(1, Math.round(image.width / 2)), Math.max(1, Math.round(image.height / 2)));
 
+const FRAMES = ['flesh', 'rapture', 'spirit', 'unbound', 'bloom'];
+
+function pickTranscend(file: string, frame: string) {
+  if (!FRAMES.includes(frame)) throw new Error('--transcend must be flesh, rapture, spirit, unbound or bloom');
+  save(join(ROOT, 'src/assets/frames', `${frame}-transcend.png`), half(cutout(readPng(file))));
+}
+
 function pickFrame(file: string, frame: string) {
-  if (!['flesh', 'rapture', 'spirit', 'unbound', 'bloom'].includes(frame)) throw new Error('--frame must be flesh, rapture, spirit, unbound or bloom');
+  if (!FRAMES.includes(frame)) throw new Error('--frame must be flesh, rapture, spirit, unbound or bloom');
   const kit = splitKit(readPng(file));
   for (const piece of PIECES) save(join(ROOT, 'src/assets/frames', `${frame}-${piece}.png`), half(kit[piece]));
 }
 
-/** Cuts each kit into art/cut/frames/<name>/, then photographs the dev card gallery with each frame's options. */
+/** Cuts each kit or crest into art/cut/frames/<name>/, then photographs the dev card gallery with each frame's options. */
 async function frames(files: string[]) {
   const groups = new Map<string, string[]>();
   for (const file of files) {
     const name = basename(file, '.png');
-    const frame = /^frame-([a-z]+)-\d+$/.exec(name)?.[1];
-    if (!frame) throw new Error(`${file} is not a frame kit (frame-<frame>-NN.png)`);
-    const kit = splitKit(readPng(file));
-    for (const piece of PIECES) save(join(ROOT, 'art/cut/frames', name, `${piece}.png`), half(kit[piece]));
-    groups.set(frame, [...(groups.get(frame) ?? []), name]);
+    const [, kind, frame] = /^(frame|transcend)-([a-z]+)-\d+$/.exec(name) ?? [];
+    if (!kind || !frame) throw new Error(`${file} is neither a frame kit (frame-<frame>-NN.png) nor a Transcend crest (transcend-<frame>-NN.png)`);
+    if (kind === 'transcend') save(join(ROOT, 'art/cut/frames', name, 'transcend.png'), half(cutout(readPng(file))));
+    else {
+      const kit = splitKit(readPng(file));
+      for (const piece of PIECES) save(join(ROOT, 'art/cut/frames', name, `${piece}.png`), half(kit[piece]));
+    }
+    const sheet = `${kind === 'transcend' ? 'transcend' : 'frames'}-${frame}`;
+    groups.set(sheet, [...(groups.get(sheet) ?? []), name]);
   }
   const port = 5181;
   const server = spawn(process.execPath, [join(ROOT, 'node_modules/vite/bin/vite.js'), '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'ignore' });
@@ -336,12 +359,12 @@ async function frames(files: string[]) {
     const { chromium } = await import('playwright');
     const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=gl', '--enable-gpu', '--ignore-gpu-blocklist'] });
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-    for (const [frame, names] of groups) {
+    for (const [sheet, names] of groups) {
       await page.goto(`${url}?cards&kit=${names.join(',')}`);
       await page.waitForSelector('.card-gallery-option');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(300);
-      const out = join(ROOT, 'art/cut', `frames-${frame}.png`);
+      const out = join(ROOT, 'art/cut', `${sheet}.png`);
       await page.screenshot({ path: out });
       console.log(relative(ROOT, out));
     }

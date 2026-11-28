@@ -5,8 +5,9 @@ import { CardFace, FrameArtContext, markNumber } from './CardView.tsx';
 import { CARD_EM, RAISED_SCALE } from './fan.ts';
 
 // Dev builds only: `?cards` shows each frame on sample cards, at the hand's size and raised, with
-// the game's own ornament. `?cards&kit=frame-flesh-01,frame-flesh-02` shows frame-kit options
-// instead, from their pieces in art/cut/frames/ (`npm run art -- frames`), for the owner to pick.
+// the game's own ornament. `?cards&kit=frame-flesh-01,transcend-flesh-02` shows frame-kit or
+// Transcend-crest options instead, from their pieces in art/cut/frames/ (`npm run art -- frames`),
+// for the owner to pick.
 
 const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.search) : new URLSearchParams());
 
@@ -31,9 +32,11 @@ function options(): Option[] {
   const kits = params().get('kit')?.split(',').filter(Boolean) ?? [];
   if (kits.length === 0) return Object.keys(SAMPLES).map((frame) => ({ label: frame, frame }));
   return kits.map((kit) => {
-    const frame = /^frame-([a-z]+)-\d+$/.exec(kit)?.[1] ?? 'bloom';
+    const [, kind, frame = 'bloom'] = /^(frame|transcend)-([a-z]+)-\d+$/.exec(kit) ?? [];
     const at = (piece: string) => `/art/cut/frames/${kit}/${piece}.png`;
-    return { label: kit.replace(/^frame-/, ''), frame, pieces: { corner: at('corner'), crest: at('crest'), side: at('side') } };
+    // A Transcend crest joins its frame's picked pieces; a kit replaces them.
+    const pieces = kind === 'transcend' ? { ...frameArt(frame), transcend: at('transcend') } : { corner: at('corner'), crest: at('crest'), side: at('side') };
+    return { label: kit.replace(/^frame-/, ''), frame, pieces };
   });
 }
 
