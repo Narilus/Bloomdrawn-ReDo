@@ -428,6 +428,8 @@ _Frames picked 28 Nov (owner): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloo
 
 _Crests picked 28 Nov (owner): Flesh 01 and Unbound 02, in `src/assets/frames/`. Rapture 05–08 (tentacles coiled around a central candle) and Spirit 05–08 (05–06 spread feathered wings, 07–08 nine fanned tails tipped with pale gold fire, in place of the shrine roof) made for comparison with 01–04, waiting on the owner._ Spirit 06 picked 28 Nov. Rapture 05–08 read as too suggestive (owner); 09–12 weave the tentacles between three candles._
 
+_Step 2 done 28 Nov: Rapture 09 picked, so every frame and Transcend crest is the owner's (`src/assets/frames/`). Each Transcend card raised in the real hand at 1920×1080 and 1280×600: `art/cut/crests-hand-*.png`. Next, step 3: card art._
+
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 

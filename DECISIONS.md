@@ -276,6 +276,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card frames picked (owner, 28 Nov): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloom 04. A card without a target reads "Party", not "No target".
 - Transcend crests (owner, 28 Nov): Flesh 01 and Unbound 02. Rapture 01–04 kept while a second set has the tentacles bolder, coiled around a candle at the centre. Spirit 01–04 kept, but the shrine roof didn't land; other Spirit ideas to compare (spread feathered wings; nine fanned tails tipped with pale gold fire).
 - Transcend crests (owner, 28 Nov): Spirit 06 (spread feathered wings round a votive candle). Rapture's single candle wrapped by tentacles read as too suggestive; instead three candles with the tentacles woven between them.
+- Transcend crests (owner, 28 Nov): Rapture 09 (tentacles woven between three candles). All four Domains now have their crest.
 
 ## Open
 - Gear at launch or later (recommendation: later).
