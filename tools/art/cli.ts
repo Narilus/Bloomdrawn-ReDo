@@ -5,7 +5,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFile
 import { homedir, tmpdir } from 'node:os';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { cutout, iconise, standardise } from './cutout.ts';
+import { chromaKey, cutout, hasAlpha, iconise, keyColour, normaliseAlpha, standardise } from './cutout.ts';
 import { splitKit, type Kit } from './kit.ts';
 import { blank, composite, crop, fill, readPng, scaleArea, scaleBilinear, scaleNearest, shade, writePng, type Rgba } from './image.ts';
 import { enemyDepth, enemyHeight, enemyHome, HEIGHT, PARTY_HEIGHT, PARTY_HOMES, WIDTH, type EnemySize } from '../../src/stage/layout.ts';
@@ -62,12 +62,14 @@ const USAGE = `Usage:
       A band's Labyrinth floor, square and opaque, from art/briefs/map-floor-band<N>.txt; or a tile's symbol
       (<kind>: fight, elite, boss, event, shop, camp, symptom, collapsing, bloom, entrance) or the party's
       marker (party), on a transparent canvas -> art/raw/map-floor-band<N>/ or art/raw/map-icon-<kind>/
+  npm run art -- gen map-overlay-cracks --stem overlay [--n 4]
+      Cracks across a whole Collapsing tile, on a transparent square, laid over any floor -> art/raw/map-overlay-cracks/
   npm run art -- maptiles <raw.png...>
       Every kind of tile on each floor option, one sheet per band (art/cut/map-floor-band<N>.png), and each
       round of symbol options on a floor (art/cut/map-icons.png), in the game's own map gallery
-  npm run art -- pick <raw.png> --map <floor-band<N>|kind|party>
-      A floor squared to 1024px as WebP -> src/assets/map/floor-band<N>.webp, or a symbol cut out and
-      fitted in a square -> src/assets/map/<kind>.png`;
+  npm run art -- pick <raw.png> --map <floor-band<N>|kind|party|cracks>
+      A floor squared to 1024px as WebP -> src/assets/map/floor-band<N>.webp, a symbol cut out and fitted
+      in a square -> src/assets/map/<kind>.png, or the cracks overlay at 512px -> src/assets/map/cracks.png`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -94,11 +96,11 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait, ornament, card, floor or mapicon');
+    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait, ornament, card, floor, mapicon or overlay');
     if (values.ref && values.like) throw new Error('--ref and --like are different references; give one');
-    const shape = values.stem === 'scene' || values.stem === 'card' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' || values.stem === 'floor' ? 'square' : 'sprite';
-    // Ornament is a kit of pieces cut apart by their transparency, so it is always transparent.
-    const kept = shape === 'sprite' ? background : values.stem === 'ornament' ? 'transparent' : undefined;
+    const shape = values.stem === 'scene' || values.stem === 'card' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' || values.stem === 'floor' || values.stem === 'overlay' ? 'square' : 'sprite';
+    // Ornament is a kit of pieces cut apart by their transparency, and an overlay lies over a floor, so both are always transparent.
+    const kept = shape === 'sprite' ? background : values.stem === 'ornament' || values.stem === 'overlay' ? 'transparent' : undefined;
     // With the ornament stem, an attached image is the frame kit a new piece joins.
     const refKind = values.stem === 'ornament' ? ('set' as const) : ('style' as const);
     const reference = values.like ? { path: values.like, kind: 'likeness' as const } : values.ref ? { path: values.ref, kind: refKind } : undefined;
@@ -138,7 +140,7 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem', card: 'Card art stem', floor: 'Map floor stem', mapicon: 'Map icon stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem', card: 'Card art stem', floor: 'Map floor stem', mapicon: 'Map icon stem', overlay: 'Map overlay stem' } as const;
 
 /** `background` is absent for a scene: opaque and wide. */
 type Shape = 'sprite' | 'landscape' | 'square';
@@ -439,10 +441,18 @@ async function cards(files: string[]) {
 }
 
 /** Photographs the dev card gallery (`?cards&<query>`) into art/cut/<sheet>.png for each pair. */
-const MAP_ICONS = ['fight', 'elite', 'boss', 'event', 'shop', 'camp', 'symptom', 'collapsing', 'bloom', 'entrance', 'party'];
+const MAP_ICONS = ['fight', 'elite', 'boss', 'event', 'shop', 'camp', 'symptom', 'collapsing', 'bloom', 'entrance', 'party', 'cracks'];
 
-/** A map symbol cut out of its canvas and fitted in a square. */
-const mapIcon = (file: string) => iconise(cutout(readPng(file)));
+/** A map symbol cut out of its canvas and fitted in a square; an overlay keeps its whole square, only its background cleared. */
+function mapIcon(file: string): Rgba {
+  if (!/map-overlay-/.test(basename(file))) return iconise(cutout(readPng(file)));
+  const image = readPng(file);
+  const clear = hasAlpha(image) ? normaliseAlpha(image) : chromaKey(image, keyColour(image));
+  return scaleArea(clear, OVERLAY, OVERLAY);
+}
+
+/** An overlay covers one hex, about 100px across; 512 covers 2× screens with room. */
+const OVERLAY = 512;
 
 /** Floors one sheet per band with every kind of tile on each option, and each round of symbols (all the 01s, all the 02s…) on a floor. */
 async function maptiles(files: string[]) {
@@ -451,13 +461,13 @@ async function maptiles(files: string[]) {
   for (const file of files) {
     const name = basename(file, '.png');
     const floor = /^map-floor-band(\d)-\d+$/.exec(name);
-    const icon = /^map-icon-([a-z]+)-\d+$/.exec(name);
+    const icon = /^map-icon-([a-z]+)-\d+$/.exec(name) ?? /^map-overlay-(cracks)-\d+$/.exec(name);
     if (floor) floors.set(Number(floor[1]), [...(floors.get(Number(floor[1])) ?? []), `/${relative(ROOT, resolve(file))}`]);
     else if (icon && MAP_ICONS.includes(icon[1]!)) {
       const out = join('art/cut', basename(dirname(file)), `${name}.png`);
       save(join(ROOT, out), mapIcon(file));
       icons.set(icon[1]!, [...(icons.get(icon[1]!) ?? []), `/${out}`]);
-    } else throw new Error(`${file} is neither a map floor (map-floor-band<N>-NN.png) nor a map symbol (map-icon-<kind>-NN.png)`);
+    } else throw new Error(`${file} is not a map floor (map-floor-band<N>-NN.png), symbol (map-icon-<kind>-NN.png) or overlay (map-overlay-cracks-NN.png)`);
   }
   // The first option of each symbol given, so the floors are judged with symbols on them.
   const firsts = Object.fromEntries([...icons].map(([kind, urls]) => [kind, urls[0]!]));

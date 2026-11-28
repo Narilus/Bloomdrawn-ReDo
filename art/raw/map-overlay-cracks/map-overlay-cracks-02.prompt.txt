@@ -1,0 +1,10 @@
+Background: transparent
+Codex thread: 01a221ce-d647-7a13-ae78-84f04dce2264
+
+Painterly gothic fantasy overlay for a board-game floor tile, fine linework and crisp edges, seen from directly above with no perspective. Only the marks themselves on a transparent background, spread across the square from edge to edge, so the game can lay them over any floor. No floor, no ground texture, no loose objects, no people, no faces, no figures, no text, no letters, no logos, no border, no frame.
+
+Large, deep cracks splitting a stone floor: three or four wide jagged fissures running from the centre right out to every edge, with finer branching cracks between them. Black in their depths with a faint dull red glow far down, and small broken chips lifted along their edges.
+
+Palette: black, charcoal, dull red.
+
+Background: fully transparent.

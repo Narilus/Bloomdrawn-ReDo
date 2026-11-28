@@ -2,8 +2,8 @@ import { DEPTH_BAND } from '../game/depth.ts';
 
 // Labyrinth map art (M6.11; owner, 28 Nov). Each hex is a slab cut from its band's floor
 // (`floor-band1.webp`…), at an offset and turn of its own so neighbouring slabs differ; tiles with
-// contents carry a symbol (`fight.png`, `shop.png`…) on a drawn gold-rimmed disc; the party is a
-// painted marker (`party.png`). Without art, the map keeps its drawn colours and labels.
+// contents carry a symbol (`fight.png`, `shop.png`…) on a drawn gold-rimmed disc, except a Collapsing
+// tile, which has cracks painted over its whole slab (`cracks.png`); the party is a painted marker (`party.png`). Without art, the map keeps its drawn colours and labels.
 
 const FLOORS = import.meta.glob<string>('../assets/map/floor-band*.webp', { eager: true, query: '?url', import: 'default' });
 const ICONS = import.meta.glob<string>('../assets/map/*.png', { eager: true, query: '?url', import: 'default' });
@@ -17,7 +17,7 @@ export const bandOf = (depth: number): number => Math.ceil(Math.max(1, depth) / 
 export interface MapArt {
   /** The floor texture for a band, if it has one. */
   floor: (band: number) => string | undefined;
-  /** A tile kind's symbol, or `party` for the party's marker. */
+  /** A tile kind's symbol, `party` for the party's marker, or `cracks` for a Collapsing tile's overlay. */
   icon: (kind: string) => string | undefined;
 }
 

@@ -458,6 +458,10 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 
 > Painterly gothic fantasy map symbol for a board game, fine linework and crisp edges, lit softly from the upper left. One single symbol or object and nothing else, whole, seen straight on, centred in a square frame with wide empty margin on every side. One bold, simple silhouette that reads when shown 40 pixels tall, with fine detail inside it. Antique gold metal with ivory and one accent colour. The object is solid and opaque, with no glints or points of light. No disc, no badge, no frame behind it, no hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
 
+**Map overlay stem**, used instead of the prompt stem for marks laid over a whole Labyrinth tile, such as a Collapsing tile's cracks (owner, 28 Nov: large cracks over the entire tile, not a symbol). The game lays one over the tile's own slab of floor, so it works on every band. The brief gives the marks, their materials and colours:
+
+> Painterly gothic fantasy overlay for a board-game floor tile, fine linework and crisp edges, seen from directly above with no perspective. Only the marks themselves on a transparent background, spread across the square from edge to edge, so the game can lay them over any floor. No floor, no ground texture, no loose objects, no people, no faces, no figures, no text, no letters, no logos, no border, no frame.
+
 **Never in any prompt or image:** starfields, galaxies or nebulae; underwater scenes, fish, coral or shells; crystal sparkle; neon; glitch effects; fractals or mirrors; any text baked into the image (all words are added by the game).
 
 ### Content warnings

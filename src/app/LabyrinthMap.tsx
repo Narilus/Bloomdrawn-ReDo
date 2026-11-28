@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useId, useState } from 'react';
 import { registry } from '../content/registry.ts';
 import { routeTo, visibleKind, type Board, type TileKind } from '../game/board.ts';
 import { parseHex, type Hex } from '../game/hex.ts';
@@ -121,16 +121,30 @@ interface TileProps {
 /** One hex: its slab of floor (or drawn colour), its symbol or label, and its step number on a previewed route. */
 export function HexTile({ at, shown, floor, classes, x, y, paid, current, step, onPointerEnter, onClick }: TileProps) {
   const art = useContext(MapArtContext);
-  const icon = floor && shown !== 'unknown' ? art.icon(shown) : undefined;
-  const cut = slab(at, FLOOR_SIZE - SIZE * 2.2);
+  // A Collapsing tile with cracks painted across it needs no symbol.
+  const cracks = floor && shown === 'collapsing' ? art.icon('cracks') : undefined;
+  const icon = floor && shown !== 'unknown' && !cracks ? art.icon(shown) : undefined;
+  const cut = slab(at, FLOOR_SIZE);
+  // The slab is a pattern fill, not a clipped image, so the tile's box (where a pointer or a test aims) is its hex.
+  const pattern = `slab-${useId().replace(/:/g, '')}`;
   return (
     <g className={classes} transform={`translate(${x} ${y})`} onPointerEnter={onPointerEnter} onClick={onClick} data-tile={at} data-kind={shown}>
       {floor && (
-        <g clipPath={`url(#${HEX_CLIP})`} className="hex-floor">
-          <image href={floor} width={FLOOR_SIZE} height={FLOOR_SIZE} x={-(cut.x + SIZE * 1.1)} y={-(cut.y + SIZE * 1.1)} transform={`rotate(${cut.turn * 60})`} preserveAspectRatio="none" />
+        <>
+          <defs>
+            <pattern id={pattern} patternUnits="userSpaceOnUse" width={FLOOR_SIZE} height={FLOOR_SIZE} patternTransform={`rotate(${cut.turn * 60}) translate(${-cut.x} ${-cut.y})`}>
+              <image href={floor} width={FLOOR_SIZE} height={FLOOR_SIZE} preserveAspectRatio="none" />
+            </pattern>
+          </defs>
+          <polygon className="hex-slab" points={corners(SIZE * 0.94)} style={{ fill: `url(#${pattern})` }} />
+        </>
+      )}
+      {cracks && (
+        <g clipPath={`url(#${HEX_CLIP})`} className="hex-cracks">
+          <image href={cracks} x={-SIZE} y={-SIZE} width={SIZE * 2} height={SIZE * 2} transform={`rotate(${cut.turn * 60})`} />
         </g>
       )}
-      <polygon points={corners(SIZE * 0.94)} />
+      <polygon className="hex-shape" points={corners(SIZE * 0.94)} />
       {floor && <polygon className="hex-bevel" points={corners(SIZE * 0.86)} />}
       {icon && !current && (
         <g className={paid ? 'emblem paid' : 'emblem'}>
@@ -138,7 +152,7 @@ export function HexTile({ at, shown, floor, classes, x, y, paid, current, step, 
           <image href={icon} x={-EMBLEM * 0.82} y={-EMBLEM * 0.82} width={EMBLEM * 1.64} height={EMBLEM * 1.64} />
         </g>
       )}
-      {!icon && LABEL[shown] && !current && (
+      {!icon && !cracks && LABEL[shown] && !current && (
         <text className="hex-label" y={5}>
           {paid ? 'Paid' : LABEL[shown]}
         </text>

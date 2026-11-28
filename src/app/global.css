@@ -1595,14 +1595,15 @@ kbd {
 .hex-ruin polygon { fill: #140d11; stroke: #2a1e22; }
 
 /* With a painted floor, each hex is a slab: the drawn colours become tints over it. */
-.has-floor .hex polygon { fill: transparent; stroke: #120b10; stroke-width: 4; }
+.has-floor .hex .hex-shape { fill: transparent; stroke: #120b10; stroke-width: 4; }
+.has-floor .hex .hex-slab { stroke: none; }
 .has-floor .hex .hex-bevel { fill: none; stroke: rgba(255, 236, 214, 0.14); stroke-width: 2; }
-.has-floor .hex-unknown polygon:first-of-type { fill: rgba(18, 11, 16, 0.74); }
-.has-floor .hex-ruin polygon:first-of-type { fill: rgba(10, 6, 9, 0.86); }
-.has-floor .hex-collapsing polygon:first-of-type { fill: rgba(106, 30, 40, 0.28); stroke-dasharray: 8 5; }
-.has-floor .hex.reachable:hover polygon:first-of-type { stroke: var(--petal-ivory); }
-.has-floor .hex.on-route polygon:first-of-type { stroke: var(--blush); stroke-width: 4; }
-.hex-floor { pointer-events: none; }
+.has-floor .hex-unknown .hex-shape { fill: rgba(18, 11, 16, 0.74); }
+.has-floor .hex-ruin .hex-shape { fill: rgba(10, 6, 9, 0.86); }
+.has-floor .hex-collapsing .hex-shape { fill: rgba(106, 30, 40, 0.28); stroke-dasharray: 8 5; }
+.has-floor .hex.reachable:hover .hex-shape { stroke: var(--petal-ivory); }
+.has-floor .hex.on-route .hex-shape { stroke: var(--blush); stroke-width: 4; }
+.hex-cracks { pointer-events: none; }
 
 .emblem { pointer-events: none; }
 .emblem circle {

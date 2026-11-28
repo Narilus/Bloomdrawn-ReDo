@@ -6,7 +6,7 @@ const design = readFileSync(new URL('../../docs/DESIGN.md', import.meta.url), 'u
 
 describe('prompts', () => {
   it('reads every stem from DESIGN.md, and none breaks a rule', () => {
-    for (const label of ['Prompt stem', 'Battle sprite stem', 'Enemy sprite stem', 'Weapon icon stem', 'Ornament stem', 'Card art stem', 'Map floor stem', 'Map icon stem']) {
+    for (const label of ['Prompt stem', 'Battle sprite stem', 'Enemy sprite stem', 'Weapon icon stem', 'Ornament stem', 'Card art stem', 'Map floor stem', 'Map icon stem', 'Map overlay stem']) {
       const stem = stemFrom(design, label);
       expect(stem.length).toBeGreaterThan(100);
       expect(promptProblems(stem, 'blue')).toEqual([]);
