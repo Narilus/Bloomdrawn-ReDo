@@ -1,0 +1,16 @@
+Background: transparent
+Reference (set): art/raw/frame-rapture/frame-rapture-02.png
+Codex thread: 01a21fd7-b484-7162-8ac3-661404281162
+
+Image 1 is the set of frame ornament this new piece joins. Match its materials, colours, linework, lighting and level of detail exactly, so the new piece belongs to the same set. Do not copy its pieces or repeat them; make only the new piece described below.
+
+Painterly gothic fantasy ornament for a game card frame, fine linework and crisp edges, drawn as separate decorative pieces lit softly from the upper left. Each piece is a single solid object with wide empty space all around it, and no piece touches another. Bold, simple silhouettes that still read when shown very small, with fine detail inside them. Antique gold filigree accents. No card, no panel, no frame behind the pieces, no scenery, no faces, no figures, no text, no letters, no logos.
+
+A small gothic altar crest with three lit candles of dripping ivory wax standing in a row, the tallest at the centre forming the peak and a shorter one to each side, each with a small warm flame. Two flesh-pink tentacles of smooth, soft skin with paler undersides weave between all three candles in loose open loops, passing in front of one candle and behind the next, so the three candles and the tentacles read as one interlaced knot spread wide across the crest; the tentacle tips curl outward at the two low ends. The base is a low pointed arch of carved dark wood and antique gold with a bruise-violet velvet stole draped across it, gold embroidery and fringe hanging at its ends. The tentacles are bold and easy to see.
+
+Colours: bruise violet #7A4FA0, sickly green-gold #A8A04A, candle-wax ivory, flesh pink, with antique gold. Nothing from the sea: no fins, shells or suckers.
+
+
+One single piece only, centred on the canvas with wide empty space all around it: a raised crest that crowns the top edge of a card. It is symmetrical left to right, about two and a half times as wide as it is tall, and its bottom edge is one straight, flat horizontal line where it sits on the card's top edge; everything rises from that line into a peak at the centre. One bold, simple silhouette that still reads very small, with fine detail inside it.
+
+Background: fully transparent.
