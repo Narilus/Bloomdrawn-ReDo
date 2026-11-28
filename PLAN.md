@@ -426,6 +426,8 @@ _Owner feedback on the first pass, 28 Nov, done: the line under the title always
 
 _Frames picked 28 Nov (owner): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloom 04, in `src/assets/frames/`. Transcend crests: four per Domain from `art/briefs/transcend-<frame>.txt`, each generated with its picked kit attached as the set to match (`--ref`, the set note in `tools/art/prompt.ts`). Made 28 Nov (`art/raw/transcend-*`), waiting on the owner's picks._
 
+_Crests picked 28 Nov (owner): Flesh 01 and Unbound 02, in `src/assets/frames/`. Rapture 05–08 (tentacles coiled around a central candle) and Spirit 05–08 (05–06 spread feathered wings, 07–08 nine fanned tails tipped with pale gold fire, in place of the shrine roof) made for comparison with 01–04, waiting on the owner._
+
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 

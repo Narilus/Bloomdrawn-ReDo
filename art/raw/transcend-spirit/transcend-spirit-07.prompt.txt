@@ -1,0 +1,16 @@
+Background: transparent
+Reference (set): art/raw/frame-spirit/frame-spirit-04.png
+Codex thread: 01a21fd0-325b-70f1-988a-a8c6f44cf350
+
+Image 1 is the set of frame ornament this new piece joins. Match its materials, colours, linework, lighting and level of detail exactly, so the new piece belongs to the same set. Do not copy its pieces or repeat them; make only the new piece described below.
+
+Painterly gothic fantasy ornament for a game card frame, fine linework and crisp edges, drawn as separate decorative pieces lit softly from the upper left. Each piece is a single solid object with wide empty space all around it, and no piece touches another. Bold, simple silhouettes that still read when shown very small, with fine detail inside them. Antique gold filigree accents. No card, no panel, no frame behind the pieces, no scenery, no faces, no figures, no text, no letters, no logos.
+
+A crest of nine fox tails fanned upward in a half circle like an open hand fan, the tallest at the centre forming the peak: thick ash-grey and white fur with soft lavender shading, each tail tip burning with a small flame of pale gold fire. The tails rise from one gold-leaf knot at the base, tied with a red-and-white braided prayer cord whose ends hang to either side with blank paper talisman tassels and one small round brass bell at the centre.
+
+Colours: gold leaf #C9A45A, ash grey, white fur, smoke lavender, red and white cord, a little pale gold flame, with antique gold. No body, no head, no animal, no writing on the paper.
+
+
+One single piece only, centred on the canvas with wide empty space all around it: a raised crest that crowns the top edge of a card. It is symmetrical left to right, about two and a half times as wide as it is tall, and its bottom edge is one straight, flat horizontal line where it sits on the card's top edge; everything rises from that line into a peak at the centre. One bold, simple silhouette that still reads very small, with fine detail inside it.
+
+Background: fully transparent.
