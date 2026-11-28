@@ -16,7 +16,7 @@ Each milestone ends with the owner playing the build. **Bold** milestones are ga
 | **M4** | **First winnable run** | Rewards, Boss, banking, save and resume. Owner wins, quits and resumes a full run |
 | M5 | Collection | Profile, levels, EXP bank, ascension, gacha and dupes; the four banner characters |
 | M6 | Depth and polish | Weapons, Trials, depth tiers, art pass, audio, balance |
-| Later | | Gear, desktop packaging, more characters, authoring tool; audio round 2: map steps, music (owner, 27 Nov); subtle stage particles such as falling pollen, with a Visual tab in Options to turn them off (owner, 27 Nov) |
+| Later | | Gear, desktop packaging, more characters, authoring tool; audio round 2: map steps, music (owner, 27 Nov); subtle stage particles such as falling pollen, with a setting in Options' Visual tab to turn them off (owner, 27 Nov) |
 
 ## M0 tasks
 
@@ -429,6 +429,8 @@ _Frames picked 28 Nov (owner): Flesh 01, Rapture 02, Spirit 04, Unbound 04, Bloo
 _Crests picked 28 Nov (owner): Flesh 01 and Unbound 02, in `src/assets/frames/`. Rapture 05–08 (tentacles coiled around a central candle) and Spirit 05–08 (05–06 spread feathered wings, 07–08 nine fanned tails tipped with pale gold fire, in place of the shrine roof) made for comparison with 01–04, waiting on the owner._ Spirit 06 picked 28 Nov. Rapture 05–08 read as too suggestive (owner); 09–12 weave the tentacles between three candles._
 
 _Step 2 done 28 Nov: Rapture 09 picked, so every frame and Transcend crest is the owner's (`src/assets/frames/`). Each Transcend card raised in the real hand at 1920×1080 and 1280×600: `art/cut/crests-hand-*.png`. Next, step 3: card art._
+
+_Crests approved 28 Nov (owner). Options has a Visual tab (`Options.tsx`) with "Disable card frames" (profile v15 `visual.plainFrames`, `src/app/visual.ts` sets `plain-frames` on the page and `global.css` hides the ornament; `e2e/visual.spec.ts`). Step 3: the owner picks Strike and Defense; the builder picks the rest and the owner flags misses._
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.

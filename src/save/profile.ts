@@ -67,17 +67,18 @@ const profileSchema = z.strictObject({
         .optional(),
     })
     .optional(),
+  visual: z.strictObject({ plainFrames: z.literal(true).optional() }).optional(),
   run: z.strictObject({ id, elites: z.int().nonnegative(), fights: z.int().positive().optional(), depth: z.int().min(2).max(DEPTH_MAX).optional() }).optional(),
 });
 
 /**
  * The profile save (docs/notes/m4-run.md, m5-collection.md): banked pulls, a run count, the characters
  * gained and their dupes, levels and ascensions, items, the Focus and the gacha, the team presets and
- * the run in progress's tally, profile EXP, claims and stats, the Trial tiers won, weapons, and sound settings.
+ * the run in progress's tally, profile EXP, claims and stats, the Trial tiers won, weapons, and sound and visual settings.
  */
 export const profileSave: SaveKind<Profile> = {
   key: 'profile',
-  schemaVersion: 14,
+  schemaVersion: 15,
   migrations: {
     // v2 added the run in progress, which a v1 profile never has.
     1: (data) => data,
@@ -151,6 +152,8 @@ export const profileSave: SaveKind<Profile> = {
     12: (data) => data,
     // v14 added kinds of sound turned off (owner, 27 Nov): a v13 profile has them all on.
     13: (data) => data,
+    // v15 added visual settings (owner, 28 Nov): a v14 profile has full card frames.
+    14: (data) => data,
   },
   parse: (data) => {
     const profile = profileSchema.parse(data) as Profile;

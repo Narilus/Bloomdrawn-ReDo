@@ -194,6 +194,19 @@ describe('the profile save', () => {
     }
   });
 
+  it('keeps plain card frames; a v14 profile has full frames (owner, 28 Nov)', async () => {
+    const adapter = memoryAdapter();
+    const data = { ...NEW_PROFILE, visual: { plainFrames: true as const } };
+    await createSaveStore(adapter, 1).write(profileSave, data);
+    expect((await createSaveStore(adapter, 1).read(profileSave))?.data).toEqual(data);
+    adapter.data.set('profile:current', JSON.stringify({ format: 'bloomdrawn-save', kind: 'profile', schemaVersion: 14, contentVersion: 1, data: { ...NEW_PROFILE, sound: { volume: 35 } } }));
+    expect(await createSaveStore(adapter, 1).read(profileSave)).toMatchObject({ data: { ...NEW_PROFILE, sound: { volume: 35 } }, savedSchemaVersion: 14 });
+    // Full frames are the default and never written; nothing unknown either.
+    for (const bad of [{ visual: { plainFrames: false } }, { visual: { particles: true } }]) {
+      await expect(createSaveStore(memoryAdapter(), 1).write(profileSave, { ...NEW_PROFILE, ...bad } as typeof NEW_PROFILE), JSON.stringify(bad)).rejects.toThrow();
+    }
+  });
+
   it('never writes a level outside 2 to 40, past a cap not ascended, or an ascension below its level', async () => {
     const saves = createSaveStore(memoryAdapter(), 1);
     for (const bad of [

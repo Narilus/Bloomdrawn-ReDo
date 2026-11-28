@@ -50,6 +50,8 @@ export interface Profile {
   stats?: ProfileStats;
   /** Volume (0–100; absent is `SOUND_VOLUME`), mute, and the kinds of sound turned off, set in Options (M6.10). */
   sound?: SoundSettings;
+  /** How things are drawn, set in Options' Visual tab; absent is the defaults (owner, 28 Nov). */
+  visual?: VisualSettings;
   /**
    * The run in progress: its ID and its banking tally, kept here as it changes so a run whose own
    * save can't be read can still bank its share (owner, 24 Oct).
@@ -90,6 +92,26 @@ export function setSound(profile: Profile, settings: Sound): Profile {
 
 /** The profile's sound settings with defaults filled in. */
 export const soundOf = (profile: Profile): Sound => ({ volume: profile.sound?.volume ?? SOUND_VOLUME, muted: profile.sound?.muted === true, off: profile.sound?.off ?? [] });
+
+/** Kept only when set: plain card frames, without the ornament pieces or Transcend crests. */
+export interface VisualSettings {
+  plainFrames?: true;
+}
+
+/** Visual settings with the defaults filled in. */
+export interface Visual {
+  /** Cards keep their coloured borders but drop the ornament and crests (owner, 28 Nov). */
+  plainFrames: boolean;
+}
+
+/** Keeps the visual settings, leaving defaults out of the save. */
+export function setVisual(profile: Profile, settings: Visual): Profile {
+  const { visual: _v, ...rest } = profile;
+  return settings.plainFrames ? { ...rest, visual: { plainFrames: true } } : rest;
+}
+
+/** The profile's visual settings with defaults filled in. */
+export const visualOf = (profile: Profile): Visual => ({ plainFrames: profile.visual?.plainFrames === true });
 
 export interface ProfileStats {
   won?: number;

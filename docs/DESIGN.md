@@ -481,6 +481,7 @@ The layout is fixed, so every card reads the same way (owner, 28 Nov; the mockup
 - **Cost:** a gem. A held Ritual's gem turns gold with a soft glow at its current cost, and the printed cost sits in a round badge at the gem's lower right, in the same serif, with a thin diagonal pink strike.
 - **Frames:** one per Domain, built in the UI from generated ornament pieces (corners, a crest, side vines or other ornament fitting the Domain) around the fixed text areas, never one generated image of a whole card. The party's cards have a Bloom frame.
 - **Transcend cards break the silhouette:** their frame adds a raised crest above the top edge in the Domain's own flavour. It overhangs outside the card's box, so card size, hand spacing, hover and hit areas never change (owner, 28 Nov).
+- **Plain frames:** Options > Visual > Disable card frames keeps each card's coloured border and drops the ornament pieces and the Transcend crest, for a sleek modern card (owner, 28 Nov).
 - **Portraits** are the only card art that must match a character exactly, so they are tight head-and-shoulders crops built for a circle.
 
 ### Readability hooks

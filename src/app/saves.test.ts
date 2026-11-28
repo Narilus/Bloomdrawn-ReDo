@@ -269,6 +269,14 @@ describe('saves', () => {
     expect(await profileOf(store)).not.toHaveProperty('sound');
   });
 
+  it('keeps plain card frames, leaving full frames out of the save (owner, 28 Nov)', async () => {
+    const { saves, store } = setup();
+    await saves.visual({ plainFrames: true });
+    expect((await profileOf(store))?.visual).toEqual({ plainFrames: true });
+    await saves.visual({ plainFrames: false });
+    expect(await profileOf(store)).not.toHaveProperty('visual');
+  });
+
   it('a file that fails validation changes nothing', async () => {
     const { saves } = setup();
     await saves.start(run());

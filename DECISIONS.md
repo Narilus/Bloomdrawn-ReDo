@@ -277,6 +277,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Transcend crests (owner, 28 Nov): Flesh 01 and Unbound 02. Rapture 01–04 kept while a second set has the tentacles bolder, coiled around a candle at the centre. Spirit 01–04 kept, but the shrine roof didn't land; other Spirit ideas to compare (spread feathered wings; nine fanned tails tipped with pale gold fire).
 - Transcend crests (owner, 28 Nov): Spirit 06 (spread feathered wings round a votive candle). Rapture's single candle wrapped by tentacles read as too suggestive; instead three candles with the tentacles woven between them.
 - Transcend crests (owner, 28 Nov): Rapture 09 (tentacles woven between three candles). All four Domains now have their crest.
+- Options > Visual (owner, 28 Nov): a Visual tab with "Disable card frames", for a sleek card that keeps its coloured border without the ornament or Transcend crests. Card art: the owner picks the eight Strike and Defense pictures; for every other card the builder picks the option that fits, and the owner flags any that miss.
 
 ## Open
 - Gear at launch or later (recommendation: later).

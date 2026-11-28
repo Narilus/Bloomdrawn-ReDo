@@ -1285,6 +1285,13 @@ kbd {
 .frame-side.right { right: -0.45em; }
 .frame-side.left { left: -0.45em; transform: scaleX(-1); }
 
+/* Options > Visual > Disable card frames (owner, 28 Nov): a plain card keeps its coloured border
+   and drops the ornament pieces and the Transcend crest. */
+:root.plain-frames .frame-side,
+:root.plain-frames .frame-corner,
+:root.plain-frames .frame-crest,
+:root.plain-frames .frame-transcend { display: none; }
+
 .card-key {
   position: absolute;
   bottom: -0.6em;

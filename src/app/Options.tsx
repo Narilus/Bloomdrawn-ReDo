@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { plural, SOUND_GROUPS, soundOf, type Profile, type Sound, type SoundGroup } from '../game/profile.ts';
+import { plural, SOUND_GROUPS, soundOf, visualOf, type Profile, type Sound, type SoundGroup, type Visual } from '../game/profile.ts';
 import { SideList } from './SideList.tsx';
 import { playCue } from './sound.ts';
 
@@ -7,14 +7,16 @@ import { playCue } from './sound.ts';
 // (owner, 27 Nov). Profile moves saves between browsers with a file and resets the profile. A reset
 // can't be undone, so it waits for a ticked box and "RESET" typed before Confirm works. Sound:
 // volume, mute, and each kind of sound muted on its own (M6.10), kept a moment after the last
-// change, with a click at the new volume, or at once if Options closes first.
+// change, with a click at the new volume, or at once if Options closes first. Visual (owner, 28 Nov):
+// plain card frames, kept at once.
 
 export const RESET_WORD = 'RESET';
 
-type Tab = 'profile' | 'sound';
+type Tab = 'profile' | 'sound' | 'visual';
 const TABS: [Tab, string][] = [
   ['profile', 'Profile'],
   ['sound', 'Sound'],
+  ['visual', 'Visual'],
 ];
 
 /** Each kind of sound as Options names it, with what it covers. */
@@ -34,11 +36,18 @@ interface OptionsProps {
   onReset: () => Promise<void>;
   /** Applies and keeps the sound settings. */
   onSound: (settings: Sound) => Promise<void>;
+  /** Applies and keeps the visual settings. */
+  onVisual: (settings: Visual) => Promise<void>;
   onBack: () => void;
 }
 
-export function Options({ profile, onExport, onImport, onReset, onSound, onBack }: OptionsProps) {
+export function Options({ profile, onExport, onImport, onReset, onSound, onVisual, onBack }: OptionsProps) {
   const [tab, setTab] = useState<Tab>('profile');
+  const [visual, setVisual] = useState(() => visualOf(profile));
+  const changeVisual = (next: Visual) => {
+    setVisual(next);
+    void onVisual(next);
+  };
   const [sound, setSound] = useState(() => soundOf(profile));
   // Saved from the change itself, not an effect: StrictMode runs effects twice on mount, which
   // saved and clicked once more with nothing changed.
@@ -90,7 +99,19 @@ export function Options({ profile, onExport, onImport, onReset, onSound, onBack 
           Back
         </button>
       </nav>
-      {tab === 'sound' ? (
+      {tab === 'visual' ? (
+        <section className="options-panel" role="tabpanel" aria-label="Visual">
+          <h3>Visual</h3>
+          <h4>Cards</h4>
+          <label className="options-check">
+            <input type="checkbox" checked={visual.plainFrames} onChange={(e) => changeVisual({ ...visual, plainFrames: e.target.checked })} />
+            <span>
+              Disable card frames
+              <small>a plain card with its coloured border, without the ornament or the Transcend crest</small>
+            </span>
+          </label>
+        </section>
+      ) : tab === 'sound' ? (
         <section className="options-panel" role="tabpanel" aria-label="Sound">
           <h3>Sound</h3>
           <label className="options-volume">
