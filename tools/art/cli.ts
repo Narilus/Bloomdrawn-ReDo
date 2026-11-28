@@ -471,7 +471,8 @@ async function maptiles(files: string[]) {
     const floor = [...floors.values()][0]?.[0];
     const rounds = Math.max(...[...icons.values()].map((urls) => urls.length));
     const rows = Array.from({ length: rounds }, (_, i) => {
-      const set = Object.fromEntries([...icons].filter(([, urls]) => urls[i]).map(([kind, urls]) => [kind, urls[i]!]));
+      // A symbol with fewer options keeps its first in the later rounds.
+      const set = Object.fromEntries([...icons].map(([kind, urls]) => [kind, urls[i] ?? urls[0]!]));
       return row(`symbols ${String(i + 1).padStart(2, '0')}`, floor, set);
     });
     shots.push([`maptiles&rows=${encodeURIComponent(JSON.stringify(rows))}`, 'map-icons']);
