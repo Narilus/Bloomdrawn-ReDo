@@ -1594,6 +1594,36 @@ kbd {
 .hex-collapsing polygon { fill: #6a1e28; stroke-dasharray: 8 5; }
 .hex-ruin polygon { fill: #140d11; stroke: #2a1e22; }
 
+/* With a painted floor, each hex is a slab: the drawn colours become tints over it. */
+.has-floor .hex polygon { fill: transparent; stroke: #120b10; stroke-width: 4; }
+.has-floor .hex .hex-bevel { fill: none; stroke: rgba(255, 236, 214, 0.14); stroke-width: 2; }
+.has-floor .hex-unknown polygon:first-of-type { fill: rgba(18, 11, 16, 0.74); }
+.has-floor .hex-ruin polygon:first-of-type { fill: rgba(10, 6, 9, 0.86); }
+.has-floor .hex-collapsing polygon:first-of-type { fill: rgba(106, 30, 40, 0.28); stroke-dasharray: 8 5; }
+.has-floor .hex.reachable:hover polygon:first-of-type { stroke: var(--petal-ivory); }
+.has-floor .hex.on-route polygon:first-of-type { stroke: var(--blush); stroke-width: 4; }
+.hex-floor { pointer-events: none; }
+
+.emblem { pointer-events: none; }
+.emblem circle {
+  fill: #2a1a24;
+  stroke: var(--antique-gold);
+  stroke-width: 3;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
+}
+.hex-fight .emblem circle { fill: #4e1f28; }
+.hex-elite .emblem circle { fill: #3e2148; }
+.hex-boss .emblem circle { fill: #5a1824; stroke-width: 4; }
+.hex-event .emblem circle { fill: #20363c; }
+.hex-shop .emblem circle { fill: #4a3820; }
+.hex-camp .emblem circle { fill: #2c3e26; }
+.hex-symptom .emblem circle { fill: #4e4016; }
+.hex-bloom .emblem circle { fill: #5a2442; stroke: #e8a0c8; }
+.hex-collapsing .emblem circle { fill: #3e1218; }
+.emblem.paid { opacity: 0.45; }
+
+.party-token image { filter: drop-shadow(0 0 8px rgba(242, 196, 196, 0.6)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.7)); }
+
 .hex.on-route polygon {
   stroke: var(--blush);
   stroke-width: 4;
@@ -4535,6 +4565,18 @@ kbd {
   color: var(--petal-ivory);
   cursor: pointer;
 }
+
+/* The dev map gallery (`?maptiles`): strips of every tile kind on each floor option. */
+.map-gallery {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 8px 24px;
+  background: radial-gradient(circle at 50% 45%, #3a2431, #1a1016 75%);
+}
+.map-gallery-row { display: flex; align-items: center; gap: 12px; }
+.map-gallery-row h3 { width: 150px; margin: 0; font-family: var(--serif); color: var(--petal-ivory); font-size: 20px; }
+.map-gallery-row svg { width: 1000px; height: 250px; }
 
 /* The dev card gallery (`?cards`): frames on sample cards, or frame-kit options to pick from. */
 .card-gallery {

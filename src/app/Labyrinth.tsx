@@ -183,7 +183,7 @@ export function Labyrinth({ initial, saves, onAgain, onTitle }: Props) {
 
   return (
     <div className={`labyrinth bloom-${stageOf(exp.clock).id}`}>
-      <LabyrinthMap board={exp.board} busy={walking || !canMove(exp)} boss={bossDirection(exp.board, exp.clock)} onPick={pick} />
+      <LabyrinthMap board={exp.board} depth={exp.depth ?? 1} busy={walking || !canMove(exp)} boss={bossDirection(exp.board, exp.clock)} onPick={pick} />
       <RelicBar relics={exp.relics} />
       <BloomClock clock={exp.clock} />
       <div className="map-obols plaque" aria-label="Obols">

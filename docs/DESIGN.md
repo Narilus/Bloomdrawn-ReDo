@@ -450,6 +450,14 @@ The reference set is the four OpenAI concepts from the earlier builds (the garde
 
 > Painterly gothic fantasy card illustration, fine linework and crisp edges, a wide landscape picture. One clear subject shown large and close: an object, a material or a burst of force caught mid-motion, set right of centre, with the left third of the picture darker and quieter. Deep plum and charcoal background with soft vignette. The glow is soft and comes from flesh, petals, pods, wax or flame, with no glints or points of light; everything is solid and opaque. Antique gold filigree accents where they fit. No people, no faces, no figures, no text, no letters, no logos, no border, no frame.
 
+**Map floor stem**, used instead of the prompt stem for the Labyrinth's floor (M6.11; owner, 28 Nov: each hex is a painted slab of ground, one floor per band of depths). The game cuts each hex from the square at its own offset, so the texture needs no seams and no focal point. The brief gives the ground, its materials and colours:
+
+> Painterly gothic fantasy ground texture seen from directly above, fine linework and crisp edges, filling the whole square edge to edge. Even, soft light from the upper left, with no vignette, no horizon, no walls and no perspective. Small, evenly spread detail with no single focal point, so any part of it can be cut out as a floor tile. Muted and mid-dark, so symbols laid over it stay clear. Any glow is soft and comes from petals, pods or flesh, with no glints or points of light. No people, no faces, no figures, no text, no letters, no logos, no border, no frame.
+
+**Map icon stem**, used instead of the prompt stem for the symbols on Labyrinth tiles and the party's marker (M6.11; owner, 28 Nov). The game sets each tile's symbol on a drawn gold-rimmed disc. The brief gives the object, its materials and colours:
+
+> Painterly gothic fantasy map symbol for a board game, fine linework and crisp edges, lit softly from the upper left. One single symbol or object and nothing else, whole, seen straight on, centred in a square frame with wide empty margin on every side. One bold, simple silhouette that reads when shown 40 pixels tall, with fine detail inside it. Antique gold metal with ivory and one accent colour. The object is solid and opaque, with no glints or points of light. No disc, no badge, no frame behind it, no hand, no person, no text, no letters, no logos, no floor, no cast shadow, no scenery.
+
 **Never in any prompt or image:** starfields, galaxies or nebulae; underwater scenes, fish, coral or shells; crystal sparkle; neon; glitch effects; fractals or mirrors; any text baked into the image (all words are added by the game).
 
 ### Content warnings

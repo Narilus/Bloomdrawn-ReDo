@@ -57,7 +57,17 @@ const USAGE = `Usage:
       Each card-art option on its card in the game's own card gallery, at the hand's size and raised
       (out: art/cut/card-<name>.png)
   npm run art -- pick <raw.png> --card
-      Card art cropped to the art window's shape as WebP -> src/assets/cards/<name>.webp`;
+      Card art cropped to the art window's shape as WebP -> src/assets/cards/<name>.webp
+  npm run art -- gen map-floor-band<N> --stem floor [--n 4]   |   gen map-icon-<kind> --stem mapicon [--n 2]
+      A band's Labyrinth floor, square and opaque, from art/briefs/map-floor-band<N>.txt; or a tile's symbol
+      (<kind>: fight, elite, boss, event, shop, camp, symptom, collapsing, bloom, entrance) or the party's
+      marker (party), on a transparent canvas -> art/raw/map-floor-band<N>/ or art/raw/map-icon-<kind>/
+  npm run art -- maptiles <raw.png...>
+      Every kind of tile on each floor option, one sheet per band (art/cut/map-floor-band<N>.png), and each
+      round of symbol options on a floor (art/cut/map-icons.png), in the game's own map gallery
+  npm run art -- pick <raw.png> --map <floor-band<N>|kind|party>
+      A floor squared to 1024px as WebP -> src/assets/map/floor-band<N>.webp, or a symbol cut out and
+      fitted in a square -> src/assets/map/<kind>.png`;
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -76,6 +86,7 @@ async function main() {
       frame: { type: 'string' },
       transcend: { type: 'string' },
       card: { type: 'boolean', default: false },
+      map: { type: 'string' },
     },
   });
   const [command, ...rest] = positionals;
@@ -83,9 +94,9 @@ async function main() {
     const background = values.bg as Background;
     if (!['transparent', 'blue', 'green'].includes(background)) throw new Error(`--bg must be transparent, blue or green`);
     const stem = STEMS[values.stem as keyof typeof STEMS];
-    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait, ornament or card');
+    if (!stem) throw new Error('--stem must be battle, enemy, icon, scene, portrait, ornament, card, floor or mapicon');
     if (values.ref && values.like) throw new Error('--ref and --like are different references; give one');
-    const shape = values.stem === 'scene' || values.stem === 'card' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' ? 'square' : 'sprite';
+    const shape = values.stem === 'scene' || values.stem === 'card' ? 'landscape' : values.stem === 'portrait' || values.stem === 'ornament' || values.stem === 'floor' ? 'square' : 'sprite';
     // Ornament is a kit of pieces cut apart by their transparency, so it is always transparent.
     const kept = shape === 'sprite' ? background : values.stem === 'ornament' ? 'transparent' : undefined;
     // With the ornament stem, an attached image is the frame kit a new piece joins.
@@ -96,6 +107,10 @@ async function main() {
     for (const file of rest) cut(file);
   } else if (command === 'cards' && rest.length > 0) {
     await cards(rest);
+  } else if (command === 'maptiles' && rest.length > 0) {
+    await maptiles(rest);
+  } else if (command === 'pick' && rest[0] && values.map) {
+    pickMap(rest[0], values.map);
   } else if (command === 'pick' && rest[0] && values.card) {
     pickCard(rest[0]);
   } else if (command === 'frames' && rest.length > 0) {
@@ -123,7 +138,7 @@ async function main() {
 }
 
 /** The DESIGN.md stem each `--stem` names. */
-const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem', card: 'Card art stem' } as const;
+const STEMS = { battle: 'Battle sprite stem', enemy: 'Enemy sprite stem', icon: 'Weapon icon stem', scene: 'Prompt stem', portrait: 'Prompt stem', ornament: 'Ornament stem', card: 'Card art stem', floor: 'Map floor stem', mapicon: 'Map icon stem' } as const;
 
 /** `background` is absent for a scene: opaque and wide. */
 type Shape = 'sprite' | 'landscape' | 'square';
@@ -408,7 +423,7 @@ async function frames(files: string[]) {
     const sheet = `${kind === 'transcend' ? 'transcend' : 'frames'}-${frame}`;
     groups.set(sheet, [...(groups.get(sheet) ?? []), name]);
   }
-  await shootGallery([...groups].map(([sheet, names]) => [`kit=${names.join(',')}`, sheet]));
+  await shootGallery([...groups].map(([sheet, names]) => [`cards&kit=${names.join(',')}`, sheet]));
 }
 
 /** Shows each card-art option on its card in the dev gallery, one sheet per picture. */
@@ -420,11 +435,77 @@ async function cards(files: string[]) {
     if (!dir || basename(dirname(file)) !== dir) throw new Error(`${file} is not card art (art/raw/card-<name>/card-<name>-NN.png)`);
     groups.set(dir, [...(groups.get(dir) ?? []), name]);
   }
-  await shootGallery([...groups].map(([dir, names]) => [`art=${names.join(',')}`, dir]));
+  await shootGallery([...groups].map(([dir, names]) => [`cards&art=${names.join(',')}`, dir]));
 }
 
 /** Photographs the dev card gallery (`?cards&<query>`) into art/cut/<sheet>.png for each pair. */
-async function shootGallery(shots: [query: string, sheet: string][]) {
+const MAP_ICONS = ['fight', 'elite', 'boss', 'event', 'shop', 'camp', 'symptom', 'collapsing', 'bloom', 'entrance', 'party'];
+
+/** A map symbol cut out of its canvas and fitted in a square. */
+const mapIcon = (file: string) => iconise(cutout(readPng(file)));
+
+/** Floors one sheet per band with every kind of tile on each option, and each round of symbols (all the 01s, all the 02s…) on a floor. */
+async function maptiles(files: string[]) {
+  const floors = new Map<number, string[]>();
+  const icons = new Map<string, string[]>();
+  for (const file of files) {
+    const name = basename(file, '.png');
+    const floor = /^map-floor-band(\d)-\d+$/.exec(name);
+    const icon = /^map-icon-([a-z]+)-\d+$/.exec(name);
+    if (floor) floors.set(Number(floor[1]), [...(floors.get(Number(floor[1])) ?? []), `/${relative(ROOT, resolve(file))}`]);
+    else if (icon && MAP_ICONS.includes(icon[1]!)) {
+      const out = join('art/cut', basename(dirname(file)), `${name}.png`);
+      save(join(ROOT, out), mapIcon(file));
+      icons.set(icon[1]!, [...(icons.get(icon[1]!) ?? []), `/${out}`]);
+    } else throw new Error(`${file} is neither a map floor (map-floor-band<N>-NN.png) nor a map symbol (map-icon-<kind>-NN.png)`);
+  }
+  // The first option of each symbol given, so the floors are judged with symbols on them.
+  const firsts = Object.fromEntries([...icons].map(([kind, urls]) => [kind, urls[0]!]));
+  const shots: [string, string][] = [];
+  const row = (label: string, floor: string | undefined, set: Record<string, string>) => ({ label, ...(floor && { floor }), icons: set });
+  for (const [band, urls] of floors) {
+    const rows = urls.map((url) => row(basename(url, '.png').replace(/^map-floor-/, ''), url, firsts));
+    shots.push([`maptiles&rows=${encodeURIComponent(JSON.stringify(rows))}`, `map-floor-band${band}`]);
+  }
+  if (icons.size > 0) {
+    const floor = [...floors.values()][0]?.[0];
+    const rounds = Math.max(...[...icons.values()].map((urls) => urls.length));
+    const rows = Array.from({ length: rounds }, (_, i) => {
+      const set = Object.fromEntries([...icons].filter(([, urls]) => urls[i]).map(([kind, urls]) => [kind, urls[i]!]));
+      return row(`symbols ${String(i + 1).padStart(2, '0')}`, floor, set);
+    });
+    shots.push([`maptiles&rows=${encodeURIComponent(JSON.stringify(rows))}`, 'map-icons']);
+  }
+  await shootGallery(shots, '.map-gallery-row');
+}
+
+/** The owner's pick of a floor (`floor-band<N>`) or a symbol (a tile kind, or `party`). */
+function pickMap(file: string, name: string) {
+  const floor = /^floor-band[1-9]$/.test(name);
+  if (!floor && !MAP_ICONS.includes(name)) throw new Error(`--map must be floor-band<N> or one of ${MAP_ICONS.join(', ')}`);
+  if (!floor) {
+    save(join(ROOT, 'src/assets/map', `${name}.png`), mapIcon(file));
+    return;
+  }
+  const image = readPng(file);
+  const side = Math.min(image.width, image.height);
+  const square = scaleArea(crop(image, Math.round((image.width - side) / 2), Math.round((image.height - side) / 2), side, side), FLOOR, FLOOR);
+  const scratch = mkdtempSync(join(tmpdir(), 'floor-'));
+  const png = join(scratch, 'floor.png');
+  writePng(png, square);
+  const out = join(ROOT, 'src/assets/map', `${name}.webp`);
+  mkdirSync(dirname(out), { recursive: true });
+  const run = spawnSync('ffmpeg', ['-nostdin', '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '88', out], { stdio: 'inherit' });
+  rmSync(scratch, { recursive: true, force: true });
+  if (run.status !== 0) throw new Error('ffmpeg failed');
+  console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
+}
+
+/** A floor is drawn about 440px across (4.5 hexes); 1024 covers 2× screens. */
+const FLOOR = 1024;
+
+/** Each query (`cards&…`, `maptiles&…`) photographed from the dev build's gallery once `ready` shows, into art/cut/<sheet>.png. */
+async function shootGallery(shots: [query: string, sheet: string][], ready = '.card-gallery-option') {
   const port = 5181;
   const server = spawn(process.execPath, [join(ROOT, 'node_modules/vite/bin/vite.js'), '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'ignore' });
   try {
@@ -438,8 +519,8 @@ async function shootGallery(shots: [query: string, sheet: string][]) {
     const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=gl', '--enable-gpu', '--ignore-gpu-blocklist'] });
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
     for (const [query, sheet] of shots) {
-      await page.goto(`${url}?cards&${query}`);
-      await page.waitForSelector('.card-gallery-option');
+      await page.goto(`${url}?${query}`);
+      await page.waitForSelector(ready);
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(300);
       const out = join(ROOT, 'art/cut', `${sheet}.png`);

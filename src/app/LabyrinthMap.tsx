@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { registry } from '../content/registry.ts';
 import { routeTo, visibleKind, type Board, type TileKind } from '../game/board.ts';
 import { parseHex, type Hex } from '../game/hex.ts';
 import { WIDTH } from '../stage/layout.ts';
+import { bandOf, mapArt, slab, type MapArt } from '../stage/mapArt.ts';
 
 // The Labyrinth board as SVG hexes: only revealed tiles are drawn, hovering one shows the route
 // the party would walk, and clicking walks it. The camera keeps the party's tile in the middle, so
-// the board's extent never hints where the Boss is (owner). Colours and labels stand in until the
-// map art pass.
+// the board's extent never hints where the Boss is (owner). Each hex is a slab of its band's floor,
+// and a tile with contents carries its symbol on a gold-rimmed disc (`src/stage/mapArt.ts`); without
+// art, drawn colours and labels stand in.
 
-type Shown = TileKind | 'unknown';
+export type Shown = TileKind | 'unknown';
+
+/** The map's art; the dev gallery (`?maptiles`) swaps in options to compare. */
+export const MapArtContext = createContext<MapArt>(mapArt);
 
 const LABEL: Readonly<Record<Shown, string>> = {
   entrance: 'Entrance',
@@ -37,6 +42,8 @@ const SQRT3 = Math.sqrt(3);
 
 interface Props {
   board: Board;
+  /** The run's depth, whose band sets the floor. */
+  depth: number;
   /** While the party walks, the map shows but takes no input. */
   busy: boolean;
   /** The Boss tile, once the Bloom shows the way: a marker points to it while it is fogged or off screen. */
@@ -44,7 +51,9 @@ interface Props {
   onPick: (key: string) => void;
 }
 
-export function LabyrinthMap({ board, busy, boss, onPick }: Props) {
+export function LabyrinthMap({ board, depth, busy, boss, onPick }: Props) {
+  const art = useContext(MapArtContext);
+  const floor = art.floor(bandOf(depth));
   const [hover, setHover] = useState<string | null>(null);
   const route = hover && !busy ? routeTo(board, hover) : undefined;
   const steps = new Map(route?.map((key, i) => [key, i + 1]));
@@ -52,7 +61,8 @@ export function LabyrinthMap({ board, busy, boss, onPick }: Props) {
 
   return (
     <>
-      <svg className="labyrinth-map" viewBox={`0 0 ${WIDTH} 1080`} onPointerLeave={() => setHover(null)}>
+      <svg className={floor ? 'labyrinth-map has-floor' : 'labyrinth-map'} viewBox={`0 0 ${WIDTH} 1080`} onPointerLeave={() => setHover(null)}>
+        <HexDefs />
         {/* A style transform, so CSS eases the board under the party as it walks. */}
         <g className="map-camera" style={{ transform: `translate(${MIDDLE.x - party.x}px, ${MIDDLE.y - party.y}px)` }}>
           {board.seen.map((key) => {
@@ -64,39 +74,110 @@ export function LabyrinthMap({ board, busy, boss, onPick }: Props) {
               .filter(Boolean)
               .join(' ');
             return (
-              <g
+              <HexTile
                 key={key}
-                className={classes}
-                transform={`translate(${x} ${y})`}
+                at={key}
+                shown={shown}
+                floor={floor}
+                classes={classes}
+                x={x}
+                y={y}
+                paid={tile.paid === true}
+                current={key === board.at}
+                step={steps.get(key)}
                 onPointerEnter={() => setHover(key)}
                 onClick={() => reachable && onPick(key)}
-                data-tile={key}
-                data-kind={shown}
-              >
-                <polygon points={corners(SIZE * 0.94)} />
-                {LABEL[shown] && key !== board.at && (
-                  <text className="hex-label" y={5}>
-                    {tile.paid ? 'Paid' : LABEL[shown]}
-                  </text>
-                )}
-                {steps.has(key) && (
-                  <text className="hex-step" y={-SIZE * 0.42}>
-                    {steps.get(key)}
-                  </text>
-                )}
-              </g>
+              />
             );
           })}
         </g>
-        <g className="party-token" transform={`translate(${MIDDLE.x} ${MIDDLE.y})`}>
-          <circle r={SIZE * 0.42} />
-        </g>
+        <PartyToken x={MIDDLE.x} y={MIDDLE.y} />
         {boss && <BossMarker board={board} boss={boss} />}
       </svg>
       {hover && <TileInfo board={board} at={hover} steps={route?.length} busy={busy} />}
     </>
   );
 }
+
+/** How much of a floor texture one hex spans: the texture is drawn this many hex widths across. */
+const FLOOR_SPAN = 4.5;
+const FLOOR_SIZE = SQRT3 * SIZE * FLOOR_SPAN;
+const HEX_CLIP = 'hex-clip';
+
+interface TileProps {
+  at: string;
+  shown: Shown;
+  floor: string | undefined;
+  classes: string;
+  x: number;
+  y: number;
+  paid: boolean;
+  current: boolean;
+  step: number | undefined;
+  onPointerEnter?: () => void;
+  onClick?: () => void;
+}
+
+/** One hex: its slab of floor (or drawn colour), its symbol or label, and its step number on a previewed route. */
+export function HexTile({ at, shown, floor, classes, x, y, paid, current, step, onPointerEnter, onClick }: TileProps) {
+  const art = useContext(MapArtContext);
+  const icon = floor && shown !== 'unknown' ? art.icon(shown) : undefined;
+  const cut = slab(at, FLOOR_SIZE - SIZE * 2.2);
+  return (
+    <g className={classes} transform={`translate(${x} ${y})`} onPointerEnter={onPointerEnter} onClick={onClick} data-tile={at} data-kind={shown}>
+      {floor && (
+        <g clipPath={`url(#${HEX_CLIP})`} className="hex-floor">
+          <image href={floor} width={FLOOR_SIZE} height={FLOOR_SIZE} x={-(cut.x + SIZE * 1.1)} y={-(cut.y + SIZE * 1.1)} transform={`rotate(${cut.turn * 60})`} preserveAspectRatio="none" />
+        </g>
+      )}
+      <polygon points={corners(SIZE * 0.94)} />
+      {floor && <polygon className="hex-bevel" points={corners(SIZE * 0.86)} />}
+      {icon && !current && (
+        <g className={paid ? 'emblem paid' : 'emblem'}>
+          <circle r={EMBLEM} />
+          <image href={icon} x={-EMBLEM * 0.82} y={-EMBLEM * 0.82} width={EMBLEM * 1.64} height={EMBLEM * 1.64} />
+        </g>
+      )}
+      {!icon && LABEL[shown] && !current && (
+        <text className="hex-label" y={5}>
+          {paid ? 'Paid' : LABEL[shown]}
+        </text>
+      )}
+      {step !== undefined && (
+        <text className="hex-step" y={-SIZE * 0.6}>
+          {step}
+        </text>
+      )}
+    </g>
+  );
+}
+
+/** The emblem disc's radius. */
+const EMBLEM = SIZE * 0.46;
+
+/** The clip each slab of floor is cut with; once per map. */
+export function HexDefs() {
+  return (
+    <defs>
+      <clipPath id={HEX_CLIP}>
+        <polygon points={corners(SIZE * 0.94)} />
+      </clipPath>
+    </defs>
+  );
+}
+
+/** The party: its painted marker, or a drawn token. */
+export function PartyToken({ x, y }: { x: number; y: number }) {
+  const marker = useContext(MapArtContext).icon('party');
+  return (
+    <g className="party-token" transform={`translate(${x} ${y})`}>
+      {marker ? <image href={marker} x={-SIZE * 0.62} y={-SIZE * 0.8} width={SIZE * 1.24} height={SIZE * 1.24} /> : <circle r={SIZE * 0.42} />}
+    </g>
+  );
+}
+
+/** A hex's centre on the board. */
+export const hexCentre = (key: string) => centre(parseHex(key));
 
 /** An arrow at the edge of the view toward the Boss, unless its tile is revealed and on screen. */
 function BossMarker({ board, boss }: { board: Board; boss: string }) {
