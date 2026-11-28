@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { add, stat } from './formula.ts';
 import { applyStatus, damage, draw, gainResource, gainShield, ifConsume, volley } from './ops/index.ts';
 import { mul, resource } from './formula.ts';
-import { cardCategory, describeCard, describeCardLive, showStats, slotAt, templateSlots } from './text.ts';
+import { cardCategory, describeCard, describeCardLive, renderTemplate, showStats, slotAt, templateSlots } from './text.ts';
 import { fixtureCombat, withCardInHand, withCards } from './testing/fixtures.ts';
 
 const card = {
@@ -54,6 +54,16 @@ describe('authored text', () => {
     expect(slotAt(pod, 'effects.0.resource')).toBeUndefined();
     expect(slotAt(pod, 'effects.9.amount')).toBeUndefined();
     expect(templateSlots(pod.text)).toEqual(['effects.0.amount', 'effects.1.amount']);
+  });
+
+  it('keeps a [bracketed] part only after a number, so a share of HP never reads "HP HP"', () => {
+    const root = { effects: [{ amount: { percent: 4, of: 'hp' as const } }] };
+    const template = 'The party loses {effects.0.amount}[ HP ({effects.0.amount.percent}% of current)].';
+    expect(renderTemplate(template, root, (f) => (typeof f === 'object' && 'percent' in f ? '6' : String(f)))).toBe('The party loses 6 HP (4% of current).');
+    expect(renderTemplate(template, root, (f) => (typeof f === 'object' && 'percent' in f ? "4% of the party's current HP" : String(f)))).toBe("The party loses 4% of the party's current HP.");
+    // Marked numbers count as numbers; text with no brackets is unchanged.
+    expect(renderTemplate(template, root, (f) => `⟦:${typeof f === 'object' ? 6 : f}⟧`)).toBe('The party loses ⟦:6⟧ HP (⟦:4⟧% of current).');
+    expect(renderTemplate('Lose {effects.0.amount}.', root, () => 'x')).toBe('Lose x.');
   });
 });
 

@@ -64,11 +64,27 @@ export function cardCategory(def: CardDef): CardCategory {
 /** The `{path}` slots in a template. */
 export const templateSlots = (template: string): string[] => [...template.matchAll(/\{([\w.]+)\}/g)].map((m) => m[1] as string);
 
-/** Fills a template's slots from formulas inside `root`. */
+/**
+ * Fills a template's slots from formulas inside `root`. A `[…]` part is kept only when the slot just
+ * before it shows a number: "loses {amount}[ HP ({amount.percent}% of current)]" reads "loses 6 HP
+ * (4% of current)" in a fight, and "loses 4% of the party's current HP" where the party's HP isn't known.
+ */
 export function renderTemplate(template: string, root: unknown, show: ShowAmount): string {
-  return template.replace(/\{([\w.]+)\}/g, (whole, path: string) => {
-    const slot = slotAt(root, path);
-    return slot ? show(slot.formula, slot.value, slot.status) : whole;
+  let numeric = true;
+  const fill = (text: string) =>
+    text.replace(/\{([\w.]+)\}/g, (whole, path: string) => {
+      const slot = slotAt(root, path);
+      if (!slot) return whole;
+      const shown = show(slot.formula, slot.value, slot.status);
+      numeric = /^[\d.,]+$/.test(shown.replace(/⟦\w*:([^⟧]*)⟧/g, '$1'));
+      return shown;
+    });
+  return template.replace(/([^[]*)(?:\[([^\]]*)\])?/g, (_, plain: string, part?: string) => {
+    const before = fill(plain);
+    if (part === undefined) return before;
+    const kept = numeric;
+    const inside = fill(part);
+    return kept ? before + inside : before;
   });
 }
 

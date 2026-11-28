@@ -10,14 +10,14 @@ import { weak } from '../statuses/weak.ts';
 export const feveredPulse = card({
   id: 'symptom.fevered-pulse', name: 'Fevered Pulse', cost: 0, target: 'none', keywords: ['exhaust'],
   effects: [gainMana(2), loseHp(percentOf(4, 'hp'), { target: 'party' })],
-  text: 'Gain {effects.0.amount} Mana. The party loses {effects.1.amount} HP ({effects.1.amount.percent}% of current).',
+  text: 'Gain {effects.0.amount} Mana. The party loses {effects.1.amount}[ HP ({effects.1.amount.percent}% of current)].',
 });
 
 export const sweetRot = card({
   id: 'symptom.sweet-rot', name: 'Sweet Rot', cost: 1, target: 'chosenEnemy',
   // The front member plays it: 350% of her Attack, 14 for Agathe at the front at level 1.
   effects: [damage(mul(3.5, stat('attack'))), applyStatus(poison, percentOf(1, 'maxHp'), 'allEnemies'), applyStatus(poison, percentOf(1, 'maxHp'), 'self')],
-  text: "Deal {effects.0.amount} damage. Every enemy and the party gain {effects.1.stacks} Poison ({effects.1.stacks.percent}% of the party's max HP).",
+  text: "Deal {effects.0.amount} damage. Every enemy and the party gain {effects.1.stacks} Poison[ ({effects.1.stacks.percent}% of the party's max HP)].",
 });
 
 export const graftedHand = card({
