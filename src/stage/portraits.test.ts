@@ -7,7 +7,7 @@ describe('portraits (M6.11)', () => {
     expect(Object.keys(portraitArt).filter((id) => registry.characters[id] === undefined)).toEqual([]);
   });
 
-  it("Maelia has the owner's pick", () => {
-    expect(portraitArt.maelia).toMatch(/portraits\/maelia\.webp/);
+  it('every character has her portrait (M6.11)', () => {
+    expect(Object.keys(registry.characters).filter((id) => portraitArt[id] === undefined)).toEqual([]);
   });
 });

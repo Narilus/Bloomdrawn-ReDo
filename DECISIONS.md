@@ -284,6 +284,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Portrait crop (owner, 28 Nov): the ring and the card medallion show a close crop centred on the head; the weapon need not be in frame and the hood may be cut. The turned options (01–04) are back in favour with that crop, and the battle sprite's own head may serve if it reads.
 - Maelia's portrait is 04 (owner, 28 Nov): all were close and 01–04 fill the circle best; 01 has good features, but 04 small gives the most feminine chin.
 - Portraits picked (owner, 28 Nov): Agathe 01, Anthe 01, Hester 02, Isadora 04, Leonora 01. Virelle and Kibane showed too much neck: their heads sit lower in the circle, for a pick.
+- Portraits picked (owner, 28 Nov): Kibane 04, Virelle 01. All eight characters have their portrait.
 
 ## Open
 - Gear at launch or later (recommendation: later).
