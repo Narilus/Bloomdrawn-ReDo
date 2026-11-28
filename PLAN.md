@@ -1,7 +1,7 @@
 # PLAN
 
 **Current milestone:** M6 Depth and polish (M5 signed off 31 Oct)
-**Current task:** M6.11a Card layout, before the rest of the art pass (owner, 28 Nov; portraits paused)
+**Current task:** M6.11 Art pass: portraits (M6.11a signed off 28 Nov)
 
 ## Milestones
 
@@ -411,7 +411,7 @@ _Plumbing built 16 Nov (`docs/notes/audio.md`): the cues and their timing in `sr
 
 Options in tabs (owner, 27 Nov): Profile (the backup and reset that were there) and Sound (volume, Mute all, and five kinds of sound muted one by one: interface, cards, combat, big moments, banners; save v14). Built 27 Nov, laid out like the inventory. Tests: `src/app/sound.test.ts` (`audible`), `src/app/saves.test.ts`, `src/save/profile.test.ts`, `e2e/sound.spec.ts`. Signed off 27 Nov after two fixes: one click when Options opens, and the kinds' descriptions all in lower case.
 
-### M6.11a Card layout (owner, 28 Nov: done first, portraits paused)
+### M6.11a Card layout ✅ (owner, 28 Nov: done first, portraits paused)
 The new card from the owner's mockup (`.external/card-mockup/`, a layout reference only: its art, portraits, ornaments and numbers are stand-ins). A card is 15 × 21 em, so one font size scales it. Down the left: the cost gem, the owner's medallion (her ultimate ring's face crop), her name plate and the Domain sigil, overlapping the art window. Then the wide art window, a centred title band, the tags and target line, and the rules on solid parchment. A held Ritual's gem turns gold at its current cost, with the printed cost struck in a badge. Frames are built in the UI from ornament pieces per Domain; Symptoms carry a Bloom emblem for the medallion. DESIGN.md "Cards" has the rules.
 1. The layout in the game with placeholder art and frames, fanned in the hand. Owner signs it off at 1080p and at the smallest supported size (1280×600).
 2. The ornament pieces for the four Domain frames and the party's, generated; the owner picks.
@@ -432,14 +432,14 @@ _Step 2 done 28 Nov: Rapture 09 picked, so every frame and Transcend crest is th
 
 _Crests approved 28 Nov (owner). Options has a Visual tab (`Options.tsx`) with "Disable card frames" (profile v15 `visual.plainFrames`, `src/app/visual.ts` sets `plain-frames` on the page and `global.css` hides the ornament; `e2e/visual.spec.ts`). Step 3: the owner picks Strike and Defense; the builder picks the rest and the owner flags misses._ Card art stem in DESIGN.md; `npm run art -- cards` shows options on their cards (`?cards&art=`). Four options for each Strike and Defense made 28 Nov (`art/raw/card-strike-*`, `card-defense-*`), waiting on the owner; two options for each of the other 50 cards made 28 Nov, and the builder picked one each (`src/assets/cards/`; Quiet Prayer redone, its crossed talismans read as an X). `?cards&all` shows every card's picture at once (`art/cut/cards-all-*.png`). Waiting on the owner's Strike and Defense picks and his flags._ Owner, 28 Nov: the builder's picks accepted; Strike Unbound 04 and Spirit 03 in; Gauntlet Rake redone with five fingers (06); Flesh and Rapture Strikes redone (05–08) for his pick. Fevered Pulse and Sweet Rot no longer read "HP HP" without live numbers (a `[…]` part of a card template shows only after a number, `renderTemplate`)._
 
-_Step 3 done 28 Nov: the owner's Strike (Flesh 05, Rapture 08) and Defense (Flesh 04, Rapture 04, Spirit 02, Unbound 03) picks are in, so every card has its picture; `cardArt.test.ts` fails if a card lacks one. Shots: `art/cut/cards-all-*.png`, `art/cut/cards/hand-*`. Waiting on the owner's sign-off of the cards in the hand, which closes M6.11a; portraits resume after._
+_Step 3 done 28 Nov: the owner's Strike (Flesh 05, Rapture 08) and Defense (Flesh 04, Rapture 04, Spirit 02, Unbound 03) picks are in, so every card has its picture; `cardArt.test.ts` fails if a card lacks one. Shots: `art/cut/cards-all-*.png`, `art/cut/cards/hand-*`. Signed off 28 Nov (owner); portraits resume._
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
 
 _Battle backgrounds first (owner, 27 Nov; `docs/notes/battle-backgrounds.md`): one level floor in the lower 60% and the far wall's foot in a straight line across, so no actor seems to stand on a wall. `npm run art -- gen <scene> --stem scene` makes options; `npm run art -- stage` previews each with the real sprites at their feet positions. A biome per band of depths, with a pool for normal fights and elites and richer scenes for Bosses (owner, 27 Nov). All five bands' pools are in the game (the naves, the greener woods, the frozen camps, the petal chambers, the craters; `src/stage/scenes.ts`, `src/assets/scenes/`). Boss scenes have begun: the Hollow Abbess's, the Gathered Beast's, every run Boss and Trial Boss has its own. Six were removed after a sweep of the back slot's feet (owner, 27 Nov). Bloom-stage variants are dropped for subtle particle effects (falling pollen) after the art pass, with a Visual tab in Options to turn them off._
 
-_Portraits next (owner, 27 Nov): they need a lot of care; colours and details must match each character. Maelia's options 01–08 are made (01–04 turned to the right with her gaze on the player, 05–08 facing the player, all kept); paused 28 Nov for M6.11a, with the owner's pick still to come. Portraits are tight head-and-shoulders crops built for a circle (the ring and the card medallion)._
+_Portraits next (owner, 27 Nov): they need a lot of care; colours and details must match each character. Maelia's options 01–08 are made (01–04 turned to the right with her gaze on the player, 05–08 facing the player, all kept); paused 28 Nov for M6.11a, with the owner's pick still to come. Resumed 28 Nov: `faces` now shows the card's medallion (3.3 em) in place of the old art window; at 44px the whole portrait is unreadable, so it shows the close crop there. Portraits are tight head-and-shoulders crops built for a circle (the ring and the card medallion)._
 
 ### M6.12 Balance
 A pass with the lab and the owner over depths, Trials and weapons.

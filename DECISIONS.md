@@ -280,6 +280,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Options > Visual (owner, 28 Nov): a Visual tab with "Disable card frames", for a sleek card that keeps its coloured border without the ornament or Transcend crests. Card art: the owner picks the eight Strike and Defense pictures; for every other card the builder picks the option that fits, and the owner flags any that miss.
 - Card art (owner, 28 Nov): Strike Unbound 04 and Spirit 03; Flesh Strike redone as a metal-bladed knife with petals blowing round it, Rapture Strike as a sword with tentacles winding round the blade among candles and a chalk circle. Gauntlet Rake redone (it had three fingers). Every other card the builder picked is accepted.
 - Strike and Defense art picked (owner, 28 Nov): Strike Flesh 05, Rapture 08; Defense Flesh 04, Rapture 04, Spirit 02, Unbound 03. Every card now has its picture.
+- Cards signed off (owner, 28 Nov): layout, frames, crests and art in the hand. M6.11a is done; portraits resume.
 
 ## Open
 - Gear at launch or later (recommendation: later).

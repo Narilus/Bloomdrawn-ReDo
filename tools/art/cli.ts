@@ -24,7 +24,7 @@ const USAGE = `Usage:
   npm run art -- faces <out.png> <character> <raw.png...>
       Each portrait option beside her battle sprite, and as the game shows it: the combat ring, whole and as a
       close crop of the face (each at 2× and 1×),
-      and the card's art window (out: art/cut/portrait-<character>-faces.png)
+      and the card's medallion with the close crop, raised (at 2× and 1×) and in the hand (out: art/cut/portrait-<character>-faces.png)
   npm run art -- stage <out.png> <raw.png...> [--boss hollow-abbess]
       Each background at 1920×1080 with the real sprites at their in-game feet positions: the party with
       three enemies, and the party facing a Boss alone, by default the Hollow Abbess (out: art/cut/<name>-stage.png)
@@ -279,8 +279,12 @@ const PORTRAIT = 512;
 /** The combat ring (`.portrait-ring` in global.css): 82px with a 5px gold band round a 72px face. */
 const RING = 82;
 const FACE = 72;
-/** The card's art window (`.card-art`): the card's inner width by 104px, the image covered from 25% down. */
-const CARD_ART: readonly [number, number] = [190, 104];
+/** The card's medallion (`.card-medal`, 3.3 em with a 0.16 em rim): [outer, face] px in the hand (15px a unit) and raised (×1.3). */
+const MEDALS: readonly (readonly [number, number])[] = [
+  [128, 116],
+  [64, 58],
+  [50, 44],
+];
 const GOLD: [number, number, number] = [184, 149, 90];
 /** A close crop for the ring, centred on the face: the briefs centre it left to right, with the chin a little above the middle. */
 const CLOSE = { side: 0.56, top: 0.06 };
@@ -311,17 +315,10 @@ function ring(canvas: Rgba, cx: number, cy: number, r: number) {
   disc(canvas, scaleNearest(solid, 2, 2), cx, cy, r);
 }
 
-/** The card window's crop: the square covered to the window's width and cut from 25% of the spare height. */
-function cardCrop(square: Rgba, scale: number): Rgba {
-  const [w, h] = [CARD_ART[0] * scale, CARD_ART[1] * scale];
-  const wide = scaleArea(square, w, w);
-  return crop(wide, 0, Math.round((w - h) * 0.25), w, h);
-}
-
 function faces(out: string, character: string, files: string[]) {
   const sprite = fitHeight(readPng(join(ROOT, 'src/assets/battle', `${character}.png`)), 480);
   const gap = 24;
-  const columns = [400, 480, RING * 2, RING, RING * 2, RING, CARD_ART[0] * 2];
+  const columns = [400, 480, RING * 2, RING, RING * 2, RING, ...MEDALS.map(([outer]) => outer)];
   const width = columns.reduce((sum, w) => sum + w + gap, gap);
   const canvas = blank(width, (480 + gap) * files.length + gap);
   fill(canvas, STAGE);
@@ -346,7 +343,15 @@ function faces(out: string, character: string, files: string[]) {
         x += RING * scale + gap;
       }
     }
-    composite(canvas, cardCrop(square, 2), x, top + 60);
+    // The card's medallion with the close crop (the whole portrait is too small to read there): raised at 2× and 1×, then in the hand.
+    const close = closeCrop(square);
+    for (const [outer, inner] of MEDALS) {
+      const cx = x + outer / 2;
+      const cy = top + 60 + RING;
+      ring(canvas, cx, cy, outer / 2);
+      disc(canvas, close, cx, cy, inner / 2);
+      x += outer + gap;
+    }
   });
   save(out, canvas);
 }
