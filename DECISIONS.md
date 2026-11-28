@@ -287,6 +287,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Portraits picked (owner, 28 Nov): Kibane 04, Virelle 01. All eight characters have their portrait.
 - Map tiles (owner, 28 Nov): each hex is a painted slab of ground, with a round gold-rimmed emblem on tiles that hold something; one floor per band of depths, matching the battle backgrounds, with the emblems shared; the party is a painted marker, the same for every party. The Bloom clock's stages on the map come later, with the falling pollen.
 - Map art picked (owner, 28 Nov): option 01 for every band's floor, every symbol and the party's lantern, since the options read much the same. Collapsing gets large cracks painted over the whole tile instead of a symbol.
+- Collapsing cracks are option 03 (owner, 28 Nov): all four read well.
 
 ## Open
 - Gear at launch or later (recommendation: later).

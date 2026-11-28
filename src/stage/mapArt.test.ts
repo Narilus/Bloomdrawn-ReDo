@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bandOf, slab } from './mapArt.ts';
+import { bandOf, mapArt, slab } from './mapArt.ts';
 
 describe('map art (M6.11)', () => {
   it('a depth is in its band of ten', () => {
@@ -18,5 +18,13 @@ describe('map art (M6.11)', () => {
       expect([0, 1, 2, 3, 4, 5]).toContain(cut.turn);
     }
     expect(new Set(cuts.map((c) => `${Math.round(c.x)},${Math.round(c.y)}`)).size).toBe(cuts.length);
+  });
+
+  it("every band has its floor, every tile that holds something its symbol, Collapsing its cracks, and the party its marker (owner's picks)", () => {
+    // A band without a floor would borrow the one before, so each must be its own.
+    expect(new Set([1, 2, 3, 4, 5].map((band) => mapArt.floor(band))).size).toBe(5);
+    expect(mapArt.floor(1)).toBeDefined();
+    const kinds = ['entrance', 'fight', 'elite', 'boss', 'event', 'shop', 'camp', 'symptom', 'bloom', 'party', 'cracks'];
+    expect(kinds.filter((kind) => mapArt.icon(kind) === undefined)).toEqual([]);
   });
 });
