@@ -430,7 +430,7 @@ _Crests picked 28 Nov (owner): Flesh 01 and Unbound 02, in `src/assets/frames/`.
 
 _Step 2 done 28 Nov: Rapture 09 picked, so every frame and Transcend crest is the owner's (`src/assets/frames/`). Each Transcend card raised in the real hand at 1920×1080 and 1280×600: `art/cut/crests-hand-*.png`. Next, step 3: card art._
 
-_Crests approved 28 Nov (owner). Options has a Visual tab (`Options.tsx`) with "Disable card frames" (profile v15 `visual.plainFrames`, `src/app/visual.ts` sets `plain-frames` on the page and `global.css` hides the ornament; `e2e/visual.spec.ts`). Step 3: the owner picks Strike and Defense; the builder picks the rest and the owner flags misses._
+_Crests approved 28 Nov (owner). Options has a Visual tab (`Options.tsx`) with "Disable card frames" (profile v15 `visual.plainFrames`, `src/app/visual.ts` sets `plain-frames` on the page and `global.css` hides the ornament; `e2e/visual.spec.ts`). Step 3: the owner picks Strike and Defense; the builder picks the rest and the owner flags misses._ Card art stem in DESIGN.md; `npm run art -- cards` shows options on their cards (`?cards&art=`). Four options for each Strike and Defense made 28 Nov (`art/raw/card-strike-*`, `card-defense-*`), waiting on the owner; two options for each of the other 50 cards under way._
 
 ### M6.11 Art pass
 Portraits, card art, battle backgrounds, map tiles, the title screen and banner screens, through `npm run art`; the owner picks.
