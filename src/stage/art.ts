@@ -1,6 +1,6 @@
-// Battle art: Bloomdrawn picks from src/assets/battle (made with `npm run art -- pick`), plus
-// Maelia's Gloomdrawn portrait as a placeholder. Characters without art
-// get a silhouette. Keyed by character ID, or by enemy ID for enemies (who otherwise get a dummy).
+// Battle art: Bloomdrawn picks from src/assets/battle (made with `npm run art -- pick`), and portraits
+// from src/assets/portraits (`pick --portrait`, cropped to the head). Characters without battle art
+// get a silhouette, and without a portrait their initial. Keyed by character ID, or by enemy ID for enemies (who otherwise get a dummy).
 import agatheBattle from '../assets/battle/agathe.png';
 import antheBattle from '../assets/battle/anthe.png';
 import hesterBattle from '../assets/battle/hester.png';
@@ -58,7 +58,6 @@ import kirinOracleBattle from '../assets/battle/kirin-oracle.png';
 import paperTalismanBattle from '../assets/battle/paper-talisman.png';
 import ringmasterBattle from '../assets/battle/ringmaster.png';
 import marionetteBattle from '../assets/battle/marionette.png';
-import maeliaPortrait from '../../reference/legacy-sprites/maelia-portrait.png';
 
 export const battleArt: Readonly<Record<string, string>> = {
   agathe: agatheBattle,
@@ -134,6 +133,9 @@ export const battleArt: Readonly<Record<string, string>> = {
   'enemy.marionette': marionetteBattle,
 };
 
-export const portraitArt: Readonly<Record<string, string>> = {
-  maelia: maeliaPortrait,
-};
+const PORTRAITS = import.meta.glob<string>('../assets/portraits/*.webp', { eager: true, query: '?url', import: 'default' });
+
+/** Each character's portrait for the combat ring and the card's medallion, by character ID. */
+export const portraitArt: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(PORTRAITS).map(([path, url]) => [/([^/]+)\.webp$/.exec(path)?.[1] ?? '', url]),
+);
