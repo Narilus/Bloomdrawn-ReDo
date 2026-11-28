@@ -1,0 +1,17 @@
+Background: scene
+Reference (likeness): src/assets/battle/hester.png
+Codex thread: 01a22109-2b0f-7b33-8af5-b4577d61917a
+
+Image 1 is this exact character, drawn as a small pixel-art battle sprite. Paint the same person: keep her face, age, hair colour and style, skin tone, eye colour, costume, every colour and every prop and ornament exactly as Image 1 shows them, and add nothing to her design. Only the medium and framing change: a painted portrait, not pixel art.
+
+Painterly gothic fantasy illustration, fine linework, anime-influenced faces. Deep plum and charcoal background with soft vignette. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac as the main light source. Antique gold filigree accents. No text, no letters, no logos.
+
+A square character portrait, head and shoulders, of the woman in Image 1: a woman in her 30s, a trapper, turned three-quarters toward the right edge of the image, her eyes looking out toward the viewer, patient and watchful, her mouth calm.
+
+Her face, exactly as Image 1: lightly tanned skin, soft grey-green eyes, a straight nose. Her long brown wavy hair falls past her shoulders from under a wide-brimmed brown leather hat, the hatband tucked with a few small pale pink flowers and green leaves.
+
+Her costume, exactly as Image 1: a long moss-green coat with a wide collar over a cream shirt open at the throat, brown leather gloves, and a coil of thick rope net slung over her far shoulder, on the left of the image, its edge hung with dark lead weights.
+
+Framing: her face is the centre of the image, both left to right and top to bottom, so a small circle cut from the middle holds her whole head; the top of her head near the top edge, her shoulders at the bottom edge. Plain soft background of deep plum fading to charcoal at the edges, with a faint glow behind her head. No other figures and no scenery.
+
+Palette: moss green, leather brown, iron grey, cream, brown hair, a little pale pink in the hat flowers, on deep plum.

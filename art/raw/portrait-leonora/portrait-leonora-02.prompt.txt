@@ -1,0 +1,17 @@
+Background: scene
+Reference (likeness): src/assets/battle/leonora.png
+Codex thread: 01a22106-da1d-7b43-8d74-810c276dee0b
+
+Image 1 is this exact character, drawn as a small pixel-art battle sprite. Paint the same person: keep her face, age, hair colour and style, skin tone, eye colour, costume, every colour and every prop and ornament exactly as Image 1 shows them, and add nothing to her design. Only the medium and framing change: a painted portrait, not pixel art.
+
+Painterly gothic fantasy illustration, fine linework, anime-influenced faces. Deep plum and charcoal background with soft vignette. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac as the main light source. Antique gold filigree accents. No text, no letters, no logos.
+
+A square character portrait, head and shoulders, of the woman in Image 1: a woman in her 30s, a quartermaster, turned three-quarters toward the right edge of the image, her eyes looking out toward the viewer, sharp and appraising, one eyebrow a little raised.
+
+Her face, exactly as Image 1: fair skin, a strong jaw, dark eyes under straight dark brows, small gold drop earrings. Her dark brown wavy hair is pinned up at the back with a gold hair ornament and a red ribbon, a few loose curls falling by her face.
+
+Her costume, exactly as Image 1: a long oxblood travelling coat with a tall turned-up collar, brass buttons and buttoned pockets, over a white ruffled blouse with a red ribbon tie held by a small gold brooch, and brown leather straps across the shoulder.
+
+Framing: her face is the centre of the image, both left to right and top to bottom, so a small circle cut from the middle holds her whole head; the top of her head near the top edge, her shoulders at the bottom edge. Plain soft background of deep plum fading to charcoal at the edges, with a faint glow behind her head. No other figures and no scenery.
+
+Palette: oxblood, brass, white linen, dark brown hair, brown leather, a little red in the ribbon, on deep plum.

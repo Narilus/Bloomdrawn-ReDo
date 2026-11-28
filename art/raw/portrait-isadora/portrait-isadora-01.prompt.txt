@@ -1,0 +1,17 @@
+Background: scene
+Reference (likeness): src/assets/battle/isadora.png
+Codex thread: 01a22108-084c-7613-adb1-bd47a10d1bb9
+
+Image 1 is this exact character, drawn as a small pixel-art battle sprite. Paint the same person: keep her face, age, hair colour and style, skin tone, eye colour, costume, every colour and every prop and ornament exactly as Image 1 shows them, and add nothing to her design. Only the medium and framing change: a painted portrait, not pixel art.
+
+Painterly gothic fantasy illustration, fine linework, anime-influenced faces. Deep plum and charcoal background with soft vignette. Flesh-coloured vines with visible muscle striation, flowers whose petals are skin with fine veins, blush and ivory petals glowing pink and lilac as the main light source. Antique gold filigree accents. No text, no letters, no logos.
+
+A square character portrait, head and shoulders, of the woman in Image 1: a young woman in her 20s, a dancer lost in her dance, turned three-quarters toward the right edge of the image, her head tipped back a little, her eyes half closed and her lips parted.
+
+Her face, exactly as Image 1: fair skin with a soft flush, delicate features. Her long, wavy pale cream-blonde hair falls behind her, crowned with a thin circlet of gold vine with small green-gold leaves, and a torn ivory devotional veil streams from it in ragged strips.
+
+Her costume, exactly as Image 1: a loose violet dance dress with thin straps, gold vine jewellery wound at her throat and shoulders. Behind her, on both sides of the image, two smooth violet tentacles without suckers arc up like ribbons, each tip ending in a large pale pink petal, never in front of her face.
+
+Framing: her face is the centre of the image, both left to right and top to bottom, so a small circle cut from the middle holds her whole head; the top of her head near the top edge, her shoulders at the bottom edge. Plain soft background of deep plum fading to charcoal at the edges, with a faint glow behind her head. No other figures and no scenery.
+
+Palette: ivory, violet, pale cream-blonde, green-gold, a little pale pink in the petals, on deep plum.
