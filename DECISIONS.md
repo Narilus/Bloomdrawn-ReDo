@@ -281,6 +281,7 @@ An append-only log. One line per decision: date, what was decided, and why if it
 - Card art (owner, 28 Nov): Strike Unbound 04 and Spirit 03; Flesh Strike redone as a metal-bladed knife with petals blowing round it, Rapture Strike as a sword with tentacles winding round the blade among candles and a chalk circle. Gauntlet Rake redone (it had three fingers). Every other card the builder picked is accepted.
 - Strike and Defense art picked (owner, 28 Nov): Strike Flesh 05, Rapture 08; Defense Flesh 04, Rapture 04, Spirit 02, Unbound 03. Every card now has its picture.
 - Cards signed off (owner, 28 Nov): layout, frames, crests and art in the hand. M6.11a is done; portraits resume.
+- Portrait crop (owner, 28 Nov): the ring and the card medallion show a close crop centred on the head; the weapon need not be in frame and the hood may be cut. The turned options (01–04) are back in favour with that crop, and the battle sprite's own head may serve if it reads.
 
 ## Open
 - Gear at launch or later (recommendation: later).

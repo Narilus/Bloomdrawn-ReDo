@@ -3,7 +3,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { cutout, iconise, standardise } from './cutout.ts';
 import { splitKit, type Kit } from './kit.ts';
@@ -21,10 +21,10 @@ const USAGE = `Usage:
   npm run art -- gen portrait-<character> --stem portrait --like src/assets/battle/<character>.png [--n 4]
       A square painted bust from art/briefs/portrait-<character>.txt, with her battle sprite attached as the
       likeness to keep (face, hair, costume, colours, props) -> art/raw/portrait-<character>/
-  npm run art -- faces <out.png> <character> <raw.png...>
-      Each portrait option beside her battle sprite, and as the game shows it: the combat ring, whole and as a
-      close crop of the face (each at 2× and 1×),
-      and the card's medallion with the close crop, raised (at 2× and 1×) and in the hand (out: art/cut/portrait-<character>-faces.png)
+  npm run art -- faces <out.png> <character> <png...>
+      Each portrait option (or her battle sprite itself) beside her battle sprite: whole, its head square from
+      art/heads.json, and as the game shows it: the combat ring (at 2× and 1×) and the card's medallion, raised
+      (at 2× and 1×) and in the hand (out: art/cut/portrait-<character>-faces.png)
   npm run art -- stage <out.png> <raw.png...> [--boss hollow-abbess]
       Each background at 1920×1080 with the real sprites at their in-game feet positions: the party with
       three enemies, and the party facing a Boss alone, by default the Hollow Abbess (out: art/cut/<name>-stage.png)
@@ -37,7 +37,7 @@ const USAGE = `Usage:
       (--icon: fitted in a square instead -> src/assets/weapons/<weapon>.png;
       --scene: a background, framed to 1920×1080 as WebP -> src/assets/scenes/<name>.webp, where <name> is
       band<N>-<n> for a band's pool or a Boss's enemy ID without "enemy.";
-      --portrait <character>: a portrait, squared to 512px as WebP -> src/assets/portraits/<character>.webp;
+      --portrait <character>: a portrait or battle sprite, cropped to its head square in art/heads.json, 256px as WebP -> src/assets/portraits/<character>.webp;
       --frame <frame>: a frame kit's corner, crest and side -> src/assets/frames/<frame>-<piece>.png;
       --transcend <frame>: a Transcend crest -> src/assets/frames/<frame>-transcend.png)
   npm run art -- gen frame-<frame> --stem ornament [--n 4]
@@ -258,12 +258,12 @@ function pickCard(file: string) {
 /** The art window is 14 × 9.3 em; a raised hand card shows it about 270px wide, so this covers 2× screens. */
 const CARD_PICTURE = { width: 720, height: 478 };
 
-/** A portrait squared from its centre to 512px and stored as WebP: the combat ring shows it at 72px, the card window wider. */
+/** A portrait cropped to its head square (art/heads.json) and stored as WebP, keeping any transparency: the combat ring and the card's medallion show it. */
 function pickPortrait(file: string, name: string) {
   if (!/^[a-z]+(-[a-z]+)*$/.test(name)) throw new Error('--portrait must be a character ID such as maelia');
-  const image = readPng(file);
-  const side = Math.min(image.width, image.height);
-  const square = scaleArea(crop(image, Math.round((image.width - side) / 2), Math.round((image.height - side) / 2), side, side), PORTRAIT, PORTRAIT);
+  const head = headCrop(file);
+  // A small head (a battle sprite's) is kept at its own size: the browser scales it up more cleanly than a resample with transparency.
+  const square = head.width > PORTRAIT ? scaleArea(head, PORTRAIT, PORTRAIT) : head;
   const scratch = mkdtempSync(join(tmpdir(), 'portrait-'));
   const png = join(scratch, 'square.png');
   writePng(png, square);
@@ -275,7 +275,8 @@ function pickPortrait(file: string, name: string) {
   console.log(`${relative(ROOT, out)} (from ${relative(ROOT, file)})`);
 }
 
-const PORTRAIT = 512;
+/** The raised medallion's face is 116px; this covers it on 2× screens. */
+const PORTRAIT = 256;
 /** The combat ring (`.portrait-ring` in global.css): 82px with a 5px gold band round a 72px face. */
 const RING = 82;
 const FACE = 72;
@@ -286,17 +287,37 @@ const MEDALS: readonly (readonly [number, number])[] = [
   [50, 44],
 ];
 const GOLD: [number, number, number] = [184, 149, 90];
-/** A close crop for the ring, centred on the face: the briefs centre it left to right, with the chin a little above the middle. */
-const CLOSE = { side: 0.56, top: 0.06 };
+/** `--mauve-shadow`, behind the ring's face. */
+const MAUVE: [number, number, number] = [90, 58, 78];
+/**
+ * Each image's head square, [centre x, centre y, side] in its own pixels, keyed by its path from the repo root.
+ * The ring and the medallion are small circles, so the head sits in the middle and the weapon and hood may be cut.
+ */
+function headCrop(file: string): Rgba {
+  const heads = JSON.parse(readFileSync(join(ROOT, 'art/heads.json'), 'utf8')) as Record<string, [number, number, number]>;
+  const key = relative(ROOT, resolve(file));
+  const head = heads[key];
+  if (!head) throw new Error(`art/heads.json has no head square for ${key}: add [centre x, centre y, side] in its pixels`);
+  const [cx, cy, side] = head;
+  return crop(readPng(file), Math.round(cx - side / 2), Math.round(cy - side / 2), side, side);
+}
 
-function closeCrop(square: Rgba): Rgba {
-  const side = Math.round(square.width * CLOSE.side);
-  return crop(square, Math.round((square.width - side) / 2), Math.round(square.height * CLOSE.top), side, side);
+/** `image` over a solid colour, so a cut-out sprite reads as it does on the ring's and medallion's own backing. */
+function backed(image: Rgba): Rgba {
+  const out = blank(image.width, image.height);
+  fill(out, MAUVE);
+  composite(out, image, 0, 0);
+  return out;
+}
+
+/** An opaque square resized to `size`: area-averaged down, bilinear up (a sprite's small head would go blocky). */
+function sized(image: Rgba, size: number): Rgba {
+  return size > image.width ? scaleBilinear(image, size, size) : scaleArea(image, size, size);
 }
 
 /** `image` drawn into a circle of radius r centred at (cx, cy), over whatever is there. */
 function disc(canvas: Rgba, image: Rgba, cx: number, cy: number, r: number) {
-  const face = scaleArea(image, r * 2, r * 2);
+  const face = sized(image, r * 2);
   for (let y = 0; y < r * 2; y++) {
     for (let x = 0; x < r * 2; x++) {
       if ((x + 0.5 - r) ** 2 + (y + 0.5 - r) ** 2 > r * r) continue;
@@ -318,38 +339,37 @@ function ring(canvas: Rgba, cx: number, cy: number, r: number) {
 function faces(out: string, character: string, files: string[]) {
   const sprite = fitHeight(readPng(join(ROOT, 'src/assets/battle', `${character}.png`)), 480);
   const gap = 24;
-  const columns = [400, 480, RING * 2, RING, RING * 2, RING, ...MEDALS.map(([outer]) => outer)];
+  const columns = [400, 480, 480, RING * 2, RING, ...MEDALS.map(([outer]) => outer)];
   const width = columns.reduce((sum, w) => sum + w + gap, gap);
   const canvas = blank(width, (480 + gap) * files.length + gap);
   fill(canvas, STAGE);
   files.forEach((file, row) => {
     const top = gap + row * (480 + gap);
-    const image = readPng(file);
-    const side = Math.min(image.width, image.height);
-    const square = crop(image, Math.round((image.width - side) / 2), Math.round((image.height - side) / 2), side, side);
+    const image = backed(readPng(file));
+    const head = backed(headCrop(file));
     let x = gap;
     const cut = sprite.width > columns[0]! ? crop(sprite, Math.round((sprite.width - columns[0]!) / 2), 0, columns[0]!, sprite.height) : sprite;
     composite(canvas, cut, x + Math.round((columns[0]! - cut.width) / 2), top);
     x += columns[0]! + gap;
-    composite(canvas, scaleArea(square, 480, 480), x, top);
+    // The source, fitted in a square, then its head square.
+    const fit = fitHeight(image, 480);
+    const whole = fit.width > 480 ? scaleArea(image, 480, Math.round((480 * image.height) / image.width)) : fit;
+    composite(canvas, whole, x + Math.round((480 - whole.width) / 2), top + Math.round((480 - whole.height) / 2));
     x += 480 + gap;
-    // The ring with the whole portrait, then with the close crop, each at 2× and 1×.
-    for (const face of [square, closeCrop(square)]) {
-      for (const scale of [2, 1]) {
-        const cx = x + (RING * scale) / 2;
-        const cy = top + 60 + RING;
-        ring(canvas, cx, cy, (RING * scale) / 2);
-        disc(canvas, face, cx, cy, (FACE * scale) / 2);
-        x += RING * scale + gap;
-      }
+    composite(canvas, sized(head, 480), x, top);
+    x += 480 + gap;
+    const cy = top + 60 + RING;
+    // The combat ring at 2× and 1×, then the card's medallion raised at 2× and 1× and in the hand.
+    for (const scale of [2, 1]) {
+      const cx = x + (RING * scale) / 2;
+      ring(canvas, cx, cy, (RING * scale) / 2);
+      disc(canvas, head, cx, cy, (FACE * scale) / 2);
+      x += RING * scale + gap;
     }
-    // The card's medallion with the close crop (the whole portrait is too small to read there): raised at 2× and 1×, then in the hand.
-    const close = closeCrop(square);
     for (const [outer, inner] of MEDALS) {
       const cx = x + outer / 2;
-      const cy = top + 60 + RING;
       ring(canvas, cx, cy, outer / 2);
-      disc(canvas, close, cx, cy, inner / 2);
+      disc(canvas, head, cx, cy, inner / 2);
       x += outer + gap;
     }
   });
