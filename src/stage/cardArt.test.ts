@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CardDef } from '../engine/index.ts';
-import { cardArtName } from './cardArt.ts';
+import { registry } from '../content/registry.ts';
+import { cardArt, cardArtName } from './cardArt.ts';
 
 const card = (id: string, extra: Partial<CardDef> = {}): CardDef => ({ id, name: id, cost: 1, target: 'none', effects: [], ...extra });
 
@@ -17,5 +18,14 @@ describe('card art', () => {
     expect(cardArtName(card('symptom.sweet-rot'), undefined)).toBe('symptom-sweet-rot');
     expect(cardArtName(card('virelle.open-the-wound-c3', { variantOf: 'virelle.open-the-wound' }), 'flesh')).toBe('virelle-open-the-wound');
     expect(cardArtName(card('agathe.strike-c5', { slot: 'strike', variantOf: 'agathe.strike' }), 'rapture')).toBe('strike-rapture');
+  });
+
+  it('every card in the game has its picture (M6.11a)', () => {
+    const missing = Object.values(registry.cards).filter((def) => {
+      const ownerless = def.owner === undefined && def.domain === undefined;
+      const domain = ownerless ? undefined : (def.domain ?? (def.owner ? registry.characters[def.owner]?.domain : undefined));
+      return cardArt(def, domain) === undefined;
+    });
+    expect(missing.map((def) => def.id)).toEqual([]);
   });
 });
