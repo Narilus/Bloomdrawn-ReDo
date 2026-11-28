@@ -4551,6 +4551,8 @@ kbd {
   background: radial-gradient(ellipse at 50% 0%, var(--mauve-shadow), var(--aubergine) 45%, var(--charcoal-plum) 85%);
 }
 
+.card-gallery-all { gap: 54px 14px; padding-top: 52px; align-content: flex-start; }
+
 .card-gallery-option h3 {
   margin: 0 0 10px;
   font-family: var(--serif);

@@ -10,7 +10,8 @@ import { CARD_EM, RAISED_SCALE } from './fan.ts';
 // the game's own ornament. `?cards&kit=frame-flesh-01,transcend-flesh-02` shows frame-kit or
 // Transcend-crest options instead, from their pieces in art/cut/frames/ (`npm run art -- frames`),
 // for the owner to pick. `?cards&art=card-strike-flesh-01,card-strike-flesh-02` shows card-art options
-// from art/raw/ (`npm run art -- cards`), each on a card that uses that picture.
+// from art/raw/ (`npm run art -- cards`), each on a card that uses that picture. `?cards&all` shows
+// one card for every picture, with the game's own art, to review the set.
 
 const params = () => (import.meta.env.DEV ? new URLSearchParams(window.location.search) : new URLSearchParams());
 
@@ -97,9 +98,28 @@ function ArtOptions({ names }: { names: string[] }) {
   );
 }
 
+/** One card for each picture the game has or needs, in registry order. */
+function AllCards() {
+  const seen = new Set<string>();
+  const cards = Object.values(registry.cards).filter((def) => {
+    const name = cardArtName(def, artDomain(def));
+    if (seen.has(name)) return false;
+    seen.add(name);
+    return true;
+  });
+  return (
+    <div className="card-gallery card-gallery-all">
+      {cards.map((def) => (
+        <Sample key={def.id} id={def.id} em={CARD_EM} />
+      ))}
+    </div>
+  );
+}
+
 export function CardGallery() {
   const art = params().get('art')?.split(',').filter(Boolean) ?? [];
   if (art.length > 0) return <ArtOptions names={art} />;
+  if (params().has('all')) return <AllCards />;
   return (
     <div className="card-gallery">
       {options().map(({ label, frame, pieces, crest }) => {
